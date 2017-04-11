@@ -11,4 +11,4 @@ inputs:
 - name: concourse-up
 
 run:
-  path: concourse-up/ci/tasts/unit-test.sh
+  path: concourse-up/ci/tasks/unit-test.sh
