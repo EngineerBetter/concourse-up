@@ -1,0 +1,16 @@
+---
+resources:
+- name: concourse-up
+  type: git
+  source:
+    uri: git@bitbucket.org:engineerbetter/concourse-up.git
+    branch: master
+    private_key: {{private_key}}
+
+jobs:
+- name: unit-test-concourse-up
+  plan:
+  - get: concourse-up
+    trigger: true
+  - task: unit-test-concourse-up
+    file: concourse-up/ci/tasks/unit-test.yml
