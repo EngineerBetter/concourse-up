@@ -14,3 +14,11 @@ jobs:
     trigger: true
   - task: unit-test-concourse-up
     file: concourse-up/ci/tasks/unit-test.yml
+
+- name: system-test-concourse-up
+  plan:
+  - get: concourse-up
+    trigger: true
+    passed: [unit-test-concourse-up]
+  - task: system-test-concourse-up
+    file: concourse-up/ci/tasks/system-test.yml
