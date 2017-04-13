@@ -31,10 +31,10 @@ var _ = Describe("concourse-up", func() {
 		session, err = Start(command, GinkgoWriter, GinkgoWriter)
 		Ω(err).ShouldNot(HaveOccurred(), "Error running CLI: "+cliPath)
 	})
-
+	args = []string{"--help"}
 	It("displays usage instructions on --help", func() {
-		args = []string{"--help"}
 		Eventually(session).Should(Exit(0))
 		Ω(session.Out).Should(Say("Concourse-Up - A CLI tool to deploy Concourse CI"))
+		Ω(session.Out).Should(Say("deploy, d  Deploys or updates a Concourse"))
 	})
 })
