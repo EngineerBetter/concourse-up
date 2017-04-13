@@ -4,7 +4,7 @@ platform: linux
 image_resource:
   type: docker-image
   source:
-    repository: golang
+    repository: engineerbetter/cup-image
     tag: 'latest'
 
 inputs:
@@ -12,3 +12,7 @@ inputs:
 
 run:
   path: concourse-up/ci/tasks/system-test.sh
+
+params:
+  AWS_ACCESS_KEY_ID:
+  AWS_SECRET_ACCESS_KEY:

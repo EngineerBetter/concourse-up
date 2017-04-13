@@ -22,3 +22,23 @@ jobs:
     passed: [unit-test-concourse-up]
   - task: system-test-concourse-up
     file: concourse-up/ci/tasks/system-test.yml
+    params:
+      AWS_ACCESS_KEY_ID: {{aws_access_key_id}}
+      AWS_SECRET_ACCESS_KEY: {{aws_secret_access_key}}
+    on_failure:
+      task: cleanup
+      file: concourse-up/ci/tasks/cleanup.yml
+      params:
+        AWS_ACCESS_KEY_ID: {{aws_access_key_id}}
+        AWS_SECRET_ACCESS_KEY: {{aws_secret_access_key}}
+
+- name: cleanup-aws
+  plan:
+  - get: concourse-up
+    trigger: true
+    passed: [system-test-concourse-up]
+  - task: cleanup-aws
+    file: concourse-up/ci/tasks/cleanup.yml
+    params:
+      AWS_ACCESS_KEY_ID: {{aws_access_key_id}}
+      AWS_SECRET_ACCESS_KEY: {{aws_secret_access_key}}
