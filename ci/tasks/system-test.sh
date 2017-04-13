@@ -7,7 +7,7 @@ dirname=$(dirname $0)
 
 go install
 
-name=$RANDOM
+name=cup-test-keypair
 config_file=".concourse-up-${name}"
 
 echo "Checking help command"
