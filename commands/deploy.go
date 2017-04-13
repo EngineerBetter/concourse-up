@@ -12,11 +12,10 @@ import (
 	"bitbucket.org/engineerbetter/concourse-up/util"
 
 	"gopkg.in/urfave/cli.v1"
-	yaml "gopkg.in/yaml.v2"
 )
 
 type deployCredentials struct {
-	PrivateKey string `yaml:"private_key"`
+	PrivateKey string
 }
 
 var credentials = deployCredentials{}
@@ -45,21 +44,25 @@ var deploy = cli.Command{
 			return nil
 		}
 		name := os.Args[2]
-		configFile := fmt.Sprintf("~/.concourse-up-%s", name)
-		path, err := util.Path(configFile)
+		configDir := "~/.concourse-up"
+		keyFile := fmt.Sprintf("%s/concourse-up-%s.pem", configDir, name)
+		configPath, err := util.Path(configDir)
+		util.CheckErr(err)
+		keyPath, err := util.Path(keyFile)
 		util.CheckErr(err)
 
-		// Check if config file exists and create it if it doesn't
-		err = util.AssertFileExists(path)
+		// Check if config dir exists and create it if it doesn't
+		err = util.AssertDirExists(configPath)
 		util.CheckErr(err)
 
-		// Extract contents of config file
-		source, err := ioutil.ReadFile(path)
+		// Check if key file exists and create it if it doesn't
+		err = util.AssertFileExists(keyPath)
 		util.CheckErr(err)
 
-		// Unmarshal yaml from config file into credentials
-		err = yaml.Unmarshal(source, &credentials)
+		// Load key from key file into credentials
+		keySource, err := ioutil.ReadFile(keyPath)
 		util.CheckErr(err)
+		credentials.PrivateKey = string(keySource)
 
 		fmt.Printf("Checking for keypair %s-bosh and generating if missing\n", name)
 		awsSession, err := aws.CreateSession()
@@ -75,10 +78,9 @@ var deploy = cli.Command{
 			return err
 		}
 		credentials.PrivateKey = updatedPrivateKey
-		updatedSource, err := yaml.Marshal(&credentials)
-		util.CheckErr(err)
+		updatedKey := []byte(credentials.PrivateKey)
 
-		err = ioutil.WriteFile(path, updatedSource, 0600)
+		err = ioutil.WriteFile(keyPath, updatedKey, 0600)
 		util.CheckErr(err)
 
 		return err

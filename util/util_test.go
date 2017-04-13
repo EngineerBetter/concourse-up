@@ -100,5 +100,63 @@ var _ = Describe("util functions", func() {
 				})
 			})
 		})
+
+		Describe("AssertDirExists", func() {
+			Context("When the dir does not already exist", func() {
+				var homeDir string
+				JustBeforeEach(func() {
+					homeDir, err := ioutil.TempDir("", "example")
+					util.CheckErr(err)
+					path = filepath.Join(homeDir, ".concourse-up")
+				})
+
+				AfterEach(func() {
+					os.RemoveAll(homeDir) // clean up
+				})
+
+				It("should create the file in the location given by `path`", func() {
+					_, err := os.Stat(path)
+					Ω(os.IsNotExist(err)).Should(BeTrue())
+					err = util.AssertDirExists(path)
+					Ω(err).Should(BeNil())
+					_, err = os.Stat(path)
+					Ω(err).Should(BeNil())
+				})
+			})
+
+			Context("When the dir exists", func() {
+				var homeDir string
+				var dirPath string
+				JustBeforeEach(func() {
+					homeDir, err := ioutil.TempDir("", "example")
+					util.CheckErr(err)
+					dirPath = filepath.Join(homeDir, ".concourse-up")
+					err = os.MkdirAll(dirPath, 0755)
+					util.CheckErr(err)
+					tmpfile, err := ioutil.TempFile(dirPath, "example")
+					util.CheckErr(err)
+					path = tmpfile.Name()
+
+					text := []byte("hello world")
+					err = ioutil.WriteFile(path, text, 0644)
+					util.CheckErr(err)
+				})
+
+				AfterEach(func() {
+					os.RemoveAll(homeDir) // clean up
+				})
+
+				It("should not modify the file in `path`", func() {
+					_, err := os.Stat(path)
+					Ω(os.IsNotExist(err)).Should(BeFalse())
+					Ω(path).Should(BeAnExistingFile())
+					err = util.AssertDirExists(dirPath)
+					Ω(err).Should(BeNil())
+					Ω(path).Should(BeAnExistingFile())
+					contents, err := ioutil.ReadFile(path)
+					Ω(string(contents)).Should(Equal("hello world"))
+				})
+			})
+		})
 	})
 })

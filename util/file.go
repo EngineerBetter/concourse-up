@@ -23,6 +23,20 @@ func Path(path string) (string, error) {
 	return path, err
 }
 
+// AssertDirExists checks if the dir `path` exists and creates it if it doesn't
+func AssertDirExists(path string) error {
+	var err error
+	fmt.Printf("Asserting `%s` is present\n", path)
+	if _, err := os.Stat(path); os.IsNotExist(err) {
+		fmt.Printf("Creating `%s`\n", path)
+		err := os.MkdirAll(path, 0755)
+		if err != nil {
+			fmt.Println("Error:", err)
+		}
+	}
+	return err
+}
+
 // AssertFileExists checks if file `path` exists and creates it if it doesn't
 func AssertFileExists(path string) error {
 	var err error
