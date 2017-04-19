@@ -18,6 +18,6 @@ fi
 
 go run main.go --non-interactive destroy $deployment
 
+aws s3 rm s3://$deployment --recursive
 aws s3api delete-objects --bucket $deployment --delete "$(aws s3api list-object-versions --bucket $deployment | jq -M '{Objects: [.["Versions","DeleteMarkers"][]| {Key:.Key, VersionId : .VersionId}], Quiet: false}')"
-
 aws s3 rb s3://$deployment --force
