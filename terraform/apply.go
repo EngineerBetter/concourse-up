@@ -11,8 +11,10 @@ import (
 
 const appName string = "concourse-up"
 
+type Applier func(config []byte, stdout, stderr io.Writer) error
+
 // Apply takes a terraform config and applies it
-func Apply(config string, stdout, stderr io.Writer) error {
+func Apply(config []byte, stdout, stderr io.Writer) error {
 	if err := checkTerraformOnPath(stdout, stderr); err != nil {
 		return err
 	}
@@ -37,7 +39,7 @@ func Apply(config string, stdout, stderr io.Writer) error {
 }
 
 // Destroy destroys the given terraform config
-func Destroy(config string, stdout, stderr io.Writer) error {
+func Destroy(config []byte, stdout, stderr io.Writer) error {
 	if err := checkTerraformOnPath(stdout, stderr); err != nil {
 		return err
 	}
@@ -80,7 +82,7 @@ func terraform(args []string, dir string, stdout, stderr io.Writer) error {
 	return nil
 }
 
-func initConfig(config string, stdout, stderr io.Writer) (string, error) {
+func initConfig(config []byte, stdout, stderr io.Writer) (string, error) {
 	// write out config
 	tmpDir, err := ioutil.TempDir("", appName)
 	if err != nil {
@@ -88,7 +90,7 @@ func initConfig(config string, stdout, stderr io.Writer) (string, error) {
 	}
 
 	configPath := filepath.Join(tmpDir, "main.tf")
-	if err := ioutil.WriteFile(configPath, []byte(config), 0777); err != nil {
+	if err := ioutil.WriteFile(configPath, config, 0777); err != nil {
 		return "", err
 	}
 

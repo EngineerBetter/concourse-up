@@ -20,7 +20,7 @@ terraform {
 }
 
 provider "aws" {
-  region     = "eu-west-1"
+  region = "eu-west-1"
 }
 
 resource "aws_iam_user" "example-user-2" {
@@ -30,12 +30,12 @@ resource "aws_iam_user" "example-user-2" {
 		stdout := gbytes.NewBuffer()
 		stderr := gbytes.NewBuffer()
 
-		err := Apply(config, stdout, stderr)
+		err := Apply([]byte(config), stdout, stderr)
 		Expect(err).ToNot(HaveOccurred())
 
 		Eventually(stdout).Should(gbytes.Say("Apply complete! Resources: 1 added, 0 changed, 0 destroyed."))
 
-		err = Destroy(config, stdout, stderr)
+		err = Destroy([]byte(config), stdout, stderr)
 		Expect(err).ToNot(HaveOccurred())
 
 		Eventually(stdout).Should(gbytes.Say("Destroy complete! Resources: 1 destroyed."))
