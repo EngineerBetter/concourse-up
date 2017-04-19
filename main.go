@@ -13,6 +13,7 @@ func main() {
 	app.Name = "Concourse-Up"
 	app.Usage = "A CLI tool to deploy Concourse CI"
 	app.Commands = commands.Commands
+	app.Flags = commands.GlobalFlags
 	if err := app.Run(os.Args); err != nil {
 		os.Exit(1)
 	}

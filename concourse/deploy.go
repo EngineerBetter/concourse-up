@@ -28,10 +28,10 @@ resource "aws_key_pair" "deployer" {
 }
 `
 
-func Deploy(name, region string, terraformApplier terraform.Applier, configLoader config.Loader, stdout, stderr io.Writer) error {
+func Deploy(name, region string, terraformApplier terraform.Applier, configClient config.IClient, stdout, stderr io.Writer) error {
 	deployment := fmt.Sprintf("engineerbetter-concourseup-%s", name)
 
-	config, err := configLoader(deployment, region)
+	config, err := configClient.LoadOrCreate(deployment)
 	if err != nil {
 		return err
 	}

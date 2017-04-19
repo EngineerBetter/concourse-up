@@ -5,7 +5,7 @@ set -eu
 export GOPATH=$PWD/go
 cd go/src/bitbucket.org/engineerbetter/concourse-up
 
-deployment="engineerbetter-concourseup-system-test-$RANDOM"
+deployment="system-test-$RANDOM"
 
 go run main.go deploy $deployment
 

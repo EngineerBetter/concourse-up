@@ -10,12 +10,12 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-var _ = Describe("Deploy", func() {
-	It("Generates the correct terraform infrastructure", func() {
-		var appliedTFConfig []byte
+var _ = Describe("Destroy", func() {
+	It("Destroys the terraform infrastructure", func() {
+		var destroyedTFConfig []byte
 
 		client := &FakeConfigClient{}
-		client.FakeLoadOrCreate = func(deployment string) (*config.Config, error) {
+		client.FakeLoad = func(deployment string) (*config.Config, error) {
 			return &config.Config{
 				PublicKey:   "example-public-key",
 				PrivateKey:  "example-private-key",
@@ -26,14 +26,14 @@ var _ = Describe("Deploy", func() {
 		}
 
 		applier := func(config []byte, stdout, stderr io.Writer) error {
-			appliedTFConfig = config
+			destroyedTFConfig = config
 			return nil
 		}
 
-		err := Deploy("happymeal", "eu-west-1", applier, client, os.Stdout, os.Stderr)
+		err := Destroy("happymeal", applier, client, os.Stdout, os.Stderr)
 		Expect(err).ToNot(HaveOccurred())
 
-		Expect(string(appliedTFConfig)).To(Equal(`
+		Expect(string(destroyedTFConfig)).To(Equal(`
 terraform {
 	backend "s3" {
 		bucket = "engineerbetter-concourseup-happymeal"
