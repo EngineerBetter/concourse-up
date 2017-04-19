@@ -16,5 +16,9 @@ RUN wget https://releases.hashicorp.com/terraform/0.9.3/terraform_0.9.3_linux_am
   && chmod +x terraform \
   && mv terraform /usr/bin/terraform
 
+RUN wget https://github.com/stedolan/jq/releases/download/jq-1.5/jq-linux64 \
+    && mv jq-linux64 /usr/bin/jq \
+    && chmod +x /usr/bin/jq \
+
 COPY verify_image.sh /tmp/verify_image.sh
 RUN /tmp/verify_image.sh && rm /tmp/verify_image.sh
