@@ -11,30 +11,26 @@ import (
 
 var (
 	cliPath string
-	args    []string
-	session *Session
-	err     error
 )
 
 var _ = Describe("concourse-up", func() {
 	BeforeSuite(func() {
+		var err error
 		cliPath, err = Build("bitbucket.org/engineerbetter/concourse-up")
-		Ω(err).ShouldNot(HaveOccurred(), "Error building source")
+		Expect(err).ToNot(HaveOccurred(), "Error building source")
 	})
 
 	AfterSuite(func() {
 		CleanupBuildArtifacts()
 	})
 
-	JustBeforeEach(func() {
-		command := exec.Command(cliPath, args...)
-		session, err = Start(command, GinkgoWriter, GinkgoWriter)
-		Ω(err).ShouldNot(HaveOccurred(), "Error running CLI: "+cliPath)
-	})
-	args = []string{"--help"}
 	It("displays usage instructions on --help", func() {
+		command := exec.Command(cliPath, "--help")
+		session, err := Start(command, GinkgoWriter, GinkgoWriter)
+		Expect(err).ToNot(HaveOccurred(), "Error running CLI: "+cliPath)
 		Eventually(session).Should(Exit(0))
-		Ω(session.Out).Should(Say("Concourse-Up - A CLI tool to deploy Concourse CI"))
-		Ω(session.Out).Should(Say("deploy, d  Deploys or updates a Concourse"))
+		Expect(session.Out).To(Say("Concourse-Up - A CLI tool to deploy Concourse CI"))
+		Expect(session.Out).To(Say("deploy, d  Deploys or updates a Concourse"))
+		Expect(session.Out).To(Say("destroy    Destroys a Concourse"))
 	})
 })
