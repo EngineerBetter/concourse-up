@@ -5,4 +5,5 @@ inputs:
 - name: concourse-up
 
 run:
-  path: concourse-up/ci/tasks/unit-test.sh
+  dir: /go/src/bitbucket.org/engineerbetter/concourse-up
+  path: ci/tasks/system-test.sh
