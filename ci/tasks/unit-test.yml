@@ -5,4 +5,4 @@ inputs:
 - name: concourse-up
 
 run:
-  path: source/ci/tasks/unit-test.sh
+  path: concourse-up/ci/tasks/unit-test.sh
