@@ -3,6 +3,7 @@ platform: linux
 
 inputs:
 - name: concourse-up
+  path: /go/src/bitbucket.org/engineerbetter/concourse-up
 
 run:
   dir: /go/src/bitbucket.org/engineerbetter/concourse-up
