@@ -56,6 +56,7 @@ func Config() *aws.Config {
 		WithMaxRetries(aws.UseServiceDefaultRetries).
 		WithLogger(aws.NewDefaultLogger()).
 		WithLogLevel(aws.LogOff).
+		WithSleepDelay(time.Sleep).
 		WithEndpointResolver(endpoints.DefaultResolver())
 }
 
