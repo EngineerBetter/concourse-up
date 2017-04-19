@@ -16,7 +16,7 @@ if [[ ! $hasKey == 'true' ]]; then
   exit 1
 fi
 
-concourse-up --non-interactive destroy $deployment
+go run main.go --non-interactive destroy $deployment
 
 aws s3api delete-objects --bucket $deployment --delete "$(aws s3api list-object-versions --bucket $deployment | jq -M '{Objects: [.["Versions","DeleteMarkers"][]| {Key:.Key, VersionId : .VersionId}], Quiet: false}')"
 
