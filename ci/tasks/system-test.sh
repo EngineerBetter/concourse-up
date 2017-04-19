@@ -2,6 +2,9 @@
 
 set -eu
 
+export GOPATH=$PWD/go
+cd go/src/bitbucket.org/engineerbetter/concourse-up
+
 go run main.go deploy system-test
 
 hasKey=$(aws ec2 describe-key-pairs | jq -r '.KeyPairs[] | select(.KeyName | contains("engineerbetter-concourseup-system-test")) | any')
