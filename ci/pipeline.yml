@@ -60,24 +60,3 @@ jobs:
     params:
       AWS_ACCESS_KEY_ID: {{aws_access_key_id}}
       AWS_SECRET_ACCESS_KEY: {{aws_secret_access_key}}
-    on_failure:
-      task: cleanup
-      file: source/ci/tasks/cleanup.yml
-      params:
-        AWS_ACCESS_KEY_ID: {{aws_access_key_id}}
-        AWS_SECRET_ACCESS_KEY: {{aws_secret_access_key}}
-
-- name: cleanup-aws
-  plan:
-  - get: image
-    trigger: true
-    passed: [system-test]
-  - get: concourse-up
-    trigger: true
-    passed: [system-test]
-  - task: cleanup-aws
-    image: image
-    file: concourse-up/ci/tasks/cleanup.yml
-    params:
-      AWS_ACCESS_KEY_ID: {{aws_access_key_id}}
-      AWS_SECRET_ACCESS_KEY: {{aws_secret_access_key}}
