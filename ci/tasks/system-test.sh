@@ -12,7 +12,7 @@ go run main.go deploy $deployment
 hasKey=$(aws ec2 describe-key-pairs | jq -r ".KeyPairs[] | select(.KeyName | contains(\"$deployment\")) | any")
 
 if [[ ! $hasKey == 'true' ]]; then
-  echo "Couldn't find key pair stating with $deployment"
+  echo "Couldn't find key pair starting with $deployment"
   exit 1
 fi
 
