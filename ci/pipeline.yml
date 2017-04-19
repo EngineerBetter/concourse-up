@@ -56,6 +56,7 @@ jobs:
     passed: [unit-test]
     image: image
   - task: system-test
+    image: image
     file: concourse-up/ci/tasks/system-test.yml
     params:
       AWS_ACCESS_KEY_ID: {{aws_access_key_id}}
