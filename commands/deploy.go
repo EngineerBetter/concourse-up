@@ -24,7 +24,6 @@ var deployFlags = []cli.Flag{
 		Name:        "region",
 		Value:       "eu-west-1",
 		Usage:       "AWS region",
-		EnvVar:      "AWS_REGION",
 		Destination: &awsRegion,
 	},
 }
@@ -40,7 +39,6 @@ var deploy = cli.Command{
 		if name == "" {
 			return errors.New("Usage is `concourse-up deploy <name>`")
 		}
-
-		return concourse.Deploy(name, awsRegion, terraform.Apply, &config.Client{}, os.Stdout, os.Stderr)
+		return concourse.Deploy(name, awsRegion, terraform.Apply, config.Load, os.Stdout, os.Stderr)
 	},
 }

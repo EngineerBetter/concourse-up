@@ -13,14 +13,12 @@ import (
 var _ = Describe("Deploy", func() {
 	It("Generates the correct terraform infrastructure", func() {
 		var appliedTFConfig []byte
-
-		client := &FakeConfigClient{}
-		client.FakeLoadOrCreate = func(deployment string) (*config.Config, error) {
+		loader := func(bucketName, region string) (*config.Config, error) {
 			return &config.Config{
 				PublicKey:   "example-public-key",
 				PrivateKey:  "example-private-key",
-				Region:      "eu-west-1",
-				Deployment:  deployment,
+				Region:      region,
+				Deployment:  "engineerbetter-concourseup-happymeal",
 				TFStatePath: "example-path",
 			}, nil
 		}
@@ -30,7 +28,7 @@ var _ = Describe("Deploy", func() {
 			return nil
 		}
 
-		err := Deploy("happymeal", "eu-west-1", applier, client, os.Stdout, os.Stderr)
+		err := Deploy("happymeal", "eu-west-1", applier, loader, os.Stdout, os.Stderr)
 		Expect(err).ToNot(HaveOccurred())
 
 		Expect(string(appliedTFConfig)).To(Equal(`

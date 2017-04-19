@@ -86,20 +86,3 @@ func EnsureFileExists(bucket, path, region string, defaultContents []byte) ([]by
 
 	return defaultContents, nil
 }
-
-// LoadFile loads a file from S3
-func LoadFile(bucket, path, region string) ([]byte, error) {
-	sess, err := session.NewSession(aws.NewConfig().WithCredentialsChainVerboseErrors(true))
-	if err != nil {
-		return nil, err
-	}
-
-	client := s3.New(sess, &aws.Config{Region: &region})
-
-	output, err := client.GetObject(&s3.GetObjectInput{Bucket: &bucket, Key: &path})
-	if err != nil {
-		return nil, err
-	}
-
-	return ioutil.ReadAll(output.Body)
-}

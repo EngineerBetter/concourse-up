@@ -5,9 +5,6 @@ import (
 	"fmt"
 	"os"
 
-	"bitbucket.org/engineerbetter/concourse-up/concourse"
-	"bitbucket.org/engineerbetter/concourse-up/config"
-	"bitbucket.org/engineerbetter/concourse-up/terraform"
 	"bitbucket.org/engineerbetter/concourse-up/util"
 
 	"gopkg.in/urfave/cli.v1"
@@ -15,27 +12,26 @@ import (
 
 var destroy = cli.Command{
 	Name:      "destroy",
-	Aliases:   []string{"x"},
 	Usage:     "Destroys a Concourse",
 	ArgsUsage: "<name>",
 	Action: func(c *cli.Context) error {
-		name := c.Args().Get(0)
-		if name == "" {
-			return errors.New("Usage is `concourse-up destroy <name>`")
+
+		if len(os.Args) < 3 {
+			fmt.Println("Usage is `concourse-up destroy <name>`")
+			return nil
+		}
+		name := os.Args[2]
+
+		confirm, err := util.CheckConfirmation(os.Stdin, os.Stdout, name)
+		if err != nil {
+			return err
 		}
 
-		if !NonInteractiveModeEnabled() {
-			confirm, err := util.CheckConfirmation(os.Stdin, os.Stdout, name)
-			if err != nil {
-				return err
-			}
-
-			if !confirm {
-				fmt.Println("Bailing out...")
-				return nil
-			}
+		if !confirm {
+			fmt.Println("Bailing out...")
+			return nil
 		}
 
-		return concourse.Destroy(name, terraform.Destroy, &config.Client{}, os.Stdout, os.Stderr)
+		return errors.New("not implemented")
 	},
 }

@@ -11,8 +11,6 @@ import (
 )
 
 const terraformStateFileName = "terraform.tfstate"
-const configBucketS3Region = "eu-west-1"
-const configFilePath = "config.json"
 
 type Config struct {
 	PublicKey   template.HTML `json:"public_key"`
@@ -22,46 +20,19 @@ type Config struct {
 	TFStatePath string        `json:"tf_state_path"`
 }
 
-type IClient interface {
-	Load(deployment string) (*Config, error)
-	LoadOrCreate(deployment string) (*Config, error)
-}
+type Loader func(deployment, region string) (*Config, error)
 
-type Client struct {
-	deployment string
-}
-
-func NewClient(deployment string) Client {
-	return Client{
-		deployment: deployment,
-	}
-}
-
-func (client *Client) Load(deployment string) (*Config, error) {
-	configBytes, err := aws.LoadFile(deployment, configFilePath, configBucketS3Region)
+func Load(deployment, region string) (*Config, error) {
+	defaultConfigBytes, err := generateDefaultConfig(deployment, region)
 	if err != nil {
 		return nil, err
 	}
 
-	conf := Config{}
-	if err := json.Unmarshal(configBytes, &conf); err != nil {
+	if err := aws.EnsureBucketExists(deployment, region); err != nil {
 		return nil, err
 	}
 
-	return &conf, nil
-}
-
-func (client *Client) LoadOrCreate(deployment string) (*Config, error) {
-	defaultConfigBytes, err := generateDefaultConfig(deployment, configBucketS3Region)
-	if err != nil {
-		return nil, err
-	}
-
-	if err := aws.EnsureBucketExists(deployment, configBucketS3Region); err != nil {
-		return nil, err
-	}
-
-	configBytes, err := aws.EnsureFileExists(deployment, configFilePath, configBucketS3Region, defaultConfigBytes)
+	configBytes, err := aws.EnsureFileExists(deployment, "config.json", region, defaultConfigBytes)
 	if err != nil {
 		return nil, err
 	}
