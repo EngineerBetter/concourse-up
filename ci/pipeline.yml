@@ -47,6 +47,7 @@ jobs:
       AWS_SECRET_ACCESS_KEY: {{aws_secret_access_key}}
 
 - name: system-test
+  serial: true
   plan:
   - get: image
     trigger: true
