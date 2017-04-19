@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -eu
+set -eux
 
 export GOPATH=$PWD/go
 cd go/src/bitbucket.org/engineerbetter/concourse-up
