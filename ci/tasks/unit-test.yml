@@ -1,14 +1,8 @@
 ---
 platform: linux
 
-image_resource:
-  type: docker-image
-  source:
-    repository: golang
-    tag: 'latest'
-
 inputs:
 - name: concourse-up
 
 run:
-  path: concourse-up/ci/tasks/unit-test.sh
+  path: source/ci/tasks/unit-test.sh

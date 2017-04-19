@@ -1,5 +1,13 @@
 ---
 resources:
+- name: image-source
+  type: git
+  source:
+    uri: git@bitbucket.org:engineerbetter/concourse-up.git
+    branch: master
+    paths: [ci/docker/*]
+    private_key: {{private_key}}
+
 - name: concourse-up
   type: git
   source:
@@ -7,37 +15,68 @@ resources:
     branch: master
     private_key: {{private_key}}
 
-jobs:
-- name: unit-test-concourse-up
-  plan:
-  - get: concourse-up
-    trigger: true
-  - task: unit-test-concourse-up
-    file: concourse-up/ci/tasks/unit-test.yml
+- name: image
+  type: docker-image
+  source:
+    repository: engineerbetter/cup-image
+    username: {{docker_user}}
+    password: {{docker_password}}
 
-- name: system-test-concourse-up
+jobs:
+- name: build-image
+  public: false
   plan:
+  - get: image-source
+    trigger: true
+  - put: image
+    params:
+      build: image-source/ci/docker
+
+- name: unit-test
+  plan:
+  - get: image
+    trigger: true
+    passed: [build-image]
   - get: concourse-up
     trigger: true
-    passed: [unit-test-concourse-up]
-  - task: system-test-concourse-up
+  - task: unit-test
+    image: image
+    file: concourse-up/ci/tasks/unit-test.yml
+    params:
+      AWS_ACCESS_KEY_ID: {{aws_access_key_id}}
+      AWS_SECRET_ACCESS_KEY: {{aws_secret_access_key}}
+
+- name: system-test
+  plan:
+  - get: image
+    trigger: true
+    passed: [unit-test]
+  - get: concourse-up
+    trigger: true
+    passed: [unit-test]
+    image: image
+  - task: system-test
     file: concourse-up/ci/tasks/system-test.yml
     params:
       AWS_ACCESS_KEY_ID: {{aws_access_key_id}}
       AWS_SECRET_ACCESS_KEY: {{aws_secret_access_key}}
     on_failure:
       task: cleanup
-      file: concourse-up/ci/tasks/cleanup.yml
+      file: source/ci/tasks/cleanup.yml
       params:
         AWS_ACCESS_KEY_ID: {{aws_access_key_id}}
         AWS_SECRET_ACCESS_KEY: {{aws_secret_access_key}}
 
 - name: cleanup-aws
   plan:
+  - get: image
+    trigger: true
+    passed: [system-test]
   - get: concourse-up
     trigger: true
-    passed: [system-test-concourse-up]
+    passed: [system-test]
   - task: cleanup-aws
+    image: image
     file: concourse-up/ci/tasks/cleanup.yml
     params:
       AWS_ACCESS_KEY_ID: {{aws_access_key_id}}
