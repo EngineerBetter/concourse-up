@@ -12,6 +12,7 @@ var Commands = []cli.Command{
 
 var nonInteractive bool
 
+// GlobalFlags are the global CLIflags
 var GlobalFlags = []cli.Flag{
 	cli.BoolFlag{
 		Name:        "non-interactive, n",
@@ -21,6 +22,7 @@ var GlobalFlags = []cli.Flag{
 	},
 }
 
+// NonInteractiveModeEnabled returns true if --non-interactive true has been passed in
 func NonInteractiveModeEnabled() bool {
 	return nonInteractive
 }

@@ -11,12 +11,6 @@ import (
 	"gopkg.in/urfave/cli.v1"
 )
 
-type deployCredentials struct {
-	PrivateKey string
-}
-
-var credentials = deployCredentials{}
-
 var awsRegion string
 
 var deployFlags = []cli.Flag{

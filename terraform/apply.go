@@ -11,6 +11,7 @@ import (
 
 const appName string = "concourse-up"
 
+// Applier is a function that applies terraform configurations (can be either create or destroy)
 type Applier func(config []byte, stdout, stderr io.Writer) error
 
 // Apply takes a terraform config and applies it

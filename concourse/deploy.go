@@ -28,6 +28,7 @@ resource "aws_key_pair" "deployer" {
 }
 `
 
+// Deploy deploys a concourse instance
 func Deploy(name, region string, terraformApplier terraform.Applier, configClient config.IClient, stdout, stderr io.Writer) error {
 	deployment := fmt.Sprintf("engineerbetter-concourseup-%s", name)
 
