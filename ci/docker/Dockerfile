@@ -1,10 +1,22 @@
 FROM golang:1.8
 RUN apt-get update && apt-get install -y --no-install-recommends \
-  python-pip \
-  python-dev \
   build-essential \
+  libreadline6 \
+  libreadline6-dev \
+  libsqlite3-dev \
+  libssl-dev \
+  libxml2-dev \
+  libxslt-dev \
+  libyaml-dev \
+  openssl \
+  python-dev \
+  python-pip \
   ruby \
+  ruby-dev \
+  sqlite3 \
   unzip \
+  zlib1g-dev \
+  zlibc \
   vim
 RUN pip install --upgrade pip
 RUN pip install --upgrade virtualenv
