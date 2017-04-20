@@ -9,7 +9,8 @@ RUN pip install --upgrade pip
 RUN pip install --upgrade virtualenv
 RUN pip install awscli
 
-RUN go get github.com/onsi/ginkgo/ginkgo github.com/onsi/gomega
+RUN go get github.com/onsi/ginkgo/ginkgo github.com/onsi/gomega \
+           gopkg.in/alecthomas/gometalinter.v1
 
 RUN wget https://releases.hashicorp.com/terraform/0.9.3/terraform_0.9.3_linux_amd64.zip \
   && unzip terraform_0.9.3_linux_amd64.zip \
