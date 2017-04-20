@@ -9,12 +9,14 @@ import (
 	"bitbucket.org/engineerbetter/concourse-up/util"
 )
 
-const stemcellSHA1 = "336160ec113edf6f019f997ead2ee586ac716ae6"
-const stemcellURL = "https://bosh.io/d/stemcells/bosh-aws-xen-hvm-ubuntu-trusty-go_agent?v=3312.12"
-const boshCPIReleaseSHA1 = "f36967927ceae09e5663a41fdda199edfe649dc6"
-const boshCPIReleaseURL = "https://bosh.io/d/github.com/cloudfoundry-incubator/bosh-aws-cpi-release?v=62"
-const boshReleaseSHA1 = "7fb8e99e28b67df6604e97ef061c5425460518d3"
-const boshReleaseURL = "https://bosh.io/d/github.com/cloudfoundry/bosh?v=260.1"
+const stemcellSHA1 = "f8f1b0f31135d9bdd527a67de1ebbdfed332f3ed"
+const stemcellURL = "https://bosh.io/d/stemcells/bosh-aws-xen-hvm-ubuntu-trusty-go_agent?v=3312.23"
+
+const boshCPIReleaseSHA1 = "239fc7797d280f140fc03009fb39060107ff0ee1"
+const boshCPIReleaseURL = "https://bosh.io/d/github.com/cloudfoundry-incubator/bosh-aws-cpi-release?v=63"
+
+const boshReleaseSHA1 = "4da9cedbcc8fbf11378ef439fb89de08300ad091"
+const boshReleaseURL = "https://bosh.io/d/github.com/cloudfoundry/bosh?v=261.4"
 
 // GenerateAWSDirectorManifest generates a manifest for the bosh director on AWS
 func GenerateAWSDirectorManifest(conf *config.Config, privateKeyPath string, metadata *terraform.Metadata) ([]byte, error) {
