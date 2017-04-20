@@ -19,6 +19,10 @@ RUN wget https://releases.hashicorp.com/terraform/0.9.3/terraform_0.9.3_linux_am
   && chmod +x terraform \
   && mv terraform /usr/bin/terraform
 
+RUN wget https://s3.amazonaws.com/bosh-init-artifacts/bosh-init-0.0.102-linux-amd64 \
+  && mv bosh-init-0.0.102-linux-amd64 /usr/bin/bosh-init \
+  && chmod +x /usr/bin/bosh-init
+
 RUN wget https://github.com/stedolan/jq/releases/download/jq-1.5/jq-linux64 \
     && mv jq-linux64 /usr/bin/jq \
     && chmod +x /usr/bin/jq
