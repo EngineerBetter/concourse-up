@@ -42,6 +42,12 @@ func Deploy(name, region string, clientFactory terraform.ClientFactory, configCl
 		return err
 	}
 
+	writeBoshFilesAndInstructions(config, metadata, stdout, stderr)
+
+	return err
+}
+
+func writeBoshFilesAndInstructions(config *config.Config, metadata *terraform.Metadata, stdout, stderr io.Writer) error {
 	keyPath := fmt.Sprintf("%s-private-key.pem", config.Deployment)
 
 	manifestBytes, err := bosh.GenerateAWSDirectorManifest(config, keyPath, metadata)
@@ -65,7 +71,8 @@ func Deploy(name, region string, clientFactory terraform.ClientFactory, configCl
 	if _, err = fmt.Fprintf(stdout, "Deploy bosh with:\n\n\tbosh-init deploy %s\n\n", manifestPath); err != nil {
 		return err
 	}
-	return err
+
+	return nil
 }
 
 const template = `
