@@ -1,6 +1,8 @@
 package terraform
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -11,23 +13,79 @@ import (
 
 const appName string = "concourse-up"
 
-// Applier is a function that applies terraform configurations (can be either create or destroy)
-type Applier func(config []byte, stdout, stderr io.Writer) error
+// IClient is an interface for the terraform Client
+type IClient interface {
+	Output() (*Metadata, error)
+	Apply() error
+	Destroy() error
+	Cleanup() error
+}
+
+// Client wraps common terraform commands
+type Client struct {
+	configDir string
+	stdout    io.Writer
+	stderr    io.Writer
+}
+
+// ClientFactory is a function that builds a client interface
+type ClientFactory func(config []byte, stdout, stderr io.Writer) (IClient, error)
+
+// NewClient is a concrete implementation of ClientFactory
+func NewClient(config []byte, stdout, stderr io.Writer) (IClient, error) {
+	if err := checkTerraformOnPath(stdout, stderr); err != nil {
+		return nil, err
+	}
+
+	configDir, err := initConfig(config, stdout, stderr)
+	if err != nil {
+		return nil, err
+	}
+
+	return &Client{
+		configDir: configDir,
+		stdout:    stdout,
+		stderr:    stderr,
+	}, nil
+}
+
+// Cleanup cleans up the temporary directory used by terraform
+func (client *Client) Cleanup() error {
+	return os.RemoveAll(client.configDir)
+}
+
+// Output fetches the terraform output/metadata
+func (client *Client) Output() (*Metadata, error) {
+	stdoutBuffer := bytes.NewBuffer(nil)
+	if err := terraform([]string{
+		"output",
+		"-json",
+	}, client.configDir, stdoutBuffer, client.stderr); err != nil {
+		return nil, err
+	}
+
+	metadata := Metadata{}
+	if err := json.NewDecoder(stdoutBuffer).Decode(&metadata); err != nil {
+		return nil, err
+	}
+
+	return &metadata, nil
+}
 
 // Apply takes a terraform config and applies it
-func Apply(config []byte, stdout, stderr io.Writer) error {
-	return terraformWithConfig([]string{
+func (client *Client) Apply() error {
+	return terraform([]string{
 		"apply",
 		"-input=false",
-	}, config, stdout, stderr)
+	}, client.configDir, client.stdout, client.stderr)
 }
 
 // Destroy destroys the given terraform config
-func Destroy(config []byte, stdout, stderr io.Writer) error {
-	return terraformWithConfig([]string{
+func (client *Client) Destroy() error {
+	return terraform([]string{
 		"destroy",
 		"-force",
-	}, config, stdout, stderr)
+	}, client.configDir, client.stdout, client.stderr)
 }
 
 func checkTerraformOnPath(stdout, stderr io.Writer) error {
@@ -35,23 +93,6 @@ func checkTerraformOnPath(stdout, stderr io.Writer) error {
 		return fmt.Errorf("Error running `terraform version`, is terraform in your PATH?\n%s", err.Error())
 	}
 	return nil
-}
-
-func terraformWithConfig(args []string, config []byte, stdout, stderr io.Writer) error {
-	if err := checkTerraformOnPath(stdout, stderr); err != nil {
-		return err
-	}
-
-	configDir, err := initConfig(config, stdout, stderr)
-	if err != nil {
-		return nil
-	}
-
-	if err := terraform(args, configDir, stdout, stderr); err != nil {
-		return err
-	}
-
-	return cleanup(configDir)
 }
 
 func terraform(args []string, dir string, stdout, stderr io.Writer) error {
@@ -81,8 +122,4 @@ func initConfig(config []byte, stdout, stderr io.Writer) (string, error) {
 	}
 
 	return tmpDir, nil
-}
-
-func cleanup(configDir string) error {
-	return os.RemoveAll(configDir)
 }

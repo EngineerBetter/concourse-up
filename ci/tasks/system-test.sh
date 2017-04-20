@@ -10,12 +10,18 @@ deployment="system-test-$RANDOM"
 
 go run main.go deploy $deployment
 
-hasKey=$(aws ec2 describe-key-pairs | jq -r ".KeyPairs[] | select(.KeyName | contains(\"$deployment\")) | any")
+bosh-init deploy concourse-up-$deployment-bosh.yml
 
-if [[ ! $hasKey == 'true' ]]; then
-  echo "Couldn't find key pair starting with $deployment"
-  exit 1
-fi
+config=$(go run main.go info $deployment)
+director_ip=$(echo $config | jq -r '.terraform.director_public_ip.value')
+username=$(echo $config | jq -r '.config.director_username')
+password=$(echo $config | jq -r '.config.director_password')
+
+bosh target -n $director_ip
+bosh login $username $password
+bosh status
+
+bosh-init delete concourse-up-$deployment-bosh.yml
 
 go run main.go --non-interactive destroy $deployment
 

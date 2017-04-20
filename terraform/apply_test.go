@@ -26,18 +26,38 @@ provider "aws" {
 resource "aws_iam_user" "example-user-2" {
   name = "example-2"
 }
+
+output "director_public_ip" {
+  value = "example"
+}
+
+output "director_security_group_id" {
+  value = "example"
+}
+
+output "director_subnet_id" {
+  value = "example"
+}
 `
 		stdout := gbytes.NewBuffer()
 		stderr := gbytes.NewBuffer()
 
-		err := Apply([]byte(config), stdout, stderr)
+		c, err := NewClient([]byte(config), stdout, stderr)
 		Expect(err).ToNot(HaveOccurred())
 
-		Eventually(stdout).Should(gbytes.Say("Apply complete! Resources: 1 added, 0 changed, 0 destroyed."))
+		defer c.Cleanup()
 
-		err = Destroy([]byte(config), stdout, stderr)
+		err = c.Apply()
+		Expect(err).ToNot(HaveOccurred())
+		Eventually(stdout).Should(gbytes.Say("Apply complete!"))
+
+		metadata, err := c.Output()
+		Expect(err).ToNot(HaveOccurred())
+		Expect(metadata.DirectorPublicIP.Value).To(Equal("example"))
+
+		err = c.Destroy()
 		Expect(err).ToNot(HaveOccurred())
 
-		Eventually(stdout).Should(gbytes.Say("Destroy complete! Resources: 1 destroyed."))
+		Eventually(stdout).Should(gbytes.Say("Destroy complete!"))
 	})
 })

@@ -36,6 +36,6 @@ var destroy = cli.Command{
 			}
 		}
 
-		return concourse.Destroy(name, terraform.Destroy, &config.Client{}, os.Stdout, os.Stderr)
+		return concourse.Destroy(name, terraform.NewClient, &config.Client{}, os.Stdout, os.Stderr)
 	},
 }

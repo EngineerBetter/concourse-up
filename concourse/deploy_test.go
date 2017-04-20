@@ -7,6 +7,7 @@ import (
 
 	. "bitbucket.org/engineerbetter/concourse-up/concourse"
 	"bitbucket.org/engineerbetter/concourse-up/config"
+	"bitbucket.org/engineerbetter/concourse-up/terraform"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
@@ -27,31 +28,35 @@ var _ = Describe("Deploy", func() {
 			}, nil
 		}
 
-		applier := func(config []byte, stdout, stderr io.Writer) error {
+		applied := false
+		cleanedUp := false
+
+		clientFactory := func(config []byte, stdout, stderr io.Writer) (terraform.IClient, error) {
 			appliedTFConfig = config
-			return nil
+			return &FakeTerraformClient{
+				FakeApply: func() error {
+					applied = true
+					return nil
+				},
+				FakeOutput: func() (*terraform.Metadata, error) {
+					return &terraform.Metadata{
+						BoshDBPort: terraform.MetadataStringValue{
+							Value: "5432",
+						},
+					}, nil
+				},
+				FakeCleanup: func() error {
+					cleanedUp = true
+					return nil
+				},
+			}, nil
 		}
 
-		err := Deploy("happymeal", "eu-west-1", applier, client, os.Stdout, os.Stderr)
+		err := Deploy("happymeal", "eu-west-1", clientFactory, client, os.Stdout, os.Stderr)
 		Expect(err).ToNot(HaveOccurred())
 
-		Expect(string(appliedTFConfig)).To(Equal(`
-terraform {
-	backend "s3" {
-		bucket = "concourse-up-happymeal"
-		key    = "example-path"
-		region = "eu-west-1"
-	}
-}
-
-provider "aws" {
-	region = "eu-west-1"
-}
-
-resource "aws_key_pair" "deployer" {
-	key_name_prefix = "concourse-up-happymeal-"
-	public_key      = "example-public-key"
-}
-`))
+		Expect(string(appliedTFConfig)).To(ContainSubstring("concourse-up-happymeal"))
+		Expect(applied).To(BeTrue())
+		Expect(cleanedUp).To(BeTrue())
 	})
 })

@@ -2,8 +2,8 @@ package util
 
 import (
 	"bytes"
-	"html/template"
 	"io/ioutil"
+	"text/template"
 )
 
 const leftDelim = "<%"

@@ -7,6 +7,7 @@ import (
 
 	. "bitbucket.org/engineerbetter/concourse-up/concourse"
 	"bitbucket.org/engineerbetter/concourse-up/config"
+	"bitbucket.org/engineerbetter/concourse-up/terraform"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
@@ -27,31 +28,28 @@ var _ = Describe("Destroy", func() {
 			}, nil
 		}
 
-		applier := func(config []byte, stdout, stderr io.Writer) error {
+		destroyed := false
+		cleanedUp := false
+
+		clientFactory := func(config []byte, stdout, stderr io.Writer) (terraform.IClient, error) {
 			destroyedTFConfig = config
-			return nil
+			return &FakeTerraformClient{
+				FakeDestroy: func() error {
+					destroyed = true
+					return nil
+				},
+				FakeCleanup: func() error {
+					cleanedUp = true
+					return nil
+				},
+			}, nil
 		}
 
-		err := Destroy("happymeal", applier, client, os.Stdout, os.Stderr)
+		err := Destroy("happymeal", clientFactory, client, os.Stdout, os.Stderr)
 		Expect(err).ToNot(HaveOccurred())
 
-		Expect(string(destroyedTFConfig)).To(Equal(`
-terraform {
-	backend "s3" {
-		bucket = "concourse-up-happymeal"
-		key    = "example-path"
-		region = "eu-west-1"
-	}
-}
-
-provider "aws" {
-	region = "eu-west-1"
-}
-
-resource "aws_key_pair" "deployer" {
-	key_name_prefix = "concourse-up-happymeal-"
-	public_key      = "example-public-key"
-}
-`))
+		Expect(string(destroyedTFConfig)).To(ContainSubstring("concourse-up-happymeal"))
+		Expect(destroyed).To(BeTrue())
+		Expect(cleanedUp).To(BeTrue())
 	})
 })

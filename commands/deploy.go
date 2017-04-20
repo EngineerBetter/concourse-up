@@ -35,6 +35,6 @@ var deploy = cli.Command{
 			return errors.New("Usage is `concourse-up deploy <name>`")
 		}
 
-		return concourse.Deploy(name, awsRegion, terraform.Apply, &config.Client{}, os.Stdout, os.Stderr)
+		return concourse.Deploy(name, awsRegion, terraform.NewClient, &config.Client{}, os.Stdout, os.Stderr)
 	},
 }

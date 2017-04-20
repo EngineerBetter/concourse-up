@@ -8,6 +8,7 @@ import (
 var Commands = []cli.Command{
 	deploy,
 	destroy,
+	info,
 }
 
 var nonInteractive bool

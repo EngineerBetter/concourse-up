@@ -9,10 +9,12 @@ import (
 // CheckConfirmation prompts the user for confirmation and returns true IFF the user responds with 'yes'
 func CheckConfirmation(stdin io.Reader, stdout io.Writer, name string) (bool, error) {
 	var response string
-	fmt.Fprintf(stdout, "Are you sure you want to destroy %s?\nThis cannot be undone. [yes/no]: ", name)
 
-	_, err := fmt.Fscan(stdin, &response)
-	if err != nil {
+	if _, err := fmt.Fprintf(stdout, "Are you sure you want to destroy %s?\nThis cannot be undone. [yes/no]: ", name); err != nil {
+		return false, err
+	}
+
+	if _, err := fmt.Fscan(stdin, &response); err != nil {
 		return false, err
 	}
 	response = strings.TrimSpace(response)
