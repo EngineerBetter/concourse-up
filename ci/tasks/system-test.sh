@@ -10,14 +10,12 @@ deployment="system-test-$RANDOM"
 
 go run main.go deploy $deployment
 
-bosh-init deploy concourse-up-$deployment-bosh.yml
-
 config=$(go run main.go info $deployment)
 director_ip=$(echo $config | jq -r '.terraform.director_public_ip.value')
 username=$(echo $config | jq -r '.config.director_username')
 password=$(echo $config | jq -r '.config.director_password')
 
-bosh target -n $director_ip
+bosh -n target $director_ip
 bosh login $username $password
 bosh status
 
