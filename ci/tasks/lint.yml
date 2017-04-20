@@ -1,0 +1,9 @@
+---
+platform: linux
+
+inputs:
+- name: concourse-up
+  path: go/src/bitbucket.org/engineerbetter/concourse-up
+
+run:
+  path: go/src/bitbucket.org/engineerbetter/concourse-up/ci/tasks/lint.sh

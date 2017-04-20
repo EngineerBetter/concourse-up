@@ -5,4 +5,4 @@ set -eu
 export GOPATH=$PWD/go
 cd go/src/bitbucket.org/engineerbetter/concourse-up
 
-ginkgo -r
+gometalinter -e vendor -e "_test\.go" --deadline=120s ./...

@@ -39,12 +39,16 @@ jobs:
     passed: [build-image]
   - get: concourse-up
     trigger: true
-  - task: unit-test
-    image: image
-    file: concourse-up/ci/tasks/unit-test.yml
-    params:
-      AWS_ACCESS_KEY_ID: {{aws_access_key_id}}
-      AWS_SECRET_ACCESS_KEY: {{aws_secret_access_key}}
+  - aggregate:
+    - task: lint
+      image: image
+      file: concourse-up/ci/tasks/lint.yml
+    - task: unit-test
+      image: image
+      file: concourse-up/ci/tasks/unit-test.yml
+      params:
+        AWS_ACCESS_KEY_ID: {{aws_access_key_id}}
+        AWS_SECRET_ACCESS_KEY: {{aws_secret_access_key}}
 
 - name: system-test
   serial: true
