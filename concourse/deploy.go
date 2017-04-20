@@ -30,7 +30,7 @@ resource "aws_key_pair" "deployer" {
 
 // Deploy deploys a concourse instance
 func Deploy(name, region string, terraformApplier terraform.Applier, configClient config.IClient, stdout, stderr io.Writer) error {
-	deployment := fmt.Sprintf("engineerbetter-concourseup-%s", name)
+	deployment := fmt.Sprintf("concourse-up-%s", name)
 
 	config, err := configClient.LoadOrCreate(deployment)
 	if err != nil {

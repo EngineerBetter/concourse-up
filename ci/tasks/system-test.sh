@@ -19,7 +19,7 @@ fi
 
 go run main.go --non-interactive destroy $deployment
 
-bucket="engineerbetter-concourseup-$deployment"
+bucket="concourse-up-$deployment"
 
 aws s3 rm s3://$bucket --recursive
 aws s3api delete-objects --bucket $bucket --delete "$(aws s3api list-object-versions --bucket $bucket | jq -M '{Objects: [.["Versions","DeleteMarkers"][]| {Key:.Key, VersionId : .VersionId}], Quiet: false}')"

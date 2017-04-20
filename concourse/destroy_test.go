@@ -36,7 +36,7 @@ var _ = Describe("Destroy", func() {
 		Expect(string(destroyedTFConfig)).To(Equal(`
 terraform {
 	backend "s3" {
-		bucket = "engineerbetter-concourseup-happymeal"
+		bucket = "concourse-up-happymeal"
 		key    = "example-path"
 		region = "eu-west-1"
 	}
@@ -47,7 +47,7 @@ provider "aws" {
 }
 
 resource "aws_key_pair" "deployer" {
-	key_name_prefix = "engineerbetter-concourseup-happymeal-"
+	key_name_prefix = "concourse-up-happymeal-"
 	public_key      = "example-public-key"
 }
 `))

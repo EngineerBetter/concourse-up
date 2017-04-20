@@ -11,7 +11,7 @@ import (
 
 // Destroy destroys a concourse instance
 func Destroy(name string, terraformApplier terraform.Applier, configClient config.IClient, stdout, stderr io.Writer) error {
-	deployment := fmt.Sprintf("engineerbetter-concourseup-%s", name)
+	deployment := fmt.Sprintf("concourse-up-%s", name)
 
 	config, err := configClient.Load(deployment)
 	if err != nil {
