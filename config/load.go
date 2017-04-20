@@ -2,6 +2,7 @@ package config
 
 import (
 	"encoding/json"
+	"fmt"
 	"html/template"
 
 	"strings"
@@ -21,6 +22,7 @@ type Config struct {
 	Region      string        `json:"region"`
 	Deployment  string        `json:"deployment"`
 	TFStatePath string        `json:"tf_state_path"`
+	Project     string        `json:"project"`
 }
 
 // IClient is an interface for the config file client
@@ -33,7 +35,9 @@ type IClient interface {
 type Client struct{}
 
 // Load loads an existing config file from S3
-func (client *Client) Load(deployment string) (*Config, error) {
+func (client *Client) Load(project string) (*Config, error) {
+	deployment := fmt.Sprintf("concourse-up-%s", project)
+
 	configBytes, err := aws.LoadFile(deployment, configFilePath, configBucketS3Region)
 	if err != nil {
 		return nil, err
@@ -48,8 +52,10 @@ func (client *Client) Load(deployment string) (*Config, error) {
 }
 
 // LoadOrCreate loads an existing config file from S3, or creates a default if one doesn't already exist
-func (client *Client) LoadOrCreate(deployment string) (*Config, error) {
-	defaultConfigBytes, err := generateDefaultConfig(deployment, configBucketS3Region)
+func (client *Client) LoadOrCreate(project string) (*Config, error) {
+	deployment := fmt.Sprintf("concourse-up-%s", project)
+
+	defaultConfigBytes, err := generateDefaultConfig(project, deployment, configBucketS3Region)
 	if err != nil {
 		return nil, err
 	}
@@ -71,7 +77,7 @@ func (client *Client) LoadOrCreate(deployment string) (*Config, error) {
 	return &conf, nil
 }
 
-func generateDefaultConfig(deployment, region string) ([]byte, error) {
+func generateDefaultConfig(project, deployment, region string) ([]byte, error) {
 	privateKey, publicKey, err := util.MakeSSHKeyPair()
 	if err != nil {
 		return nil, err
@@ -81,6 +87,7 @@ func generateDefaultConfig(deployment, region string) ([]byte, error) {
 		PublicKey:   template.HTML(strings.TrimSpace(string(publicKey))),
 		PrivateKey:  template.HTML(strings.TrimSpace(string(privateKey))),
 		Deployment:  deployment,
+		Project:     project,
 		TFStatePath: terraformStateFileName,
 		Region:      region,
 	}

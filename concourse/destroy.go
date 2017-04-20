@@ -1,7 +1,6 @@
 package concourse
 
 import (
-	"fmt"
 	"io"
 
 	"bitbucket.org/engineerbetter/concourse-up/config"
@@ -11,9 +10,7 @@ import (
 
 // Destroy destroys a concourse instance
 func Destroy(name string, terraformApplier terraform.Applier, configClient config.IClient, stdout, stderr io.Writer) error {
-	deployment := fmt.Sprintf("concourse-up-%s", name)
-
-	config, err := configClient.Load(deployment)
+	config, err := configClient.Load(name)
 	if err != nil {
 		return err
 	}

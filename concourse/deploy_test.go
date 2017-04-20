@@ -1,6 +1,7 @@
 package concourse_test
 
 import (
+	"fmt"
 	"io"
 	"os"
 
@@ -15,12 +16,13 @@ var _ = Describe("Deploy", func() {
 		var appliedTFConfig []byte
 
 		client := &FakeConfigClient{}
-		client.FakeLoadOrCreate = func(deployment string) (*config.Config, error) {
+		client.FakeLoadOrCreate = func(project string) (*config.Config, error) {
 			return &config.Config{
 				PublicKey:   "example-public-key",
 				PrivateKey:  "example-private-key",
 				Region:      "eu-west-1",
-				Deployment:  deployment,
+				Deployment:  fmt.Sprintf("concourse-up-%s", project),
+				Project:     project,
 				TFStatePath: "example-path",
 			}, nil
 		}
