@@ -21,11 +21,6 @@
 			"Rev": "b5d549c8b24bf097dc539a63c4f91e6122740e3a"
 		},
 		{
-			"ImportPath": "github.com/aws/aws-sdk-go/service/ec2",
-			"Comment": "v1.6.19-1-gb5d549c8",
-			"Rev": "b5d549c8b24bf097dc539a63c4f91e6122740e3a"
-		},
-		{
 			"ImportPath": "github.com/aws/aws-sdk-go/service/s3",
 			"Comment": "v1.6.19-1-gb5d549c8",
 			"Rev": "b5d549c8b24bf097dc539a63c4f91e6122740e3a"
