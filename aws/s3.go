@@ -45,9 +45,6 @@ func EnsureBucketExists(name, region string) error {
 			Status: &versioningStatus,
 		},
 	})
-	if err != nil {
-		return err
-	}
 
 	return err
 }
@@ -63,7 +60,8 @@ func EnsureFileExists(bucket, path, region string, defaultContents []byte) ([]by
 
 	output, err := client.GetObject(&s3.GetObjectInput{Bucket: &bucket, Key: &path})
 	if err == nil {
-		contents, err := ioutil.ReadAll(output.Body)
+		var contents []byte
+		contents, err = ioutil.ReadAll(output.Body)
 		if err != nil {
 			return nil, err
 		}

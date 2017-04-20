@@ -22,7 +22,7 @@ func MakeSSHKeyPair() ([]byte, []byte, error) {
 	privateKeyBuffer := bytes.NewBuffer(nil)
 
 	privateKeyPEM := &pem.Block{Type: "RSA PRIVATE KEY", Bytes: x509.MarshalPKCS1PrivateKey(privateKey)}
-	if err := pem.Encode(privateKeyBuffer, privateKeyPEM); err != nil {
+	if err = pem.Encode(privateKeyBuffer, privateKeyPEM); err != nil {
 		return nil, nil, err
 	}
 

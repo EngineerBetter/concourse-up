@@ -16,53 +16,18 @@ type Applier func(config []byte, stdout, stderr io.Writer) error
 
 // Apply takes a terraform config and applies it
 func Apply(config []byte, stdout, stderr io.Writer) error {
-	if err := checkTerraformOnPath(stdout, stderr); err != nil {
-		return err
-	}
-
-	configDir, err := initConfig(config, stdout, stderr)
-	if err != nil {
-		return nil
-	}
-
-	if err := terraform([]string{
+	return terraformWithConfig([]string{
 		"apply",
 		"-input=false",
-	}, configDir, stdout, stderr); err != nil {
-		return err
-	}
-
-	if err := cleanup(configDir); err != nil {
-		return err
-	}
-
-	return nil
+	}, config, stdout, stderr)
 }
 
 // Destroy destroys the given terraform config
 func Destroy(config []byte, stdout, stderr io.Writer) error {
-	if err := checkTerraformOnPath(stdout, stderr); err != nil {
-		return err
-	}
-
-	configDir, err := initConfig(config, stdout, stderr)
-	if err != nil {
-		return nil
-	}
-
-	// run terraform
-	if err := terraform([]string{
+	return terraformWithConfig([]string{
 		"destroy",
 		"-force",
-	}, configDir, stdout, stderr); err != nil {
-		return err
-	}
-
-	if err := cleanup(configDir); err != nil {
-		return err
-	}
-
-	return nil
+	}, config, stdout, stderr)
 }
 
 func checkTerraformOnPath(stdout, stderr io.Writer) error {
@@ -72,15 +37,29 @@ func checkTerraformOnPath(stdout, stderr io.Writer) error {
 	return nil
 }
 
+func terraformWithConfig(args []string, config []byte, stdout, stderr io.Writer) error {
+	if err := checkTerraformOnPath(stdout, stderr); err != nil {
+		return err
+	}
+
+	configDir, err := initConfig(config, stdout, stderr)
+	if err != nil {
+		return nil
+	}
+
+	if err := terraform(args, configDir, stdout, stderr); err != nil {
+		return err
+	}
+
+	return cleanup(configDir)
+}
+
 func terraform(args []string, dir string, stdout, stderr io.Writer) error {
 	cmd := exec.Command("terraform", args...)
 	cmd.Dir = dir
 	cmd.Stdout = stdout
 	cmd.Stderr = stderr
-	if err := cmd.Run(); err != nil {
-		return err
-	}
-	return nil
+	return cmd.Run()
 }
 
 func initConfig(config []byte, stdout, stderr io.Writer) (string, error) {

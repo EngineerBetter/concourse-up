@@ -18,7 +18,7 @@ func RenderTemplate(templateStr string, params interface{}) ([]byte, error) {
 
 	buffer := new(bytes.Buffer)
 
-	if err := templ.Execute(buffer, params); err != nil {
+	if err = templ.Execute(buffer, params); err != nil {
 		return nil, err
 	}
 

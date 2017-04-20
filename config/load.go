@@ -54,7 +54,7 @@ func (client *Client) LoadOrCreate(deployment string) (*Config, error) {
 		return nil, err
 	}
 
-	if err := aws.EnsureBucketExists(deployment, configBucketS3Region); err != nil {
+	if err = aws.EnsureBucketExists(deployment, configBucketS3Region); err != nil {
 		return nil, err
 	}
 
