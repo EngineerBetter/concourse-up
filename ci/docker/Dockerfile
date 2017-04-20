@@ -3,11 +3,14 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   python-pip \
   python-dev \
   build-essential \
+  ruby \
   unzip \
   vim
 RUN pip install --upgrade pip
 RUN pip install --upgrade virtualenv
 RUN pip install awscli
+
+RUN gem install bosh_cli --no-doc --no-ri
 
 RUN go get github.com/onsi/ginkgo/ginkgo github.com/onsi/gomega \
            gopkg.in/alecthomas/gometalinter.v1
@@ -26,6 +29,7 @@ RUN wget https://s3.amazonaws.com/bosh-init-artifacts/bosh-init-0.0.102-linux-am
 RUN wget https://github.com/stedolan/jq/releases/download/jq-1.5/jq-linux64 \
     && mv jq-linux64 /usr/bin/jq \
     && chmod +x /usr/bin/jq
+
 
 COPY verify_image.sh /tmp/verify_image.sh
 RUN /tmp/verify_image.sh && rm /tmp/verify_image.sh
