@@ -2,8 +2,9 @@
 
 set -eux
 
-export GOPATH=$PWD/go
-cd go/src/bitbucket.org/engineerbetter/concourse-up
+mkdir -p $GOPATH/src/bitbucket.org/engineerbetter/concourse-up
+mv concourse-up/* $GOPATH/src/bitbucket.org/engineerbetter/concourse-up
+cd $GOPATH/src/bitbucket.org/engineerbetter/concourse-up
 
 deployment="system-test-$RANDOM"
 
