@@ -123,7 +123,7 @@ func generateDefaultConfig(project, deployment, region string) ([]byte, error) {
 		DirectorNATSPassword:     util.GeneratePassword(),
 		DirectorRegistryPassword: util.GeneratePassword(),
 		RDSInstanceClass:         "db.t2.small",
-		RDSUsername:              util.GeneratePassword(),
+		RDSUsername:              "admin" + util.GeneratePassword(),
 		RDSPassword:              util.GeneratePassword(),
 	}
 
