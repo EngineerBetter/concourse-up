@@ -49,6 +49,21 @@ func EnsureBucketExists(name, region string) error {
 	return err
 }
 
+func WriteFile(bucket, path, region string, contents []byte) error {
+	sess, err := session.NewSession(aws.NewConfig().WithCredentialsChainVerboseErrors(true))
+	if err != nil {
+		return err
+	}
+	client := s3.New(sess, &aws.Config{Region: &region})
+
+	_, err = client.PutObject(&s3.PutObjectInput{
+		Bucket: &bucket,
+		Key:    &path,
+		Body:   bytes.NewReader(contents),
+	})
+	return err
+}
+
 // EnsureFileExists checks for the named file in S3 and creates it if it doesn't
 func EnsureFileExists(bucket, path, region string, defaultContents []byte) ([]byte, error) {
 	sess, err := session.NewSession(aws.NewConfig().WithCredentialsChainVerboseErrors(true))

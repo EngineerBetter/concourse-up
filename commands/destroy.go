@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 
+	"bitbucket.org/engineerbetter/concourse-up/bosh"
 	"bitbucket.org/engineerbetter/concourse-up/concourse"
 	"bitbucket.org/engineerbetter/concourse-up/config"
 	"bitbucket.org/engineerbetter/concourse-up/terraform"
@@ -36,6 +37,6 @@ var destroy = cli.Command{
 			}
 		}
 
-		return concourse.Destroy(name, terraform.NewClient, &config.Client{}, os.Stdout, os.Stderr)
+		return concourse.Destroy(name, terraform.NewClient, bosh.NewBoshInitClient, &config.Client{}, os.Stdout, os.Stderr)
 	},
 }

@@ -15,16 +15,21 @@ func TestConcourse(t *testing.T) {
 }
 
 type FakeConfigClient struct {
-	FakeLoad         func(deployment string) (*config.Config, error)
-	FakeLoadOrCreate func(deployment string) (*config.Config, error)
+	FakeLoad         func(project string) (*config.Config, error)
+	FakeLoadOrCreate func(project string) (*config.Config, error)
+	FakeStoreAsset   func(project, filename string, contents []byte) error
 }
 
-func (client *FakeConfigClient) Load(deployment string) (*config.Config, error) {
-	return client.FakeLoad(deployment)
+func (client *FakeConfigClient) Load(project string) (*config.Config, error) {
+	return client.FakeLoad(project)
 }
 
-func (client *FakeConfigClient) LoadOrCreate(deployment string) (*config.Config, error) {
-	return client.FakeLoadOrCreate(deployment)
+func (client *FakeConfigClient) LoadOrCreate(project string) (*config.Config, error) {
+	return client.FakeLoadOrCreate(project)
+}
+
+func (client *FakeConfigClient) StoreAsset(project, filename string, contents []byte) error {
+	return client.FakeStoreAsset(project, filename, contents)
 }
 
 type FakeTerraformClient struct {
@@ -48,4 +53,17 @@ func (client *FakeTerraformClient) Destroy() error {
 
 func (client *FakeTerraformClient) Cleanup() error {
 	return client.FakeCleanup()
+}
+
+type FakeBoshInitClient struct {
+	FakeDeploy func() ([]byte, error)
+	FakeDelete func() error
+}
+
+func (client *FakeBoshInitClient) Deploy() ([]byte, error) {
+	return client.FakeDeploy()
+}
+
+func (client *FakeBoshInitClient) Delete() error {
+	return client.FakeDelete()
 }

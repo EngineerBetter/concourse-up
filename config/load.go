@@ -39,12 +39,21 @@ type Config struct {
 
 // IClient is an interface for the config file client
 type IClient interface {
-	Load(deployment string) (*Config, error)
-	LoadOrCreate(deployment string) (*Config, error)
+	Load(project string) (*Config, error)
+	LoadOrCreate(project string) (*Config, error)
+	StoreAsset(project, filename string, contents []byte) error
 }
 
 // Client is a client for loading the config file from S3
 type Client struct{}
+
+// StoreAsset stores an associated configuration file
+func (client *Client) StoreAsset(project, filename string, contents []byte) error {
+	deployment := fmt.Sprintf("concourse-up-%s", project)
+	configBucket := fmt.Sprintf("%s-config", deployment)
+
+	return aws.WriteFile(configBucket, filename, configBucketS3Region, contents)
+}
 
 // Load loads an existing config file from S3
 func (client *Client) Load(project string) (*Config, error) {

@@ -4,6 +4,7 @@ import (
 	"errors"
 	"os"
 
+	"bitbucket.org/engineerbetter/concourse-up/bosh"
 	"bitbucket.org/engineerbetter/concourse-up/concourse"
 	"bitbucket.org/engineerbetter/concourse-up/config"
 	"bitbucket.org/engineerbetter/concourse-up/terraform"
@@ -35,6 +36,6 @@ var deploy = cli.Command{
 			return errors.New("Usage is `concourse-up deploy <name>`")
 		}
 
-		return concourse.Deploy(name, awsRegion, terraform.NewClient, &config.Client{}, os.Stdout, os.Stderr)
+		return concourse.Deploy(name, awsRegion, terraform.NewClient, bosh.NewBoshInitClient, &config.Client{}, os.Stdout, os.Stderr)
 	},
 }

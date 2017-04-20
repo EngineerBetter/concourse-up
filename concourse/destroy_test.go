@@ -5,6 +5,7 @@ import (
 	"io"
 	"os"
 
+	"bitbucket.org/engineerbetter/concourse-up/bosh"
 	. "bitbucket.org/engineerbetter/concourse-up/concourse"
 	"bitbucket.org/engineerbetter/concourse-up/config"
 	"bitbucket.org/engineerbetter/concourse-up/terraform"
@@ -38,6 +39,13 @@ var _ = Describe("Destroy", func() {
 					destroyed = true
 					return nil
 				},
+				FakeOutput: func() (*terraform.Metadata, error) {
+					return &terraform.Metadata{
+						BoshDBPort: terraform.MetadataStringValue{
+							Value: "5432",
+						},
+					}, nil
+				},
 				FakeCleanup: func() error {
 					cleanedUp = true
 					return nil
@@ -45,11 +53,22 @@ var _ = Describe("Destroy", func() {
 			}, nil
 		}
 
-		err := Destroy("happymeal", clientFactory, client, os.Stdout, os.Stderr)
+		boshInitDeleted := false
+		boshInitClientFactory := func(manifestPath string, stdout, stderr io.Writer) bosh.IBoshInitClient {
+			return &FakeBoshInitClient{
+				FakeDelete: func() error {
+					boshInitDeleted = true
+					return nil
+				},
+			}
+		}
+
+		err := Destroy("happymeal", clientFactory, boshInitClientFactory, client, os.Stdout, os.Stderr)
 		Expect(err).ToNot(HaveOccurred())
 
 		Expect(string(destroyedTFConfig)).To(ContainSubstring("concourse-up-happymeal"))
 		Expect(destroyed).To(BeTrue())
 		Expect(cleanedUp).To(BeTrue())
+		Expect(boshInitDeleted).To(BeTrue())
 	})
 })

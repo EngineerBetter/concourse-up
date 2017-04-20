@@ -12,18 +12,31 @@ import (
 )
 
 // Deploy deploys a concourse instance
-func Deploy(name, region string, clientFactory terraform.ClientFactory, configClient config.IClient, stdout, stderr io.Writer) error {
+func Deploy(name, region string,
+	terraformClientFactory terraform.ClientFactory,
+	boshInitClientFactory bosh.BoshInitClientFactory,
+	configClient config.IClient,
+	stdout, stderr io.Writer) error {
 	config, err := configClient.LoadOrCreate(name)
 	if err != nil {
 		return err
 	}
+
+	userIP, err := util.FindUserIP()
+	if err != nil {
+		return err
+	}
+
+	config.SourceAccessIP = userIP
+	stdout.Write([]byte(fmt.Sprintf(
+		"\nWARNING: allowing access from local machine (address: %s)\n\n", userIP)))
 
 	terraformFile, err := util.RenderTemplate(template, config)
 	if err != nil {
 		return err
 	}
 
-	terraformClient, err := clientFactory(terraformFile, stdout, stderr)
+	terraformClient, err := terraformClientFactory(terraformFile, stdout, stderr)
 	if err != nil {
 		return err
 	}
@@ -42,37 +55,57 @@ func Deploy(name, region string, clientFactory terraform.ClientFactory, configCl
 		return err
 	}
 
-	writeBoshFilesAndInstructions(config, metadata, stdout, stderr)
+	boshInitClient, manifestBytes, err := createBoshInitClient(config, metadata, boshInitClientFactory, stdout, stderr)
+	if err != nil {
+		return err
+	}
+	if err = configClient.StoreAsset(config.Project, "director.yml", manifestBytes); err != nil {
+		return err
+	}
 
-	return err
-}
-
-func writeBoshFilesAndInstructions(config *config.Config, metadata *terraform.Metadata, stdout, stderr io.Writer) error {
-	keyPath := fmt.Sprintf("%s-private-key.pem", config.Deployment)
-
-	manifestBytes, err := bosh.GenerateAWSDirectorManifest(config, keyPath, metadata)
+	boshStateBytes, err := boshInitClient.Deploy()
 	if err != nil {
 		return err
 	}
 
-	manifestPath := fmt.Sprintf("%s-bosh.yml", config.Deployment)
-	if err = ioutil.WriteFile(manifestPath, manifestBytes, 0700); err != nil {
+	if err = configClient.StoreAsset(config.Project, "director-state.json", boshStateBytes); err != nil {
 		return err
 	}
 
-	if _, err = fmt.Fprintf(stdout, "Private key written to %s\n", keyPath); err != nil {
-		return err
-	}
-
-	if err = ioutil.WriteFile(keyPath, []byte(config.PrivateKey), 0700); err != nil {
-		return err
-	}
-
-	if _, err = fmt.Fprintf(stdout, "Deploy bosh with:\n\n\tbosh-init deploy %s\n\n", manifestPath); err != nil {
-		return err
-	}
+	stdout.Write([]byte(fmt.Sprintf(
+		"\nDEPLOY SUCCESSFUL. Bosh connection credentials:\n\tIP Address: %s\n\tUsername: %s\n\tPassword: %s\n\n",
+		metadata.DirectorPublicIP,
+		config.DirectorUsername,
+		config.DirectorPassword,
+	)))
 
 	return nil
+}
+
+func createBoshInitClient(config *config.Config, metadata *terraform.Metadata, boshInitClientFactory bosh.BoshInitClientFactory, stdout, stderr io.Writer) (bosh.IBoshInitClient, []byte, error) {
+	keyFile, err := ioutil.TempFile("", config.Deployment)
+	if err != nil {
+	}
+
+	if _, err = keyFile.WriteString(config.PrivateKey); err != nil {
+	}
+	if err = keyFile.Sync(); err != nil {
+	}
+
+	manifestBytes, err := bosh.GenerateAWSDirectorManifest(config, keyFile.Name(), metadata)
+	if err != nil {
+	}
+
+	manifestFile, err := ioutil.TempFile("", config.Deployment)
+	if err != nil {
+	}
+
+	if _, err = manifestFile.Write(manifestBytes); err != nil {
+	}
+	if err = manifestFile.Sync(); err != nil {
+	}
+
+	return boshInitClientFactory(manifestFile.Name(), stdout, stderr), manifestBytes, nil
 }
 
 const template = `

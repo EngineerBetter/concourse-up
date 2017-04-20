@@ -19,8 +19,6 @@ bosh -n target $director_ip
 bosh login $username $password
 bosh status
 
-bosh-init delete concourse-up-$deployment-bosh.yml
-
 go run main.go --non-interactive destroy $deployment
 
 bucket="concourse-up-$deployment"
