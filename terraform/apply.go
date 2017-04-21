@@ -33,11 +33,11 @@ type ClientFactory func(config []byte, stdout, stderr io.Writer) (IClient, error
 
 // NewClient is a concrete implementation of ClientFactory
 func NewClient(config []byte, stdout, stderr io.Writer) (IClient, error) {
-	if err := checkTerraformOnPath(stdout, stderr); err != nil {
+	if err := checkTerraformOnPath(stderr, stderr); err != nil {
 		return nil, err
 	}
 
-	configDir, err := initConfig(config, stdout, stderr)
+	configDir, err := initConfig(config, stderr, stderr)
 	if err != nil {
 		return nil, err
 	}
