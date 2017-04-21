@@ -3,6 +3,7 @@ package concourse
 import (
 	"io"
 
+	"bitbucket.org/engineerbetter/concourse-up/certs"
 	"bitbucket.org/engineerbetter/concourse-up/config"
 	"bitbucket.org/engineerbetter/concourse-up/director"
 	"bitbucket.org/engineerbetter/concourse-up/terraform"
@@ -13,6 +14,7 @@ import (
 type Client struct {
 	terraformClientFactory terraform.ClientFactory
 	boshInitClientFactory  director.BoshInitClientFactory
+	certGenerator          func(caName, ip string) (*certs.Certs, error)
 	configClient           config.IClient
 	stdout                 io.Writer
 	stderr                 io.Writer
@@ -29,11 +31,13 @@ type IClient interface {
 func NewClient(
 	terraformClientFactory terraform.ClientFactory,
 	boshInitClientFactory director.BoshInitClientFactory,
+	certGenerator func(caName, ip string) (*certs.Certs, error),
 	configClient config.IClient, stdout, stderr io.Writer) *Client {
 	return &Client{
 		terraformClientFactory: terraformClientFactory,
 		boshInitClientFactory:  boshInitClientFactory,
 		configClient:           configClient,
+		certGenerator:          certGenerator,
 		stdout:                 stdout,
 		stderr:                 stderr,
 	}
@@ -49,7 +53,7 @@ func (client *Client) buildTerraformClient(config *config.Config) (terraform.ICl
 }
 
 func (client *Client) buildBoshInitClient(config *config.Config, metadata *terraform.Metadata) (director.IBoshInitClient, error) {
-	manifestBytes, err := director.GenerateManifest(config, metadata)
+	manifestBytes, err := director.GenerateBoshInitManifest(config, metadata)
 	if err != nil {
 		return nil, err
 	}

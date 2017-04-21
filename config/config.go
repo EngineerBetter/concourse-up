@@ -26,10 +26,14 @@ type Config struct {
 	DirectorMbusPassword     string `json:"director_mbus_password"`
 	DirectorNATSPassword     string `json:"director_nats_password"`
 	DirectorRegistryPassword string `json:"director_registry_password"`
-	RDSInstanceClass         string `json:"rds_instance_class"`
-	RDSUsername              string `json:"rds_username"`
-	RDSPassword              string `json:"rds_password"`
-	MultiAZRDS               bool   `json:"multi_az_rds"`
+	DirectorCACert           string `json:"director_ca_cert"`
+	DirectorCert             string `json:"director_cert"`
+	DirectorKey              string `json:"director_key"`
+
+	RDSInstanceClass string `json:"rds_instance_class"`
+	RDSUsername      string `json:"rds_username"`
+	RDSPassword      string `json:"rds_password"`
+	MultiAZRDS       bool   `json:"multi_az_rds"`
 }
 
 func generateDefaultConfig(project, deployment, region string) ([]byte, error) {

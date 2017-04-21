@@ -14,10 +14,16 @@ config=$(go run main.go info $deployment)
 director_ip=$(echo $config | jq -r '.terraform.director_public_ip.value')
 username=$(echo $config | jq -r '.config.director_username')
 password=$(echo $config | jq -r '.config.director_password')
+cacert="$(echo $config | jq -r '.config.director_ca_cert')"
 
-bosh -n target $director_ip
-bosh login $username $password
-bosh status
+echo "$cacert" > cacert.pem
+
+bosh-cli \
+  --ca-cert=cacert.pem \
+  --environment $director_ip \
+  --client $username \
+  --client-secret $password \
+  deployments
 
 go run main.go --non-interactive destroy $deployment
 

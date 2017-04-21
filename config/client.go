@@ -15,6 +15,7 @@ const configFilePath = "config.json"
 type IClient interface {
 	Load() (*Config, error)
 	LoadOrCreate() (*Config, bool, error)
+	Update(*Config) error
 	StoreAsset(filename string, contents []byte) error
 	HasAsset(filename string) (bool, error)
 	LoadAsset(filename string) ([]byte, error)
@@ -50,6 +51,16 @@ func (client *Client) HasAsset(filename string) (bool, error) {
 		filename,
 		configBucketS3Region,
 	)
+}
+
+// Update stores the conconcourse up config file to S3
+func (client *Client) Update(config *Config) error {
+	bytes, err := json.Marshal(config)
+	if err != nil {
+		return err
+	}
+
+	return aws.WriteFile(client.configBucket(), configFilePath, configBucketS3Region, bytes)
 }
 
 // Load loads an existing config file from S3

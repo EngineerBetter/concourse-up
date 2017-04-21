@@ -22,6 +22,11 @@ func (client *Client) Deploy() error {
 		return err
 	}
 
+	config, err = client.ensureCerts(config, metadata)
+	if err != nil {
+		return err
+	}
+
 	if err = client.deployBosh(config, metadata); err != nil {
 		return err
 	}
@@ -31,6 +36,30 @@ func (client *Client) Deploy() error {
 	}
 
 	return nil
+}
+
+func (client *Client) ensureCerts(config *config.Config, metadata *terraform.Metadata) (*config.Config, error) {
+	if config.DirectorCACert == "" {
+		ip := metadata.DirectorPublicIP.Value
+		_, err := client.stdout.Write(
+			[]byte(fmt.Sprintf("\nGENERATING CERTIFICATE FOR %s\n", ip)))
+		if err != nil {
+			return nil, err
+		}
+
+		certs, err := client.certGenerator(config.Deployment, ip)
+		if err != nil {
+			return nil, err
+		}
+
+		config.DirectorCACert = string(certs.CACert)
+		config.DirectorCert = string(certs.Cert)
+		config.DirectorKey = string(certs.Key)
+
+		client.configClient.Update(config)
+	}
+
+	return config, nil
 }
 
 func (client *Client) applyTerraform(config *config.Config) (metadata *terraform.Metadata, err error) {

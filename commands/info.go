@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 
+	"bitbucket.org/engineerbetter/concourse-up/certs"
 	"bitbucket.org/engineerbetter/concourse-up/concourse"
 	"bitbucket.org/engineerbetter/concourse-up/config"
 	"bitbucket.org/engineerbetter/concourse-up/director"
@@ -38,6 +39,7 @@ var info = cli.Command{
 		client := concourse.NewClient(
 			terraform.NewClient,
 			director.NewBoshInitClient,
+			certs.Generate,
 			&config.Client{Project: name},
 			os.Stdout,
 			os.Stderr,

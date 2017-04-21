@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 
+	"bitbucket.org/engineerbetter/concourse-up/certs"
 	"bitbucket.org/engineerbetter/concourse-up/concourse"
 	"bitbucket.org/engineerbetter/concourse-up/config"
 	"bitbucket.org/engineerbetter/concourse-up/director"
@@ -20,6 +21,10 @@ var _ = Describe("Client", func() {
 	var stdout *gbytes.Buffer
 	var stderr *gbytes.Buffer
 	var deleteBoshDirectorError error
+	certGenerator := func(caName string, ip string) (*certs.Certs, error) {
+		actions = append(actions, fmt.Sprintf("generating cert ca: %s, ip: %s", caName, ip))
+		return &certs.Certs{}, nil
+	}
 
 	BeforeEach(func() {
 		deleteBoshDirectorError = nil
@@ -42,6 +47,10 @@ var _ = Describe("Client", func() {
 			FakeLoad: func() (*config.Config, error) {
 				actions = append(actions, "loading config file")
 				return exampleConfig, nil
+			},
+			FakeUpdate: func(config *config.Config) error {
+				actions = append(actions, "updating config file")
+				return nil
 			},
 			FakeStoreAsset: func(filename string, contents []byte) error {
 				actions = append(actions, fmt.Sprintf("storing config asset: %s", filename))
@@ -102,6 +111,7 @@ var _ = Describe("Client", func() {
 		client = concourse.NewClient(
 			terraformClientFactory,
 			boshInitClientFactory,
+			certGenerator,
 			configClient,
 			stdout,
 			stderr,
@@ -128,6 +138,20 @@ var _ = Describe("Client", func() {
 			Expect(err).ToNot(HaveOccurred())
 
 			Expect(actions).To(ContainElement("cleaning up terraform client"))
+		})
+
+		It("Generates certificates", func() {
+			err := client.Deploy()
+			Expect(err).ToNot(HaveOccurred())
+
+			Expect(actions).To(ContainElement("generating cert ca: concourse-up-happymeal, ip: 99.99.99.99"))
+		})
+
+		It("Updates the config", func() {
+			err := client.Deploy()
+			Expect(err).ToNot(HaveOccurred())
+
+			Expect(actions).To(ContainElement("updating config file"))
 		})
 
 		It("Deploys the director", func() {
