@@ -11,9 +11,9 @@ import (
 	"golang.org/x/crypto/ssh"
 )
 
-// MakeSSHKeyPair generates a new ssh public key pair
+// GenerateSSHKeyPair generates a new ssh public key pair
 // http://stackoverflow.com/questions/21151714/go-generate-an-ssh-public-key
-func MakeSSHKeyPair() ([]byte, []byte, error) {
+func GenerateSSHKeyPair() ([]byte, []byte, error) {
 	privateKey, err := rsa.GenerateKey(rand.Reader, 2048)
 	if err != nil {
 		return nil, nil, err

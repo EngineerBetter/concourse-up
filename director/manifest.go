@@ -1,4 +1,4 @@
-package bosh
+package director
 
 import (
 	"strconv"
@@ -18,8 +18,8 @@ const boshCPIReleaseURL = "https://bosh.io/d/github.com/cloudfoundry-incubator/b
 const boshReleaseSHA1 = "4da9cedbcc8fbf11378ef439fb89de08300ad091"
 const boshReleaseURL = "https://bosh.io/d/github.com/cloudfoundry/bosh?v=261.4"
 
-// GenerateAWSDirectorManifest generates a manifest for the bosh director on AWS
-func GenerateAWSDirectorManifest(conf *config.Config, privateKeyPath string, metadata *terraform.Metadata) ([]byte, error) {
+// GenerateManifest generates a manifest for the bosh director on AWS
+func GenerateManifest(conf *config.Config, metadata *terraform.Metadata) ([]byte, error) {
 	dbPort, err := strconv.Atoi(metadata.BoshDBPort.Value)
 	if err != nil {
 		return nil, err
@@ -44,7 +44,7 @@ func GenerateAWSDirectorManifest(conf *config.Config, privateKeyPath string, met
 		KeyPairName:            metadata.DirectorKeyPair.Value,
 		MbusPassword:           conf.DirectorMbusPassword,
 		NATSPassword:           conf.DirectorNATSPassword,
-		PrivateKeyPath:         privateKeyPath,
+		PrivateKeyPath:         "director.pem",
 		PublicIP:               metadata.DirectorPublicIP.Value,
 		RegistryPassword:       conf.DirectorRegistryPassword,
 		S3AWSAccessKeyID:       metadata.BlobstoreUserAccessKeyID.Value,

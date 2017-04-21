@@ -7,6 +7,7 @@ import (
 
 	"bitbucket.org/engineerbetter/concourse-up/concourse"
 	"bitbucket.org/engineerbetter/concourse-up/config"
+	"bitbucket.org/engineerbetter/concourse-up/director"
 	"bitbucket.org/engineerbetter/concourse-up/terraform"
 
 	"encoding/json"
@@ -20,25 +21,37 @@ var info = cli.Command{
 	Usage:     "Fetches information on a deployed environment",
 	ArgsUsage: "<name>",
 	Flags:     deployFlags,
-	Action: func(c *cli.Context) error {
+	Action: func(c *cli.Context) (err error) {
 		name := c.Args().Get(0)
 		if name == "" {
-			return errors.New("Usage is `concourse-up info <name>`")
+			err = errors.New("Usage is `concourse-up info <name>`")
+			return
 		}
 
-		logFile, err := os.Create("terraform.combined.log")
+		var logFile *os.File
+		logFile, err = os.Create("terraform.combined.log")
 		if err != nil {
-			return err
+			return
 		}
-		defer logFile.Close()
+		defer func() { err = logFile.Close() }()
 
-		info, err := concourse.FetchInfo(name, terraform.NewClient, &config.Client{}, logFile, logFile)
+		client := concourse.NewClient(
+			terraform.NewClient,
+			director.NewBoshInitClient,
+			&config.Client{Project: name},
+			os.Stdout,
+			os.Stderr,
+		)
+
+		var info *concourse.Info
+		info, err = client.FetchInfo()
 		if err != nil {
-			return err
+			return
 		}
-		bytes, err := json.MarshalIndent(info, "", "  ")
+		var bytes []byte
+		bytes, err = json.MarshalIndent(info, "", "  ")
 		if err != nil {
-			return err
+			return
 		}
 
 		fmt.Println(string(bytes))

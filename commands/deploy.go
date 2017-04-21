@@ -4,9 +4,9 @@ import (
 	"errors"
 	"os"
 
-	"bitbucket.org/engineerbetter/concourse-up/bosh"
 	"bitbucket.org/engineerbetter/concourse-up/concourse"
 	"bitbucket.org/engineerbetter/concourse-up/config"
+	"bitbucket.org/engineerbetter/concourse-up/director"
 	"bitbucket.org/engineerbetter/concourse-up/terraform"
 
 	"gopkg.in/urfave/cli.v1"
@@ -36,6 +36,14 @@ var deploy = cli.Command{
 			return errors.New("Usage is `concourse-up deploy <name>`")
 		}
 
-		return concourse.Deploy(name, awsRegion, terraform.NewClient, bosh.NewBoshInitClient, &config.Client{}, os.Stdout, os.Stderr)
+		client := concourse.NewClient(
+			terraform.NewClient,
+			director.NewBoshInitClient,
+			&config.Client{Project: name},
+			os.Stdout,
+			os.Stderr,
+		)
+
+		return client.Deploy()
 	},
 }

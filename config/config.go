@@ -3,16 +3,10 @@ package config
 import (
 	"encoding/json"
 	"fmt"
-
 	"strings"
 
-	"bitbucket.org/engineerbetter/concourse-up/aws"
 	"bitbucket.org/engineerbetter/concourse-up/util"
 )
-
-const terraformStateFileName = "terraform.tfstate"
-const configBucketS3Region = "eu-west-1"
-const configFilePath = "config.json"
 
 // Config represents a concourse-up configuration file
 type Config struct {
@@ -35,74 +29,11 @@ type Config struct {
 	RDSInstanceClass         string `json:"rds_instance_class"`
 	RDSUsername              string `json:"rds_username"`
 	RDSPassword              string `json:"rds_password"`
-}
-
-// IClient is an interface for the config file client
-type IClient interface {
-	Load(project string) (*Config, error)
-	LoadOrCreate(project string) (*Config, error)
-	StoreAsset(project, filename string, contents []byte) error
-}
-
-// Client is a client for loading the config file from S3
-type Client struct{}
-
-// StoreAsset stores an associated configuration file
-func (client *Client) StoreAsset(project, filename string, contents []byte) error {
-	deployment := fmt.Sprintf("concourse-up-%s", project)
-	configBucket := fmt.Sprintf("%s-config", deployment)
-
-	return aws.WriteFile(configBucket, filename, configBucketS3Region, contents)
-}
-
-// Load loads an existing config file from S3
-func (client *Client) Load(project string) (*Config, error) {
-	deployment := fmt.Sprintf("concourse-up-%s", project)
-	configBucket := fmt.Sprintf("%s-config", deployment)
-
-	configBytes, err := aws.LoadFile(configBucket, configFilePath, configBucketS3Region)
-	if err != nil {
-		return nil, err
-	}
-
-	conf := Config{}
-	if err := json.Unmarshal(configBytes, &conf); err != nil {
-		return nil, err
-	}
-
-	return &conf, nil
-}
-
-// LoadOrCreate loads an existing config file from S3, or creates a default if one doesn't already exist
-func (client *Client) LoadOrCreate(project string) (*Config, error) {
-	deployment := fmt.Sprintf("concourse-up-%s", project)
-
-	defaultConfigBytes, err := generateDefaultConfig(project, deployment, configBucketS3Region)
-	if err != nil {
-		return nil, err
-	}
-
-	configBucket := fmt.Sprintf("%s-config", deployment)
-
-	if err = aws.EnsureBucketExists(configBucket, configBucketS3Region); err != nil {
-		return nil, err
-	}
-
-	configBytes, err := aws.EnsureFileExists(configBucket, configFilePath, configBucketS3Region, defaultConfigBytes)
-	if err != nil {
-		return nil, err
-	}
-
-	conf := Config{}
-	if err := json.Unmarshal(configBytes, &conf); err != nil {
-		return nil, err
-	}
-
-	return &conf, nil
+	MultiAZRDS               bool   `json:"multi_az_rds"`
 }
 
 func generateDefaultConfig(project, deployment, region string) ([]byte, error) {
-	privateKey, publicKey, err := util.MakeSSHKeyPair()
+	privateKey, publicKey, err := util.GenerateSSHKeyPair()
 	if err != nil {
 		return nil, err
 	}
@@ -134,6 +65,7 @@ func generateDefaultConfig(project, deployment, region string) ([]byte, error) {
 		RDSInstanceClass:         "db.t2.small",
 		RDSUsername:              "admin" + util.GeneratePassword(),
 		RDSPassword:              util.GeneratePassword(),
+		MultiAZRDS:               false,
 	}
 
 	return json.MarshalIndent(&conf, "", "  ")

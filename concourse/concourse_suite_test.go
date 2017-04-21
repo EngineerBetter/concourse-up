@@ -15,21 +15,31 @@ func TestConcourse(t *testing.T) {
 }
 
 type FakeConfigClient struct {
-	FakeLoad         func(project string) (*config.Config, error)
-	FakeLoadOrCreate func(project string) (*config.Config, error)
-	FakeStoreAsset   func(project, filename string, contents []byte) error
+	FakeLoad         func() (*config.Config, error)
+	FakeLoadOrCreate func() (*config.Config, error)
+	FakeStoreAsset   func(filename string, contents []byte) error
+	FakeLoadAsset    func(filename string) ([]byte, error)
+	FakeHasAsset     func(filename string) (bool, error)
 }
 
-func (client *FakeConfigClient) Load(project string) (*config.Config, error) {
-	return client.FakeLoad(project)
+func (client *FakeConfigClient) Load() (*config.Config, error) {
+	return client.FakeLoad()
 }
 
-func (client *FakeConfigClient) LoadOrCreate(project string) (*config.Config, error) {
-	return client.FakeLoadOrCreate(project)
+func (client *FakeConfigClient) LoadOrCreate() (*config.Config, error) {
+	return client.FakeLoadOrCreate()
 }
 
-func (client *FakeConfigClient) StoreAsset(project, filename string, contents []byte) error {
-	return client.FakeStoreAsset(project, filename, contents)
+func (client *FakeConfigClient) StoreAsset(filename string, contents []byte) error {
+	return client.FakeStoreAsset(filename, contents)
+}
+
+func (client *FakeConfigClient) LoadAsset(filename string) ([]byte, error) {
+	return client.FakeLoadAsset(filename)
+}
+
+func (client *FakeConfigClient) HasAsset(filename string) (bool, error) {
+	return client.FakeHasAsset(filename)
 }
 
 type FakeTerraformClient struct {
@@ -56,8 +66,9 @@ func (client *FakeTerraformClient) Cleanup() error {
 }
 
 type FakeBoshInitClient struct {
-	FakeDeploy func() ([]byte, error)
-	FakeDelete func() error
+	FakeDeploy  func() ([]byte, error)
+	FakeDelete  func() error
+	FakeCleanup func() error
 }
 
 func (client *FakeBoshInitClient) Deploy() ([]byte, error) {
@@ -66,4 +77,8 @@ func (client *FakeBoshInitClient) Deploy() ([]byte, error) {
 
 func (client *FakeBoshInitClient) Delete() error {
 	return client.FakeDelete()
+}
+
+func (client *FakeBoshInitClient) Cleanup() error {
+	return client.FakeCleanup()
 }

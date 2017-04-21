@@ -4,50 +4,53 @@ import (
 	"fmt"
 	"io"
 
-	"bitbucket.org/engineerbetter/concourse-up/bosh"
 	"bitbucket.org/engineerbetter/concourse-up/config"
+
+	"bitbucket.org/engineerbetter/concourse-up/director"
 	"bitbucket.org/engineerbetter/concourse-up/terraform"
-	"bitbucket.org/engineerbetter/concourse-up/util"
 )
 
 // Destroy destroys a concourse instance
-func Destroy(name string,
-	terraformClientFactory terraform.ClientFactory,
-	boshInitClientFactory bosh.BoshInitClientFactory,
-	configClient config.IClient, stdout, stderr io.Writer) error {
-	config, err := configClient.Load(name)
+func (client *Client) Destroy() (err error) {
+	var conf *config.Config
+	conf, err = client.configClient.Load()
 	if err != nil {
-		return err
+		return
 	}
 
-	terraformFile, err := util.RenderTemplate(template, config)
+	var terraformClient terraform.IClient
+	terraformClient, err = client.buildTerraformClient(conf)
 	if err != nil {
-		return err
+		return
+	}
+	defer func() { err = terraformClient.Cleanup() }()
+
+	var metadata *terraform.Metadata
+	metadata, err = terraformClient.Output()
+	if err != nil {
+		return
 	}
 
-	terraformClient, err := terraformClientFactory(terraformFile, stdout, stderr)
+	var boshInitClient director.IBoshInitClient
+	boshInitClient, err = client.buildBoshInitClient(conf, metadata)
 	if err != nil {
-		return err
+		return
 	}
-	defer func() {
-		err = terraformClient.Cleanup()
-	}()
-
-	metadata, err := terraformClient.Output()
-	if err != nil {
-		return err
-	}
-
-	boshInitClient, _, err := createBoshInitClient(config, metadata, boshInitClientFactory, stdout, stderr)
-	if err != nil {
-		return err
-	}
+	defer func() { err = boshInitClient.Cleanup() }()
 
 	if err = boshInitClient.Delete(); err != nil {
-		stderr.Write([]byte(fmt.Sprintf("Warning error deleting bosh director. Continuing with terraform deletion.\n\t%s", err.Error())))
+		if err = writeDeleteBoshDirectorErrorWarning(client.stderr, err.Error()); err != nil {
+			return
+		}
 	}
 
 	err = terraformClient.Destroy()
+	return
+}
+
+func writeDeleteBoshDirectorErrorWarning(stderr io.Writer, message string) error {
+	_, err := stderr.Write([]byte(fmt.Sprintf(
+		"Warning error deleting bosh director. Continuing with terraform deletion.\n\t%s", message)))
 
 	return err
 }

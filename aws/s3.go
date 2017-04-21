@@ -49,6 +49,7 @@ func EnsureBucketExists(name, region string) error {
 	return err
 }
 
+// WriteFile writes the specified S3 object
 func WriteFile(bucket, path, region string, contents []byte) error {
 	sess, err := session.NewSession(aws.NewConfig().WithCredentialsChainVerboseErrors(true))
 	if err != nil {
@@ -62,6 +63,26 @@ func WriteFile(bucket, path, region string, contents []byte) error {
 		Body:   bytes.NewReader(contents),
 	})
 	return err
+}
+
+// HasFile returns true if the specified S3 object exists
+func HasFile(bucket, path, region string) (bool, error) {
+	sess, err := session.NewSession(aws.NewConfig().WithCredentialsChainVerboseErrors(true))
+	if err != nil {
+		return false, err
+	}
+	client := s3.New(sess, &aws.Config{Region: &region})
+
+	_, err = client.HeadObject(&s3.HeadObjectInput{Bucket: &bucket, Key: &path})
+	if err != nil {
+		errCode := err.(awserr.Error).Code()
+		if errCode == s3.ErrCodeNoSuchKey || errCode == "NotFound" {
+			return false, nil
+		}
+		return false, err
+	}
+
+	return true, nil
 }
 
 // EnsureFileExists checks for the named file in S3 and creates it if it doesn't

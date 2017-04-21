@@ -5,7 +5,7 @@ import (
 
 	"bitbucket.org/engineerbetter/concourse-up/commands"
 
-	"gopkg.in/urfave/cli.v1" // imports as package "cli"
+	"gopkg.in/urfave/cli.v1"
 )
 
 func main() {

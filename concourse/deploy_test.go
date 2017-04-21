@@ -1,16 +1,16 @@
 package concourse_test
 
 import (
-	"fmt"
 	"io"
 	"os"
 
-	"bitbucket.org/engineerbetter/concourse-up/bosh"
 	. "bitbucket.org/engineerbetter/concourse-up/concourse"
 	"bitbucket.org/engineerbetter/concourse-up/config"
+	"bitbucket.org/engineerbetter/concourse-up/director"
 	"bitbucket.org/engineerbetter/concourse-up/terraform"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	"github.com/onsi/gomega/gbytes"
 )
 
 var _ = Describe("Deploy", func() {
@@ -19,30 +19,33 @@ var _ = Describe("Deploy", func() {
 		storedAssetPaths := []string{}
 
 		client := &FakeConfigClient{
-			FakeLoadOrCreate: func(project string) (*config.Config, error) {
+			FakeLoadOrCreate: func() (*config.Config, error) {
 				return &config.Config{
 					PublicKey:   "example-public-key",
 					PrivateKey:  "example-private-key",
 					Region:      "eu-west-1",
-					Deployment:  fmt.Sprintf("concourse-up-%s", project),
-					Project:     project,
+					Deployment:  "concourse-up-happymeal",
+					Project:     "happymeal",
 					TFStatePath: "example-path",
 				}, nil
 			},
-			FakeStoreAsset: func(project, filename string, contents []byte) error {
+			FakeStoreAsset: func(filename string, contents []byte) error {
 				storedAssetPaths = append(storedAssetPaths, filename)
 				return nil
 			},
+			FakeHasAsset: func(filename string) (bool, error) {
+				return false, nil
+			},
 		}
 
-		applied := false
+		appliedTerraform := false
 		cleanedUp := false
 
 		terraformClientFactory := func(config []byte, stdout, stderr io.Writer) (terraform.IClient, error) {
 			appliedTFConfig = config
 			return &FakeTerraformClient{
 				FakeApply: func() error {
-					applied = true
+					appliedTerraform = true
 					return nil
 				},
 				FakeOutput: func() (*terraform.Metadata, error) {
@@ -60,23 +63,34 @@ var _ = Describe("Deploy", func() {
 		}
 
 		boshInitDeployed := false
-		boshInitClientFactory := func(manifestPath string, stdout, stderr io.Writer) bosh.IBoshInitClient {
+		cleanedUpBoshInit := false
+		boshInitClientFactory := func(manifestBytes, stateFileBytes, keyfileBytes []byte, stdout, stderr io.Writer) (director.IBoshInitClient, error) {
 			return &FakeBoshInitClient{
 				FakeDeploy: func() ([]byte, error) {
 					boshInitDeployed = true
 					return []byte{}, nil
 				},
-			}
+				FakeCleanup: func() error {
+					cleanedUpBoshInit = true
+					return nil
+				},
+			}, nil
 		}
 
-		err := Deploy("happymeal", "eu-west-1", terraformClientFactory, boshInitClientFactory, client, os.Stdout, os.Stderr)
+		stdout := gbytes.NewBuffer()
+
+		concourseClient := NewClient(terraformClientFactory, boshInitClientFactory, client, stdout, os.Stderr)
+		err := concourseClient.Deploy()
 		Expect(err).ToNot(HaveOccurred())
 
 		Expect(string(appliedTFConfig)).To(ContainSubstring("concourse-up-happymeal"))
-		Expect(applied).To(BeTrue())
+		Expect(appliedTerraform).To(BeTrue())
 		Expect(cleanedUp).To(BeTrue())
 		Expect(boshInitDeployed).To(BeTrue())
-		Expect(storedAssetPaths).To(ContainElement("director.yml"))
+		Expect(storedAssetPaths).To(HaveLen(1))
 		Expect(storedAssetPaths).To(ContainElement("director-state.json"))
+		Expect(cleanedUpBoshInit).To(BeTrue())
+
+		Eventually(stdout).Should(gbytes.Say("DEPLOY SUCCESSFUL"))
 	})
 })
