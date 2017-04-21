@@ -10,6 +10,23 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3"
 )
 
+const (
+	// New versions of github.com/aws/aws-sdk-go/aws have these consts
+	// but the version currently pinned by bosh-cli v2 does not
+
+	// ErrCodeNoSuchBucket for service response error code
+	// "NoSuchBucket".
+	//
+	// The specified bucket does not exist.
+	ErrCodeNoSuchBucket = "NoSuchBucket"
+
+	// ErrCodeNoSuchKey for service response error code
+	// "NoSuchKey".
+	//
+	// The specified key does not exist.
+	ErrCodeNoSuchKey = "NoSuchKey"
+)
+
 // EnsureBucketExists checks if the named bucket exists and creates it if it doesn't
 func EnsureBucketExists(name, region string) error {
 	sess, err := session.NewSession(aws.NewConfig().WithCredentialsChainVerboseErrors(true))
@@ -24,7 +41,7 @@ func EnsureBucketExists(name, region string) error {
 		return nil
 	}
 
-	if err.(awserr.Error).Code() != s3.ErrCodeNoSuchBucket && err.(awserr.Error).Code() != "NotFound" {
+	if err.(awserr.Error).Code() != ErrCodeNoSuchBucket && err.(awserr.Error).Code() != "NotFound" {
 		return err
 	}
 
@@ -76,7 +93,7 @@ func HasFile(bucket, path, region string) (bool, error) {
 	_, err = client.HeadObject(&s3.HeadObjectInput{Bucket: &bucket, Key: &path})
 	if err != nil {
 		errCode := err.(awserr.Error).Code()
-		if errCode == s3.ErrCodeNoSuchKey || errCode == "NotFound" {
+		if errCode == ErrCodeNoSuchKey || errCode == "NotFound" {
 			return false, nil
 		}
 		return false, err
@@ -107,7 +124,7 @@ func EnsureFileExists(bucket, path, region string, defaultContents []byte) ([]by
 		return contents, true, nil
 	}
 
-	if err.(awserr.Error).Code() != s3.ErrCodeNoSuchKey {
+	if err.(awserr.Error).Code() != ErrCodeNoSuchKey {
 		return nil, false, err
 	}
 
