@@ -12,7 +12,7 @@ import (
 
 // Deploy deploys a concourse instance
 func (client *Client) Deploy() error {
-	config, err := client.configClient.LoadOrCreate()
+	config, err := client.loadConfigWithUserIP()
 	if err != nil {
 		return err
 	}
@@ -70,9 +70,15 @@ func (client *Client) deployBosh(config *config.Config, metadata *terraform.Meta
 }
 
 func (client *Client) loadConfigWithUserIP() (*config.Config, error) {
-	config, err := client.configClient.LoadOrCreate()
+	config, createdNewConfig, err := client.configClient.LoadOrCreate()
 	if err != nil {
 		return nil, err
+	}
+
+	if !createdNewConfig {
+		if err = writeConfigLoadedSuccessMessage(client.stdout); err != nil {
+			return nil, err
+		}
 	}
 
 	userIP, err := util.FindUserIP()
@@ -110,6 +116,12 @@ func writeDeploySuccessMessage(config *config.Config, metadata *terraform.Metada
 		config.DirectorUsername,
 		config.DirectorPassword,
 	)))
+
+	return err
+}
+
+func writeConfigLoadedSuccessMessage(stdout io.Writer) error {
+	_, err := stdout.Write([]byte("\nUSING PREVIOUS DEPLOYMENT CONFIG\n"))
 
 	return err
 }

@@ -16,7 +16,7 @@ func TestConcourse(t *testing.T) {
 
 type FakeConfigClient struct {
 	FakeLoad         func() (*config.Config, error)
-	FakeLoadOrCreate func() (*config.Config, error)
+	FakeLoadOrCreate func() (*config.Config, bool, error)
 	FakeStoreAsset   func(filename string, contents []byte) error
 	FakeLoadAsset    func(filename string) ([]byte, error)
 	FakeHasAsset     func(filename string) (bool, error)
@@ -26,7 +26,7 @@ func (client *FakeConfigClient) Load() (*config.Config, error) {
 	return client.FakeLoad()
 }
 
-func (client *FakeConfigClient) LoadOrCreate() (*config.Config, error) {
+func (client *FakeConfigClient) LoadOrCreate() (*config.Config, bool, error) {
 	return client.FakeLoadOrCreate()
 }
 

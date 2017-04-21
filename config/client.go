@@ -14,7 +14,7 @@ const configFilePath = "config.json"
 // IClient is an interface for the config file client
 type IClient interface {
 	Load() (*Config, error)
-	LoadOrCreate() (*Config, error)
+	LoadOrCreate() (*Config, bool, error)
 	StoreAsset(filename string, contents []byte) error
 	HasAsset(filename string) (bool, error)
 	LoadAsset(filename string) ([]byte, error)
@@ -72,36 +72,36 @@ func (client *Client) Load() (*Config, error) {
 }
 
 // LoadOrCreate loads an existing config file from S3, or creates a default if one doesn't already exist
-func (client *Client) LoadOrCreate() (*Config, error) {
+func (client *Client) LoadOrCreate() (*Config, bool, error) {
 	defaultConfigBytes, err := generateDefaultConfig(
 		client.Project,
 		client.deployment(),
 		configBucketS3Region,
 	)
 	if err != nil {
-		return nil, err
+		return nil, false, err
 	}
 
 	if err = aws.EnsureBucketExists(client.configBucket(), configBucketS3Region); err != nil {
-		return nil, err
+		return nil, false, err
 	}
 
-	configBytes, err := aws.EnsureFileExists(
+	configBytes, createdNewFile, err := aws.EnsureFileExists(
 		client.configBucket(),
 		configFilePath,
 		configBucketS3Region,
 		defaultConfigBytes,
 	)
 	if err != nil {
-		return nil, err
+		return nil, false, err
 	}
 
 	conf := Config{}
 	if err := json.Unmarshal(configBytes, &conf); err != nil {
-		return nil, err
+		return nil, false, err
 	}
 
-	return &conf, nil
+	return &conf, createdNewFile, nil
 }
 
 func (client *Client) deployment() string {

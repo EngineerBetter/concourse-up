@@ -86,10 +86,11 @@ func HasFile(bucket, path, region string) (bool, error) {
 }
 
 // EnsureFileExists checks for the named file in S3 and creates it if it doesn't
-func EnsureFileExists(bucket, path, region string, defaultContents []byte) ([]byte, error) {
+// Second argument is true if new file was created
+func EnsureFileExists(bucket, path, region string, defaultContents []byte) ([]byte, bool, error) {
 	sess, err := session.NewSession(aws.NewConfig().WithCredentialsChainVerboseErrors(true))
 	if err != nil {
-		return nil, err
+		return nil, false, err
 	}
 
 	client := s3.New(sess, &aws.Config{Region: &region})
@@ -99,14 +100,15 @@ func EnsureFileExists(bucket, path, region string, defaultContents []byte) ([]by
 		var contents []byte
 		contents, err = ioutil.ReadAll(output.Body)
 		if err != nil {
-			return nil, err
+			return nil, false, err
 		}
 
-		return contents, nil
+		// Successfully loaded file
+		return contents, true, nil
 	}
 
 	if err.(awserr.Error).Code() != s3.ErrCodeNoSuchKey {
-		return nil, err
+		return nil, false, err
 	}
 
 	_, err = client.PutObject(&s3.PutObjectInput{
@@ -115,10 +117,11 @@ func EnsureFileExists(bucket, path, region string, defaultContents []byte) ([]by
 		Body:   bytes.NewReader(defaultContents),
 	})
 	if err != nil {
-		return nil, err
+		return nil, false, err
 	}
 
-	return defaultContents, nil
+	// Created file from given contents
+	return defaultContents, true, nil
 }
 
 // LoadFile loads a file from S3

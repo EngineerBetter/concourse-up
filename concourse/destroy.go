@@ -45,12 +45,25 @@ func (client *Client) Destroy() (err error) {
 	}
 
 	err = terraformClient.Destroy()
+	if err != nil {
+		return
+	}
+
+	if err = writeDestroySuccessMessage(client.stdout); err != nil {
+		return err
+	}
+
 	return
 }
 
 func writeDeleteBoshDirectorErrorWarning(stderr io.Writer, message string) error {
 	_, err := stderr.Write([]byte(fmt.Sprintf(
 		"Warning error deleting bosh director. Continuing with terraform deletion.\n\t%s", message)))
+
+	return err
+}
+func writeDestroySuccessMessage(stdout io.Writer) error {
+	_, err := stdout.Write([]byte("\nDESTROY SUCCESSFUL\n\n"))
 
 	return err
 }

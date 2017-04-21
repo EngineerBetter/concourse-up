@@ -1,0 +1,233 @@
+package concourse_test
+
+import (
+	"errors"
+	"fmt"
+	"io"
+
+	"bitbucket.org/engineerbetter/concourse-up/concourse"
+	"bitbucket.org/engineerbetter/concourse-up/config"
+	"bitbucket.org/engineerbetter/concourse-up/director"
+	"bitbucket.org/engineerbetter/concourse-up/terraform"
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
+	"github.com/onsi/gomega/gbytes"
+)
+
+var _ = Describe("Client", func() {
+	var client concourse.IClient
+	var actions []string
+	var stdout *gbytes.Buffer
+	var stderr *gbytes.Buffer
+	var deleteBoshDirectorError error
+
+	BeforeEach(func() {
+		deleteBoshDirectorError = nil
+		actions = []string{}
+		exampleConfig := &config.Config{
+			PublicKey:        "example-public-key",
+			PrivateKey:       "example-private-key",
+			Region:           "eu-west-1",
+			Deployment:       "concourse-up-happymeal",
+			Project:          "happymeal",
+			TFStatePath:      "example-path",
+			DirectorUsername: "admin",
+			DirectorPassword: "secret123",
+		}
+		configClient := &FakeConfigClient{
+			FakeLoadOrCreate: func() (*config.Config, bool, error) {
+				actions = append(actions, "loading or creating config file")
+				return exampleConfig, false, nil
+			},
+			FakeLoad: func() (*config.Config, error) {
+				actions = append(actions, "loading config file")
+				return exampleConfig, nil
+			},
+			FakeStoreAsset: func(filename string, contents []byte) error {
+				actions = append(actions, fmt.Sprintf("storing config asset: %s", filename))
+				return nil
+			},
+			FakeHasAsset: func(filename string) (bool, error) {
+				return false, nil
+			},
+		}
+
+		terraformClientFactory := func(config []byte, stdout, stderr io.Writer) (terraform.IClient, error) {
+			return &FakeTerraformClient{
+				FakeApply: func() error {
+					actions = append(actions, "applying terraform")
+					return nil
+				},
+				FakeDestroy: func() error {
+					actions = append(actions, "destroying terraform")
+					return nil
+				},
+				FakeOutput: func() (*terraform.Metadata, error) {
+					actions = append(actions, "fetching terraform metadata")
+					return &terraform.Metadata{
+						DirectorPublicIP: terraform.MetadataStringValue{
+							Value: "99.99.99.99",
+						},
+						BoshDBPort: terraform.MetadataStringValue{
+							Value: "5432",
+						}}, nil
+				},
+				FakeCleanup: func() error {
+					actions = append(actions, "cleaning up terraform client")
+					return nil
+				},
+			}, nil
+		}
+
+		boshInitClientFactory := func(manifestBytes, stateFileBytes, keyfileBytes []byte, stdout, stderr io.Writer) (director.IBoshInitClient, error) {
+			return &FakeBoshInitClient{
+				FakeDeploy: func() ([]byte, error) {
+					actions = append(actions, "deploying director")
+					return []byte{}, nil
+				},
+				FakeDelete: func() error {
+					actions = append(actions, "deleting director")
+					return deleteBoshDirectorError
+				},
+				FakeCleanup: func() error {
+					actions = append(actions, "cleaning up bosh init")
+					return nil
+				},
+			}, nil
+		}
+
+		stdout = gbytes.NewBuffer()
+		stderr = gbytes.NewBuffer()
+
+		client = concourse.NewClient(
+			terraformClientFactory,
+			boshInitClientFactory,
+			configClient,
+			stdout,
+			stderr,
+		)
+	})
+
+	Describe("Deploy", func() {
+		It("Loads of creates config file", func() {
+			err := client.Deploy()
+			Expect(err).ToNot(HaveOccurred())
+
+			Expect(actions).To(ContainElement("loading or creating config file"))
+		})
+
+		It("Generates the correct terraform infrastructure", func() {
+			err := client.Deploy()
+			Expect(err).ToNot(HaveOccurred())
+
+			Expect(actions).To(ContainElement("applying terraform"))
+		})
+
+		It("Cleans up the correct terraform client", func() {
+			err := client.Deploy()
+			Expect(err).ToNot(HaveOccurred())
+
+			Expect(actions).To(ContainElement("cleaning up terraform client"))
+		})
+
+		It("Deploys the director", func() {
+			err := client.Deploy()
+			Expect(err).ToNot(HaveOccurred())
+
+			Expect(actions).To(ContainElement("deploying director"))
+		})
+
+		It("Cleans up the director", func() {
+			err := client.Deploy()
+			Expect(err).ToNot(HaveOccurred())
+
+			Expect(actions).To(ContainElement("cleaning up bosh init"))
+		})
+
+		It("Warns about access to local machine", func() {
+			err := client.Deploy()
+			Expect(err).ToNot(HaveOccurred())
+
+			Eventually(stderr).Should(gbytes.Say("WARNING: allowing access from local machine"))
+		})
+
+		It("Prints the bosh credentials", func() {
+			err := client.Deploy()
+			Expect(err).ToNot(HaveOccurred())
+			Eventually(stdout).Should(gbytes.Say(
+				"DEPLOY SUCCESSFUL. Bosh connection credentials:\n\tIP Address: 99.99.99.99\n\tUsername: admin\n\tPassword: secret123"))
+		})
+
+		Context("When an existing config is loaded", func() {
+			It("Notifies the user", func() {
+				err := client.Deploy()
+				Expect(err).ToNot(HaveOccurred())
+
+				Eventually(stdout).Should(gbytes.Say("USING PREVIOUS DEPLOYMENT CONFIG"))
+			})
+		})
+	})
+
+	Describe("Destroy", func() {
+		It("Loads the config file", func() {
+			err := client.Destroy()
+			Expect(err).ToNot(HaveOccurred())
+
+			Expect(actions).To(ContainElement("loading config file"))
+		})
+		It("Deletes the director", func() {
+			err := client.Destroy()
+			Expect(err).ToNot(HaveOccurred())
+
+			Expect(actions).To(ContainElement("deleting director"))
+		})
+
+		It("Cleans up the director", func() {
+			err := client.Destroy()
+			Expect(err).ToNot(HaveOccurred())
+
+			Expect(actions).To(ContainElement("cleaning up bosh init"))
+		})
+
+		It("Destroys the terraform infrastructure", func() {
+			err := client.Destroy()
+			Expect(err).ToNot(HaveOccurred())
+
+			Expect(actions).To(ContainElement("destroying terraform"))
+		})
+
+		It("Cleans up the terraform client", func() {
+			err := client.Destroy()
+			Expect(err).ToNot(HaveOccurred())
+
+			Expect(actions).To(ContainElement("cleaning up terraform client"))
+		})
+
+		It("Prints a destroy success message", func() {
+			err := client.Destroy()
+			Expect(err).ToNot(HaveOccurred())
+
+			Eventually(stdout).Should(gbytes.Say("DESTROY SUCCESSFUL"))
+		})
+
+		Context("When there is an error deleting the bosh director", func() {
+			BeforeEach(func() {
+				deleteBoshDirectorError = errors.New("some error")
+			})
+
+			It("Still attemps to destroy the terraform", func() {
+				err := client.Destroy()
+				Expect(err).ToNot(HaveOccurred())
+
+				Expect(actions).To(ContainElement("destroying terraform"))
+			})
+
+			It("Prints a warning", func() {
+				err := client.Destroy()
+				Expect(err).ToNot(HaveOccurred())
+
+				Eventually(stderr).Should(gbytes.Say("Warning error deleting bosh director. Continuing with terraform deletion."))
+			})
+		})
+	})
+})
