@@ -1,17 +1,15 @@
 package certs
 
-import (
-	"errors"
+import "github.com/square/certstrap/pkix"
 
-	"github.com/square/certstrap/pkix"
-)
-
+// Certs contains certificates and keys
 type Certs struct {
 	CACert []byte
 	Key    []byte
 	Cert   []byte
 }
 
+// Generate generates certs for use in a bosh director manifest
 func Generate(caName, ip string) (*Certs, error) {
 	caCert, caKey, err := generateCACert(caName)
 	if err != nil {
@@ -43,14 +41,6 @@ func signCSR(csrBytes, caCertBytes, caCertKeyBytes []byte) ([]byte, error) {
 	caCert, err := pkix.NewCertificateFromPEM(caCertBytes)
 	if err != nil {
 		return nil, err
-	}
-	rawCert, err := caCert.GetRawCertificate()
-	if err != nil {
-		return nil, err
-	}
-
-	if !rawCert.IsCA {
-		return nil, errors.New("raw is CA!")
 	}
 
 	caCertKey, err := pkix.NewKeyFromPrivateKeyPEM(caCertKeyBytes)
