@@ -4,9 +4,10 @@ package system
 
 import (
 	"fmt"
+	"os"
+	"strconv"
 	"strings"
 
-	"errors"
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 )
 
@@ -25,29 +26,30 @@ func (fs *osFileSystem) currentHomeDir() (string, error) {
 	return fs.HomeDir("")
 }
 
-func (fs *osFileSystem) chown(path, owner string) error {
-	if owner == "" {
-		return errors.New("Failed to lookup user ''")
-	}
-
-	var group string
-	var err error
-
-	ownerSplit := strings.Split(owner, ":")
-	user := ownerSplit[0]
-
-	if len(ownerSplit) <= 1 {
-		group, err = fs.runCommand(fmt.Sprintf("id -g %s", user))
-		if err != nil {
-			return bosherr.WrapErrorf(err, "Failed to lookup user '%s'", user)
-		}
-	} else {
-		group = ownerSplit[1]
-	}
-
-	_, err = fs.runCommand(fmt.Sprintf("chown '%s:%s' '%s'", user, group, path))
+func (fs *osFileSystem) chown(path, username string) error {
+	uid, err := fs.runCommand(fmt.Sprintf("id -u %s", username))
 	if err != nil {
-		return bosherr.WrapError(err, "Failed to chown")
+		return bosherr.WrapErrorf(err, "Getting user id for '%s'", username)
+	}
+
+	uidAsInt, err := strconv.Atoi(uid)
+	if err != nil {
+		return bosherr.WrapError(err, "Converting UID to integer")
+	}
+
+	gid, err := fs.runCommand(fmt.Sprintf("id -g %s", username))
+	if err != nil {
+		return bosherr.WrapErrorf(err, "Getting group id for '%s'", username)
+	}
+
+	gidAsInt, err := strconv.Atoi(gid)
+	if err != nil {
+		return bosherr.WrapError(err, "Converting GID to integer")
+	}
+
+	err = os.Chown(path, uidAsInt, gidAsInt)
+	if err != nil {
+		return bosherr.WrapError(err, "Doing Chown")
 	}
 
 	return nil
