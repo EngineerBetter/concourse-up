@@ -154,33 +154,27 @@
 		},
 		{
 			"ImportPath": "github.com/cloudfoundry/bosh-agent/agentclient",
-			"Comment": "v0.0.29",
-			"Rev": "4c438a38f652744cac3f0f4a85f470a213e61b87"
+			"Rev": "50d8e5d7c6c7af860c867816a30ecedc6d75d011"
 		},
 		{
 			"ImportPath": "github.com/cloudfoundry/bosh-agent/agentclient/applyspec",
-			"Comment": "v0.0.29",
-			"Rev": "4c438a38f652744cac3f0f4a85f470a213e61b87"
+			"Rev": "50d8e5d7c6c7af860c867816a30ecedc6d75d011"
 		},
 		{
 			"ImportPath": "github.com/cloudfoundry/bosh-agent/agentclient/http",
-			"Comment": "v0.0.29",
-			"Rev": "4c438a38f652744cac3f0f4a85f470a213e61b87"
+			"Rev": "50d8e5d7c6c7af860c867816a30ecedc6d75d011"
 		},
 		{
 			"ImportPath": "github.com/cloudfoundry/bosh-agent/platform/deviceutil",
-			"Comment": "v0.0.29",
-			"Rev": "4c438a38f652744cac3f0f4a85f470a213e61b87"
+			"Rev": "50d8e5d7c6c7af860c867816a30ecedc6d75d011"
 		},
 		{
 			"ImportPath": "github.com/cloudfoundry/bosh-agent/platform/disk",
-			"Comment": "v0.0.29",
-			"Rev": "4c438a38f652744cac3f0f4a85f470a213e61b87"
+			"Rev": "50d8e5d7c6c7af860c867816a30ecedc6d75d011"
 		},
 		{
 			"ImportPath": "github.com/cloudfoundry/bosh-agent/settings",
-			"Comment": "v0.0.29",
-			"Rev": "4c438a38f652744cac3f0f4a85f470a213e61b87"
+			"Rev": "50d8e5d7c6c7af860c867816a30ecedc6d75d011"
 		},
 		{
 			"ImportPath": "github.com/cloudfoundry/bosh-cli/blobstore",

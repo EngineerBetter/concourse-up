@@ -2,40 +2,27 @@ package settings
 
 import (
 	"fmt"
-
 	"github.com/cloudfoundry/bosh-agent/platform/disk"
 )
-
-type DiskAssociations []DiskAssociation
-
-type DiskAssociation struct {
-	Name    string `json:"name"`
-	DiskCID string `json:"cid"`
-}
 
 const (
 	RootUsername        = "root"
 	VCAPUsername        = "vcap"
 	AdminGroup          = "admin"
 	SudoersGroup        = "bosh_sudoers"
-	SshersGroup         = "bosh_sshers"
 	EphemeralUserPrefix = "bosh_"
 )
 
 type Settings struct {
-	AgentID   string    `json:"agent_id"`
-	Blobstore Blobstore `json:"blobstore"`
-	Disks     Disks     `json:"disks"`
-	Env       Env       `json:"env"`
-	Networks  Networks  `json:"networks"`
-	Ntp       []string  `json:"ntp"`
-	Mbus      string    `json:"mbus"`
-	VM        VM        `json:"vm"`
-}
-
-type UpdateSettings struct {
-	DiskAssociations DiskAssociations `json:"disk_associations"`
-	TrustedCerts     string           `json:"trusted_certs"`
+	AgentID      string    `json:"agent_id"`
+	Blobstore    Blobstore `json:"blobstore"`
+	Disks        Disks     `json:"disks"`
+	Env          Env       `json:"env"`
+	Networks     Networks  `json:"networks"`
+	Ntp          []string  `json:"ntp"`
+	Mbus         string    `json:"mbus"`
+	VM           VM        `json:"vm"`
+	TrustedCerts string    `json:"trusted_certs"`
 }
 
 type Source interface {
@@ -156,13 +143,6 @@ func (s Settings) RawEphemeralDiskSettings() (devices []DiskSettings) {
 	return s.Disks.RawEphemeral
 }
 
-func (s Settings) GetMbusURL() string {
-	if s.Env.Bosh.Mbus != nil && len(s.Env.Bosh.Mbus.URL) > 0 {
-		return s.Env.Bosh.Mbus.URL
-	}
-	return s.Mbus
-}
-
 type Env struct {
 	Bosh             BoshEnv             `json:"bosh"`
 	PersistentDiskFS disk.FileSystemType `json:"persistent_disk_fs"`
@@ -180,39 +160,13 @@ func (e Env) GetRemoveDevTools() bool {
 	return e.Bosh.RemoveDevTools
 }
 
-func (e Env) GetRemoveStaticLibraries() bool {
-	return e.Bosh.RemoveStaticLibraries
-}
-
-func (e Env) GetAuthorizedKeys() []string {
-	return e.Bosh.AuthorizedKeys
-}
-
-func (e Env) GetSwapSizeInBytes() *uint64 {
-	if e.Bosh.SwapSizeInMB == nil {
-		return nil
-	}
-
-	result := uint64(*e.Bosh.SwapSizeInMB * 1024 * 1024)
-	return &result
-}
-
-func (e Env) IsNatsTLSSupported() bool {
-	return e.Bosh.Mbus != nil
-}
-
 type BoshEnv struct {
-	Password              string   `json:"password"`
-	KeepRootPassword      bool     `json:"keep_root_password"`
-	RemoveDevTools        bool     `json:"remove_dev_tools"`
-	RemoveStaticLibraries bool     `json:"remove_static_libraries"`
-	AuthorizedKeys        []string `json:"authorized_keys"`
-	SwapSizeInMB          *uint64  `json:"swap_size"`
-	Mbus                  *MBus    `json:"mbus"`
+	Password         string `json:"password"`
+	KeepRootPassword bool   `json:"keep_root_password"`
+	RemoveDevTools   bool   `json:"remove_dev_tools"`
 }
 
 type DNSRecords struct {
-	Version uint64      `json:"Version"`
 	Records [][2]string `json:"records"`
 }
 
@@ -356,15 +310,6 @@ func (n Network) IsVIP() bool {
 	return n.Type == NetworkTypeVIP
 }
 
-type MBus struct {
-	URL string `json:"url"`
-	CA  string `json:"ca"`
-}
-
-func (b MBus) IsTLSEnabled() bool {
-	return len(b.CA) > 0
-}
-
 //{
 //	"agent_id": "bm-xxxxxxxx",
 //	"blobstore": {
@@ -383,10 +328,6 @@ func (b MBus) IsTLSEnabled() bool {
 //	"env": {
 //		"bosh": {
 //			"password": null
-//			"mbus": {
-//				"url": "nats://localhost:ddd",
-//				"ca": "....."
-//			}
 //      },
 //      "persistent_disk_fs": "xfs"
 //	},

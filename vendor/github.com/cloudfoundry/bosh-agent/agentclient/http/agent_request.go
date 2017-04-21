@@ -35,7 +35,7 @@ func (r agentRequest) Send(method string, arguments []interface{}, response Resp
 
 	httpResponse, err := r.httpClient.Post(r.endpoint, agentRequestJSON)
 	if err != nil {
-		return bosherr.WrapErrorf(err, "Performing request to agent")
+		return bosherr.WrapErrorf(err, "Performing request to agent endpoint '%s'", r.endpoint)
 	}
 	defer func() {
 		_ = httpResponse.Body.Close()

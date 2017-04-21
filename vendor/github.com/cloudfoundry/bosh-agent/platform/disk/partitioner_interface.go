@@ -5,10 +5,9 @@ import "fmt"
 type PartitionType string
 
 const (
-	PartitionTypeSwap    PartitionType = "swap"
-	PartitionTypeLinux   PartitionType = "linux"
-	PartitionTypeEmpty   PartitionType = "empty"
-	PartitionTypeUnknown PartitionType = "unknown"
+	PartitionTypeSwap  PartitionType = "swap"
+	PartitionTypeLinux PartitionType = "linux"
+	PartitionTypeEmpty PartitionType = "empty"
 )
 
 type Partition struct {

@@ -9,11 +9,7 @@ func NewLinuxBindMounter(delegateMounter Mounter) Mounter {
 }
 
 func (m linuxBindMounter) Mount(partitionPath, mountPoint string, mountOptions ...string) error {
-	// Filesystems should not be bind mounted
-	if partitionPath != "tmpfs" {
-		mountOptions = append(mountOptions, "--bind")
-	}
-
+	mountOptions = append(mountOptions, "--bind")
 	return m.delegateMounter.Mount(partitionPath, mountPoint, mountOptions...)
 }
 
@@ -42,8 +38,4 @@ func (m linuxBindMounter) IsMountPoint(path string) (string, bool, error) {
 
 func (m linuxBindMounter) IsMounted(partitionOrMountPoint string) (bool, error) {
 	return m.delegateMounter.IsMounted(partitionOrMountPoint)
-}
-
-func (m linuxBindMounter) RemountInPlace(mountPoint string, mountOptions ...string) (err error) {
-	return m.delegateMounter.RemountInPlace(mountPoint, mountOptions...)
 }
