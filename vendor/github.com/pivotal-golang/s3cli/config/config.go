@@ -149,7 +149,7 @@ func (c *S3Cli) S3Endpoint() string {
 }
 
 func (c *S3Cli) isAWSHost() bool {
-	_, hasKey := AWSHostToRegion[c.Host]
+	_, hasKey := awsHostToRegion[c.Host]
 	return hasKey
 }
 
@@ -163,5 +163,5 @@ func (c *S3Cli) allowMultipart() bool {
 }
 
 func (c *S3Cli) getRegionFromHost() string {
-	return AWSHostToRegion[c.Host]
+	return awsHostToRegion[c.Host]
 }

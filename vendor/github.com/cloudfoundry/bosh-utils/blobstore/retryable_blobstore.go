@@ -27,7 +27,7 @@ func (b retryableBlobstore) Get(blobID string, fingerprint boshcrypto.Digest) (s
 	var fileName string
 	var lastErr error
 
-	for i := 0; i < b.maxTries; i++ {
+	for i := 1; i <= b.maxTries; i++ {
 		fileName, lastErr = b.blobstore.Get(blobID, fingerprint)
 		if lastErr == nil {
 			return fileName, nil
@@ -51,7 +51,7 @@ func (b retryableBlobstore) Delete(blobID string) error {
 func (b retryableBlobstore) Create(fileName string) (string, boshcrypto.MultipleDigest, error) {
 	var lastErr error
 
-	for i := 0; i < b.maxTries; i++ {
+	for i := 1; i <= b.maxTries; i++ {
 		blobID, digest, thisErr := b.blobstore.Create(fileName)
 		if thisErr == nil {
 			return blobID, digest, nil

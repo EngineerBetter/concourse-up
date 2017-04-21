@@ -87,7 +87,7 @@ const (
 	// -h and --help options. When either -h or --help is specified on the
 	// command line, the parser will return the special error of type
 	// ErrHelp. When PrintErrors is also specified, then the help message
-	// will also be automatically printed to os.Stdout.
+	// will also be automatically printed to os.Stderr.
 	HelpFlag = 1 << iota
 
 	// PassDoubleDash passes all arguments after a double dash, --, as
@@ -100,8 +100,7 @@ const (
 	IgnoreUnknown
 
 	// PrintErrors prints any errors which occurred during parsing to
-	// os.Stderr. In the special case of ErrHelp, the message will be printed
-	// to os.Stdout.
+	// os.Stderr.
 	PrintErrors
 
 	// PassAfterNonOption passes all arguments after the first non option
@@ -677,13 +676,7 @@ func (p *Parser) showBuiltinHelp() error {
 
 func (p *Parser) printError(err error) error {
 	if err != nil && (p.Options&PrintErrors) != None {
-		flagsErr, ok := err.(*Error)
-
-		if ok && flagsErr.Type == ErrHelp {
-			fmt.Fprintln(os.Stdout, err)
-		} else {
-			fmt.Fprintln(os.Stderr, err)
-		}
+		fmt.Fprintln(os.Stderr, err)
 	}
 
 	return err

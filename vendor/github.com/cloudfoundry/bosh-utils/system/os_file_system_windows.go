@@ -35,7 +35,7 @@ func (fs *osFileSystem) homeDir(username string) (string, error) {
 }
 
 func (fs *osFileSystem) chown(path, username string) error {
-	return bosherr.WrapError(error(syscall.EWINDOWS), "Chown not supported on Windows")
+	return nil
 }
 
 func isSlash(c uint8) bool { return c == '\\' || c == '/' }
