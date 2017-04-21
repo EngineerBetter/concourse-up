@@ -31,11 +31,12 @@ func NewLocalBlobstore(
 	}
 }
 
-func (b localBlobstore) Get(blobID, _ string) (fileName string, err error) {
+func (b localBlobstore) Get(blobID string) (fileName string, err error) {
 	file, err := b.fs.TempFile("bosh-blobstore-external-Get")
 	if err != nil {
 		return "", bosherr.WrapError(err, "Creating temporary file")
 	}
+	defer file.Close()
 
 	fileName = file.Name()
 
@@ -58,7 +59,7 @@ func (b localBlobstore) Delete(blobID string) error {
 	return b.fs.RemoveAll(blobPath)
 }
 
-func (b localBlobstore) Create(fileName string) (blobID string, fingerprint string, err error) {
+func (b localBlobstore) Create(fileName string) (blobID string, err error) {
 	blobID, err = b.uuidGen.Generate()
 	if err != nil {
 		err = bosherr.WrapError(err, "Generating blobID")

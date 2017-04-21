@@ -158,3 +158,21 @@ func (m linuxMounter) shouldMount(partitionPath, mountPoint string) (bool, error
 
 	return true, nil
 }
+
+func (m linuxMounter) RemountInPlace(mountPoint string, mountOptions ...string) (err error) {
+	found, err := m.IsMounted(mountPoint)
+	if err != nil || !found {
+		return bosherr.WrapErrorf(err, "Error finding existing mount point %s", mountPoint)
+	}
+
+	mountArgs := []string{mountPoint, mountPoint}
+	mountOptions = append(mountOptions, "-o", "remount")
+	mountArgs = append(mountArgs, mountOptions...)
+
+	_, _, _, err = m.runner.RunCommand("mount", mountArgs...)
+	if err != nil {
+		return bosherr.WrapError(err, "Shelling out to mount")
+	}
+
+	return nil
+}

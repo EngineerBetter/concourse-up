@@ -39,11 +39,12 @@ func NewExternalBlobstore(
 	}
 }
 
-func (b externalBlobstore) Get(blobID, _ string) (string, error) {
+func (b externalBlobstore) Get(blobID string) (string, error) {
 	file, err := b.fs.TempFile("bosh-blobstore-externalBlobstore-Get")
 	if err != nil {
 		return "", bosherr.WrapError(err, "Creating temporary file")
 	}
+	defer file.Close()
 
 	fileName := file.Name()
 
@@ -64,23 +65,23 @@ func (b externalBlobstore) Delete(blobId string) error {
 	return errors.New("externalBlobstore doesn't implement Delete")
 }
 
-func (b externalBlobstore) Create(fileName string) (string, string, error) {
+func (b externalBlobstore) Create(fileName string) (string, error) {
 	filePath, err := filepath.Abs(fileName)
 	if err != nil {
-		return "", "", bosherr.WrapError(err, "Getting absolute file path")
+		return "", bosherr.WrapError(err, "Getting absolute file path")
 	}
 
 	blobID, err := b.uuidGen.Generate()
 	if err != nil {
-		return "", "", bosherr.WrapError(err, "Generating UUID")
+		return "", bosherr.WrapError(err, "Generating UUID")
 	}
 
 	err = b.run("put", filePath, blobID)
 	if err != nil {
-		return "", "", bosherr.WrapError(err, "Making put command")
+		return "", bosherr.WrapError(err, "Making put command")
 	}
 
-	return blobID, "", nil
+	return blobID, nil
 }
 
 func (b externalBlobstore) Validate() error {

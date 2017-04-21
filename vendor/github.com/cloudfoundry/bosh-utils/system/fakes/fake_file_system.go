@@ -11,6 +11,7 @@ import (
 	"sort"
 	"strings"
 	"sync"
+	"syscall"
 
 	gouuid "github.com/nu7hatch/gouuid"
 
@@ -41,7 +42,7 @@ type FakeFileSystem struct {
 	ExpandPathExpanded string
 	ExpandPathErr      error
 
-	openFileRegsitry *FakeFileRegistry
+	openFileRegistry *FakeFileRegistry
 	OpenFileErr      error
 
 	ReadFileError       error
@@ -59,7 +60,8 @@ type FakeFileSystem struct {
 	ChownErr error
 	ChmodErr error
 
-	CopyFileError error
+	CopyFileError     error
+	CopyFileCallCount int
 
 	CopyDirError error
 
@@ -69,7 +71,7 @@ type FakeFileSystem struct {
 
 	RemoveAllStub removeAllFn
 
-	ReadLinkError error
+	ReadAndFollowLinkError error
 
 	TempFileError           error
 	TempFileErrorsByPrefix  map[string]error
@@ -214,7 +216,7 @@ func (f FakeFile) Stat() (os.FileInfo, error) {
 func NewFakeFileSystem() *FakeFileSystem {
 	return &FakeFileSystem{
 		fileRegistry:           NewFakeFileStatsRegistry(),
-		openFileRegsitry:       NewFakeFileRegistry(),
+		openFileRegistry:       NewFakeFileRegistry(),
 		GlobErrs:               map[string]error{},
 		globsMap:               map[string][][]string{},
 		readFileErrorByPath:    map[string]error{},
@@ -277,7 +279,7 @@ func (fs *FakeFileSystem) MkdirAll(path string, perm os.FileMode) error {
 
 func (fs *FakeFileSystem) RegisterOpenFile(path string, file *FakeFile) {
 	path = gopath.Join(path)
-	fs.openFileRegsitry.Register(path, file)
+	fs.openFileRegistry.Register(path, file)
 }
 
 func (fs *FakeFileSystem) FindFileStats(path string) (*FakeFileStats, error) {
@@ -301,7 +303,7 @@ func (fs *FakeFileSystem) OpenFile(path string, flag int, perm os.FileMode) (bos
 	stats.Flags = flag
 	stats.FileType = FakeFileTypeFile
 
-	openFile := fs.openFileRegsitry.Get(path)
+	openFile := fs.openFileRegistry.Get(path)
 	if openFile != nil {
 		return openFile, nil
 	}
@@ -315,7 +317,49 @@ func (fs *FakeFileSystem) Stat(path string) (os.FileInfo, error) {
 	fs.filesLock.Lock()
 	defer fs.filesLock.Unlock()
 
-	openFile := fs.openFileRegsitry.Get(path)
+	openFile := fs.openFileRegistry.Get(path)
+	if openFile != nil {
+		return openFile.Stat()
+	}
+
+	stats := fs.fileRegistry.Get(path)
+	if stats == nil {
+		panic(fmt.Sprintf("Unexpected Stat call for path '%s' that does not exist", path))
+	}
+
+	if stats.FileType == FakeFileTypeSymlink {
+		targetStats := fs.fileRegistry.Get(stats.SymlinkTarget)
+		if targetStats == nil {
+			return nil, fmt.Errorf("stat: %s: no such file or directory", path)
+		}
+
+		stats = targetStats
+	}
+
+	return NewFakeFile(path, fs).Stat()
+}
+
+func (fs *FakeFileSystem) Readlink(path string) (string, error) {
+	fs.filesLock.Lock()
+	defer fs.filesLock.Unlock()
+
+	stats := fs.fileRegistry.Get(path)
+	if stats == nil {
+		return "", errors.New(fmt.Sprintf("path '%s' does not exist", path))
+	}
+
+	if stats.FileType != FakeFileTypeSymlink {
+		return "", errors.New(fmt.Sprintf("cannot readlink of non-symlink"))
+	}
+
+	return stats.SymlinkTarget, nil
+}
+
+func (fs *FakeFileSystem) Lstat(path string) (os.FileInfo, error) {
+	fs.filesLock.Lock()
+	defer fs.filesLock.Unlock()
+
+	openFile := fs.openFileRegistry.Get(path)
 	if openFile != nil {
 		return openFile.Stat()
 	}
@@ -460,7 +504,15 @@ func (fs *FakeFileSystem) ReadFile(path string) ([]byte, error) {
 
 		return stats.Content, nil
 	}
-	return nil, bosherr.Errorf("File not found: '%s'", path)
+
+	return nil, bosherr.ComplexError{
+		Err: bosherr.Error("Not found"),
+		Cause: &os.PathError{
+			Op:   "open",
+			Path: path,
+			Err:  syscall.ENOENT,
+		},
+	}
 }
 
 func (fs *FakeFileSystem) FileExists(path string) bool {
@@ -509,6 +561,7 @@ func (fs *FakeFileSystem) Symlink(oldPath, newPath string) (err error) {
 
 	if fs.SymlinkError == nil {
 		stats := fs.getOrCreateFile(newPath)
+		stats.FileMode |= os.ModeSymlink
 		stats.FileType = FakeFileTypeSymlink
 		stats.SymlinkTarget = fs.fileRegistry.UnifiedPath(oldPath)
 		return
@@ -518,15 +571,23 @@ func (fs *FakeFileSystem) Symlink(oldPath, newPath string) (err error) {
 	return
 }
 
-func (fs *FakeFileSystem) ReadLink(symlinkPath string) (string, error) {
-	if fs.ReadLinkError != nil {
-		return "", fs.ReadLinkError
+func (fs *FakeFileSystem) ReadAndFollowLink(symlinkPath string) (string, error) {
+	if fs.ReadAndFollowLinkError != nil {
+		return "", fs.ReadAndFollowLinkError
 	}
 
 	symlinkPath = gopath.Join(symlinkPath)
 
 	stat := fs.GetFileTestStat(symlinkPath)
 	if stat != nil {
+		targetStat := fs.GetFileTestStat(stat.SymlinkTarget)
+
+		if targetStat == nil {
+			return stat.SymlinkTarget, os.ErrNotExist
+		} else if FakeFileTypeSymlink == targetStat.FileType {
+			return fs.ReadAndFollowLink(stat.SymlinkTarget)
+		}
+
 		return stat.SymlinkTarget, nil
 	}
 
@@ -534,6 +595,7 @@ func (fs *FakeFileSystem) ReadLink(symlinkPath string) (string, error) {
 }
 
 func (fs *FakeFileSystem) CopyFile(srcPath, dstPath string) error {
+	fs.CopyFileCallCount++
 	fs.filesLock.Lock()
 	defer fs.filesLock.Unlock()
 

@@ -4,6 +4,7 @@ import (
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 	boshsys "github.com/cloudfoundry/bosh-utils/system"
 	"regexp"
+	"strings"
 )
 
 type linuxFormatter struct {
@@ -42,10 +43,11 @@ func (f linuxFormatter) Format(partitionPath string, fsType FileSystemType) (err
 		}
 
 	case FileSystemExt4:
-		if f.fs.FileExists("/sys/fs/ext4/features/lazy_itable_init") {
-			_, _, _, err = f.runner.RunCommand("mke2fs", "-t", string(fsType), "-j", "-E", "lazy_itable_init=1", partitionPath)
-		} else {
-			_, _, _, err = f.runner.RunCommand("mke2fs", "-t", string(fsType), "-j", partitionPath)
+		err = f.makeFileSystemExt4(partitionPath)
+		if err != nil {
+			if strings.Contains(err.Error(), "apparently in use by the system") {
+				err = f.makeFileSystemExt4(partitionPath)
+			}
 		}
 		if err != nil {
 			err = bosherr.WrapError(err, "Shelling out to mke2fs")
@@ -58,6 +60,16 @@ func (f linuxFormatter) Format(partitionPath string, fsType FileSystemType) (err
 		}
 	}
 	return
+}
+
+func (f linuxFormatter) makeFileSystemExt4(partitionPath string) error {
+	var err error
+	if f.fs.FileExists("/sys/fs/ext4/features/lazy_itable_init") {
+		_, _, _, err = f.runner.RunCommand("mke2fs", "-t", string(FileSystemExt4), "-j", "-E", "lazy_itable_init=1", partitionPath)
+	} else {
+		_, _, _, err = f.runner.RunCommand("mke2fs", "-t", string(FileSystemExt4), "-j", partitionPath)
+	}
+	return err
 }
 
 func (f linuxFormatter) getPartitionFormatType(partitionPath string) (FileSystemType, error) {

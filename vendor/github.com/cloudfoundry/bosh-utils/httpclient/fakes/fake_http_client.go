@@ -133,6 +133,17 @@ func (c *FakeHTTPClient) Delete(endpoint string) (*http.Response, error) {
 	return deleteReturn.response, deleteReturn.err
 }
 
+func (c *FakeHTTPClient) DeleteCustomized(endpoint string, f func(*http.Request)) (*http.Response, error) {
+	c.DeleteInputs = append(c.DeleteInputs, deleteInput{
+		Endpoint: endpoint,
+	})
+
+	deleteReturn := c.deleteOutputs[0]
+	c.deleteOutputs = c.deleteOutputs[1:]
+
+	return deleteReturn.response, deleteReturn.err
+}
+
 func (c *FakeHTTPClient) SetPostBehavior(body string, statusCode int, err error) {
 	postResponse := &http.Response{
 		Body:       ioutil.NopCloser(strings.NewReader(body)),

@@ -18,14 +18,24 @@ func NewTarballCompressor(
 }
 
 func (c tarballCompressor) CompressFilesInDir(dir string) (string, error) {
-	tarball, err := c.fs.TempFile("bosh-platform-disk-TarballCompressor-CompressFilesInDir")
+	return c.CompressSpecificFilesInDir(dir, []string{"."})
+}
+
+func (c tarballCompressor) CompressSpecificFilesInDir(dir string, files []string) (string, error) {
+	tarball, err := c.fs.TempFile("bosh-platform-disk-TarballCompressor-CompressSpecificFilesInDir")
 	if err != nil {
 		return "", bosherr.WrapError(err, "Creating temporary file for tarball")
 	}
 
 	tarballPath := tarball.Name()
 
-	_, _, _, err = c.cmdRunner.RunCommand("tar", "czf", tarballPath, "-C", dir, ".")
+	args := []string{"czf", tarballPath, "-C", dir}
+
+	for _, file := range files {
+		args = append(args, file)
+	}
+
+	_, _, _, err = c.cmdRunner.RunCommand("tar", args...)
 	if err != nil {
 		return "", bosherr.WrapError(err, "Shelling out to tar")
 	}
@@ -39,7 +49,7 @@ func (c tarballCompressor) DecompressFileToDir(tarballPath string, dir string, o
 		sameOwnerOption = "--same-owner"
 	}
 
-	_, _, _, err := c.cmdRunner.RunCommand("tar", sameOwnerOption, "-xzvf", tarballPath, "-C", dir)
+	_, _, _, err := c.cmdRunner.RunCommand("tar", sameOwnerOption, "-xzf", tarballPath, "-C", dir)
 	if err != nil {
 		return bosherr.WrapError(err, "Shelling out to tar")
 	}

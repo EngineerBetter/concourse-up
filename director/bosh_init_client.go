@@ -2,20 +2,12 @@ package director
 
 import (
 	"io"
+	"io/ioutil"
 	"os"
-	"path"
 	"path/filepath"
 
-	"io/ioutil"
-
 	"bitbucket.org/engineerbetter/concourse-up/util"
-
-	bicmd "github.com/cloudfoundry/bosh-init/cmd"
-	biui "github.com/cloudfoundry/bosh-init/ui"
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
-	boshsys "github.com/cloudfoundry/bosh-utils/system"
-	boshuuid "github.com/cloudfoundry/bosh-utils/uuid"
-	"github.com/pivotal-golang/clock"
 )
 
 const boshInitLogLevel = boshlog.LevelWarn
@@ -86,7 +78,13 @@ func (client *BoshInitClient) Cleanup() error {
 func (client *BoshInitClient) Deploy() ([]byte, error) {
 	// deploy command needs to be run from directory with bosh state file
 	err := util.PushDir(client.tempDir, func() error {
-		return client.runBoshInitCommant("deploy", client.manifestPath)
+		return client.runBoshCommand(
+			"--non-interactive",
+			"create-env",
+			client.manifestPath,
+			"--state",
+			client.stateFilePath,
+		)
 	})
 	if err != nil {
 		return nil, err
@@ -97,28 +95,11 @@ func (client *BoshInitClient) Deploy() ([]byte, error) {
 
 // Delete deletes a bosh director
 func (client *BoshInitClient) Delete() error {
-	return client.runBoshInitCommant("delete", client.manifestPath)
-}
-
-// from https://github.com/cloudfoundry/bosh-init/blob/master/main.go
-func (client *BoshInitClient) runBoshInitCommant(args ...string) error {
-	logger := boshlog.NewWriterLogger(boshInitLogLevel, client.stdout, client.stderr)
-
-	fileSystem := boshsys.NewOsFileSystemWithStrictTempRoot(logger)
-	workspaceRootPath := path.Join(os.Getenv("HOME"), ".bosh_init")
-	ui := biui.NewConsoleUI(logger)
-	timeService := clock.NewClock()
-
-	cmdFactory := bicmd.NewFactory(
-		fileSystem,
-		ui,
-		timeService,
-		logger,
-		boshuuid.NewGenerator(),
-		workspaceRootPath,
+	return client.runBoshCommand(
+		"--non-interactive",
+		"delete-env",
+		client.manifestPath,
+		"--state",
+		client.stateFilePath,
 	)
-
-	cmdRunner := bicmd.NewRunner(cmdFactory)
-	stage := biui.NewStage(ui, timeService, logger)
-	return cmdRunner.Run(stage, args...)
 }

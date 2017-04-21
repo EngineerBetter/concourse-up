@@ -6,6 +6,7 @@ type Mounter interface {
 
 	RemountAsReadonly(mountPoint string) (err error)
 	Remount(fromMountPoint, toMountPoint string, mountOptions ...string) (err error)
+	RemountInPlace(mountPoint string, mountOptions ...string) (err error)
 
 	SwapOn(partitionPath string) (err error)
 
