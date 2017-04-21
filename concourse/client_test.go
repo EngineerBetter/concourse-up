@@ -23,7 +23,9 @@ var _ = Describe("Client", func() {
 	var deleteBoshDirectorError error
 	certGenerator := func(caName string, ip string) (*certs.Certs, error) {
 		actions = append(actions, fmt.Sprintf("generating cert ca: %s, ip: %s", caName, ip))
-		return &certs.Certs{}, nil
+		return &certs.Certs{
+			CACert: []byte("----EXAMPLE CERT----"),
+		}, nil
 	}
 
 	BeforeEach(func() {
@@ -179,7 +181,7 @@ var _ = Describe("Client", func() {
 			err := client.Deploy()
 			Expect(err).ToNot(HaveOccurred())
 			Eventually(stdout).Should(gbytes.Say(
-				"DEPLOY SUCCESSFUL. Bosh connection credentials:\n\tIP Address: 99.99.99.99\n\tUsername: admin\n\tPassword: secret123"))
+				"DEPLOY SUCCESSFUL. Bosh connection credentials:\n\tIP Address: 99.99.99.99\n\tUsername: admin\n\tPassword: secret123\n\tCA Cert:\n\t\t----EXAMPLE CERT----"))
 		})
 
 		Context("When an existing config is loaded", func() {
