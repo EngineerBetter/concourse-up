@@ -36,7 +36,7 @@ func (client *BoshInitClient) runBoshCommand(args ...string) ([]byte, error) {
 		return nil, err
 	}
 
-	if err := cmd.Execute(); err != nil {
+	if err = cmd.Execute(); err != nil {
 		return nil, err
 	}
 
