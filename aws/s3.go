@@ -18,13 +18,16 @@ const (
 	// "NoSuchBucket".
 	//
 	// The specified bucket does not exist.
-	ErrCodeNoSuchBucket = "NoSuchBucket"
+	awsErrCodeNoSuchBucket = "NoSuchBucket"
 
 	// ErrCodeNoSuchKey for service response error code
 	// "NoSuchKey".
 	//
 	// The specified key does not exist.
-	ErrCodeNoSuchKey = "NoSuchKey"
+	awsErrCodeNoSuchKey = "NoSuchKey"
+
+	// Returned when calling HEAD on non-existant bucket or object
+	awsErrCodeNotFound = "NotFound"
 )
 
 // EnsureBucketExists checks if the named bucket exists and creates it if it doesn't
@@ -41,7 +44,8 @@ func EnsureBucketExists(name, region string) error {
 		return nil
 	}
 
-	if err.(awserr.Error).Code() != ErrCodeNoSuchBucket && err.(awserr.Error).Code() != "NotFound" {
+	awsErrCode := err.(awserr.Error).Code()
+	if awsErrCode != awsErrCodeNotFound && awsErrCode != awsErrCodeNoSuchBucket {
 		return err
 	}
 
@@ -92,8 +96,8 @@ func HasFile(bucket, path, region string) (bool, error) {
 
 	_, err = client.HeadObject(&s3.HeadObjectInput{Bucket: &bucket, Key: &path})
 	if err != nil {
-		errCode := err.(awserr.Error).Code()
-		if errCode == ErrCodeNoSuchKey || errCode == "NotFound" {
+		awsErrCode := err.(awserr.Error).Code()
+		if awsErrCode == awsErrCodeNotFound || awsErrCode == awsErrCodeNoSuchKey {
 			return false, nil
 		}
 		return false, err
@@ -124,7 +128,8 @@ func EnsureFileExists(bucket, path, region string, defaultContents []byte) ([]by
 		return contents, true, nil
 	}
 
-	if err.(awserr.Error).Code() != ErrCodeNoSuchKey {
+	awsErrCode := err.(awserr.Error).Code()
+	if awsErrCode != awsErrCodeNoSuchKey && awsErrCode != awsErrCodeNotFound {
 		return nil, false, err
 	}
 
