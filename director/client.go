@@ -8,7 +8,6 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
-
 	"strings"
 
 	"bitbucket.org/engineerbetter/concourse-up/config"
@@ -25,8 +24,6 @@ const manifestFilename = "director.yml"
 const cloudConfigFilename = "cloud-config.yml"
 const caCertFilename = "ca-cert.pem"
 
-
-
 var defaultBoshArgs = []string{"--non-interactive", "--tty", "--no-color"}
 
 // StateFilename is default name for bosh-init state file
@@ -39,9 +36,8 @@ type Client struct {
 	cloudConfigPath      string
 	stateFilePath        string
 	caCertPath           string
-	boshURL              string
-	boshUsername         string
-	boshPassword         string
+	config               *config.Config
+	metadata             *terraform.Metadata
 	stdout               io.Writer
 	stderr               io.Writer
 }
@@ -107,9 +103,8 @@ func NewClient(config *config.Config, metadata *terraform.Metadata, stateFileByt
 		cloudConfigPath:      cloudConfigPath,
 		stateFilePath:        stateFilePath,
 		caCertPath:           caCertPath,
-		boshURL:              fmt.Sprintf("https://%s", metadata.DirectorPublicIP.Value),
-		boshUsername:         config.DirectorUsername,
-		boshPassword:         config.DirectorPassword,
+		config:               config,
+		metadata:             metadata,
 		stdout:               stdout,
 		stderr:               stderr,
 	}, nil
@@ -123,6 +118,26 @@ func (client *Client) Cleanup() error {
 // Deploy deploys a new Bosh director or converges an existing deployment
 // Returns new contents of bosh state file
 func (client *Client) Deploy() ([]byte, error) {
+	if err := client.createEnv(); err != nil {
+		return nil, err
+	}
+
+	if err := client.updateCloudConfig(); err != nil {
+		return nil, err
+	}
+
+	if err := client.uploadConcourse(); err != nil {
+		return nil, err
+	}
+
+	if err := client.createDefaultDatabases(); err != nil {
+		return nil, err
+	}
+
+	return ioutil.ReadFile(client.stateFilePath)
+}
+
+func (client *Client) createEnv() error {
 	// deploy command needs to be run from directory with bosh state file
 	var combinedOutput []byte
 	err := util.PushDir(client.tempDir, func() error {
@@ -136,21 +151,13 @@ func (client *Client) Deploy() ([]byte, error) {
 		return e
 	})
 	if err != nil {
-		return nil, err
+		return err
 	}
 	if !strings.Contains(string(combinedOutput), "Finished deploying") && !strings.Contains(string(combinedOutput), "Skipping deploy") {
-		return nil, errors.New("Couldn't find string `Finished deploying` or `Skipping deploy` in bosh stdout/stderr output")
+		return errors.New("Couldn't find string `Finished deploying` or `Skipping deploy` in bosh stdout/stderr output")
 	}
 
-	if err = client.updateCloudConfig(); err != nil {
-		return nil, err
-	}
-
-	if err = client.uploadConcourse(); err != nil {
-		return nil, err
-	}
-
-	return ioutil.ReadFile(client.stateFilePath)
+	return nil
 }
 
 // Delete deletes a bosh director
@@ -177,13 +184,13 @@ func (client *Client) updateCloudConfig() error {
 func (client *Client) runAuthenticatedBoshCommand(args ...string) ([]byte, error) {
 	args = append([]string{
 		"--environment",
-		client.boshURL,
+		fmt.Sprintf("https://%s", client.metadata.DirectorPublicIP.Value),
 		"--ca-cert",
 		client.caCertPath,
 		"--client",
-		client.boshUsername,
+		client.config.DirectorUsername,
 		"--client-secret",
-		client.boshPassword,
+		client.config.DirectorPassword,
 	}, args...)
 
 	return client.runBoshCommand(args...)

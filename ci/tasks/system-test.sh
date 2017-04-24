@@ -23,7 +23,7 @@ bosh-cli \
   --environment $director_ip \
   --client $username \
   --client-secret $password \
-  deployments
+  releases
 
 go run main.go --non-interactive destroy $deployment
 

@@ -82,13 +82,13 @@ networks:
   subnets:
   - range: 10.0.0.0/24
     gateway: 10.0.0.1
+    dns:
+    - 10.0.0.2
     az: z1
     static:
     - 10.0.0.6
     reserved:
     - 10.0.0.1-10.0.0.5
-    dns:
-    - 10.0.0.2
     cloud_properties:
       subnet: <% .DefaultSubnetID %>
 
