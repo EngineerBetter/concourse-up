@@ -268,8 +268,8 @@
 		},
 		{
 			"ImportPath": "github.com/jessevdk/go-flags",
-			"Comment": "v1.2.0-1-g460c7bb",
-			"Rev": "460c7bb0abd6e927f2767cadc91aa6ef776a98b4"
+			"Comment": "v1-372-ge5fed46",
+			"Rev": "e5fed4605533826a4722e1985b8fedd521e76046"
 		},
 		{
 			"ImportPath": "github.com/jmespath/go-jmespath",
