@@ -127,19 +127,6 @@ func (client *Client) loadConfigWithUserIP() (*config.Config, error) {
 	return config, err
 }
 
-func loadDirectorState(configClient config.IClient) ([]byte, error) {
-	hasState, err := configClient.HasAsset(director.StateFilename)
-	if err != nil {
-		return nil, err
-	}
-
-	if !hasState {
-		return nil, nil
-	}
-
-	return configClient.LoadAsset(director.StateFilename)
-}
-
 func writeDeploySuccessMessage(config *config.Config, metadata *terraform.Metadata, stdout io.Writer) error {
 	caCert := strings.Replace(config.DirectorCACert, "\n", "\n\t\t", -1)
 

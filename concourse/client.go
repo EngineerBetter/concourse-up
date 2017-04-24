@@ -71,3 +71,16 @@ func (client *Client) buildBoshInitClient(config *config.Config, metadata *terra
 		client.stderr,
 	)
 }
+
+func loadDirectorState(configClient config.IClient) ([]byte, error) {
+	hasState, err := configClient.HasAsset(director.StateFilename)
+	if err != nil {
+		return nil, err
+	}
+
+	if !hasState {
+		return nil, nil
+	}
+
+	return configClient.LoadAsset(director.StateFilename)
+}

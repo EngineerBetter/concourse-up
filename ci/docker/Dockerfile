@@ -1,10 +1,10 @@
 FROM golang:1.8
 RUN apt-get update && apt-get install -y --no-install-recommends \
- build-essential \
- python-dev \
- python-pip \
- unzip \
- vim
+    build-essential \
+    python-dev \
+    python-pip \
+    unzip \
+    vim
 
 RUN pip install --upgrade pip \
     && pip install --upgrade virtualenv \
