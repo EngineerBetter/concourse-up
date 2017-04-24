@@ -34,6 +34,10 @@ func NewWrappingConfUI(parent UI, logger boshlog.Logger) *ConfUI {
 	}
 }
 
+func (ui *ConfUI) SetParent(u UI) {
+	ui.parent = u
+}
+
 func (ui *ConfUI) EnableTTY(force bool) {
 	if !ui.isTTY && !force {
 		ui.parent = NewNonTTYUI(ui.parent)

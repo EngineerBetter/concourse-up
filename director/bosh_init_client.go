@@ -1,10 +1,13 @@
 package director
 
 import (
+	"errors"
 	"io"
 	"io/ioutil"
 	"os"
 	"path/filepath"
+
+	"strings"
 
 	"bitbucket.org/engineerbetter/concourse-up/util"
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
@@ -75,19 +78,28 @@ func (client *BoshInitClient) Cleanup() error {
 }
 
 // Deploy deploys a new Bosh director or converges an existing deployment
+// Returns new contents of bosh state file
 func (client *BoshInitClient) Deploy() ([]byte, error) {
 	// deploy command needs to be run from directory with bosh state file
+	var combinedOutput []byte
 	err := util.PushDir(client.tempDir, func() error {
-		return client.runBoshCommand(
+		var e error
+		combinedOutput, e = client.runBoshCommand(
 			"--non-interactive",
+			"--tty",
+			"--no-color",
 			"create-env",
 			client.manifestPath,
 			"--state",
 			client.stateFilePath,
 		)
+		return e
 	})
 	if err != nil {
 		return nil, err
+	}
+	if !strings.Contains(string(combinedOutput), "Finished deploying") && !strings.Contains(string(combinedOutput), "Skipping deploy") {
+		return nil, errors.New("Couldn't find string `Finished deploying` or `Skipping deploy` in bosh stdout/stderr output")
 	}
 
 	return ioutil.ReadFile(client.stateFilePath)
@@ -95,11 +107,15 @@ func (client *BoshInitClient) Deploy() ([]byte, error) {
 
 // Delete deletes a bosh director
 func (client *BoshInitClient) Delete() error {
-	return client.runBoshCommand(
+	_, err := client.runBoshCommand(
 		"--non-interactive",
+		"--tty",
+		"--no-color",
 		"delete-env",
 		client.manifestPath,
 		"--state",
 		client.stateFilePath,
 	)
+
+	return err
 }

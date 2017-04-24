@@ -3,57 +3,43 @@ package concourse
 import (
 	"fmt"
 	"io"
-
-	"bitbucket.org/engineerbetter/concourse-up/config"
-
-	"bitbucket.org/engineerbetter/concourse-up/director"
-	"bitbucket.org/engineerbetter/concourse-up/terraform"
 )
 
 // Destroy destroys a concourse instance
-func (client *Client) Destroy() (err error) {
-	var conf *config.Config
-	conf, err = client.configClient.Load()
+func (client *Client) Destroy() error {
+	conf, err := client.configClient.Load()
 	if err != nil {
-		return
-	}
-
-	var terraformClient terraform.IClient
-	terraformClient, err = client.buildTerraformClient(conf)
-	if err != nil {
-		return
-	}
-	defer func() { err = terraformClient.Cleanup() }()
-
-	var metadata *terraform.Metadata
-	metadata, err = terraformClient.Output()
-	if err != nil {
-		return
-	}
-
-	var boshInitClient director.IBoshInitClient
-	boshInitClient, err = client.buildBoshInitClient(conf, metadata)
-	if err != nil {
-		return
-	}
-	defer func() { err = boshInitClient.Cleanup() }()
-
-	if err = boshInitClient.Delete(); err != nil {
-		if err = writeDeleteBoshDirectorErrorWarning(client.stderr, err.Error()); err != nil {
-			return
-		}
-	}
-
-	err = terraformClient.Destroy()
-	if err != nil {
-		return
-	}
-
-	if err = writeDestroySuccessMessage(client.stdout); err != nil {
 		return err
 	}
 
-	return
+	terraformClient, err := client.buildTerraformClient(conf)
+	if err != nil {
+		return err
+	}
+	defer terraformClient.Cleanup()
+
+	metadata, err := terraformClient.Output()
+	if err != nil {
+		return err
+	}
+
+	boshInitClient, err := client.buildBoshInitClient(conf, metadata)
+	if err != nil {
+		return err
+	}
+	defer boshInitClient.Cleanup()
+
+	if err := boshInitClient.Delete(); err != nil {
+		if err := writeDeleteBoshDirectorErrorWarning(client.stderr, err.Error()); err != nil {
+			return err
+		}
+	}
+
+	if err := terraformClient.Destroy(); err != nil {
+		return err
+	}
+
+	return writeDestroySuccessMessage(client.stdout)
 }
 
 func writeDeleteBoshDirectorErrorWarning(stderr io.Writer, message string) error {

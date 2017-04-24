@@ -22,19 +22,17 @@ var info = cli.Command{
 	Usage:     "Fetches information on a deployed environment",
 	ArgsUsage: "<name>",
 	Flags:     deployFlags,
-	Action: func(c *cli.Context) (err error) {
+	Action: func(c *cli.Context) error {
 		name := c.Args().Get(0)
 		if name == "" {
-			err = errors.New("Usage is `concourse-up info <name>`")
-			return
+			return errors.New("Usage is `concourse-up info <name>`")
 		}
 
-		var logFile *os.File
-		logFile, err = os.Create("terraform.combined.log")
+		logFile, err := os.Create("terraform.combined.log")
 		if err != nil {
-			return
+			return err
 		}
-		defer func() { err = logFile.Close() }()
+		defer logFile.Close()
 
 		client := concourse.NewClient(
 			terraform.NewClient,
@@ -45,15 +43,14 @@ var info = cli.Command{
 			os.Stderr,
 		)
 
-		var info *concourse.Info
-		info, err = client.FetchInfo()
+		info, err := client.FetchInfo()
 		if err != nil {
-			return
+			return err
 		}
-		var bytes []byte
-		bytes, err = json.MarshalIndent(info, "", "  ")
+
+		bytes, err := json.MarshalIndent(info, "", "  ")
 		if err != nil {
-			return
+			return err
 		}
 
 		fmt.Println(string(bytes))

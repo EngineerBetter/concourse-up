@@ -64,40 +64,33 @@ func (client *Client) ensureCerts(config *config.Config, metadata *terraform.Met
 	return config, nil
 }
 
-func (client *Client) applyTerraform(config *config.Config) (metadata *terraform.Metadata, err error) {
-	var terraformClient terraform.IClient
-	terraformClient, err = client.buildTerraformClient(config)
+func (client *Client) applyTerraform(config *config.Config) (*terraform.Metadata, error) {
+	terraformClient, err := client.buildTerraformClient(config)
 	if err != nil {
-		return
+		return nil, err
 	}
-	defer func() { err = terraformClient.Cleanup() }()
+	defer terraformClient.Cleanup()
 
-	err = terraformClient.Apply()
-	if err != nil {
-		return
+	if err := terraformClient.Apply(); err != nil {
+		return nil, err
 	}
 
-	metadata, err = terraformClient.Output()
-	return
+	return terraformClient.Output()
 }
 
-func (client *Client) deployBosh(config *config.Config, metadata *terraform.Metadata) (err error) {
-	var boshInitClient director.IBoshInitClient
-	boshInitClient, err = client.buildBoshInitClient(config, metadata)
+func (client *Client) deployBosh(config *config.Config, metadata *terraform.Metadata) error {
+	boshInitClient, err := client.buildBoshInitClient(config, metadata)
 	if err != nil {
-		return
+		return err
 	}
-	defer func() { err = boshInitClient.Cleanup() }()
+	defer boshInitClient.Cleanup()
 
-	var boshStateBytes []byte
-	boshStateBytes, err = boshInitClient.Deploy()
+	boshStateBytes, err := boshInitClient.Deploy()
 	if err != nil {
-		return
+		return err
 	}
 
-	err = client.configClient.StoreAsset(director.StateFilename, boshStateBytes)
-
-	return
+	return client.configClient.StoreAsset(director.StateFilename, boshStateBytes)
 }
 
 func (client *Client) loadConfigWithUserIP() (*config.Config, error) {

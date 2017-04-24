@@ -12,27 +12,25 @@ type Info struct {
 }
 
 // FetchInfo fetches and builds the info
-func (client *Client) FetchInfo() (info *Info, err error) {
+func (client *Client) FetchInfo() (*Info, error) {
 	config, err := client.configClient.Load()
 	if err != nil {
-		return
+		return nil, err
 	}
 
 	terraformClient, err := client.buildTerraformClient(config)
 	if err != nil {
-		return
+		return nil, err
 	}
 
 	metadata, err := terraformClient.Output()
 	if err != nil {
-		return
+		return nil, err
 	}
-	defer func() { err = terraformClient.Cleanup() }()
+	defer terraformClient.Cleanup()
 
-	info = &Info{
+	return &Info{
 		Terraform: metadata,
 		Config:    config,
-	}
-
-	return
+	}, nil
 }
