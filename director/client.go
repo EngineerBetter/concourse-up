@@ -25,6 +25,8 @@ const manifestFilename = "director.yml"
 const cloudConfigFilename = "cloud-config.yml"
 const caCertFilename = "ca-cert.pem"
 
+
+
 var defaultBoshArgs = []string{"--non-interactive", "--tty", "--no-color"}
 
 // StateFilename is default name for bosh-init state file
@@ -141,6 +143,10 @@ func (client *Client) Deploy() ([]byte, error) {
 	}
 
 	if err = client.updateCloudConfig(); err != nil {
+		return nil, err
+	}
+
+	if err = client.uploadConcourse(); err != nil {
 		return nil, err
 	}
 
