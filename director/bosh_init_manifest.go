@@ -2,6 +2,7 @@ package director
 
 import (
 	"strconv"
+	"strings"
 
 	"bitbucket.org/engineerbetter/concourse-up/config"
 
@@ -56,6 +57,9 @@ func GenerateBoshInitManifest(conf *config.Config, metadata *terraform.Metadata)
 		BoshReleaseSHA1:        boshReleaseSHA1,
 		BoshReleaseURL:         boshReleaseURL,
 		VMsSecurityGroupID:     metadata.VMsSecurityGroupID.Value,
+		DirectorCACert:         conf.DirectorCACert,
+		DirectorCert:           conf.DirectorCert,
+		DirectorKey:            conf.DirectorKey,
 	}
 
 	return util.RenderTemplate(awsDirectorManifestTemplate, templateParams)
@@ -92,6 +96,25 @@ type awsDirectorManifestParams struct {
 	StemcellSHA1           string
 	StemcellURL            string
 	VMsSecurityGroupID     string
+	DirectorCACert         string
+	DirectorCert           string
+	DirectorKey            string
+}
+
+// Indent is a helper function to indent the field a given number of spaces
+func (params awsDirectorManifestParams) Indent(countStr, field string) string {
+	count, err := strconv.Atoi(countStr)
+	if err != nil {
+		panic(err)
+	}
+
+	prefix := ""
+	for i := 0; i < count; i++ {
+		prefix += " "
+	}
+
+	field = strings.TrimSpace(field)
+	return strings.Replace(field, "\n", "\n"+prefix, -1)
 }
 
 var awsDirectorManifestTemplate = `---
@@ -212,11 +235,19 @@ jobs:
             password: <% .AdminUserPassword %>
           - name: hm
             password: <% .HMUserPassword %>
+      ssl:
+        cert: |-
+          <% .Indent "10" .DirectorCert %>
+        key: |-
+          <% .Indent "10" .DirectorKey %>
     hm:
+      resurrector_enabled: true
       director_account:
         user: hm
         password: <% .HMUserPassword %>
-      resurrector_enabled: true
+        ca_cert: |-
+          <% .Indent "10" .DirectorCACert %>
+
     aws: &aws
       access_key_id: "<% .BoshAWSAccessKeyID %>"
       secret_access_key: "<% .BoshAWSSecretAccessKey %>"
