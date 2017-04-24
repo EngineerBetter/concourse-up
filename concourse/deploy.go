@@ -94,7 +94,7 @@ func (client *Client) deployBosh(config *config.Config, metadata *terraform.Meta
 	}
 	defer boshClient.Cleanup()
 
-	boshStateBytes, err := boshClient.DeployDirector()
+	boshStateBytes, err := boshClient.Deploy()
 	if err != nil {
 		return err
 	}

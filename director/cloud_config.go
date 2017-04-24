@@ -7,18 +7,18 @@ import (
 )
 
 type awsCloudConfigParams struct {
-	AvailabilityZone       string
-	DefaultSecurityGroupID string
-	DirectorSubnetID       string
-	VMsSubnetID            string
+	AvailabilityZone   string
+	VMsSecurityGroupID string
+	DirectorSubnetID   string
+	ConcourseSubnetID  string
 }
 
 func generateCloudConfig(conf *config.Config, metadata *terraform.Metadata) ([]byte, error) {
 	templateParams := awsCloudConfigParams{
-		AvailabilityZone:       conf.AvailabilityZone,
-		DefaultSecurityGroupID: metadata.DirectorSecurityGroupID.Value,
-		DirectorSubnetID:       metadata.DirectorSubnetID.Value,
-		VMsSubnetID:            metadata.VMsSubnetID.Value,
+		AvailabilityZone:   conf.AvailabilityZone,
+		VMsSecurityGroupID: metadata.VMsSecurityGroupID.Value,
+		DirectorSubnetID:   metadata.DirectorSubnetID.Value,
+		ConcourseSubnetID:  metadata.ConcourseSubnetID.Value,
 	}
 
 	return util.RenderTemplate(awsCloudConfigtemplate, templateParams)
@@ -31,7 +31,7 @@ azs:
     availability_zone: <% .AvailabilityZone %>
 
 vm_types:
-- name: medium
+- name: concourse-medium
   cloud_properties:
     instance_type: m3.medium
     spot_bid_price: 0.09 # on-demand price: 0.073
@@ -40,9 +40,9 @@ vm_types:
       size: 200_000
       type: gp2
     security_groups:
-    - <% .DefaultSecurityGroupID %>
+    - <% .VMsSecurityGroupID %>
 
-- name: large
+- name: concourse-large
   cloud_properties:
     instance_type: m3.xlarge
     spot_bid_price: 0.320 # on-demand price: 0.266
@@ -51,7 +51,18 @@ vm_types:
       size: 200_000
       type: gp2
     security_groups:
-    - <% .DefaultSecurityGroupID %>
+    - <% .VMsSecurityGroupID %>
+
+- name: compilation
+  cloud_properties:
+    instance_type: m3.xlarge
+    spot_bid_price: 0.320 # on-demand price: 0.266
+    spot_ondemand_fallback: true
+    ephemeral_disk:
+      size: 5_000
+      type: gp2
+    security_groups:
+    - <% .VMsSecurityGroupID %>
 
 disk_types:
 - name: default
@@ -79,7 +90,7 @@ networks:
     cloud_properties:
       subnet: <% .DirectorSubnetID %>
 
-- name: vms
+- name: concourse
   type: manual
   subnets:
   - range: 10.0.1.0/24
@@ -90,7 +101,7 @@ networks:
     dns:
     - 10.0.0.2
     cloud_properties:
-      subnet: <% .VMsSubnetID %>
+      subnet: <% .ConcourseSubnetID %>
 
 - name: vip
   type: vip
@@ -99,6 +110,6 @@ compilation:
   workers: 5
   reuse_compilation_vms: true
   az: z1
-  vm_type: large
+  vm_type: compilation
   network: default
 `

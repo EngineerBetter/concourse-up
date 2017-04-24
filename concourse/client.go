@@ -44,7 +44,7 @@ func NewClient(
 }
 
 func (client *Client) buildTerraformClient(config *config.Config) (terraform.IClient, error) {
-	terraformFile, err := util.RenderTemplate(template, config)
+	terraformFile, err := util.RenderTemplate(terraform.Template, config)
 	if err != nil {
 		return nil, err
 	}

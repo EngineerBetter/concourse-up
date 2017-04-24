@@ -71,17 +71,17 @@ func (client *FakeTerraformClient) Cleanup() error {
 }
 
 type FakeBoshClient struct {
-	FakeDeployDirector func() ([]byte, error)
-	FakeDeleteDirector func() error
+	FakeDeploy func() ([]byte, error)
+	FakeDelete func() error
 	FakeCleanup        func() error
 }
 
-func (client *FakeBoshClient) DeployDirector() ([]byte, error) {
-	return client.FakeDeployDirector()
+func (client *FakeBoshClient) Deploy() ([]byte, error) {
+	return client.FakeDeploy()
 }
 
-func (client *FakeBoshClient) DeleteDirector() error {
-	return client.FakeDeleteDirector()
+func (client *FakeBoshClient) Delete() error {
+	return client.FakeDelete()
 }
 
 func (client *FakeBoshClient) Cleanup() error {

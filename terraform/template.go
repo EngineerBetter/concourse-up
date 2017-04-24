@@ -1,6 +1,6 @@
-package concourse
+package terraform
 
-const template = `
+const Template = `
 terraform {
 	backend "s3" {
 		bucket = "<% .ConfigBucket %>"
@@ -185,14 +185,14 @@ resource "aws_subnet" "director" {
   }
 }
 
-resource "aws_subnet" "vms" {
+resource "aws_subnet" "concourse" {
   vpc_id                  = "${aws_vpc.default.id}"
   availability_zone       = "${var.availability_zone}"
   cidr_block              = "10.0.1.0/24"
   map_public_ip_on_launch = true
 
   tags {
-    Name = "${var.deployment}-vms"
+    Name = "${var.deployment}-concourse"
     concourse-up-project = "${var.project}"
     concourse-up-component = "bosh"
   }
@@ -264,7 +264,7 @@ resource "aws_security_group" "vms" {
   tags {
     Name = "${var.deployment}-vms"
     concourse-up-project = "${var.project}"
-    concourse-up-component = "concourse"
+    concourse-up-component = "bosh"
   }
 
   ingress {
@@ -429,8 +429,8 @@ output "director_subnet_id" {
   value = "${aws_subnet.director.id}"
 }
 
-output "vms_subnet_id" {
-  value = "${aws_subnet.vms.id}"
+output "concourse_subnet_id" {
+  value = "${aws_subnet.concourse.id}"
 }
 
 output "blobstore_bucket" {

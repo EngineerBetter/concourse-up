@@ -46,8 +46,8 @@ type Client struct {
 
 // IClient is a client for performing bosh-init commands
 type IClient interface {
-	DeployDirector() ([]byte, error)
-	DeleteDirector() error
+	Deploy() ([]byte, error)
+	Delete() error
 	Cleanup() error
 }
 
@@ -118,9 +118,9 @@ func (client *Client) Cleanup() error {
 	return os.RemoveAll(client.tempDir)
 }
 
-// DeployDirector deploys a new Bosh director or converges an existing deployment
+// Deploy deploys a new Bosh director or converges an existing deployment
 // Returns new contents of bosh state file
-func (client *Client) DeployDirector() ([]byte, error) {
+func (client *Client) Deploy() ([]byte, error) {
 	// deploy command needs to be run from directory with bosh state file
 	var combinedOutput []byte
 	err := util.PushDir(client.tempDir, func() error {
@@ -147,8 +147,8 @@ func (client *Client) DeployDirector() ([]byte, error) {
 	return ioutil.ReadFile(client.stateFilePath)
 }
 
-// DeleteDirector deletes a bosh director
-func (client *Client) DeleteDirector() error {
+// Delete deletes a bosh director
+func (client *Client) Delete() error {
 	_, err := client.runBoshCommand(
 		"delete-env",
 		client.directorManifestPath,

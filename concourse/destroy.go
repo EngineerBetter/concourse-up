@@ -29,7 +29,7 @@ func (client *Client) Destroy() error {
 	}
 	defer boshClient.Cleanup()
 
-	if err := boshClient.DeleteDirector(); err != nil {
+	if err := boshClient.Delete(); err != nil {
 		if err := writeDeleteBoshDirectorErrorWarning(client.stderr, err.Error()); err != nil {
 			return err
 		}
