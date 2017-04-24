@@ -39,7 +39,7 @@ func generateBoshInitManifest(conf *config.Config, metadata *terraform.Metadata)
 		DBPort:                 dbPort,
 		DBUsername:             metadata.BoshDBUsername.Value,
 		DBName:                 conf.RDSDefaultDatabaseName,
-		DirectorSubnetID:       metadata.DirectorSubnetID.Value,
+		DirectorSubnetID:       metadata.DefaultSubnetID.Value,
 		HMUserPassword:         conf.DirectorHMUserPassword,
 		KeyPairName:            metadata.DirectorKeyPair.Value,
 		MbusPassword:           conf.DirectorMbusPassword,

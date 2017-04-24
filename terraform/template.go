@@ -173,24 +173,11 @@ resource "aws_route" "internet_access" {
   gateway_id             = "${aws_internet_gateway.default.id}"
 }
 
-resource "aws_subnet" "director" {
+resource "aws_subnet" "default" {
   vpc_id                  = "${aws_vpc.default.id}"
   availability_zone       = "${var.availability_zone}"
   cidr_block              = "10.0.0.0/24"
-  map_public_ip_on_launch = true
-
-  tags {
-    Name = "${var.deployment}-director"
-    concourse-up-project = "${var.project}"
-    concourse-up-component = "bosh"
-  }
-}
-
-resource "aws_subnet" "concourse" {
-  vpc_id                  = "${aws_vpc.default.id}"
-  availability_zone       = "${var.availability_zone}"
-  cidr_block              = "10.0.1.0/24"
-  map_public_ip_on_launch = true
+  map_public_ip_on_launch = false
 
   tags {
     Name = "${var.deployment}"
@@ -201,7 +188,7 @@ resource "aws_subnet" "concourse" {
 
 resource "aws_elb" "concourse" {
   name            = "${var.project}-concourse-up"
-  subnets         = ["${aws_subnet.concourse.id}"]
+  subnets         = ["${aws_subnet.default.id}"]
   security_groups = ["${aws_security_group.elb.id}"]
 
   listener {
@@ -300,6 +287,13 @@ resource "aws_security_group" "vms" {
     Name = "${var.deployment}-vms"
     concourse-up-project = "${var.project}"
     concourse-up-component = "bosh"
+  }
+
+  ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["${var.source_access_ip}/32"]
   }
 
   ingress {
@@ -496,12 +490,8 @@ output "elb_security_group_id" {
   value = "${aws_security_group.elb.id}"
 }
 
-output "director_subnet_id" {
-  value = "${aws_subnet.director.id}"
-}
-
-output "concourse_subnet_id" {
-  value = "${aws_subnet.concourse.id}"
+output "default_subnet_id" {
+  value = "${aws_subnet.default.id}"
 }
 
 output "blobstore_bucket" {

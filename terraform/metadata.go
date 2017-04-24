@@ -9,13 +9,13 @@ type MetadataStringValue struct {
 
 // Metadata represents the terraform output variables
 type Metadata struct {
-	DirectorKeyPair          MetadataStringValue `json:"director_key_pair" valid:"required"`
-	DirectorPublicIP         MetadataStringValue `json:"director_public_ip" valid:"required"`
-	DirectorSecurityGroupID  MetadataStringValue `json:"director_security_group_id" valid:"required"`
-	VMsSecurityGroupID       MetadataStringValue `json:"vms_security_group_id" valid:"required"`
-	ELBSecurityGroupID       MetadataStringValue `json:"elb_security_group_id" valid:"required"`
-	DirectorSubnetID         MetadataStringValue `json:"director_subnet_id" valid:"required"`
-	ConcourseSubnetID        MetadataStringValue `json:"concourse_subnet_id" valid:"required"`
+	DirectorKeyPair         MetadataStringValue `json:"director_key_pair" valid:"required"`
+	DirectorPublicIP        MetadataStringValue `json:"director_public_ip" valid:"required"`
+	DirectorSecurityGroupID MetadataStringValue `json:"director_security_group_id" valid:"required"`
+	VMsSecurityGroupID      MetadataStringValue `json:"vms_security_group_id" valid:"required"`
+	ELBSecurityGroupID      MetadataStringValue `json:"elb_security_group_id" valid:"required"`
+	DefaultSubnetID         MetadataStringValue `json:"default_subnet_id" valid:"required"`
+
 	BlobstoreBucket          MetadataStringValue `json:"blobstore_bucket" valid:"required"`
 	BlobstoreUserAccessKeyID MetadataStringValue `json:"blobstore_user_access_key_id" valid:"required"`
 	BlobstoreSecretAccessKey MetadataStringValue `json:"blobstore_user_secret_access_key" valid:"required"`

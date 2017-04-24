@@ -11,8 +11,7 @@ type awsCloudConfigParams struct {
 	VMsSecurityGroupID          string
 	LoadBalancerSecurityGroupID string
 	LoadBalancerID              string
-	DirectorSubnetID            string
-	ConcourseSubnetID           string
+	DefaultSubnetID             string
 }
 
 func generateCloudConfig(conf *config.Config, metadata *terraform.Metadata) ([]byte, error) {
@@ -21,8 +20,7 @@ func generateCloudConfig(conf *config.Config, metadata *terraform.Metadata) ([]b
 		VMsSecurityGroupID:          metadata.VMsSecurityGroupID.Value,
 		LoadBalancerSecurityGroupID: metadata.ELBSecurityGroupID.Value,
 		LoadBalancerID:              metadata.ELBName.Value,
-		DirectorSubnetID:            metadata.DirectorSubnetID.Value,
-		ConcourseSubnetID:           metadata.ConcourseSubnetID.Value,
+		DefaultSubnetID:             metadata.DefaultSubnetID.Value,
 	}
 
 	return util.RenderTemplate(awsCloudConfigtemplate, templateParams)
@@ -92,20 +90,7 @@ networks:
     dns:
     - 10.0.0.2
     cloud_properties:
-      subnet: <% .DirectorSubnetID %>
-
-- name: concourse
-  type: manual
-  subnets:
-  - range: 10.0.1.0/24
-    gateway: 10.0.1.1
-    az: z1
-    reserved:
-    - 10.0.1.1-10.0.1.5
-    dns:
-    - 10.0.0.2
-    cloud_properties:
-      subnet: <% .ConcourseSubnetID %>
+      subnet: <% .DefaultSubnetID %>
 
 - name: vip
   type: vip
