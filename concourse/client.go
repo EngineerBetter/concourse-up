@@ -13,7 +13,7 @@ import (
 // Client is a concrete implementation of IClient interface
 type Client struct {
 	terraformClientFactory terraform.ClientFactory
-	boshInitClientFactory  director.BoshInitClientFactory
+	boshClientFactory      director.ClientFactory
 	certGenerator          func(caName, ip string) (*certs.Certs, error)
 	configClient           config.IClient
 	stdout                 io.Writer
@@ -30,12 +30,12 @@ type IClient interface {
 // NewClient returns a new Client
 func NewClient(
 	terraformClientFactory terraform.ClientFactory,
-	boshInitClientFactory director.BoshInitClientFactory,
+	boshClientFactory director.ClientFactory,
 	certGenerator func(caName, ip string) (*certs.Certs, error),
 	configClient config.IClient, stdout, stderr io.Writer) *Client {
 	return &Client{
 		terraformClientFactory: terraformClientFactory,
-		boshInitClientFactory:  boshInitClientFactory,
+		boshClientFactory:      boshClientFactory,
 		configClient:           configClient,
 		certGenerator:          certGenerator,
 		stdout:                 stdout,
@@ -52,21 +52,16 @@ func (client *Client) buildTerraformClient(config *config.Config) (terraform.ICl
 	return client.terraformClientFactory(terraformFile, client.stdout, client.stderr)
 }
 
-func (client *Client) buildBoshInitClient(config *config.Config, metadata *terraform.Metadata) (director.IBoshInitClient, error) {
-	manifestBytes, err := director.GenerateBoshInitManifest(config, metadata)
-	if err != nil {
-		return nil, err
-	}
-
+func (client *Client) buildBoshClient(config *config.Config, metadata *terraform.Metadata) (director.IClient, error) {
 	directorStateBytes, err := loadDirectorState(client.configClient)
 	if err != nil {
 		return nil, err
 	}
 
-	return client.boshInitClientFactory(
-		manifestBytes,
+	return client.boshClientFactory(
+		config,
+		metadata,
 		directorStateBytes,
-		[]byte(config.PrivateKey),
 		client.stdout,
 		client.stderr,
 	)

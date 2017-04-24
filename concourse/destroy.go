@@ -23,13 +23,13 @@ func (client *Client) Destroy() error {
 		return err
 	}
 
-	boshInitClient, err := client.buildBoshInitClient(conf, metadata)
+	boshClient, err := client.buildBoshClient(conf, metadata)
 	if err != nil {
 		return err
 	}
-	defer boshInitClient.Cleanup()
+	defer boshClient.Cleanup()
 
-	if err := boshInitClient.Delete(); err != nil {
+	if err := boshClient.Delete(); err != nil {
 		if err := writeDeleteBoshDirectorErrorWarning(client.stderr, err.Error()); err != nil {
 			return err
 		}

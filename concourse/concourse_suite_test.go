@@ -70,20 +70,20 @@ func (client *FakeTerraformClient) Cleanup() error {
 	return client.FakeCleanup()
 }
 
-type FakeBoshInitClient struct {
+type FakeBoshClient struct {
 	FakeDeploy  func() ([]byte, error)
 	FakeDelete  func() error
 	FakeCleanup func() error
 }
 
-func (client *FakeBoshInitClient) Deploy() ([]byte, error) {
+func (client *FakeBoshClient) Deploy() ([]byte, error) {
 	return client.FakeDeploy()
 }
 
-func (client *FakeBoshInitClient) Delete() error {
+func (client *FakeBoshClient) Delete() error {
 	return client.FakeDelete()
 }
 
-func (client *FakeBoshInitClient) Cleanup() error {
+func (client *FakeBoshClient) Cleanup() error {
 	return client.FakeCleanup()
 }

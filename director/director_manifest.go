@@ -20,12 +20,11 @@ const boshReleaseSHA1 = "4da9cedbcc8fbf11378ef439fb89de08300ad091"
 const boshReleaseURL = "https://bosh.io/d/github.com/cloudfoundry/bosh?v=261.4"
 
 // GenerateBoshInitManifest generates a manifest for the bosh director on AWS
-func GenerateBoshInitManifest(conf *config.Config, metadata *terraform.Metadata) ([]byte, error) {
+func generateBoshInitManifest(conf *config.Config, metadata *terraform.Metadata) ([]byte, error) {
 	dbPort, err := strconv.Atoi(metadata.BoshDBPort.Value)
 	if err != nil {
 		return nil, err
 	}
-
 	templateParams := awsDirectorManifestParams{
 		AWSRegion:              conf.Region,
 		AdminUserName:          conf.DirectorUsername,

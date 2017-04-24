@@ -40,7 +40,7 @@ var destroy = cli.Command{
 
 		client := concourse.NewClient(
 			terraform.NewClient,
-			director.NewBoshInitClient,
+			director.NewClient,
 			certs.Generate,
 			&config.Client{Project: name},
 			os.Stdout,

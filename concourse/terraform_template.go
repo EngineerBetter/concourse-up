@@ -185,6 +185,19 @@ resource "aws_subnet" "director" {
   }
 }
 
+resource "aws_subnet" "vms" {
+  vpc_id                  = "${aws_vpc.default.id}"
+  availability_zone       = "${var.availability_zone}"
+  cidr_block              = "10.0.1.0/24"
+  map_public_ip_on_launch = true
+
+  tags {
+    Name = "${var.deployment}-vms"
+    concourse-up-project = "${var.project}"
+    concourse-up-component = "bosh"
+  }
+}
+
 resource "aws_eip" "director" {
   vpc = true
 }
@@ -414,6 +427,10 @@ output "vms_security_group_id" {
 
 output "director_subnet_id" {
   value = "${aws_subnet.director.id}"
+}
+
+output "vms_subnet_id" {
+  value = "${aws_subnet.vms.id}"
 }
 
 output "blobstore_bucket" {

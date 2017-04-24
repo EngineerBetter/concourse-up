@@ -88,13 +88,13 @@ func (client *Client) applyTerraform(config *config.Config) (*terraform.Metadata
 }
 
 func (client *Client) deployBosh(config *config.Config, metadata *terraform.Metadata) error {
-	boshInitClient, err := client.buildBoshInitClient(config, metadata)
+	boshClient, err := client.buildBoshClient(config, metadata)
 	if err != nil {
 		return err
 	}
-	defer boshInitClient.Cleanup()
+	defer boshClient.Cleanup()
 
-	boshStateBytes, err := boshInitClient.Deploy()
+	boshStateBytes, err := boshClient.Deploy()
 	if err != nil {
 		return err
 	}

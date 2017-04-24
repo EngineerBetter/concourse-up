@@ -37,6 +37,7 @@ var _ = Describe("Client", func() {
 			DirectorSecurityGroupID:  terraform.MetadataStringValue{Value: "sg-123"},
 			VMsSecurityGroupID:       terraform.MetadataStringValue{Value: "sg-456"},
 			DirectorSubnetID:         terraform.MetadataStringValue{Value: "sn-123"},
+			VMsSubnetID:              terraform.MetadataStringValue{Value: "sn-456"},
 			BoshDBPort:               terraform.MetadataStringValue{Value: "5432"},
 			BoshDBAddress:            terraform.MetadataStringValue{Value: "rds.aws.com"},
 			BoshDBUsername:           terraform.MetadataStringValue{Value: "admin"},
@@ -102,8 +103,8 @@ var _ = Describe("Client", func() {
 			}, nil
 		}
 
-		boshInitClientFactory := func(manifestBytes, stateFileBytes, keyfileBytes []byte, stdout, stderr io.Writer) (director.IBoshInitClient, error) {
-			return &FakeBoshInitClient{
+		boshClientFactory := func(config *config.Config, metadata *terraform.Metadata, stateFileBytes []byte, stdout, stderr io.Writer) (director.IClient, error) {
+			return &FakeBoshClient{
 				FakeDeploy: func() ([]byte, error) {
 					actions = append(actions, "deploying director")
 					return []byte{}, nil
@@ -124,7 +125,7 @@ var _ = Describe("Client", func() {
 
 		client = concourse.NewClient(
 			terraformClientFactory,
-			boshInitClientFactory,
+			boshClientFactory,
 			certGenerator,
 			configClient,
 			stdout,
