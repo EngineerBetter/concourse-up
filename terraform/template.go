@@ -222,7 +222,7 @@ resource "aws_elb" "concourse" {
     healthy_threshold   = 2
     unhealthy_threshold = 2
     timeout             = 3
-    target              = "TCP:8000/"
+    target              = "TCP:8000"
     interval            = 30
   }
 
