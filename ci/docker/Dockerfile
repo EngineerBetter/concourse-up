@@ -13,7 +13,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     python-pip \
     ruby \
     ruby-dev \
-    sqlite3
+    sqlite3 \
     unzip \
     vim \
     zlib1g-dev \
