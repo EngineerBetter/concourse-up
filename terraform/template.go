@@ -218,6 +218,14 @@ resource "aws_elb" "concourse" {
     lb_protocol       = "tcp"
   }
 
+  health_check {
+    healthy_threshold   = 2
+    unhealthy_threshold = 2
+    timeout             = 3
+    target              = "TCP:8000/"
+    interval            = 30
+  }
+
   tags {
     Name = "${var.deployment}"
     concourse-up-project = "${var.project}"
