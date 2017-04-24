@@ -10,5 +10,5 @@ gometalinter.v1 --exclude vendor \
   --exclude "_test\.go" \
   --disable=gotype \
   --disable=gas \
-  --deadline=120s \
+  --deadline=240s \
   ./...
