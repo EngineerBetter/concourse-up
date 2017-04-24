@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"io"
 
+	"bitbucket.org/engineerbetter/concourse-up/bosh"
 	"bitbucket.org/engineerbetter/concourse-up/certs"
 	"bitbucket.org/engineerbetter/concourse-up/concourse"
 	"bitbucket.org/engineerbetter/concourse-up/config"
-	"bitbucket.org/engineerbetter/concourse-up/director"
 	"bitbucket.org/engineerbetter/concourse-up/terraform"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -104,7 +104,7 @@ var _ = Describe("Client", func() {
 			}, nil
 		}
 
-		boshClientFactory := func(config *config.Config, metadata *terraform.Metadata, stateFileBytes []byte, stdout, stderr io.Writer) (director.IClient, error) {
+		boshClientFactory := func(config *config.Config, metadata *terraform.Metadata, stateFileBytes []byte, stdout, stderr io.Writer) (bosh.IClient, error) {
 			return &FakeBoshClient{
 				FakeDeploy: func() ([]byte, error) {
 					actions = append(actions, "deploying director")

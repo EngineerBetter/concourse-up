@@ -1,4 +1,4 @@
-package director
+package bosh
 
 import (
 	"database/sql"

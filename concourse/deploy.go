@@ -6,8 +6,8 @@ import (
 
 	"strings"
 
+	"bitbucket.org/engineerbetter/concourse-up/bosh"
 	"bitbucket.org/engineerbetter/concourse-up/config"
-	"bitbucket.org/engineerbetter/concourse-up/director"
 	"bitbucket.org/engineerbetter/concourse-up/terraform"
 	"bitbucket.org/engineerbetter/concourse-up/util"
 )
@@ -99,7 +99,7 @@ func (client *Client) deployBosh(config *config.Config, metadata *terraform.Meta
 		return err
 	}
 
-	return client.configClient.StoreAsset(director.StateFilename, boshStateBytes)
+	return client.configClient.StoreAsset(bosh.StateFilename, boshStateBytes)
 }
 
 func (client *Client) loadConfigWithUserIP() (*config.Config, error) {

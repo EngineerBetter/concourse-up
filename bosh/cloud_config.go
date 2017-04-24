@@ -1,4 +1,4 @@
-package director
+package bosh
 
 import (
 	"bitbucket.org/engineerbetter/concourse-up/config"

@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"os"
 
+	"bitbucket.org/engineerbetter/concourse-up/bosh"
 	"bitbucket.org/engineerbetter/concourse-up/certs"
 	"bitbucket.org/engineerbetter/concourse-up/concourse"
 	"bitbucket.org/engineerbetter/concourse-up/config"
-	"bitbucket.org/engineerbetter/concourse-up/director"
 	"bitbucket.org/engineerbetter/concourse-up/terraform"
 
 	"encoding/json"
@@ -36,7 +36,7 @@ var info = cli.Command{
 
 		client := concourse.NewClient(
 			terraform.NewClient,
-			director.NewClient,
+			bosh.NewClient,
 			certs.Generate,
 			&config.Client{Project: name},
 			os.Stdout,

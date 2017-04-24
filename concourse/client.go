@@ -3,9 +3,9 @@ package concourse
 import (
 	"io"
 
+	"bitbucket.org/engineerbetter/concourse-up/bosh"
 	"bitbucket.org/engineerbetter/concourse-up/certs"
 	"bitbucket.org/engineerbetter/concourse-up/config"
-	"bitbucket.org/engineerbetter/concourse-up/director"
 	"bitbucket.org/engineerbetter/concourse-up/terraform"
 	"bitbucket.org/engineerbetter/concourse-up/util"
 )
@@ -13,7 +13,7 @@ import (
 // Client is a concrete implementation of IClient interface
 type Client struct {
 	terraformClientFactory terraform.ClientFactory
-	boshClientFactory      director.ClientFactory
+	boshClientFactory      bosh.ClientFactory
 	certGenerator          func(caName, ip string) (*certs.Certs, error)
 	configClient           config.IClient
 	stdout                 io.Writer
@@ -30,7 +30,7 @@ type IClient interface {
 // NewClient returns a new Client
 func NewClient(
 	terraformClientFactory terraform.ClientFactory,
-	boshClientFactory director.ClientFactory,
+	boshClientFactory bosh.ClientFactory,
 	certGenerator func(caName, ip string) (*certs.Certs, error),
 	configClient config.IClient, stdout, stderr io.Writer) *Client {
 	return &Client{
@@ -52,7 +52,7 @@ func (client *Client) buildTerraformClient(config *config.Config) (terraform.ICl
 	return client.terraformClientFactory(terraformFile, client.stdout, client.stderr)
 }
 
-func (client *Client) buildBoshClient(config *config.Config, metadata *terraform.Metadata) (director.IClient, error) {
+func (client *Client) buildBoshClient(config *config.Config, metadata *terraform.Metadata) (bosh.IClient, error) {
 	directorStateBytes, err := loadDirectorState(client.configClient)
 	if err != nil {
 		return nil, err
@@ -68,7 +68,7 @@ func (client *Client) buildBoshClient(config *config.Config, metadata *terraform
 }
 
 func loadDirectorState(configClient config.IClient) ([]byte, error) {
-	hasState, err := configClient.HasAsset(director.StateFilename)
+	hasState, err := configClient.HasAsset(bosh.StateFilename)
 	if err != nil {
 		return nil, err
 	}
@@ -77,5 +77,5 @@ func loadDirectorState(configClient config.IClient) ([]byte, error) {
 		return nil, nil
 	}
 
-	return configClient.LoadAsset(director.StateFilename)
+	return configClient.LoadAsset(bosh.StateFilename)
 }
