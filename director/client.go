@@ -25,6 +25,8 @@ const manifestFilename = "director.yml"
 const cloudConfigFilename = "cloud-config.yml"
 const caCertFilename = "ca-cert.pem"
 
+var defaultBoshArgs = []string{"--non-interactive", "--tty", "--no-color"}
+
 // StateFilename is default name for bosh-init state file
 const StateFilename = "director-state.json"
 
@@ -44,8 +46,8 @@ type Client struct {
 
 // IClient is a client for performing bosh-init commands
 type IClient interface {
-	Deploy() ([]byte, error)
-	Delete() error
+	DeployDirector() ([]byte, error)
+	DeleteDirector() error
 	Cleanup() error
 }
 
@@ -116,17 +118,14 @@ func (client *Client) Cleanup() error {
 	return os.RemoveAll(client.tempDir)
 }
 
-// Deploy deploys a new Bosh director or converges an existing deployment
+// DeployDirector deploys a new Bosh director or converges an existing deployment
 // Returns new contents of bosh state file
-func (client *Client) Deploy() ([]byte, error) {
+func (client *Client) DeployDirector() ([]byte, error) {
 	// deploy command needs to be run from directory with bosh state file
 	var combinedOutput []byte
 	err := util.PushDir(client.tempDir, func() error {
 		var e error
 		combinedOutput, e = client.runBoshCommand(
-			"--non-interactive",
-			"--tty",
-			"--no-color",
 			"create-env",
 			client.directorManifestPath,
 			"--state",
@@ -148,12 +147,9 @@ func (client *Client) Deploy() ([]byte, error) {
 	return ioutil.ReadFile(client.stateFilePath)
 }
 
-// Delete deletes a bosh director
-func (client *Client) Delete() error {
+// DeleteDirector deletes a bosh director
+func (client *Client) DeleteDirector() error {
 	_, err := client.runBoshCommand(
-		"--non-interactive",
-		"--tty",
-		"--no-color",
 		"delete-env",
 		client.directorManifestPath,
 		"--state",
@@ -164,7 +160,16 @@ func (client *Client) Delete() error {
 }
 
 func (client *Client) updateCloudConfig() error {
-	_, err := client.runBoshCommand(
+	_, err := client.runAuthenticatedBoshCommand(
+		"update-cloud-config",
+		client.cloudConfigPath,
+	)
+
+	return err
+}
+
+func (client *Client) runAuthenticatedBoshCommand(args ...string) ([]byte, error) {
+	args = append([]string{
 		"--environment",
 		client.boshURL,
 		"--ca-cert",
@@ -173,14 +178,9 @@ func (client *Client) updateCloudConfig() error {
 		client.boshUsername,
 		"--client-secret",
 		client.boshPassword,
-		"--non-interactive",
-		"--tty",
-		"--no-color",
-		"update-cloud-config",
-		client.cloudConfigPath,
-	)
+	}, args...)
 
-	return err
+	return client.runBoshCommand(args...)
 }
 
 // https://github.com/cloudfoundry/bosh-cli/blob/master/main.go
@@ -203,6 +203,8 @@ func (client *Client) runBoshCommand(args ...string) ([]byte, error) {
 
 	basicDeps := boshcmd.NewBasicDeps(ui, logger)
 	cmdFactory := boshcmd.NewFactory(basicDeps)
+
+	args = append(defaultBoshArgs, args...)
 
 	cmd, err := cmdFactory.New(args)
 	if err != nil {

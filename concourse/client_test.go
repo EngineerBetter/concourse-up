@@ -105,11 +105,11 @@ var _ = Describe("Client", func() {
 
 		boshClientFactory := func(config *config.Config, metadata *terraform.Metadata, stateFileBytes []byte, stdout, stderr io.Writer) (director.IClient, error) {
 			return &FakeBoshClient{
-				FakeDeploy: func() ([]byte, error) {
+				FakeDeployDirector: func() ([]byte, error) {
 					actions = append(actions, "deploying director")
 					return []byte{}, nil
 				},
-				FakeDelete: func() error {
+				FakeDeleteDirector: func() error {
 					actions = append(actions, "deleting director")
 					return deleteBoshDirectorError
 				},
