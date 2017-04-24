@@ -10,6 +10,10 @@ import (
 
 // Config represents a concourse-up configuration file
 type Config struct {
+	ConcourseUsername        string `json:"concourse_username"`
+	ConcoursePassword        string `json:"concourse_password"`
+	ConcourseWorkerCount     int    `json:"concourse_worker_count"`
+	ConcourseDBName          string `json:"concourse_db_name"`
 	PublicKey                string `json:"public_key"`
 	PrivateKey               string `json:"private_key"`
 	Region                   string `json:"region"`
@@ -50,6 +54,10 @@ func generateDefaultConfig(project, deployment, region string) ([]byte, error) {
 	configBucket := fmt.Sprintf("%s-config", deployment)
 
 	conf := Config{
+		ConcourseUsername:        "admin",
+		ConcoursePassword:        util.GeneratePassword(),
+		ConcourseWorkerCount:     1,
+		ConcourseDBName:          "concourse_atc",
 		PublicKey:                strings.TrimSpace(string(publicKey)),
 		PrivateKey:               strings.TrimSpace(string(privateKey)),
 		Deployment:               deployment,

@@ -20,7 +20,8 @@ import (
 
 const boshInitLogLevel = boshlog.LevelWarn
 const pemFilename = "director.pem"
-const manifestFilename = "director.yml"
+const directorManifestFilename = "director.yml"
+const concourseManifestFilename = "concourse.yml"
 const cloudConfigFilename = "cloud-config.yml"
 const caCertFilename = "ca-cert.pem"
 
@@ -31,15 +32,16 @@ const StateFilename = "director-state.json"
 
 // Client is a concrete implementation of the IClient interface
 type Client struct {
-	tempDir              string
-	directorManifestPath string
-	cloudConfigPath      string
-	stateFilePath        string
-	caCertPath           string
-	config               *config.Config
-	metadata             *terraform.Metadata
-	stdout               io.Writer
-	stderr               io.Writer
+	tempDir               string
+	directorManifestPath  string
+	concourseManifestPath string
+	cloudConfigPath       string
+	stateFilePath         string
+	caCertPath            string
+	config                *config.Config
+	metadata              *terraform.Metadata
+	stdout                io.Writer
+	stderr                io.Writer
 }
 
 // IClient is a client for performing bosh-init commands
@@ -70,8 +72,18 @@ func NewClient(config *config.Config, metadata *terraform.Metadata, stateFileByt
 		return nil, err
 	}
 
-	directorManifestPath := filepath.Join(tempDir, manifestFilename)
+	directorManifestPath := filepath.Join(tempDir, directorManifestFilename)
 	if err = ioutil.WriteFile(directorManifestPath, manifestBytes, 0700); err != nil {
+		return nil, err
+	}
+
+	concourseManifestBytes, err := generateConcourseManifest(config, metadata)
+	if err != nil {
+		return nil, err
+	}
+
+	concourseManfestPath := filepath.Join(tempDir, concourseManifestFilename)
+	if err = ioutil.WriteFile(concourseManfestPath, concourseManifestBytes, 0700); err != nil {
 		return nil, err
 	}
 

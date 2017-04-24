@@ -15,8 +15,12 @@ import (
 )
 
 func (client *Client) createDefaultDatabases() error {
-	err := client.runSQL("CREATE DATABASE concourse_atc;")
-	if err != nil && !strings.Contains(err.Error(), "pq: database \"concourse_atc\" already exists") {
+	dbName := client.config.ConcourseDBName
+
+	err := client.runSQL(
+		fmt.Sprintf("CREATE DATABASE %s;", dbName))
+	if err != nil && !strings.Contains(err.Error(),
+		fmt.Sprintf("pq: database \"%s\" already exists", dbName)) {
 		return err
 	}
 	return nil
@@ -34,10 +38,10 @@ func (client *Client) runSQL(sqlStr string) error {
 	}
 	defer tmpFile.Close()
 
-	if _, err := tmpFile.WriteString(rdsRootCert); err != nil {
+	if _, err = tmpFile.WriteString(rdsRootCert); err != nil {
 		return err
 	}
-	if err := tmpFile.Sync(); err != nil {
+	if err = tmpFile.Sync(); err != nil {
 		return err
 	}
 
@@ -70,11 +74,11 @@ func (client *Client) runSQL(sqlStr string) error {
 		return err
 	}
 
-	if err := rows.Err(); err != nil {
+	if err = rows.Err(); err != nil {
 		return err
 	}
 
-	if err := rows.Close(); err != nil {
+	if err = rows.Close(); err != nil {
 		return err
 	}
 
