@@ -1,5 +1,7 @@
 package terraform
 
+import "github.com/asaskevich/govalidator"
+
 // MetadataStringValue is a terraform output string variable
 type MetadataStringValue struct {
 	Value string `json:"value"`
@@ -7,18 +9,24 @@ type MetadataStringValue struct {
 
 // Metadata represents the terraform output variables
 type Metadata struct {
-	DirectorKeyPair          MetadataStringValue `json:"director_key_pair"`
-	DirectorPublicIP         MetadataStringValue `json:"director_public_ip"`
-	DirectorSecurityGroupID  MetadataStringValue `json:"director_security_group_id"`
-	VMsSecurityGroupID       MetadataStringValue `json:"vms_security_group_id"`
-	DirectorSubnetID         MetadataStringValue `json:"director_subnet_id"`
-	BlobstoreBucket          MetadataStringValue `json:"blobstore_bucket"`
-	BlobstoreUserAccessKeyID MetadataStringValue `json:"blobstore_user_access_key_id"`
-	BlobstoreSecretAccessKey MetadataStringValue `json:"blobstore_user_secret_access_key"`
-	BoshUserAccessKeyID      MetadataStringValue `json:"bosh_user_access_key_id"`
-	BoshSecretAccessKey      MetadataStringValue `json:"bosh_user_secret_access_key"`
-	BoshDBUsername           MetadataStringValue `json:"bosh_db_username"`
-	BoshDBPassword           MetadataStringValue `json:"bosh_db_password"`
-	BoshDBPort               MetadataStringValue `json:"bosh_db_port"`
-	BoshDBAddress            MetadataStringValue `json:"bosh_db_address"`
+	DirectorKeyPair          MetadataStringValue `json:"director_key_pair" valid:"required"`
+	DirectorPublicIP         MetadataStringValue `json:"director_public_ip" valid:"required"`
+	DirectorSecurityGroupID  MetadataStringValue `json:"director_security_group_id" valid:"required"`
+	VMsSecurityGroupID       MetadataStringValue `json:"vms_security_group_id" valid:"required"`
+	DirectorSubnetID         MetadataStringValue `json:"director_subnet_id" valid:"required"`
+	BlobstoreBucket          MetadataStringValue `json:"blobstore_bucket" valid:"required"`
+	BlobstoreUserAccessKeyID MetadataStringValue `json:"blobstore_user_access_key_id" valid:"required"`
+	BlobstoreSecretAccessKey MetadataStringValue `json:"blobstore_user_secret_access_key" valid:"required"`
+	BoshUserAccessKeyID      MetadataStringValue `json:"bosh_user_access_key_id" valid:"required"`
+	BoshSecretAccessKey      MetadataStringValue `json:"bosh_user_secret_access_key" valid:"required"`
+	BoshDBUsername           MetadataStringValue `json:"bosh_db_username" valid:"required"`
+	BoshDBPassword           MetadataStringValue `json:"bosh_db_password" valid:"required"`
+	BoshDBPort               MetadataStringValue `json:"bosh_db_port" valid:"required"`
+	BoshDBAddress            MetadataStringValue `json:"bosh_db_address" valid:"required"`
+}
+
+// AssertValid returns an error if the struct contains any missing fields
+func (metadata *Metadata) AssertValid() error {
+	_, err := govalidator.ValidateStruct(metadata)
+	return err
 }

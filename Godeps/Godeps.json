@@ -6,6 +6,11 @@
 	],
 	"Deps": [
 		{
+			"ImportPath": "github.com/asaskevich/govalidator",
+			"Comment": "v5-39-g2c14e1c",
+			"Rev": "2c14e1cca90af49b3b21fe2d7aaa8cc7f9da2ff8"
+		},
+		{
 			"ImportPath": "github.com/aws/aws-sdk-go/aws",
 			"Comment": "v1.4.19",
 			"Rev": "1a651d9028d1203f4a0ba9fee91b207536cd4ca2"
@@ -67,113 +72,113 @@
 		},
 		{
 			"ImportPath": "github.com/cloudfoundry/bosh-cli/blobstore",
-			"Comment": "v2.0.14",
-			"Rev": "d5180d5a5e3645d9761da90803fbbde0ddea2bfc"
+			"Comment": "v2.0.13-2-gb9f35a62",
+			"Rev": "b9f35a621cfe75a3db04f259c6d76a1953a3b592"
 		},
 		{
 			"ImportPath": "github.com/cloudfoundry/bosh-cli/cloud",
-			"Comment": "v2.0.14",
-			"Rev": "d5180d5a5e3645d9761da90803fbbde0ddea2bfc"
+			"Comment": "v2.0.13-2-gb9f35a62",
+			"Rev": "b9f35a621cfe75a3db04f259c6d76a1953a3b592"
 		},
 		{
 			"ImportPath": "github.com/cloudfoundry/bosh-cli/cmd",
-			"Comment": "v2.0.14",
-			"Rev": "d5180d5a5e3645d9761da90803fbbde0ddea2bfc"
+			"Comment": "v2.0.13-2-gb9f35a62",
+			"Rev": "b9f35a621cfe75a3db04f259c6d76a1953a3b592"
 		},
 		{
 			"ImportPath": "github.com/cloudfoundry/bosh-cli/common/net",
-			"Comment": "v2.0.14",
-			"Rev": "d5180d5a5e3645d9761da90803fbbde0ddea2bfc"
+			"Comment": "v2.0.13-2-gb9f35a62",
+			"Rev": "b9f35a621cfe75a3db04f259c6d76a1953a3b592"
 		},
 		{
 			"ImportPath": "github.com/cloudfoundry/bosh-cli/common/util",
-			"Comment": "v2.0.14",
-			"Rev": "d5180d5a5e3645d9761da90803fbbde0ddea2bfc"
+			"Comment": "v2.0.13-2-gb9f35a62",
+			"Rev": "b9f35a621cfe75a3db04f259c6d76a1953a3b592"
 		},
 		{
 			"ImportPath": "github.com/cloudfoundry/bosh-cli/config",
-			"Comment": "v2.0.14",
-			"Rev": "d5180d5a5e3645d9761da90803fbbde0ddea2bfc"
+			"Comment": "v2.0.13-2-gb9f35a62",
+			"Rev": "b9f35a621cfe75a3db04f259c6d76a1953a3b592"
 		},
 		{
 			"ImportPath": "github.com/cloudfoundry/bosh-cli/cpi/release",
-			"Comment": "v2.0.14",
-			"Rev": "d5180d5a5e3645d9761da90803fbbde0ddea2bfc"
+			"Comment": "v2.0.13-2-gb9f35a62",
+			"Rev": "b9f35a621cfe75a3db04f259c6d76a1953a3b592"
 		},
 		{
 			"ImportPath": "github.com/cloudfoundry/bosh-cli/crypto",
-			"Comment": "v2.0.14",
-			"Rev": "d5180d5a5e3645d9761da90803fbbde0ddea2bfc"
+			"Comment": "v2.0.13-2-gb9f35a62",
+			"Rev": "b9f35a621cfe75a3db04f259c6d76a1953a3b592"
 		},
 		{
 			"ImportPath": "github.com/cloudfoundry/bosh-cli/deployment",
-			"Comment": "v2.0.14",
-			"Rev": "d5180d5a5e3645d9761da90803fbbde0ddea2bfc"
+			"Comment": "v2.0.13-2-gb9f35a62",
+			"Rev": "b9f35a621cfe75a3db04f259c6d76a1953a3b592"
 		},
 		{
 			"ImportPath": "github.com/cloudfoundry/bosh-cli/director",
-			"Comment": "v2.0.14",
-			"Rev": "d5180d5a5e3645d9761da90803fbbde0ddea2bfc"
+			"Comment": "v2.0.13-2-gb9f35a62",
+			"Rev": "b9f35a621cfe75a3db04f259c6d76a1953a3b592"
 		},
 		{
 			"ImportPath": "github.com/cloudfoundry/bosh-cli/index",
-			"Comment": "v2.0.14",
-			"Rev": "d5180d5a5e3645d9761da90803fbbde0ddea2bfc"
+			"Comment": "v2.0.13-2-gb9f35a62",
+			"Rev": "b9f35a621cfe75a3db04f259c6d76a1953a3b592"
 		},
 		{
 			"ImportPath": "github.com/cloudfoundry/bosh-cli/installation",
-			"Comment": "v2.0.14",
-			"Rev": "d5180d5a5e3645d9761da90803fbbde0ddea2bfc"
+			"Comment": "v2.0.13-2-gb9f35a62",
+			"Rev": "b9f35a621cfe75a3db04f259c6d76a1953a3b592"
 		},
 		{
 			"ImportPath": "github.com/cloudfoundry/bosh-cli/registry",
-			"Comment": "v2.0.14",
-			"Rev": "d5180d5a5e3645d9761da90803fbbde0ddea2bfc"
+			"Comment": "v2.0.13-2-gb9f35a62",
+			"Rev": "b9f35a621cfe75a3db04f259c6d76a1953a3b592"
 		},
 		{
 			"ImportPath": "github.com/cloudfoundry/bosh-cli/release",
-			"Comment": "v2.0.14",
-			"Rev": "d5180d5a5e3645d9761da90803fbbde0ddea2bfc"
+			"Comment": "v2.0.13-2-gb9f35a62",
+			"Rev": "b9f35a621cfe75a3db04f259c6d76a1953a3b592"
 		},
 		{
 			"ImportPath": "github.com/cloudfoundry/bosh-cli/releasedir",
-			"Comment": "v2.0.14",
-			"Rev": "d5180d5a5e3645d9761da90803fbbde0ddea2bfc"
+			"Comment": "v2.0.13-2-gb9f35a62",
+			"Rev": "b9f35a621cfe75a3db04f259c6d76a1953a3b592"
 		},
 		{
 			"ImportPath": "github.com/cloudfoundry/bosh-cli/ssh",
-			"Comment": "v2.0.14",
-			"Rev": "d5180d5a5e3645d9761da90803fbbde0ddea2bfc"
+			"Comment": "v2.0.13-2-gb9f35a62",
+			"Rev": "b9f35a621cfe75a3db04f259c6d76a1953a3b592"
 		},
 		{
 			"ImportPath": "github.com/cloudfoundry/bosh-cli/state/job",
-			"Comment": "v2.0.14",
-			"Rev": "d5180d5a5e3645d9761da90803fbbde0ddea2bfc"
+			"Comment": "v2.0.13-2-gb9f35a62",
+			"Rev": "b9f35a621cfe75a3db04f259c6d76a1953a3b592"
 		},
 		{
 			"ImportPath": "github.com/cloudfoundry/bosh-cli/state/pkg",
-			"Comment": "v2.0.14",
-			"Rev": "d5180d5a5e3645d9761da90803fbbde0ddea2bfc"
+			"Comment": "v2.0.13-2-gb9f35a62",
+			"Rev": "b9f35a621cfe75a3db04f259c6d76a1953a3b592"
 		},
 		{
 			"ImportPath": "github.com/cloudfoundry/bosh-cli/stemcell",
-			"Comment": "v2.0.14",
-			"Rev": "d5180d5a5e3645d9761da90803fbbde0ddea2bfc"
+			"Comment": "v2.0.13-2-gb9f35a62",
+			"Rev": "b9f35a621cfe75a3db04f259c6d76a1953a3b592"
 		},
 		{
 			"ImportPath": "github.com/cloudfoundry/bosh-cli/templatescompiler",
-			"Comment": "v2.0.14",
-			"Rev": "d5180d5a5e3645d9761da90803fbbde0ddea2bfc"
+			"Comment": "v2.0.13-2-gb9f35a62",
+			"Rev": "b9f35a621cfe75a3db04f259c6d76a1953a3b592"
 		},
 		{
 			"ImportPath": "github.com/cloudfoundry/bosh-cli/uaa",
-			"Comment": "v2.0.14",
-			"Rev": "d5180d5a5e3645d9761da90803fbbde0ddea2bfc"
+			"Comment": "v2.0.13-2-gb9f35a62",
+			"Rev": "b9f35a621cfe75a3db04f259c6d76a1953a3b592"
 		},
 		{
 			"ImportPath": "github.com/cloudfoundry/bosh-cli/ui",
-			"Comment": "v2.0.14",
-			"Rev": "d5180d5a5e3645d9761da90803fbbde0ddea2bfc"
+			"Comment": "v2.0.13-2-gb9f35a62",
+			"Rev": "b9f35a621cfe75a3db04f259c6d76a1953a3b592"
 		},
 		{
 			"ImportPath": "github.com/cloudfoundry/bosh-davcli/client",

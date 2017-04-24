@@ -75,7 +75,16 @@ func (client *Client) applyTerraform(config *config.Config) (*terraform.Metadata
 		return nil, err
 	}
 
-	return terraformClient.Output()
+	metadata, err := terraformClient.Output()
+	if err != nil {
+		return nil, err
+	}
+
+	if err = metadata.AssertValid(); err != nil {
+		return nil, err
+	}
+
+	return metadata, nil
 }
 
 func (client *Client) deployBosh(config *config.Config, metadata *terraform.Metadata) error {

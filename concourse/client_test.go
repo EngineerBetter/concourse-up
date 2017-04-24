@@ -21,6 +21,8 @@ var _ = Describe("Client", func() {
 	var stdout *gbytes.Buffer
 	var stderr *gbytes.Buffer
 	var deleteBoshDirectorError error
+	var terraformMetadata *terraform.Metadata
+
 	certGenerator := func(caName string, ip string) (*certs.Certs, error) {
 		actions = append(actions, fmt.Sprintf("generating cert ca: %s, ip: %s", caName, ip))
 		return &certs.Certs{
@@ -29,6 +31,22 @@ var _ = Describe("Client", func() {
 	}
 
 	BeforeEach(func() {
+		terraformMetadata = &terraform.Metadata{
+			DirectorPublicIP:         terraform.MetadataStringValue{Value: "99.99.99.99"},
+			DirectorKeyPair:          terraform.MetadataStringValue{Value: "-- KEY --"},
+			DirectorSecurityGroupID:  terraform.MetadataStringValue{Value: "sg-123"},
+			VMsSecurityGroupID:       terraform.MetadataStringValue{Value: "sg-456"},
+			DirectorSubnetID:         terraform.MetadataStringValue{Value: "sn-123"},
+			BoshDBPort:               terraform.MetadataStringValue{Value: "5432"},
+			BoshDBAddress:            terraform.MetadataStringValue{Value: "rds.aws.com"},
+			BoshDBUsername:           terraform.MetadataStringValue{Value: "admin"},
+			BoshDBPassword:           terraform.MetadataStringValue{Value: "s3cret"},
+			BoshUserAccessKeyID:      terraform.MetadataStringValue{Value: "abc123"},
+			BoshSecretAccessKey:      terraform.MetadataStringValue{Value: "abc123"},
+			BlobstoreBucket:          terraform.MetadataStringValue{Value: "blobs.aws.com"},
+			BlobstoreUserAccessKeyID: terraform.MetadataStringValue{Value: "abc123"},
+			BlobstoreSecretAccessKey: terraform.MetadataStringValue{Value: "abc123"},
+		}
 		deleteBoshDirectorError = nil
 		actions = []string{}
 		exampleConfig := &config.Config{
@@ -75,13 +93,7 @@ var _ = Describe("Client", func() {
 				},
 				FakeOutput: func() (*terraform.Metadata, error) {
 					actions = append(actions, "fetching terraform metadata")
-					return &terraform.Metadata{
-						DirectorPublicIP: terraform.MetadataStringValue{
-							Value: "99.99.99.99",
-						},
-						BoshDBPort: terraform.MetadataStringValue{
-							Value: "5432",
-						}}, nil
+					return terraformMetadata, nil
 				},
 				FakeCleanup: func() error {
 					actions = append(actions, "cleaning up terraform client")
@@ -190,6 +202,15 @@ var _ = Describe("Client", func() {
 				Expect(err).ToNot(HaveOccurred())
 
 				Eventually(stdout).Should(gbytes.Say("USING PREVIOUS DEPLOYMENT CONFIG"))
+			})
+		})
+
+		Context("When a metadata field is missing", func() {
+			It("Returns an error", func() {
+				terraformMetadata.DirectorKeyPair = terraform.MetadataStringValue{Value: ""}
+				err := client.Deploy()
+				Expect(err.Error()).To(ContainSubstring("director_key_pair"))
+				Expect(err.Error()).To(ContainSubstring("non zero value required"))
 			})
 		})
 	})
