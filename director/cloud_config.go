@@ -57,8 +57,8 @@ vm_types:
 
 - name: compilation
   cloud_properties:
-    instance_type: m3.xlarge
-    spot_bid_price: 0.320 # on-demand price: 0.266
+    instance_type: m3.medium
+    spot_bid_price: 0.09 # on-demand price: 0.073
     spot_ondemand_fallback: true
     ephemeral_disk:
       size: 5_000
