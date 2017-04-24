@@ -30,11 +30,14 @@ func NewSfdiskPartitioner(logger boshlog.Logger, cmdRunner boshsys.CmdRunner, ti
 }
 
 func (p sfdiskPartitioner) Partition(devicePath string, partitions []Partition) error {
-	if p.diskMatchesPartitions(devicePath, partitions) {
+	partitionMatches, err := p.diskMatchesPartitions(devicePath, partitions)
+	if err != nil {
+		return err
+	}
+	if partitionMatches {
 		p.logger.Info(p.logTag, "%s already partitioned as expected, skipping", devicePath)
 		return nil
 	}
-
 	sfdiskPartitionTypes := map[PartitionType]string{
 		PartitionTypeSwap:  "S",
 		PartitionTypeLinux: "L",
@@ -63,12 +66,10 @@ func (p sfdiskPartitioner) Partition(devicePath string, partitions []Partition) 
 	})
 
 	partitionRetryStrategy := NewPartitionStrategy(partitionRetryable, p.timeService, p.logger)
-	err := partitionRetryStrategy.Try()
-
+	err = partitionRetryStrategy.Try()
 	if err != nil {
 		return err
 	}
-
 	if strings.Contains(devicePath, "/dev/mapper/") {
 		_, _, _, err = p.cmdRunner.RunCommand("/etc/init.d/open-iscsi", "restart")
 		if err != nil {
@@ -112,7 +113,7 @@ func (p sfdiskPartitioner) Partition(devicePath string, partitions []Partition) 
 func (p sfdiskPartitioner) GetDeviceSizeInBytes(devicePath string) (uint64, error) {
 	stdout, _, _, err := p.cmdRunner.RunCommand("sfdisk", "-s", devicePath)
 	if err != nil {
-		return 0, bosherr.WrapError(err, "Shelling out to sfdisk")
+		return 0, bosherr.WrapError(err, "Shelling out to sfdisk when getting device size")
 	}
 
 	sizeInKb, err := strconv.ParseUint(strings.Trim(stdout, "\n"), 10, 64)
@@ -123,21 +124,18 @@ func (p sfdiskPartitioner) GetDeviceSizeInBytes(devicePath string) (uint64, erro
 	return p.convertFromKbToBytes(sizeInKb), nil
 }
 
-func (p sfdiskPartitioner) diskMatchesPartitions(devicePath string, partitionsToMatch []Partition) (result bool) {
+func (p sfdiskPartitioner) diskMatchesPartitions(devicePath string, partitionsToMatch []Partition) (bool, error) {
 	existingPartitions, err := p.getPartitions(devicePath)
 	if err != nil {
-		err = bosherr.WrapErrorf(err, "Getting partitions for %s", devicePath)
-		return
+		return false, bosherr.WrapErrorf(err, "Getting partitions for %s", devicePath)
 	}
-
 	if len(existingPartitions) < len(partitionsToMatch) {
-		return
+		return false, nil
 	}
 
 	remainingDiskSpace, err := p.GetDeviceSizeInBytes(devicePath)
 	if err != nil {
-		err = bosherr.WrapErrorf(err, "Getting device size for %s", devicePath)
-		return
+		return false, bosherr.WrapErrorf(err, "Getting device size for %s", devicePath)
 	}
 
 	for index, partitionToMatch := range partitionsToMatch {
@@ -148,27 +146,28 @@ func (p sfdiskPartitioner) diskMatchesPartitions(devicePath string, partitionsTo
 		existingPartition := existingPartitions[index]
 		switch {
 		case existingPartition.Type != partitionToMatch.Type:
-			return
+			return false, nil
 		case !withinDelta(existingPartition.SizeInBytes, partitionToMatch.SizeInBytes, p.convertFromMbToBytes(20)):
-			return
+			return false, nil
 		}
 
 		remainingDiskSpace = remainingDiskSpace - partitionToMatch.SizeInBytes
 	}
 
-	return true
+	return true, nil
 }
 
-func (p sfdiskPartitioner) getPartitions(devicePath string) (partitions []Partition, err error) {
+func (p sfdiskPartitioner) getPartitions(devicePath string) ([]Partition, error) {
 	stdout, _, _, err := p.cmdRunner.RunCommand("sfdisk", "-d", devicePath)
 	if err != nil {
-		err = bosherr.WrapError(err, "Shelling out to sfdisk")
-		return
+		return nil, bosherr.WrapError(err, "Shelling out to sfdisk when getting partitions")
 	}
+
+	partitions := []Partition{}
 
 	allLines := strings.Split(stdout, "\n")
 	if len(allLines) < 4 {
-		return
+		return partitions, nil
 	}
 
 	partitionLines := allLines[3 : len(allLines)-1]
@@ -178,6 +177,9 @@ func (p sfdiskPartitioner) getPartitions(devicePath string) (partitions []Partit
 		partition := Partition{Type: partitionType}
 
 		if partition.Type != PartitionTypeEmpty {
+			if strings.Contains(partitionPath, "/dev/mapper/") {
+				partitionPath = partitionPath[0:len(partitionPath)-1] + "-part1"
+			}
 			size, err := p.GetDeviceSizeInBytes(partitionPath)
 			if err == nil {
 				partition.SizeInBytes = size
@@ -186,7 +188,7 @@ func (p sfdiskPartitioner) getPartitions(devicePath string) (partitions []Partit
 
 		partitions = append(partitions, partition)
 	}
-	return
+	return partitions, nil
 }
 
 var partitionTypesMap = map[string]PartitionType{

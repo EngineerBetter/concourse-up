@@ -3,6 +3,7 @@
 package pb
 
 import (
+	"io"
 	"sync"
 	"time"
 )
@@ -14,18 +15,24 @@ func StartPool(pbs ...*ProgressBar) (pool *Pool, err error) {
 	if err = pool.start(); err != nil {
 		return
 	}
-	pool.add(pbs...)
+	pool.Add(pbs...)
 	return
 }
 
 type Pool struct {
-	RefreshRate time.Duration
-	bars        []*ProgressBar
-	quit        chan int
-	finishOnce  sync.Once
+	Output        io.Writer
+	RefreshRate   time.Duration
+	bars          []*ProgressBar
+	lastBarsCount int
+	quit          chan int
+	m             sync.Mutex
+	finishOnce    sync.Once
 }
 
-func (p *Pool) add(pbs ...*ProgressBar) {
+// Add progress bars.
+func (p *Pool) Add(pbs ...*ProgressBar) {
+	p.m.Lock()
+	defer p.m.Unlock()
 	for _, bar := range pbs {
 		bar.ManualUpdate = true
 		bar.NotPrint = true

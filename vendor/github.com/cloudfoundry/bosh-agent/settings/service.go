@@ -6,6 +6,7 @@ import (
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 	boshsys "github.com/cloudfoundry/bosh-utils/system"
+	"sync"
 )
 
 type Service interface {
@@ -25,6 +26,7 @@ type settingsService struct {
 	fs                     boshsys.FileSystem
 	settingsPath           string
 	settings               Settings
+	settingsMutex          sync.Mutex
 	settingsSource         Source
 	defaultNetworkResolver DefaultNetworkResolver
 	logger                 boshlog.Logger
@@ -72,17 +74,25 @@ func (s *settingsService) LoadSettings() error {
 
 		s.logger.Debug(settingsServiceLogTag, "Successfully read settings from file")
 
-		err := json.Unmarshal(existingSettingsJSON, &s.settings)
+		cachedSettings := Settings{}
+
+		err := json.Unmarshal(existingSettingsJSON, &cachedSettings)
 		if err != nil {
 			s.logger.Error(settingsServiceLogTag, "Failed unmarshalling settings from file %s", err.Error())
 			return bosherr.WrapError(fetchErr, "Invoking settings fetcher")
 		}
 
+		s.settingsMutex.Lock()
+		s.settings = cachedSettings
+		s.settingsMutex.Unlock()
+
 		return nil
 	}
 
 	s.logger.Debug(settingsServiceLogTag, "Successfully received settings from fetcher")
+	s.settingsMutex.Lock()
 	s.settings = newSettings
+	s.settingsMutex.Unlock()
 
 	newSettingsJSON, err := json.Marshal(newSettings)
 	if err != nil {
@@ -99,7 +109,20 @@ func (s *settingsService) LoadSettings() error {
 
 // GetSettings returns setting even if it fails to resolve IPs for dynamic networks.
 func (s *settingsService) GetSettings() Settings {
+	s.settingsMutex.Lock()
+
+	settingsCopy := s.settings
+
+	if s.settings.Networks != nil {
+		settingsCopy.Networks = make(map[string]Network)
+	}
+
 	for networkName, network := range s.settings.Networks {
+		settingsCopy.Networks[networkName] = network
+	}
+	s.settingsMutex.Unlock()
+
+	for networkName, network := range settingsCopy.Networks {
 		if !network.IsDHCP() {
 			continue
 		}
@@ -109,10 +132,9 @@ func (s *settingsService) GetSettings() Settings {
 			break
 		}
 
-		s.settings.Networks[networkName] = resolvedNetwork
+		settingsCopy.Networks[networkName] = resolvedNetwork
 	}
-
-	return s.settings
+	return settingsCopy
 }
 
 func (s *settingsService) InvalidateSettings() error {

@@ -5,6 +5,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/cloudfoundry/bosh-agent/agent/action"
 	"github.com/cloudfoundry/bosh-agent/agentclient"
 	"github.com/cloudfoundry/bosh-agent/agentclient/applyspec"
 	"github.com/cloudfoundry/bosh-agent/settings"
@@ -130,7 +131,7 @@ func (c *agentClient) MigrateDisk() error {
 	return err
 }
 
-func (c *agentClient) UpdateSettings(settings settings.Settings) error {
+func (c *agentClient) UpdateSettings(settings settings.UpdateSettings) error {
 	_, err := c.sendAsyncTaskMessage("update_settings", []interface{}{settings})
 	return err
 }
@@ -200,14 +201,23 @@ func (c *agentClient) DeleteARPEntries(ips []string) error {
 	return c.agentRequest.Send("delete_arp_entries", []interface{}{map[string][]string{"ips": ips}}, &TaskResponse{})
 }
 
-func (c *agentClient) SyncDNS(blobID, sha1 string) (string, error) {
+func (c *agentClient) SyncDNS(blobID, sha1 string, version uint64) (string, error) {
 	var response SyncDNSResponse
-	err := c.agentRequest.Send("sync_dns", []interface{}{blobID, sha1}, &response)
+	err := c.agentRequest.Send("sync_dns", []interface{}{blobID, sha1, version}, &response)
 	if err != nil {
 		return "", bosherr.WrapError(err, "Sending 'sync_dns' to the agent")
 	}
 
 	return response.Value, nil
+}
+
+func (c *agentClient) SSH(cmd string, params action.SSHParams) error {
+	err := c.agentRequest.Send("ssh", []interface{}{cmd, params}, &SSHResponse{})
+	if err != nil {
+		return bosherr.WrapError(err, "Sending 'ssh' to the agent")
+	}
+
+	return nil
 }
 
 func (c *agentClient) sendAsyncTaskMessage(method string, arguments []interface{}) (value map[string]interface{}, err error) {

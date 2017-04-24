@@ -13,6 +13,8 @@ import (
 	"github.com/pivotal-golang/clock"
 )
 
+const partitionNamePrefix = "bosh-partition"
+
 type partedPartitioner struct {
 	logger      boshlog.Logger
 	cmdRunner   boshsys.CmdRunner
@@ -29,19 +31,21 @@ func NewPartedPartitioner(logger boshlog.Logger, cmdRunner boshsys.CmdRunner, ti
 	}
 }
 
-func (p partedPartitioner) Partition(devicePath string, partitions []Partition) error {
+func (p partedPartitioner) Partition(devicePath string, desiredPartitions []Partition) error {
 	existingPartitions, deviceFullSizeInBytes, err := p.getPartitions(devicePath)
 	if err != nil {
 		return bosherr.WrapErrorf(err, "Getting existing partitions of `%s'", devicePath)
 	}
 
-	if p.partitionsMatch(existingPartitions, partitions) {
+	if p.partitionsMatch(existingPartitions, desiredPartitions, deviceFullSizeInBytes) {
 		return nil
 	}
 
-	partitionStart := p.decideFirstPartitionStartingPoint(existingPartitions)
+	if p.areAnyExistingPartitionsCreatedByBosh(existingPartitions) {
+		return bosherr.Errorf("'%s' contains a partition created by bosh. No partitioning is allowed.", devicePath)
+	}
 
-	if err = p.createEachPartition(partitions, partitionStart, deviceFullSizeInBytes, devicePath); err != nil {
+	if err = p.createEachPartition(desiredPartitions, deviceFullSizeInBytes, devicePath); err != nil {
 		return err
 	}
 
@@ -55,54 +59,57 @@ func (p partedPartitioner) Partition(devicePath string, partitions []Partition) 
 }
 
 func (p partedPartitioner) GetDeviceSizeInBytes(devicePath string) (uint64, error) {
-	p.logger.Debug(p.logTag, "Getting size of disk remaining after first partition")
-
-	stdout, _, _, err := p.cmdRunner.RunCommand("parted", "-m", devicePath, "unit", "B", "print")
+	stdout, _, _, err := p.cmdRunner.RunCommand("lsblk", "--nodeps", "-nb", "-o", "SIZE", devicePath)
 	if err != nil {
-		return 0, bosherr.WrapErrorf(err, "Getting remaining size of `%s'", devicePath)
+		return 0, bosherr.WrapErrorf(err, "Getting block device size of '%s'", devicePath)
 	}
 
-	allLines := strings.Split(stdout, "\n")
-	if len(allLines) < 3 {
-		return 0, bosherr.Errorf("Getting remaining size of `%s'", devicePath)
-	}
-
-	partitionInfoLines := allLines[1:3]
-	deviceInfo := strings.Split(partitionInfoLines[0], ":")
-	deviceFullSizeInBytes, err := strconv.ParseUint(strings.TrimRight(deviceInfo[1], "B"), 10, 64)
+	deviceSize, err := strconv.Atoi(strings.Trim(stdout, "\n"))
 	if err != nil {
-		return 0, bosherr.WrapErrorf(err, "Getting remaining size of `%s'", devicePath)
+		return 0, bosherr.WrapErrorf(err, "Converting block device size of '%s'", devicePath)
 	}
 
-	firstPartitionInfo := strings.Split(partitionInfoLines[1], ":")
-	firstPartitionEndInBytes, err := strconv.ParseUint(strings.TrimRight(firstPartitionInfo[2], "B"), 10, 64)
-	if err != nil {
-		return 0, bosherr.WrapErrorf(err, "Getting remaining size of `%s'", devicePath)
-	}
-
-	remainingSizeInBytes := deviceFullSizeInBytes - firstPartitionEndInBytes - 1
-
-	return remainingSizeInBytes, nil
+	return uint64(deviceSize), nil
 }
 
-func (p partedPartitioner) partitionsMatch(existingPartitions []existingPartition, partitions []Partition) bool {
-	if len(existingPartitions) != len(partitions) {
+func (p partedPartitioner) partitionsMatch(existingPartitions []existingPartition, desiredPartitions []Partition, deviceSizeInBytes uint64) bool {
+	if len(existingPartitions) < len(desiredPartitions) {
 		return false
 	}
 
-	for index, partition := range partitions {
+	remainingDiskSpace := deviceSizeInBytes
+
+	for index, partition := range desiredPartitions {
+		if index == len(desiredPartitions)-1 && partition.SizeInBytes == 0 {
+			partition.SizeInBytes = remainingDiskSpace
+		}
+
 		existingPartition := existingPartitions[index]
-		if !withinDelta(partition.SizeInBytes, existingPartition.SizeInBytes, p.convertFromMbToBytes(20)) {
+		if existingPartition.Type != partition.Type {
+			return false
+		} else if !withinDelta(partition.SizeInBytes, existingPartition.SizeInBytes, p.convertFromMbToBytes(20)) {
 			return false
 		}
+
+		remainingDiskSpace = remainingDiskSpace - partition.SizeInBytes
 	}
 
 	return true
 }
 
+func (p partedPartitioner) areAnyExistingPartitionsCreatedByBosh(existingPartitions []existingPartition) bool {
+	for _, partition := range existingPartitions {
+		if strings.HasPrefix(partition.Name, partitionNamePrefix) {
+			return true
+		}
+	}
+
+	return false
+}
+
+// For reference on format of outputs: http://lists.alioth.debian.org/pipermail/parted-devel/2006-December/000573.html
 func (p partedPartitioner) getPartitions(devicePath string) (partitions []existingPartition, deviceFullSizeInBytes uint64, err error) {
 	stdout, _, _, err := p.runPartedPrint(devicePath)
-
 	if err != nil {
 		return partitions, deviceFullSizeInBytes, bosherr.WrapErrorf(err, "Running parted print")
 	}
@@ -147,6 +154,15 @@ func (p partedPartitioner) getPartitions(devicePath string) (partitions []existi
 			return partitions, deviceFullSizeInBytes, bosherr.WrapErrorf(err, "Parsing existing partitions")
 		}
 
+		partitionType := PartitionTypeUnknown
+		if partitionInfo[4] == "ext4" || partitionInfo[4] == "xfs" {
+			partitionType = PartitionTypeLinux
+		} else if partitionInfo[4] == "linux-swap(v1)" {
+			partitionType = PartitionTypeSwap
+		}
+
+		partitionName := partitionInfo[5]
+
 		partitions = append(
 			partitions,
 			existingPartition{
@@ -154,6 +170,8 @@ func (p partedPartitioner) getPartitions(devicePath string) (partitions []existi
 				SizeInBytes:  uint64(partitionSizeInBytes),
 				StartInBytes: uint64(partitionStartInBytes),
 				EndInBytes:   uint64(partitionEndInBytes),
+				Type:         partitionType,
+				Name:         partitionName,
 			},
 		)
 	}
@@ -177,7 +195,7 @@ func (p partedPartitioner) runPartedPrint(devicePath string) (stdout, stderr str
 	stdout, stderr, exitStatus, err = p.cmdRunner.RunCommand("parted", "-m", devicePath, "unit", "B", "print")
 
 	// If the error is not having a partition table, create one
-	if err != nil && strings.Contains(err.Error(), "unrecognised disk label") {
+	if strings.Contains(fmt.Sprintf("%s\n%s", stdout, stderr), "unrecognised disk label") {
 		stdout, stderr, exitStatus, err = p.getPartitionTable(devicePath)
 
 		if err != nil {
@@ -222,41 +240,24 @@ func (p partedPartitioner) roundDown(numToRound, multiple uint64) uint64 {
 	return numToRound - remainder
 }
 
-func (p partedPartitioner) decideFirstPartitionStartingPoint(existingPartitions []existingPartition) uint64 {
-	partitionStart := uint64(0)
-	if len(existingPartitions) == 0 {
-		partitionStart = uint64(513)
-	} else {
-		partitionStart = existingPartitions[len(existingPartitions)-1].EndInBytes + 1
-	}
-
+func (p partedPartitioner) createEachPartition(partitions []Partition, deviceFullSizeInBytes uint64, devicePath string) error {
+	partitionStart := uint64(1048576)
 	alignmentInBytes := uint64(1048576)
-	partitionStart = p.roundUp(partitionStart, alignmentInBytes)
-	return partitionStart
-}
 
-func (p partedPartitioner) createEachPartition(partitions []Partition, partitionStart uint64, deviceFullSizeInBytes uint64, devicePath string) error {
-	//For each Parition
-	alignmentInBytes := uint64(1048576)
 	for index, partition := range partitions {
-
-		//Get end point for partition
 		var partitionEnd uint64
 
 		if partition.SizeInBytes == 0 {
-			// If no partitions were specified, use the whole disk space
-			partitionEnd = p.roundDown(deviceFullSizeInBytes-1, alignmentInBytes)
+			partitionEnd = deviceFullSizeInBytes - 1
 		} else {
 			partitionEnd = partitionStart + partition.SizeInBytes
-			// If the partition size is greater than the remaining space on disk, truncate the partition to whatever size is left
 			if partitionEnd >= deviceFullSizeInBytes {
 				partitionEnd = deviceFullSizeInBytes - 1
 				p.logger.Info(p.logTag, "Partition %d would be larger than remaining space. Reducing size to %dB", index, partitionEnd-partitionStart)
 			}
-			partitionEnd = p.roundDown(partitionEnd, alignmentInBytes) - 1
 		}
+		partitionEnd = p.roundDown(partitionEnd, alignmentInBytes) - 1
 
-		// Create and run a retryable
 		partitionRetryable := boshretry.NewRetryable(func() (bool, error) {
 			_, _, _, err := p.cmdRunner.RunCommand(
 				"parted",
@@ -265,7 +266,7 @@ func (p partedPartitioner) createEachPartition(partitions []Partition, partition
 				"unit",
 				"B",
 				"mkpart",
-				"primary",
+				fmt.Sprintf("%s-%d", partitionNamePrefix, index),
 				fmt.Sprintf("%d", partitionStart),
 				fmt.Sprintf("%d", partitionEnd),
 			)
@@ -285,7 +286,6 @@ func (p partedPartitioner) createEachPartition(partitions []Partition, partition
 			return bosherr.WrapErrorf(err, "Partitioning disk `%s'", devicePath)
 		}
 
-		//increment
 		partitionStart = p.roundUp(partitionEnd+1, alignmentInBytes)
 	}
 	return nil

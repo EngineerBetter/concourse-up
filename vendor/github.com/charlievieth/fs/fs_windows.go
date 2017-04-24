@@ -14,34 +14,36 @@ import (
 	"strings"
 	"syscall"
 	"time"
+	"unicode"
 )
 
-func isSlash(c uint8) bool { return c == '\\' || c == '/' }
+// https://msdn.microsoft.com/en-us/library/windows/desktop/aa365247(v=vs.85).aspx#maxpath
+//
+//   When using an API to create a directory, the specified path cannot be so
+//   long that you cannot append an 8.3 file name (that is, the directory name
+//   cannot exceed MAX_PATH minus 12).
+//
+//   MAX_PATH = 260
+//
+const MAX_PATH = 248 // 260 - 12
 
 func absPath(path string) (string, error) {
 	if filepath.IsAbs(path) {
 		return filepath.Clean(path), nil
 	}
-	wd, err := os.Getwd()
-	if err != nil {
-		return "", err
-	}
-	if len(path) > 0 && isSlash(path[0]) {
-		return filepath.Join(filepath.VolumeName(wd), path), nil
-	}
-	return filepath.Join(wd, path), nil
+	return filepath.Abs(filepath.Clean(path))
 }
 
 func winPath(path string) (string, error) {
+	if len(path) == 0 || (len(path) >= 2 && path[:2] == `\\`) {
+		return path, nil
+	}
 	p, err := absPath(path)
 	if err != nil {
 		return "", err
 	}
-	if len(p) >= syscall.MAX_PATH-2 {
-		if !strings.HasPrefix(p, `\\?\`) {
-			p = `\\?\` + p
-		}
-		return p, nil
+	if len(p) >= MAX_PATH {
+		return `\\?\` + strings.TrimRightFunc(p, unicode.IsSpace), nil
 	}
 	return path, nil
 }
