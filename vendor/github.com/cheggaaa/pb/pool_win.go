@@ -8,18 +8,13 @@ import (
 )
 
 func (p *Pool) print(first bool) bool {
-	p.m.Lock()
-	defer p.m.Unlock()
 	var out string
 	if !first {
 		coords, err := getCursorPos()
 		if err != nil {
 			log.Panic(err)
 		}
-		coords.Y -= int16(p.lastBarsCount)
-		if coords.Y < 0 {
-			coords.Y = 0
-		}
+		coords.Y -= int16(len(p.bars))
 		coords.X = 0
 
 		err = setCursorPos(coords)
@@ -29,17 +24,12 @@ func (p *Pool) print(first bool) bool {
 	}
 	isFinished := true
 	for _, bar := range p.bars {
-		if !bar.IsFinished() {
+		if !bar.isFinish {
 			isFinished = false
 		}
 		bar.Update()
 		out += fmt.Sprintf("\r%s\n", bar.String())
 	}
-	if p.Output != nil {
-		fmt.Fprint(p.Output, out)
-	} else {
-		fmt.Print(out)
-	}
-	p.lastBarsCount = len(p.bars)
+	fmt.Print(out)
 	return isFinished
 }

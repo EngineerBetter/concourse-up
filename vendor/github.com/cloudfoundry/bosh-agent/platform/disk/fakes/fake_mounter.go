@@ -7,11 +7,6 @@ type FakeMounter struct {
 	MountMountOptions   [][]string
 	MountErr            error
 
-	RemountInPlaceCalled       bool
-	RemountInPlaceMountPoints  []string
-	RemountInPlaceMountOptions [][]string
-	RemountInPlaceErr          error
-
 	RemountAsReadonlyCalled bool
 	RemountAsReadonlyPath   string
 	RemountAsReadonlyErr    error
@@ -33,10 +28,9 @@ type FakeMounter struct {
 	IsMountPointResult        bool
 	IsMountPointErr           error
 
-	IsMountedResult bool
-	IsMountedErr    error
-	IsMountedStub   func(string) (bool, error)
-	isMountedArgs   []string
+	IsMountedDevicePathOrMountPoint string
+	IsMountedResult                 bool
+	IsMountedErr                    error
 }
 
 func (m *FakeMounter) Mount(partitionPath, mountPoint string, mountOptions ...string) error {
@@ -76,20 +70,6 @@ func (m *FakeMounter) IsMountPoint(path string) (partitionPath string, result bo
 }
 
 func (m *FakeMounter) IsMounted(devicePathOrMountPoint string) (bool, error) {
-	m.isMountedArgs = append(m.isMountedArgs, devicePathOrMountPoint)
-	if m.IsMountedStub != nil {
-		return m.IsMountedStub(devicePathOrMountPoint)
-	}
+	m.IsMountedDevicePathOrMountPoint = devicePathOrMountPoint
 	return m.IsMountedResult, m.IsMountedErr
-}
-
-func (m *FakeMounter) IsMountedArgsForCall(callNumber int) string {
-	return m.isMountedArgs[callNumber]
-}
-
-func (m *FakeMounter) RemountInPlace(mountPoint string, mountOptions ...string) error {
-	m.RemountInPlaceCalled = true
-	m.RemountInPlaceMountPoints = append(m.RemountInPlaceMountPoints, mountPoint)
-	m.RemountInPlaceMountOptions = append(m.RemountInPlaceMountOptions, mountOptions)
-	return m.RemountInPlaceErr
 }

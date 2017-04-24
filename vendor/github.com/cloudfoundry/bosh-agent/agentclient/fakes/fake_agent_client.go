@@ -4,7 +4,6 @@ package fakes
 import (
 	"sync"
 
-	"github.com/cloudfoundry/bosh-agent/agent/action"
 	"github.com/cloudfoundry/bosh-agent/agentclient"
 	"github.com/cloudfoundry/bosh-agent/agentclient/applyspec"
 	"github.com/cloudfoundry/bosh-agent/settings"
@@ -92,21 +91,20 @@ type FakeAgentClient struct {
 	deleteARPEntriesReturns struct {
 		result1 error
 	}
-	SyncDNSStub        func(blobID, sha1 string, version uint64) (string, error)
+	SyncDNSStub        func(blobID, sha1 string) (string, error)
 	syncDNSMutex       sync.RWMutex
 	syncDNSArgsForCall []struct {
-		blobID  string
-		sha1    string
-		version uint64
+		blobID string
+		sha1   string
 	}
 	syncDNSReturns struct {
 		result1 string
 		result2 error
 	}
-	UpdateSettingsStub        func(settings.UpdateSettings) error
+	UpdateSettingsStub        func(settings settings.Settings) error
 	updateSettingsMutex       sync.RWMutex
 	updateSettingsArgsForCall []struct {
-		arg1 settings.UpdateSettings
+		settings settings.Settings
 	}
 	updateSettingsReturns struct {
 		result1 error
@@ -120,23 +118,11 @@ type FakeAgentClient struct {
 	runScriptReturns struct {
 		result1 error
 	}
-	SSHStub        func(cmd string, params action.SSHParams) error
-	sSHMutex       sync.RWMutex
-	sSHArgsForCall []struct {
-		cmd    string
-		params action.SSHParams
-	}
-	sSHReturns struct {
-		result1 error
-	}
-	invocations      map[string][][]interface{}
-	invocationsMutex sync.RWMutex
 }
 
 func (fake *FakeAgentClient) Ping() (string, error) {
 	fake.pingMutex.Lock()
 	fake.pingArgsForCall = append(fake.pingArgsForCall, struct{}{})
-	fake.recordInvocation("Ping", []interface{}{})
 	fake.pingMutex.Unlock()
 	if fake.PingStub != nil {
 		return fake.PingStub()
@@ -162,7 +148,6 @@ func (fake *FakeAgentClient) PingReturns(result1 string, result2 error) {
 func (fake *FakeAgentClient) Stop() error {
 	fake.stopMutex.Lock()
 	fake.stopArgsForCall = append(fake.stopArgsForCall, struct{}{})
-	fake.recordInvocation("Stop", []interface{}{})
 	fake.stopMutex.Unlock()
 	if fake.StopStub != nil {
 		return fake.StopStub()
@@ -189,7 +174,6 @@ func (fake *FakeAgentClient) Apply(arg1 applyspec.ApplySpec) error {
 	fake.applyArgsForCall = append(fake.applyArgsForCall, struct {
 		arg1 applyspec.ApplySpec
 	}{arg1})
-	fake.recordInvocation("Apply", []interface{}{arg1})
 	fake.applyMutex.Unlock()
 	if fake.ApplyStub != nil {
 		return fake.ApplyStub(arg1)
@@ -220,7 +204,6 @@ func (fake *FakeAgentClient) ApplyReturns(result1 error) {
 func (fake *FakeAgentClient) Start() error {
 	fake.startMutex.Lock()
 	fake.startArgsForCall = append(fake.startArgsForCall, struct{}{})
-	fake.recordInvocation("Start", []interface{}{})
 	fake.startMutex.Unlock()
 	if fake.StartStub != nil {
 		return fake.StartStub()
@@ -245,7 +228,6 @@ func (fake *FakeAgentClient) StartReturns(result1 error) {
 func (fake *FakeAgentClient) GetState() (agentclient.AgentState, error) {
 	fake.getStateMutex.Lock()
 	fake.getStateArgsForCall = append(fake.getStateArgsForCall, struct{}{})
-	fake.recordInvocation("GetState", []interface{}{})
 	fake.getStateMutex.Unlock()
 	if fake.GetStateStub != nil {
 		return fake.GetStateStub()
@@ -273,7 +255,6 @@ func (fake *FakeAgentClient) MountDisk(arg1 string) error {
 	fake.mountDiskArgsForCall = append(fake.mountDiskArgsForCall, struct {
 		arg1 string
 	}{arg1})
-	fake.recordInvocation("MountDisk", []interface{}{arg1})
 	fake.mountDiskMutex.Unlock()
 	if fake.MountDiskStub != nil {
 		return fake.MountDiskStub(arg1)
@@ -306,7 +287,6 @@ func (fake *FakeAgentClient) UnmountDisk(arg1 string) error {
 	fake.unmountDiskArgsForCall = append(fake.unmountDiskArgsForCall, struct {
 		arg1 string
 	}{arg1})
-	fake.recordInvocation("UnmountDisk", []interface{}{arg1})
 	fake.unmountDiskMutex.Unlock()
 	if fake.UnmountDiskStub != nil {
 		return fake.UnmountDiskStub(arg1)
@@ -337,7 +317,6 @@ func (fake *FakeAgentClient) UnmountDiskReturns(result1 error) {
 func (fake *FakeAgentClient) ListDisk() ([]string, error) {
 	fake.listDiskMutex.Lock()
 	fake.listDiskArgsForCall = append(fake.listDiskArgsForCall, struct{}{})
-	fake.recordInvocation("ListDisk", []interface{}{})
 	fake.listDiskMutex.Unlock()
 	if fake.ListDiskStub != nil {
 		return fake.ListDiskStub()
@@ -363,7 +342,6 @@ func (fake *FakeAgentClient) ListDiskReturns(result1 []string, result2 error) {
 func (fake *FakeAgentClient) MigrateDisk() error {
 	fake.migrateDiskMutex.Lock()
 	fake.migrateDiskArgsForCall = append(fake.migrateDiskArgsForCall, struct{}{})
-	fake.recordInvocation("MigrateDisk", []interface{}{})
 	fake.migrateDiskMutex.Unlock()
 	if fake.MigrateDiskStub != nil {
 		return fake.MigrateDiskStub()
@@ -386,17 +364,11 @@ func (fake *FakeAgentClient) MigrateDiskReturns(result1 error) {
 }
 
 func (fake *FakeAgentClient) CompilePackage(packageSource agentclient.BlobRef, compiledPackageDependencies []agentclient.BlobRef) (compiledPackageRef agentclient.BlobRef, err error) {
-	var compiledPackageDependenciesCopy []agentclient.BlobRef
-	if compiledPackageDependencies != nil {
-		compiledPackageDependenciesCopy = make([]agentclient.BlobRef, len(compiledPackageDependencies))
-		copy(compiledPackageDependenciesCopy, compiledPackageDependencies)
-	}
 	fake.compilePackageMutex.Lock()
 	fake.compilePackageArgsForCall = append(fake.compilePackageArgsForCall, struct {
 		packageSource               agentclient.BlobRef
 		compiledPackageDependencies []agentclient.BlobRef
-	}{packageSource, compiledPackageDependenciesCopy})
-	fake.recordInvocation("CompilePackage", []interface{}{packageSource, compiledPackageDependenciesCopy})
+	}{packageSource, compiledPackageDependencies})
 	fake.compilePackageMutex.Unlock()
 	if fake.CompilePackageStub != nil {
 		return fake.CompilePackageStub(packageSource, compiledPackageDependencies)
@@ -426,16 +398,10 @@ func (fake *FakeAgentClient) CompilePackageReturns(result1 agentclient.BlobRef, 
 }
 
 func (fake *FakeAgentClient) DeleteARPEntries(ips []string) error {
-	var ipsCopy []string
-	if ips != nil {
-		ipsCopy = make([]string, len(ips))
-		copy(ipsCopy, ips)
-	}
 	fake.deleteARPEntriesMutex.Lock()
 	fake.deleteARPEntriesArgsForCall = append(fake.deleteARPEntriesArgsForCall, struct {
 		ips []string
-	}{ipsCopy})
-	fake.recordInvocation("DeleteARPEntries", []interface{}{ipsCopy})
+	}{ips})
 	fake.deleteARPEntriesMutex.Unlock()
 	if fake.DeleteARPEntriesStub != nil {
 		return fake.DeleteARPEntriesStub(ips)
@@ -463,17 +429,15 @@ func (fake *FakeAgentClient) DeleteARPEntriesReturns(result1 error) {
 	}{result1}
 }
 
-func (fake *FakeAgentClient) SyncDNS(blobID string, sha1 string, version uint64) (string, error) {
+func (fake *FakeAgentClient) SyncDNS(blobID string, sha1 string) (string, error) {
 	fake.syncDNSMutex.Lock()
 	fake.syncDNSArgsForCall = append(fake.syncDNSArgsForCall, struct {
-		blobID  string
-		sha1    string
-		version uint64
-	}{blobID, sha1, version})
-	fake.recordInvocation("SyncDNS", []interface{}{blobID, sha1, version})
+		blobID string
+		sha1   string
+	}{blobID, sha1})
 	fake.syncDNSMutex.Unlock()
 	if fake.SyncDNSStub != nil {
-		return fake.SyncDNSStub(blobID, sha1, version)
+		return fake.SyncDNSStub(blobID, sha1)
 	} else {
 		return fake.syncDNSReturns.result1, fake.syncDNSReturns.result2
 	}
@@ -485,10 +449,10 @@ func (fake *FakeAgentClient) SyncDNSCallCount() int {
 	return len(fake.syncDNSArgsForCall)
 }
 
-func (fake *FakeAgentClient) SyncDNSArgsForCall(i int) (string, string, uint64) {
+func (fake *FakeAgentClient) SyncDNSArgsForCall(i int) (string, string) {
 	fake.syncDNSMutex.RLock()
 	defer fake.syncDNSMutex.RUnlock()
-	return fake.syncDNSArgsForCall[i].blobID, fake.syncDNSArgsForCall[i].sha1, fake.syncDNSArgsForCall[i].version
+	return fake.syncDNSArgsForCall[i].blobID, fake.syncDNSArgsForCall[i].sha1
 }
 
 func (fake *FakeAgentClient) SyncDNSReturns(result1 string, result2 error) {
@@ -499,15 +463,14 @@ func (fake *FakeAgentClient) SyncDNSReturns(result1 string, result2 error) {
 	}{result1, result2}
 }
 
-func (fake *FakeAgentClient) UpdateSettings(arg1 settings.UpdateSettings) error {
+func (fake *FakeAgentClient) UpdateSettings(settings1 settings.Settings) error {
 	fake.updateSettingsMutex.Lock()
 	fake.updateSettingsArgsForCall = append(fake.updateSettingsArgsForCall, struct {
-		arg1 settings.UpdateSettings
-	}{arg1})
-	fake.recordInvocation("UpdateSettings", []interface{}{arg1})
+		settings settings.Settings
+	}{settings1})
 	fake.updateSettingsMutex.Unlock()
 	if fake.UpdateSettingsStub != nil {
-		return fake.UpdateSettingsStub(arg1)
+		return fake.UpdateSettingsStub(settings1)
 	} else {
 		return fake.updateSettingsReturns.result1
 	}
@@ -519,10 +482,10 @@ func (fake *FakeAgentClient) UpdateSettingsCallCount() int {
 	return len(fake.updateSettingsArgsForCall)
 }
 
-func (fake *FakeAgentClient) UpdateSettingsArgsForCall(i int) settings.UpdateSettings {
+func (fake *FakeAgentClient) UpdateSettingsArgsForCall(i int) settings.Settings {
 	fake.updateSettingsMutex.RLock()
 	defer fake.updateSettingsMutex.RUnlock()
-	return fake.updateSettingsArgsForCall[i].arg1
+	return fake.updateSettingsArgsForCall[i].settings
 }
 
 func (fake *FakeAgentClient) UpdateSettingsReturns(result1 error) {
@@ -538,7 +501,6 @@ func (fake *FakeAgentClient) RunScript(scriptName string, options map[string]int
 		scriptName string
 		options    map[string]interface{}
 	}{scriptName, options})
-	fake.recordInvocation("RunScript", []interface{}{scriptName, options})
 	fake.runScriptMutex.Unlock()
 	if fake.RunScriptStub != nil {
 		return fake.RunScriptStub(scriptName, options)
@@ -564,88 +526,6 @@ func (fake *FakeAgentClient) RunScriptReturns(result1 error) {
 	fake.runScriptReturns = struct {
 		result1 error
 	}{result1}
-}
-
-func (fake *FakeAgentClient) SSH(cmd string, params action.SSHParams) error {
-	fake.sSHMutex.Lock()
-	fake.sSHArgsForCall = append(fake.sSHArgsForCall, struct {
-		cmd    string
-		params action.SSHParams
-	}{cmd, params})
-	fake.recordInvocation("SSH", []interface{}{cmd, params})
-	fake.sSHMutex.Unlock()
-	if fake.SSHStub != nil {
-		return fake.SSHStub(cmd, params)
-	} else {
-		return fake.sSHReturns.result1
-	}
-}
-
-func (fake *FakeAgentClient) SSHCallCount() int {
-	fake.sSHMutex.RLock()
-	defer fake.sSHMutex.RUnlock()
-	return len(fake.sSHArgsForCall)
-}
-
-func (fake *FakeAgentClient) SSHArgsForCall(i int) (string, action.SSHParams) {
-	fake.sSHMutex.RLock()
-	defer fake.sSHMutex.RUnlock()
-	return fake.sSHArgsForCall[i].cmd, fake.sSHArgsForCall[i].params
-}
-
-func (fake *FakeAgentClient) SSHReturns(result1 error) {
-	fake.SSHStub = nil
-	fake.sSHReturns = struct {
-		result1 error
-	}{result1}
-}
-
-func (fake *FakeAgentClient) Invocations() map[string][][]interface{} {
-	fake.invocationsMutex.RLock()
-	defer fake.invocationsMutex.RUnlock()
-	fake.pingMutex.RLock()
-	defer fake.pingMutex.RUnlock()
-	fake.stopMutex.RLock()
-	defer fake.stopMutex.RUnlock()
-	fake.applyMutex.RLock()
-	defer fake.applyMutex.RUnlock()
-	fake.startMutex.RLock()
-	defer fake.startMutex.RUnlock()
-	fake.getStateMutex.RLock()
-	defer fake.getStateMutex.RUnlock()
-	fake.mountDiskMutex.RLock()
-	defer fake.mountDiskMutex.RUnlock()
-	fake.unmountDiskMutex.RLock()
-	defer fake.unmountDiskMutex.RUnlock()
-	fake.listDiskMutex.RLock()
-	defer fake.listDiskMutex.RUnlock()
-	fake.migrateDiskMutex.RLock()
-	defer fake.migrateDiskMutex.RUnlock()
-	fake.compilePackageMutex.RLock()
-	defer fake.compilePackageMutex.RUnlock()
-	fake.deleteARPEntriesMutex.RLock()
-	defer fake.deleteARPEntriesMutex.RUnlock()
-	fake.syncDNSMutex.RLock()
-	defer fake.syncDNSMutex.RUnlock()
-	fake.updateSettingsMutex.RLock()
-	defer fake.updateSettingsMutex.RUnlock()
-	fake.runScriptMutex.RLock()
-	defer fake.runScriptMutex.RUnlock()
-	fake.sSHMutex.RLock()
-	defer fake.sSHMutex.RUnlock()
-	return fake.invocations
-}
-
-func (fake *FakeAgentClient) recordInvocation(key string, args []interface{}) {
-	fake.invocationsMutex.Lock()
-	defer fake.invocationsMutex.Unlock()
-	if fake.invocations == nil {
-		fake.invocations = map[string][][]interface{}{}
-	}
-	if fake.invocations[key] == nil {
-		fake.invocations[key] = [][]interface{}{}
-	}
-	fake.invocations[key] = append(fake.invocations[key], args)
 }
 
 var _ agentclient.AgentClient = new(FakeAgentClient)

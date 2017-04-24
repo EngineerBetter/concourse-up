@@ -5,7 +5,6 @@ import (
 
 	"runtime/debug"
 
-	"github.com/cloudfoundry/bosh-agent/agent/action"
 	"github.com/cloudfoundry/bosh-agent/agentclient"
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 )
@@ -38,22 +37,6 @@ func (r *SimpleTaskResponse) Unmarshal(message []byte) error {
 type SyncDNSResponse struct {
 	Value     string
 	Exception *exception
-}
-
-type SSHResponse struct {
-	action.SSHResult
-	Exception *exception
-}
-
-func (r *SSHResponse) ServerError() error {
-	if r.Exception != nil {
-		return bosherr.Errorf("Agent responded with error: %s", r.Exception.Message)
-	}
-	return nil
-}
-
-func (r *SSHResponse) Unmarshal(message []byte) error {
-	return json.Unmarshal(message, r)
 }
 
 func (r *SyncDNSResponse) ServerError() error {

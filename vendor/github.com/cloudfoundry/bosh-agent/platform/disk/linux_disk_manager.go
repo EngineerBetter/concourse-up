@@ -1,14 +1,12 @@
 package disk
 
 import (
-	"fmt"
 	"time"
 
+	boshdevutil "github.com/cloudfoundry/bosh-agent/platform/deviceutil"
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 	boshsys "github.com/cloudfoundry/bosh-utils/system"
 	"github.com/pivotal-golang/clock"
-
-	boshdevutil "github.com/cloudfoundry/bosh-agent/platform/deviceutil"
 )
 
 type linuxDiskManager struct {
@@ -23,16 +21,11 @@ type linuxDiskManager struct {
 	runner                boshsys.CmdRunner
 }
 
-type LinuxDiskManagerOpts struct {
-	BindMount       bool
-	PartitionerType string
-}
-
 func NewLinuxDiskManager(
 	logger boshlog.Logger,
 	runner boshsys.CmdRunner,
 	fs boshsys.FileSystem,
-	opts LinuxDiskManagerOpts,
+	bindMount bool,
 ) (manager Manager) {
 	var mounter Mounter
 	var mountsSearcher MountsSearcher
@@ -45,29 +38,18 @@ func NewLinuxDiskManager(
 	// reliably determine which device backs a mount point,
 	// so we use less reliable source of mount information:
 	// the mount command which returns information from /etc/mtab.
-	if opts.BindMount {
+	if bindMount {
 		mountsSearcher = NewCmdMountsSearcher(runner)
 	}
 
 	mounter = NewLinuxMounter(runner, mountsSearcher, 1*time.Second)
 
-	if opts.BindMount {
+	if bindMount {
 		mounter = NewLinuxBindMounter(mounter)
 	}
 
-	var partitioner Partitioner
-
-	switch opts.PartitionerType {
-	case "parted":
-		partitioner = NewPartedPartitioner(logger, runner, clock.NewClock())
-	case "":
-		partitioner = NewSfdiskPartitioner(logger, runner, clock.NewClock())
-	default:
-		panic(fmt.Sprintf("Unknown partitioner type '%s'", opts.PartitionerType))
-	}
-
 	return linuxDiskManager{
-		partitioner:           partitioner,
+		partitioner:           NewSfdiskPartitioner(logger, runner, clock.NewClock()),
 		rootDevicePartitioner: NewRootDevicePartitioner(logger, runner, uint64(20*1024*1024)),
 		partedPartitioner:     NewPartedPartitioner(logger, runner, clock.NewClock()),
 		formatter:             NewLinuxFormatter(runner, fs),
@@ -79,9 +61,13 @@ func NewLinuxDiskManager(
 	}
 }
 
-func (m linuxDiskManager) GetPartitioner() Partitioner           { return m.partitioner }
-func (m linuxDiskManager) GetPartedPartitioner() Partitioner     { return m.partedPartitioner }
-func (m linuxDiskManager) GetRootDevicePartitioner() Partitioner { return m.rootDevicePartitioner }
+func (m linuxDiskManager) GetPartitioner() Partitioner { return m.partitioner }
+
+func (m linuxDiskManager) GetPartedPartitioner() Partitioner { return m.partedPartitioner }
+
+func (m linuxDiskManager) GetRootDevicePartitioner() Partitioner {
+	return m.rootDevicePartitioner
+}
 
 func (m linuxDiskManager) GetFormatter() Formatter           { return m.formatter }
 func (m linuxDiskManager) GetMounter() Mounter               { return m.mounter }

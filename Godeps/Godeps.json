@@ -46,28 +46,24 @@
 		},
 		{
 			"ImportPath": "github.com/cheggaaa/pb",
-			"Comment": "v1.0.13",
-			"Rev": "b6229822fa186496fcbf34111237e7a9693c6971"
+			"Comment": "v1.0.3-1-gc1f48d5",
+			"Rev": "c1f48d5ce4f292dfb775ef52aaedd15be323510d"
 		},
 		{
 			"ImportPath": "github.com/cloudfoundry/bosh-agent/agentclient",
-			"Comment": "v0.0.29",
-			"Rev": "4c438a38f652744cac3f0f4a85f470a213e61b87"
+			"Rev": "50d8e5d7c6c7af860c867816a30ecedc6d75d011"
 		},
 		{
 			"ImportPath": "github.com/cloudfoundry/bosh-agent/platform/deviceutil",
-			"Comment": "v0.0.29",
-			"Rev": "4c438a38f652744cac3f0f4a85f470a213e61b87"
+			"Rev": "50d8e5d7c6c7af860c867816a30ecedc6d75d011"
 		},
 		{
 			"ImportPath": "github.com/cloudfoundry/bosh-agent/platform/disk",
-			"Comment": "v0.0.29",
-			"Rev": "4c438a38f652744cac3f0f4a85f470a213e61b87"
+			"Rev": "50d8e5d7c6c7af860c867816a30ecedc6d75d011"
 		},
 		{
 			"ImportPath": "github.com/cloudfoundry/bosh-agent/settings",
-			"Comment": "v0.0.29",
-			"Rev": "4c438a38f652744cac3f0f4a85f470a213e61b87"
+			"Rev": "50d8e5d7c6c7af860c867816a30ecedc6d75d011"
 		},
 		{
 			"ImportPath": "github.com/cloudfoundry/bosh-cli/blobstore",
@@ -278,13 +274,12 @@
 		},
 		{
 			"ImportPath": "github.com/mattn/go-colorable",
-			"Comment": "v0.0.7-24-gded68f7",
-			"Rev": "ded68f7a9561c023e790de24279db7ebf473ea80"
+			"Comment": "v0.0.4-1-ge8a10dd",
+			"Rev": "e8a10ddc7d2a7fe255f6fd7f501070a4cb62c183"
 		},
 		{
 			"ImportPath": "github.com/mattn/go-isatty",
-			"Comment": "v0.0.2",
-			"Rev": "fc9e8d8ef48496124e79ae0df75490096eccf6fe"
+			"Rev": "56b76bdf51f7708750eac80fa38b952bb9f32639"
 		},
 		{
 			"ImportPath": "github.com/nu7hatch/gouuid",
