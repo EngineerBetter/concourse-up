@@ -36,7 +36,7 @@ var _ = Describe("Client", func() {
 			DirectorKeyPair:          terraform.MetadataStringValue{Value: "-- KEY --"},
 			DirectorSecurityGroupID:  terraform.MetadataStringValue{Value: "sg-123"},
 			VMsSecurityGroupID:       terraform.MetadataStringValue{Value: "sg-456"},
-			DefaultSubnetID:          terraform.MetadataStringValue{Value: "sn-123"}
+			DefaultSubnetID:          terraform.MetadataStringValue{Value: "sn-123"},
 			BoshDBPort:               terraform.MetadataStringValue{Value: "5432"},
 			BoshDBAddress:            terraform.MetadataStringValue{Value: "rds.aws.com"},
 			BoshDBUsername:           terraform.MetadataStringValue{Value: "admin"},
