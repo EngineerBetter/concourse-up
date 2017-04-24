@@ -26,37 +26,38 @@ func Generate(caName, ip string) (*Certs, error) {
 		return nil, err
 	}
 
+	caCertByte, err := caCert.Export()
+	if err != nil {
+		return nil, err
+	}
+
+	keyBytes, err := key.ExportPrivate()
+	if err != nil {
+		return nil, err
+	}
+
+	certBytes, err := cert.Export()
+	if err != nil {
+		return nil, err
+	}
+
 	return &Certs{
-		CACert: caCert,
-		Key:    key,
-		Cert:   cert,
+		CACert: caCertByte,
+		Key:    keyBytes,
+		Cert:   certBytes,
 	}, nil
 }
 
-func signCSR(csrBytes, caCertBytes, caCertKeyBytes []byte) ([]byte, error) {
-	csr, err := pkix.NewCertificateSigningRequestFromPEM(csrBytes)
-	if err != nil {
-		return nil, err
-	}
-	caCert, err := pkix.NewCertificateFromPEM(caCertBytes)
-	if err != nil {
-		return nil, err
-	}
-
-	caCertKey, err := pkix.NewKeyFromPrivateKeyPEM(caCertKeyBytes)
-	if err != nil {
-		return nil, err
-	}
-
+func signCSR(csr *pkix.CertificateSigningRequest, caCert *pkix.Certificate, caCertKey *pkix.Key) (*pkix.Certificate, error) {
 	crtOut, err := pkix.CreateCertificateHost(caCert, caCertKey, csr, 2)
 	if err != nil {
 		return nil, err
 	}
 
-	return crtOut.Export()
+	return crtOut, nil
 }
 
-func generateCACert(caName string) ([]byte, []byte, error) {
+func generateCACert(caName string) (*pkix.Certificate, *pkix.Key, error) {
 	key, err := pkix.CreateRSAKey(4096)
 	if err != nil {
 		return nil, nil, err
@@ -76,20 +77,10 @@ func generateCACert(caName string) ([]byte, []byte, error) {
 		return nil, nil, err
 	}
 
-	caCertBytes, err := caCert.Export()
-	if err != nil {
-		return nil, nil, err
-	}
-
-	caCertKeyBytes, err := key.ExportPrivate()
-	if err != nil {
-		return nil, nil, err
-	}
-
-	return caCertBytes, caCertKeyBytes, nil
+	return caCert, key, nil
 }
 
-func generateCertificateSigningRequest(ip string) ([]byte, []byte, error) {
+func generateCertificateSigningRequest(ip string) (*pkix.CertificateSigningRequest, *pkix.Key, error) {
 	ips, err := pkix.ParseAndValidateIPs(ip)
 	if err != nil {
 		return nil, nil, err
@@ -117,15 +108,5 @@ func generateCertificateSigningRequest(ip string) ([]byte, []byte, error) {
 		return nil, nil, err
 	}
 
-	csrBytes, err := csr.Export()
-	if err != nil {
-		return nil, nil, err
-	}
-
-	keyBytes, err := key.ExportPrivate()
-	if err != nil {
-		return nil, nil, err
-	}
-
-	return csrBytes, keyBytes, nil
+	return csr, key, nil
 }
