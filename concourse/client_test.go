@@ -47,6 +47,8 @@ var _ = Describe("Client", func() {
 			BlobstoreBucket:          terraform.MetadataStringValue{Value: "blobs.aws.com"},
 			BlobstoreUserAccessKeyID: terraform.MetadataStringValue{Value: "abc123"},
 			BlobstoreSecretAccessKey: terraform.MetadataStringValue{Value: "abc123"},
+			ELBSecurityGroupID:       terraform.MetadataStringValue{Value: "sg-789"},
+			ELBName:                  terraform.MetadataStringValue{Value: "elb-123"},
 		}
 		deleteBoshDirectorError = nil
 		actions = []string{}
