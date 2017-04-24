@@ -13,6 +13,7 @@ type Metadata struct {
 	DirectorPublicIP         MetadataStringValue `json:"director_public_ip" valid:"required"`
 	DirectorSecurityGroupID  MetadataStringValue `json:"director_security_group_id" valid:"required"`
 	VMsSecurityGroupID       MetadataStringValue `json:"vms_security_group_id" valid:"required"`
+	ELBSecurityGroupID       MetadataStringValue `json:"elb_security_group_id" valid:"required"`
 	DirectorSubnetID         MetadataStringValue `json:"director_subnet_id" valid:"required"`
 	ConcourseSubnetID        MetadataStringValue `json:"concourse_subnet_id" valid:"required"`
 	BlobstoreBucket          MetadataStringValue `json:"blobstore_bucket" valid:"required"`
@@ -24,6 +25,7 @@ type Metadata struct {
 	BoshDBPassword           MetadataStringValue `json:"bosh_db_password" valid:"required"`
 	BoshDBPort               MetadataStringValue `json:"bosh_db_port" valid:"required"`
 	BoshDBAddress            MetadataStringValue `json:"bosh_db_address" valid:"required"`
+	ELBName                  MetadataStringValue `json:"elb_name"`
 }
 
 // AssertValid returns an error if the struct contains any missing fields

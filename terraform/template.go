@@ -1,5 +1,6 @@
 package terraform
 
+// Template is a terraform configuration template
 const Template = `
 terraform {
 	backend "s3" {
@@ -192,7 +193,33 @@ resource "aws_subnet" "concourse" {
   map_public_ip_on_launch = true
 
   tags {
-    Name = "${var.deployment}-concourse"
+    Name = "${var.deployment}"
+    concourse-up-project = "${var.project}"
+    concourse-up-component = "bosh"
+  }
+}
+
+resource "aws_elb" "concourse" {
+  name            = "${var.project}-concourse-up"
+  subnets         = ["${aws_subnet.concourse.id}"]
+  security_groups = ["${aws_security_group.elb.id}"]
+
+  listener {
+    instance_port      = 8080
+    instance_protocol  = "tcp"
+    lb_port            = 443
+    lb_protocol        = "tcp"
+  }
+
+  listener {
+    instance_port     = 2222
+    instance_protocol = "tcp"
+    lb_port           = 2222
+    lb_protocol       = "tcp"
+  }
+
+  tags {
+    Name = "${var.deployment}"
     concourse-up-project = "${var.project}"
     concourse-up-component = "bosh"
   }
@@ -315,6 +342,38 @@ resource "aws_security_group" "rds" {
   }
 }
 
+resource "aws_security_group" "elb" {
+  name        = "${var.deployment}-elb"
+  description = "Concourse UP ELB security group"
+  vpc_id      = "${aws_vpc.default.id}"
+
+  tags {
+    Name    = "${var.project}-elb"
+    project = "${var.project}"
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    from_port   = 2222
+    to_port     = 2222
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
 resource "aws_route_table" "rds" {
   vpc_id = "${aws_vpc.default.id}"
 
@@ -425,6 +484,10 @@ output "vms_security_group_id" {
   value = "${aws_security_group.vms.id}"
 }
 
+output "elb_security_group_id" {
+  value = "${aws_security_group.elb.id}"
+}
+
 output "director_subnet_id" {
   value = "${aws_subnet.director.id}"
 }
@@ -467,5 +530,9 @@ output "bosh_db_port" {
 
 output "bosh_db_address" {
   value = "${aws_db_instance.default.address}"
+}
+
+output "elb_name" {
+  value = "${aws_elb.concourse.name}"
 }
 `
