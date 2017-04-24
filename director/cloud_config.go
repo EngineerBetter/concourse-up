@@ -101,7 +101,7 @@ networks:
     gateway: 10.0.1.1
     az: z1
     reserved:
-    - 10.0.1.1
+    - 10.0.1.1-10.0.1.5
     dns:
     - 10.0.0.2
     cloud_properties:
