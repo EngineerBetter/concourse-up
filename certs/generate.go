@@ -1,6 +1,11 @@
 package certs
 
-import "github.com/square/certstrap/pkix"
+import (
+	"net"
+	"strings"
+
+	"github.com/square/certstrap/pkix"
+)
 
 // Certs contains certificates and keys
 type Certs struct {
@@ -10,13 +15,13 @@ type Certs struct {
 }
 
 // Generate generates certs for use in a bosh director manifest
-func Generate(caName, ip string) (*Certs, error) {
+func Generate(caName, ipOrDomain string) (*Certs, error) {
 	caCert, caKey, err := generateCACert(caName)
 	if err != nil {
 		return nil, err
 	}
 
-	csr, key, err := generateCertificateSigningRequest(ip)
+	csr, key, err := generateCertificateSigningRequest(ipOrDomain)
 	if err != nil {
 		return nil, err
 	}
@@ -80,10 +85,22 @@ func generateCACert(caName string) (*pkix.Certificate, *pkix.Key, error) {
 	return caCert, key, nil
 }
 
-func generateCertificateSigningRequest(ip string) (*pkix.CertificateSigningRequest, *pkix.Key, error) {
-	ips, err := pkix.ParseAndValidateIPs(ip)
+func generateCertificateSigningRequest(ipOrDomain string) (*pkix.CertificateSigningRequest, *pkix.Key, error) {
+	var name string
+	var domains []string
+
+	ips, err := pkix.ParseAndValidateIPs(ipOrDomain)
 	if err != nil {
-		return nil, nil, err
+		// if invalid IP address, assume domain instead
+		if strings.Contains(err.Error(), "Invalid IP address") {
+			name = ipOrDomain
+			domains = []string{ipOrDomain}
+			ips = []net.IP{}
+		} else {
+			return nil, nil, err
+		}
+	} else {
+		name = ips[0].String()
 	}
 
 	key, err := pkix.CreateRSAKey(2048)
@@ -91,13 +108,11 @@ func generateCertificateSigningRequest(ip string) (*pkix.CertificateSigningReque
 		return nil, nil, err
 	}
 
-	name := ips[0].String()
-
 	csr, err := pkix.CreateCertificateSigningRequest(
 		key,
 		"",
 		ips,
-		[]string{},
+		domains,
 		"",
 		"",
 		"",

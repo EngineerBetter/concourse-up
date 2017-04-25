@@ -34,6 +34,9 @@ type Config struct {
 	DirectorCert             string `json:"director_cert"`
 	DirectorKey              string `json:"director_key"`
 
+	ConcourseCert string `json:"concourse_cert"`
+	ConcourseKey  string `json:"concourse_key"`
+
 	RDSInstanceClass string `json:"rds_instance_class"`
 	RDSUsername      string `json:"rds_username"`
 	RDSPassword      string `json:"rds_password"`
