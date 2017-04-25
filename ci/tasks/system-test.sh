@@ -19,9 +19,3 @@ fly --target system-test login --concourse-url http://$elb_dns_name --username $
 fly --target system-test workers
 
 go run main.go --non-interactive destroy $deployment
-
-bucket="concourse-up-$deployment-config"
-
-aws s3 rm s3://$bucket --recursive
-aws s3api delete-objects --bucket $bucket --delete "$(aws s3api list-object-versions --bucket $bucket | jq -M '{Objects: [.["Versions","DeleteMarkers"][]| {Key:.Key, VersionId : .VersionId}], Quiet: false}')"
-aws s3 rb s3://$bucket --force

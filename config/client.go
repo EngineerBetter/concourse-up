@@ -14,6 +14,7 @@ const configFilePath = "config.json"
 // IClient is an interface for the config file client
 type IClient interface {
 	Load() (*Config, error)
+	DeleteAll(config *Config) error
 	LoadOrCreate() (*Config, bool, error)
 	Update(*Config) error
 	StoreAsset(filename string, contents []byte) error
@@ -71,6 +72,11 @@ func (client *Client) Update(config *Config) error {
 	}
 
 	return aws.WriteFile(client.configBucket(), configFilePath, configBucketS3Region, bytes)
+}
+
+// DeleteAll deletes the entire configuration bucket
+func (client *Client) DeleteAll(config *Config) error {
+	return aws.DeleteVersionedBucket(config.ConfigBucket, configBucketS3Region)
 }
 
 // Load loads an existing config file from S3

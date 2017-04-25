@@ -30,6 +30,45 @@ const (
 	awsErrCodeNotFound = "NotFound"
 )
 
+// DeleteVersionedBucket deletes and empties a versioned bucket
+func DeleteVersionedBucket(name, region string) error {
+	sess, err := session.NewSession(aws.NewConfig().WithCredentialsChainVerboseErrors(true))
+	if err != nil {
+		return err
+	}
+
+	client := s3.New(sess, &aws.Config{Region: &region})
+
+	versions := []*s3.ObjectVersion{}
+	err = client.ListObjectVersionsPages(&s3.ListObjectVersionsInput{Bucket: &name},
+		func(output *s3.ListObjectVersionsOutput, _ bool) bool {
+			versions = append(versions, output.Versions...)
+
+			return true
+		})
+	if err != nil {
+		return err
+	}
+
+	for _, version := range versions {
+		_, err = client.DeleteObject(&s3.DeleteObjectInput{
+			Bucket:    &name,
+			Key:       version.Key,
+			VersionId: version.VersionId,
+		})
+		if err != nil {
+			return nil
+		}
+	}
+
+	_, err = client.DeleteBucket(&s3.DeleteBucketInput{Bucket: &name})
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 // EnsureBucketExists checks if the named bucket exists and creates it if it doesn't
 func EnsureBucketExists(name, region string) error {
 	sess, err := session.NewSession(aws.NewConfig().WithCredentialsChainVerboseErrors(true))

@@ -54,6 +54,10 @@ func (client *Client) Destroy() error {
 		return err
 	}
 
+	if err := client.configClient.DeleteAll(conf); err != nil {
+		return err
+	}
+
 	return writeDestroySuccessMessage(client.stdout)
 }
 

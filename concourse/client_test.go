@@ -116,6 +116,10 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 			FakeHasAsset: func(filename string) (bool, error) {
 				return false, nil
 			},
+			FakeDeleteAll: func(config *config.Config) error {
+				actions = append(actions, "deleting config")
+				return nil
+			},
 		}
 
 		terraformClientFactory := func(config []byte, stdout, stderr io.Writer) (terraform.IClient, error) {
@@ -299,6 +303,13 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 			Expect(err).ToNot(HaveOccurred())
 
 			Expect(actions).To(ContainElement("cleaning up terraform client"))
+		})
+
+		It("Deletes the config", func() {
+			err := client.Destroy()
+			Expect(err).ToNot(HaveOccurred())
+
+			Expect(actions).To(ContainElement("deleting config"))
 		})
 
 		It("Prints a destroy success message", func() {
