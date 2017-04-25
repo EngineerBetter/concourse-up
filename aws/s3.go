@@ -3,6 +3,7 @@ package aws
 import (
 	"bytes"
 	"io/ioutil"
+	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
@@ -60,6 +61,8 @@ func DeleteVersionedBucket(name, region string) error {
 			return nil
 		}
 	}
+
+	time.Sleep(time.Second)
 
 	_, err = client.DeleteBucket(&s3.DeleteBucketInput{Bucket: &name})
 	if err != nil {
