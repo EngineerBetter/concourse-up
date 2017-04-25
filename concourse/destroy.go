@@ -4,6 +4,8 @@ import (
 	"io"
 
 	"bitbucket.org/engineerbetter/concourse-up/bosh"
+	"bitbucket.org/engineerbetter/concourse-up/config"
+	"bitbucket.org/engineerbetter/concourse-up/terraform"
 )
 
 // Destroy destroys a concourse instance
@@ -24,6 +26,22 @@ func (client *Client) Destroy() error {
 		return err
 	}
 
+	if err = client.deleteBosh(conf, metadata); err != nil {
+		return err
+	}
+
+	if err := terraformClient.Destroy(); err != nil {
+		return err
+	}
+
+	if err := client.configClient.DeleteAll(conf); err != nil {
+		return err
+	}
+
+	return writeDestroySuccessMessage(client.stdout)
+}
+
+func (client *Client) deleteBosh(conf *config.Config, metadata *terraform.Metadata) error {
 	boshClient, err := client.buildBoshClient(conf, metadata)
 	if err != nil {
 		return err
@@ -50,15 +68,7 @@ func (client *Client) Destroy() error {
 		return err
 	}
 
-	if err := terraformClient.Destroy(); err != nil {
-		return err
-	}
-
-	if err := client.configClient.DeleteAll(conf); err != nil {
-		return err
-	}
-
-	return writeDestroySuccessMessage(client.stdout)
+	return nil
 }
 
 func writeDestroySuccessMessage(stdout io.Writer) error {
