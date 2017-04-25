@@ -2,20 +2,18 @@ package bosh_test
 
 import (
 	"fmt"
+	"io/ioutil"
 	"path/filepath"
 	"strings"
 
 	. "bitbucket.org/engineerbetter/concourse-up/bosh"
-	"bitbucket.org/engineerbetter/concourse-up/terraform"
-
-	"io/ioutil"
-
 	"bitbucket.org/engineerbetter/concourse-up/config"
+	"bitbucket.org/engineerbetter/concourse-up/terraform"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
 
-var _ = Describe("Deploy", func() {
+var _ = Describe("Delete", func() {
 	var actions []string
 	var tempDir string
 	var createEnvOutput string
@@ -32,7 +30,7 @@ var _ = Describe("Deploy", func() {
 			err := ioutil.WriteFile(filepath.Join(tempDir, "director-state.json"), []byte("{ some state }"), 0700)
 			Expect(err).ToNot(HaveOccurred())
 
-			if strings.Contains(strings.Join(args, " "), "create-env") {
+			if strings.Contains(strings.Join(args, " "), "delete-env") {
 				return []byte(createEnvOutput), nil
 			}
 			return []byte{}, nil
@@ -60,7 +58,7 @@ var _ = Describe("Deploy", func() {
 
 	BeforeEach(func() {
 		actions = []string{}
-		createEnvOutput = "Finished deploying"
+		createEnvOutput = "Finished deleting deployment"
 
 		var err error
 		tempDir, err = ioutil.TempDir("", "bosh_test")
@@ -107,7 +105,7 @@ var _ = Describe("Deploy", func() {
 	Context("When an initial director state exists", func() {
 		It("Saves the director state", func() {
 			stateFileBytes := []byte("{}")
-			_, err := client.Deploy(stateFileBytes)
+			_, err := client.Delete(stateFileBytes)
 			Expect(err).ToNot(HaveOccurred())
 			Expect(actions).To(ContainElement("Saving file to working dir: director-state.json"))
 		})
@@ -115,74 +113,29 @@ var _ = Describe("Deploy", func() {
 
 	Context("When an initial director state does not exist", func() {
 		It("Does not save the director state", func() {
-			_, err := client.Deploy(nil)
+			_, err := client.Delete(nil)
 			Expect(err).ToNot(HaveOccurred())
 			Expect(actions).ToNot(ContainElement("Saving file to working dir: director-state.json"))
 		})
 	})
 
 	It("Saves the private key", func() {
-		_, err := client.Deploy(nil)
+		_, err := client.Delete(nil)
 		Expect(err).ToNot(HaveOccurred())
 		Expect(actions).To(ContainElement("Saving file to working dir: director.pem"))
 	})
 
-	It("Saves the manifest", func() {
-		_, err := client.Deploy(nil)
+	It("Deletes the director", func() {
+		_, err := client.Delete(nil)
 		Expect(err).ToNot(HaveOccurred())
-		Expect(actions).To(ContainElement("Saving file to working dir: director.yml"))
-	})
-
-	It("Deploys the director", func() {
-		_, err := client.Deploy(nil)
-		Expect(err).ToNot(HaveOccurred())
-		expectedCommand := fmt.Sprintf("Running bosh command: create-env %s/director.yml --state %s/director-state.json", tempDir, tempDir)
+		expectedCommand := fmt.Sprintf("Running bosh command: delete-env %s/director.yml --state %s/director-state.json", tempDir, tempDir)
 		Expect(actions).To(ContainElement(expectedCommand))
 	})
 
-	It("Saves the cloud config", func() {
-		_, err := client.Deploy(nil)
+	It("Deletes concourse", func() {
+		_, err := client.Delete(nil)
 		Expect(err).ToNot(HaveOccurred())
-		Expect(actions).To(ContainElement("Saving file to working dir: cloud-config.yml"))
-	})
-
-	It("Updates the cloud config", func() {
-		_, err := client.Deploy(nil)
-		Expect(err).ToNot(HaveOccurred())
-		expectedCommand := fmt.Sprintf("Running authenticated bosh command: update-cloud-config %s/cloud-config.yml", tempDir)
-		Expect(actions).To(ContainElement(expectedCommand))
-	})
-
-	It("Uploads the concourse stemcell", func() {
-		_, err := client.Deploy(nil)
-		Expect(err).ToNot(HaveOccurred())
-		Expect(actions).To(ContainElement("Running authenticated bosh command: upload-stemcell https://bosh-jenkins-artifacts.s3.amazonaws.com/bosh-stemcell/aws/light-bosh-stemcell-3262.4.1-aws-xen-ubuntu-trusty-go_agent.tgz"))
-	})
-
-	It("Uploads the concourse releases", func() {
-		_, err := client.Deploy(nil)
-		Expect(err).ToNot(HaveOccurred())
-		Expect(actions).To(ContainElement("Running authenticated bosh command: upload-release https://bosh.io/d/github.com/concourse/concourse?v=2.7.3"))
-		Expect(actions).To(ContainElement("Running authenticated bosh command: upload-release https://bosh.io/d/github.com/cloudfoundry/garden-runc-release?v=1.4.0"))
-	})
-
-	It("Saves the concourse manifest", func() {
-		_, err := client.Deploy(nil)
-		Expect(err).ToNot(HaveOccurred())
-		Expect(actions).To(ContainElement("Saving file to working dir: concourse.yml"))
-	})
-
-	It("Creates the default concourse DB", func() {
-		_, err := client.Deploy(nil)
-		Expect(err).ToNot(HaveOccurred())
-		Expect(actions).To(ContainElement("Running SQL: CREATE DATABASE concourse_atc;"))
-	})
-
-	It("Deploys concourse", func() {
-		_, err := client.Deploy(nil)
-		Expect(err).ToNot(HaveOccurred())
-		expectedCommand := fmt.Sprintf("Running authenticated bosh command: --deployment concourse deploy %s/concourse.yml", tempDir)
-		Expect(actions).To(ContainElement(expectedCommand))
+		Expect(actions).To(ContainElement("Running authenticated bosh command: --deployment concourse delete-deployment --force"))
 	})
 
 })
