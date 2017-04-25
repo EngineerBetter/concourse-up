@@ -32,16 +32,21 @@ const StateFilename = "director-state.json"
 
 // Client is a concrete implementation of the IClient interface
 type Client struct {
+	config   *config.Config
+	metadata *terraform.Metadata
+	stdout   io.Writer
+	stderr   io.Writer
+	*tempFiles
+}
+
+type tempFiles struct {
 	tempDir               string
 	directorManifestPath  string
 	concourseManifestPath string
 	cloudConfigPath       string
 	stateFilePath         string
 	caCertPath            string
-	config                *config.Config
-	metadata              *terraform.Metadata
-	stdout                io.Writer
-	stderr                io.Writer
+	keyFilePath           string
 }
 
 // IClient is a client for performing bosh-init commands
@@ -56,69 +61,17 @@ type ClientFactory func(config *config.Config, metadata *terraform.Metadata, sta
 
 // NewClient creates a new Client
 func NewClient(config *config.Config, metadata *terraform.Metadata, stateFileBytes []byte, stdout, stderr io.Writer) (IClient, error) {
-	tempDir, err := ioutil.TempDir("", "concourse-up")
+	tempFiles, err := writeClientTempFiles(config, metadata, stateFileBytes)
 	if err != nil {
 		return nil, err
-	}
-
-	keyfileBytes := []byte(config.PrivateKey)
-	keyFilePath := filepath.Join(tempDir, pemFilename)
-	if err = ioutil.WriteFile(keyFilePath, keyfileBytes, 0700); err != nil {
-		return nil, err
-	}
-
-	manifestBytes, err := generateBoshInitManifest(config, metadata)
-	if err != nil {
-		return nil, err
-	}
-
-	directorManifestPath := filepath.Join(tempDir, directorManifestFilename)
-	if err = ioutil.WriteFile(directorManifestPath, manifestBytes, 0700); err != nil {
-		return nil, err
-	}
-
-	concourseManifestBytes, err := generateConcourseManifest(config, metadata)
-	if err != nil {
-		return nil, err
-	}
-
-	concourseManfestPath := filepath.Join(tempDir, concourseManifestFilename)
-	if err = ioutil.WriteFile(concourseManfestPath, concourseManifestBytes, 0700); err != nil {
-		return nil, err
-	}
-
-	cloudConfigBytes, err := generateCloudConfig(config, metadata)
-	if err != nil {
-		return nil, err
-	}
-
-	cloudConfigPath := filepath.Join(tempDir, cloudConfigFilename)
-	if err = ioutil.WriteFile(cloudConfigPath, cloudConfigBytes, 0700); err != nil {
-		return nil, err
-	}
-
-	caCertPath := filepath.Join(tempDir, caCertFilename)
-	if err = ioutil.WriteFile(caCertPath, []byte(config.DirectorCACert), 0700); err != nil {
-		return nil, err
-	}
-
-	stateFilePath := filepath.Join(tempDir, StateFilename)
-	if stateFileBytes != nil {
-		if err = ioutil.WriteFile(stateFilePath, stateFileBytes, 0700); err != nil {
-			return nil, err
-		}
 	}
 
 	return &Client{
-		tempDir:              tempDir,
-		directorManifestPath: directorManifestPath,
-		cloudConfigPath:      cloudConfigPath,
-		stateFilePath:        stateFilePath,
-		caCertPath:           caCertPath,
-		config:               config,
-		metadata:             metadata,
-		stdout:               stdout,
-		stderr:               stderr,
+		config:    config,
+		metadata:  metadata,
+		stdout:    stdout,
+		stderr:    stderr,
+		tempFiles: tempFiles,
 	}, nil
 }
 
@@ -248,4 +201,69 @@ func (client *Client) runBoshCommand(args ...string) ([]byte, error) {
 	}
 
 	return stdoutBytes, nil
+}
+
+func writeClientTempFiles(config *config.Config, metadata *terraform.Metadata, stateFileBytes []byte) (*tempFiles, error) {
+	tempDir, err := ioutil.TempDir("", "concourse-up")
+	if err != nil {
+		return nil, err
+	}
+
+	manifestBytes, err := generateBoshInitManifest(config, metadata)
+	if err != nil {
+		return nil, err
+	}
+
+	directorManifestPath := filepath.Join(tempDir, directorManifestFilename)
+	if err = ioutil.WriteFile(directorManifestPath, manifestBytes, 0700); err != nil {
+		return nil, err
+	}
+
+	concourseManifestBytes, err := generateConcourseManifest(config, metadata)
+	if err != nil {
+		return nil, err
+	}
+
+	concourseManifestPath := filepath.Join(tempDir, concourseManifestFilename)
+	if err = ioutil.WriteFile(concourseManifestPath, concourseManifestBytes, 0700); err != nil {
+		return nil, err
+	}
+
+	cloudConfigBytes, err := generateCloudConfig(config, metadata)
+	if err != nil {
+		return nil, err
+	}
+
+	cloudConfigPath := filepath.Join(tempDir, cloudConfigFilename)
+	if err = ioutil.WriteFile(cloudConfigPath, cloudConfigBytes, 0700); err != nil {
+		return nil, err
+	}
+
+	keyFileBytes := []byte(config.PrivateKey)
+	keyFilePath := filepath.Join(tempDir, pemFilename)
+	if err = ioutil.WriteFile(keyFilePath, keyFileBytes, 0700); err != nil {
+		return nil, err
+	}
+
+	caCertPath := filepath.Join(tempDir, caCertFilename)
+	if err = ioutil.WriteFile(caCertPath, []byte(config.DirectorCACert), 0700); err != nil {
+		return nil, err
+	}
+
+	stateFilePath := filepath.Join(tempDir, StateFilename)
+	if stateFileBytes != nil {
+		if err = ioutil.WriteFile(stateFilePath, stateFileBytes, 0700); err != nil {
+			return nil, err
+		}
+	}
+
+	return &tempFiles{
+		tempDir:               tempDir,
+		stateFilePath:         stateFilePath,
+		caCertPath:            caCertPath,
+		directorManifestPath:  directorManifestPath,
+		concourseManifestPath: concourseManifestPath,
+		keyFilePath:           keyFilePath,
+		cloudConfigPath:       cloudConfigPath,
+	}, nil
 }
