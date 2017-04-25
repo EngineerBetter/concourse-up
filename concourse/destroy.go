@@ -1,7 +1,6 @@
 package concourse
 
 import (
-	"fmt"
 	"io"
 
 	"bitbucket.org/engineerbetter/concourse-up/bosh"
@@ -38,12 +37,16 @@ func (client *Client) Destroy() error {
 
 	boshStateBytes, err = boshClient.Delete(boshStateBytes)
 	if err != nil {
-		if err = writeDeleteBoshDirectorErrorWarning(client.stderr, err.Error()); err != nil {
-			return err
+		// If there was an error,
+		// attempt to save the bosh state before propagating
+		// This prevents issues when re-trying
+		if boshStateBytes != nil {
+			client.configClient.StoreAsset(bosh.StateFilename, boshStateBytes)
 		}
+		return err
 	}
 
-	if err = client.configClient.StoreAsset(bosh.StateFilename, boshStateBytes); err != nil {
+	if err = client.configClient.DeleteAsset(bosh.StateFilename); err != nil {
 		return err
 	}
 
@@ -54,12 +57,6 @@ func (client *Client) Destroy() error {
 	return writeDestroySuccessMessage(client.stdout)
 }
 
-func writeDeleteBoshDirectorErrorWarning(stderr io.Writer, message string) error {
-	_, err := stderr.Write([]byte(fmt.Sprintf(
-		"Warning error deleting bosh director. Continuing with terraform deletion.\n\t%s", message)))
-
-	return err
-}
 func writeDestroySuccessMessage(stdout io.Writer) error {
 	_, err := stdout.Write([]byte("\nDESTROY SUCCESSFUL\n\n"))
 

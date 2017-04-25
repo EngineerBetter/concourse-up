@@ -2,7 +2,6 @@ package bosh
 
 import (
 	"errors"
-	"io/ioutil"
 	"strings"
 )
 
@@ -37,14 +36,9 @@ func (client *Client) Delete(stateFileBytes []byte) ([]byte, error) {
 		return stateFileBytes, err
 	}
 
-	stateFileBytes, err = ioutil.ReadFile(stateFilePath)
-	if err != nil {
-		return stateFileBytes, err
-	}
-
 	if !strings.Contains(string(output), "Finished deleting deployment") {
-		return stateFileBytes, errors.New("Couldn't find string `Finished deleting deployment` in bosh stdout/stderr output")
+		return nil, errors.New("Couldn't find string `Finished deleting deployment` in bosh stdout/stderr output")
 	}
 
-	return stateFileBytes, nil
+	return nil, nil
 }

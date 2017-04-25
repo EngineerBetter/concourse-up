@@ -162,3 +162,19 @@ func LoadFile(bucket, path, region string) ([]byte, error) {
 
 	return ioutil.ReadAll(output.Body)
 }
+
+// DeleteFile deletes a file from S3
+func DeleteFile(bucket, path, region string) error {
+	sess, err := session.NewSession(aws.NewConfig().WithCredentialsChainVerboseErrors(true))
+	if err != nil {
+		return err
+	}
+
+	client := s3.New(sess, &aws.Config{Region: &region})
+	_, err = client.DeleteObject(&s3.DeleteObjectInput{
+		Bucket: &bucket,
+		Key:    &path,
+	})
+
+	return err
+}

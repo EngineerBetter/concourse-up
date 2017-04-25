@@ -19,6 +19,7 @@ type IClient interface {
 	StoreAsset(filename string, contents []byte) error
 	HasAsset(filename string) (bool, error)
 	LoadAsset(filename string) ([]byte, error)
+	DeleteAsset(filename string) error
 }
 
 // Client is a client for loading the config file  from S3
@@ -38,6 +39,15 @@ func (client *Client) StoreAsset(filename string, contents []byte) error {
 // LoadAsset loads an associated configuration file
 func (client *Client) LoadAsset(filename string) ([]byte, error) {
 	return aws.LoadFile(
+		client.configBucket(),
+		filename,
+		configBucketS3Region,
+	)
+}
+
+// DeleteAsset deletes an associated configuration file
+func (client *Client) DeleteAsset(filename string) error {
+	return aws.DeleteFile(
 		client.configBucket(),
 		filename,
 		configBucketS3Region,
