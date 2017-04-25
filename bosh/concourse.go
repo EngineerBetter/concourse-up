@@ -129,8 +129,8 @@ stemcells:
   version: latest
 
 tags:
-	concourse-up-project: <% .Project %>
-	concourse-up-component: concourse
+  concourse-up-project: <% .Project %>
+  concourse-up-component: concourse
 
 instance_groups:
 - name: web
