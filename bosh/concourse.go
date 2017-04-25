@@ -2,6 +2,7 @@ package bosh
 
 import (
 	"bitbucket.org/engineerbetter/concourse-up/config"
+	"bitbucket.org/engineerbetter/concourse-up/db"
 	"bitbucket.org/engineerbetter/concourse-up/terraform"
 	"bitbucket.org/engineerbetter/concourse-up/util"
 )
@@ -57,7 +58,7 @@ func generateConcourseManifest(config *config.Config, metadata *terraform.Metada
 		DBPassword: config.RDSPassword,
 		DBName:     config.ConcourseDBName,
 		DBHost:     metadata.BoshDBAddress.Value,
-		DBCACert:   rdsRootCert,
+		DBCACert:   db.RDSRootCert,
 		Network:    "default",
 	}
 

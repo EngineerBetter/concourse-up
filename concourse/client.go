@@ -6,6 +6,7 @@ import (
 	"bitbucket.org/engineerbetter/concourse-up/bosh"
 	"bitbucket.org/engineerbetter/concourse-up/certs"
 	"bitbucket.org/engineerbetter/concourse-up/config"
+	"bitbucket.org/engineerbetter/concourse-up/db"
 	"bitbucket.org/engineerbetter/concourse-up/director"
 	"bitbucket.org/engineerbetter/concourse-up/terraform"
 	"bitbucket.org/engineerbetter/concourse-up/util"
@@ -65,9 +66,25 @@ func (client *Client) buildBoshClient(config *config.Config, metadata *terraform
 		return nil, err
 	}
 
+	dbRunner, err := db.NewRunner(&db.Credentials{
+		Username:      config.RDSUsername,
+		Password:      config.RDSPassword,
+		Address:       metadata.BoshDBAddress.Value,
+		Port:          metadata.BoshDBPort.Value,
+		DB:            config.RDSDefaultDatabaseName,
+		CACert:        db.RDSRootCert,
+		SSHPrivateKey: []byte(config.PrivateKey),
+		SSHPublicIP:   metadata.DirectorPublicIP.Value,
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
 	return client.boshClientFactory(
 		config,
 		metadata,
 		director,
+		dbRunner,
 	), nil
 }
