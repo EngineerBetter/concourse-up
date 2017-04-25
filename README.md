@@ -1,6 +1,8 @@
 # Concourse-Up
 
-A tool for easily setting up a Concourse deployment in a single command.
+![Smiling Pilot](http://i.imgur.com/uLWVhJA.jpg)
+
+A tool for easily deploying [Concourse](concourse.ci) in a single command.
 
 # Features
 
@@ -9,8 +11,8 @@ A tool for easily setting up a Concourse deployment in a single command.
 
 # Prerequisites
 
-- AWS credentials, either configured via AWS CLI, or as envars
-- Terraform 0.9.3 or newer
+- AWS credentials, either configured via AWS CLI, or as [env vars](http://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html#cli-environment)
+- [Terraform](https://www.terraform.io/intro/getting-started/install.html) 0.9.3 or newer
 
 ## Install
 
@@ -36,5 +38,5 @@ go get -u bitbucket.org/engineerbetter/concourse-up
 Set the pipeline with:
 
 ```sh
-fly -t sombrero set-pipeline -p concourse-up -c ci/pipeline.yml --var private_key="$(cat path/to/key)"
+fly -t sombrero set-pipeline -p concourse-up -c ci/pipeline.yml --var private_key="$(cat path/to/key)" -l secret_credentials.yml
 ```
