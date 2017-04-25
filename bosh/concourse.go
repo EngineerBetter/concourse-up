@@ -25,7 +25,7 @@ func (client *Client) uploadConcourse() error {
 	}
 
 	for _, releaseURL := range concourseReleaseURLs {
-		_, err := client.director.RunAuthenticatedCommand(
+		_, err = client.director.RunAuthenticatedCommand(
 			"upload-release",
 			releaseURL,
 		)
@@ -39,7 +39,7 @@ func (client *Client) uploadConcourse() error {
 		return err
 	}
 
-	_, err = client.director.SaveFileToWorkingDir(cloudConfigFilename, concourseManifestBytes)
+	_, err = client.director.SaveFileToWorkingDir(concourseManifestFilename, concourseManifestBytes)
 	if err != nil {
 		return err
 	}
