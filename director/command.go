@@ -34,19 +34,6 @@ func (client *Client) RunAuthenticatedCommand(args ...string) ([]byte, error) {
 // RunCommand runs a command against the bosh director
 // https://github.com/cloudfoundry/bosh-cli/blob/master/main.go
 func (client *Client) RunCommand(args ...string) ([]byte, error) {
-	// var output []byte
-	// err := client.tempDir.PushDir(func() error {
-	// 	var e error
-	// 	output, e = runBoshCLIV2Command(client.stdout, client.stderr, args...)
-	// 	return e
-	// })
-
-	// if err != nil {
-	// 	return nil, err
-	// }
-
-	// return output, nil
-
 	return runBoshCLIV2Command(client.stdout, client.stderr, args...)
 }
 
