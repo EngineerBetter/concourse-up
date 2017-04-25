@@ -87,6 +87,7 @@ func generateConcourseManifest(config *config.Config, metadata *terraform.Metada
 		DBHost:     metadata.BoshDBAddress.Value,
 		DBPort:     metadata.BoshDBPort.Value,
 		DBCACert:   db.RDSRootCert,
+		Project:    config.Project,
 		Network:    "default",
 	}
 
@@ -103,6 +104,7 @@ type awsConcourseManifestParams struct {
 	DBPort     string
 	DBUsername string
 	DBPassword string
+	Project    string
 	DBCACert   string
 	Network    string
 }
@@ -127,7 +129,8 @@ stemcells:
   version: latest
 
 tags:
-  project: concourse-up
+	concourse-up-project: <% .Project %>
+	concourse-up-component: concourse
 
 instance_groups:
 - name: web
