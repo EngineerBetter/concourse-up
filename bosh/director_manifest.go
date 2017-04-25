@@ -9,8 +9,8 @@ import (
 	"bitbucket.org/engineerbetter/concourse-up/util"
 )
 
-const stemcellSHA1 = "f8f1b0f31135d9bdd527a67de1ebbdfed332f3ed"
-const stemcellURL = "https://bosh.io/d/stemcells/bosh-aws-xen-hvm-ubuntu-trusty-go_agent?v=3312.23"
+const stemcellSHA1 = "e02edcaa6d27ed57e5fbb11f90a58315908382f8"
+const stemcellURL = "https://bosh.io/d/stemcells/bosh-aws-xen-hvm-ubuntu-trusty-go_agent?v=3363.19"
 
 const boshCPIReleaseSHA1 = "239fc7797d280f140fc03009fb39060107ff0ee1"
 const boshCPIReleaseURL = "https://bosh.io/d/github.com/cloudfoundry-incubator/bosh-aws-cpi-release?v=63"
