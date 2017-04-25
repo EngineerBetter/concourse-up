@@ -47,14 +47,22 @@ func (client *Client) ensureCerts(config *config.Config, metadata *terraform.Met
 			return nil, err
 		}
 
-		certs, err := client.certGenerator(config.Deployment, ip)
+		directorCerts, err := client.certGenerator(config.Deployment, ip)
 		if err != nil {
 			return nil, err
 		}
 
-		config.DirectorCACert = string(certs.CACert)
-		config.DirectorCert = string(certs.Cert)
-		config.DirectorKey = string(certs.Key)
+		config.DirectorCACert = string(directorCerts.CACert)
+		config.DirectorCert = string(directorCerts.Cert)
+		config.DirectorKey = string(directorCerts.Key)
+
+		concourseCerts, err := client.certGenerator(config.Deployment, metadata.ELBDNSName.Value)
+		if err != nil {
+			return nil, err
+		}
+
+		config.ConcourseCert = string(concourseCerts.Cert)
+		config.ConcourseKey = string(concourseCerts.Key)
 
 		client.configClient.Update(config)
 	}

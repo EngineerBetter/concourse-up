@@ -77,36 +77,42 @@ func (client *Client) deployConcourse() error {
 
 func generateConcourseManifest(config *config.Config, metadata *terraform.Metadata) ([]byte, error) {
 	templateParams := awsConcourseManifestParams{
-		Workers:    config.ConcourseWorkerCount,
-		URL:        fmt.Sprintf("http://%s", metadata.ELBDNSName.Value),
-		Username:   config.ConcourseUsername,
-		Password:   config.ConcoursePassword,
-		DBUsername: config.RDSUsername,
-		DBPassword: config.RDSPassword,
-		DBName:     config.ConcourseDBName,
-		DBHost:     metadata.BoshDBAddress.Value,
-		DBPort:     metadata.BoshDBPort.Value,
-		DBCACert:   db.RDSRootCert,
-		Project:    config.Project,
-		Network:    "default",
+		Workers:              config.ConcourseWorkerCount,
+		URL:                  fmt.Sprintf("http://%s", metadata.ELBDNSName.Value),
+		Username:             config.ConcourseUsername,
+		Password:             config.ConcoursePassword,
+		DBUsername:           config.RDSUsername,
+		DBPassword:           config.RDSPassword,
+		DBName:               config.ConcourseDBName,
+		DBHost:               metadata.BoshDBAddress.Value,
+		DBPort:               metadata.BoshDBPort.Value,
+		DBCACert:             db.RDSRootCert,
+		Project:              config.Project,
+		Network:              "default",
+		TLSCert:              config.ConcourseCert,
+		TLSKey:               config.ConcourseKey,
+		AllowSelfSignedCerts: "true",
 	}
 
 	return util.RenderTemplate(awsConcourseManifestTemplate, templateParams)
 }
 
 type awsConcourseManifestParams struct {
-	Workers    int
-	URL        string
-	Username   string
-	Password   string
-	DBHost     string
-	DBName     string
-	DBPort     string
-	DBUsername string
-	DBPassword string
-	Project    string
-	DBCACert   string
-	Network    string
+	Workers              int
+	URL                  string
+	Username             string
+	Password             string
+	DBHost               string
+	DBName               string
+	DBPort               string
+	DBUsername           string
+	DBPassword           string
+	Project              string
+	DBCACert             string
+	Network              string
+	TLSCert              string
+	TLSKey               string
+	AllowSelfSignedCerts string
 }
 
 // Indent is a helper function to indent the field a given number of spaces
@@ -148,9 +154,16 @@ instance_groups:
   - name: atc
     release: concourse
     properties:
+      allow_self_signed_certificates: <% .AllowSelfSignedCerts %>
       external_url: <% .URL %>
       basic_auth_username: <% .Username %>
       basic_auth_password: <% .Password %>
+      tls_cert: |-
+        <% .Indent "8" .TLSCert %>
+
+      tls_key: |-
+        <% .Indent "8" .TLSKey %>
+
       postgresql:
         port: <% .DBPort %>
         database: <% .DBName %>

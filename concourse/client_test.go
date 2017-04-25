@@ -26,7 +26,7 @@ var _ = Describe("Client", func() {
 	var terraformMetadata *terraform.Metadata
 
 	certGenerator := func(caName string, ip string) (*certs.Certs, error) {
-		actions = append(actions, fmt.Sprintf("generating cert ca: %s, ip: %s", caName, ip))
+		actions = append(actions, fmt.Sprintf("generating cert ca: %s, ca: %s", caName, ip))
 		return &certs.Certs{
 			CACert: []byte("----EXAMPLE CERT----"),
 		}, nil
@@ -195,11 +195,18 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 			Expect(actions).To(ContainElement("cleaning up terraform client"))
 		})
 
-		It("Generates certificates", func() {
+		It("Generates certificates for bosh", func() {
 			err := client.Deploy()
 			Expect(err).ToNot(HaveOccurred())
 
-			Expect(actions).To(ContainElement("generating cert ca: concourse-up-happymeal, ip: 99.99.99.99"))
+			Expect(actions).To(ContainElement("generating cert ca: concourse-up-happymeal, ca: 99.99.99.99"))
+		})
+
+		It("Generates certificates for concourse", func() {
+			err := client.Deploy()
+			Expect(err).ToNot(HaveOccurred())
+
+			Expect(actions).To(ContainElement("generating cert ca: concourse-up-happymeal, ca: elb.aws.com"))
 		})
 
 		It("Updates the config", func() {
