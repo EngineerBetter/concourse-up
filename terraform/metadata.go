@@ -21,8 +21,6 @@ type Metadata struct {
 	BlobstoreSecretAccessKey MetadataStringValue `json:"blobstore_user_secret_access_key" valid:"required"`
 	BoshUserAccessKeyID      MetadataStringValue `json:"bosh_user_access_key_id" valid:"required"`
 	BoshSecretAccessKey      MetadataStringValue `json:"bosh_user_secret_access_key" valid:"required"`
-	BoshDBUsername           MetadataStringValue `json:"bosh_db_username" valid:"required"`
-	BoshDBPassword           MetadataStringValue `json:"bosh_db_password" valid:"required"`
 	BoshDBPort               MetadataStringValue `json:"bosh_db_port" valid:"required"`
 	BoshDBAddress            MetadataStringValue `json:"bosh_db_address" valid:"required"`
 	ELBName                  MetadataStringValue `json:"elb_name"`

@@ -41,8 +41,6 @@ var _ = Describe("Client", func() {
 			DefaultSubnetID:          terraform.MetadataStringValue{Value: "sn-123"},
 			BoshDBPort:               terraform.MetadataStringValue{Value: "5432"},
 			BoshDBAddress:            terraform.MetadataStringValue{Value: "rds.aws.com"},
-			BoshDBUsername:           terraform.MetadataStringValue{Value: "admin"},
-			BoshDBPassword:           terraform.MetadataStringValue{Value: "s3cret"},
 			BoshUserAccessKeyID:      terraform.MetadataStringValue{Value: "abc123"},
 			BoshSecretAccessKey:      terraform.MetadataStringValue{Value: "abc123"},
 			BlobstoreBucket:          terraform.MetadataStringValue{Value: "blobs.aws.com"},
@@ -88,6 +86,8 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 			TFStatePath:      "example-path",
 			DirectorUsername: "admin",
 			DirectorPassword: "secret123",
+			RDSUsername:      "admin",
+			RDSPassword:      "s3cret",
 		}
 		configClient := &FakeConfigClient{
 			FakeLoadOrCreate: func() (*config.Config, bool, error) {

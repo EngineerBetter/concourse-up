@@ -74,8 +74,6 @@ var _ = Describe("Deploy", func() {
 			DefaultSubnetID:          terraform.MetadataStringValue{Value: "sn-123"},
 			BoshDBPort:               terraform.MetadataStringValue{Value: "5432"},
 			BoshDBAddress:            terraform.MetadataStringValue{Value: "rds.aws.com"},
-			BoshDBUsername:           terraform.MetadataStringValue{Value: "admin"},
-			BoshDBPassword:           terraform.MetadataStringValue{Value: "s3cret"},
 			BoshUserAccessKeyID:      terraform.MetadataStringValue{Value: "abc123"},
 			BoshSecretAccessKey:      terraform.MetadataStringValue{Value: "abc123"},
 			BlobstoreBucket:          terraform.MetadataStringValue{Value: "blobs.aws.com"},
@@ -94,6 +92,8 @@ var _ = Describe("Deploy", func() {
 			DirectorUsername: "admin",
 			DirectorPassword: "secret123",
 			ConcourseDBName:  "concourse_atc",
+			RDSUsername:      "admin",
+			RDSPassword:      "s3cret",
 		}
 
 		client = NewClient(

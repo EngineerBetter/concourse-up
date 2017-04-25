@@ -522,14 +522,6 @@ output "bosh_user_secret_access_key" {
   value = "${aws_iam_access_key.bosh.secret}"
 }
 
-output "bosh_db_username" {
-  value = "${var.rds_instance_username}"
-}
-
-output "bosh_db_password" {
-  value = "${var.rds_instance_password}"
-}
-
 output "bosh_db_port" {
   value = "${aws_db_instance.default.port}"
 }

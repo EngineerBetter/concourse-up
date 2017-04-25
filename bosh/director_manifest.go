@@ -24,6 +24,7 @@ func generateBoshInitManifest(conf *config.Config, metadata *terraform.Metadata,
 	if err != nil {
 		return nil, err
 	}
+
 	templateParams := awsDirectorManifestParams{
 		AWSRegion:              conf.Region,
 		AdminUserName:          conf.DirectorUsername,
@@ -34,9 +35,9 @@ func generateBoshInitManifest(conf *config.Config, metadata *terraform.Metadata,
 		BoshAWSSecretAccessKey: metadata.BoshSecretAccessKey.Value,
 		BoshSecurityGroupID:    metadata.DirectorSecurityGroupID.Value,
 		DBHost:                 metadata.BoshDBAddress.Value,
-		DBPassword:             metadata.BoshDBPassword.Value,
+		DBPassword:             conf.RDSPassword,
 		DBPort:                 dbPort,
-		DBUsername:             metadata.BoshDBUsername.Value,
+		DBUsername:             conf.RDSUsername,
 		DBName:                 conf.RDSDefaultDatabaseName,
 		DirectorSubnetID:       metadata.DefaultSubnetID.Value,
 		HMUserPassword:         conf.DirectorHMUserPassword,
