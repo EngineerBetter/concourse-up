@@ -11,19 +11,12 @@ deployment="system-test-$RANDOM"
 go run main.go deploy $deployment
 
 config=$(go run main.go info $deployment)
-director_ip=$(echo $config | jq -r '.terraform.director_public_ip.value')
-username=$(echo $config | jq -r '.config.director_username')
-password=$(echo $config | jq -r '.config.director_password')
-cacert="$(echo $config | jq -r '.config.director_ca_cert')"
+elb_dns_name=$(echo $config | jq -r '.terraform.elb_dns_name.value')
+username=$(echo $config | jq -r '.config.concourse_username')
+password=$(echo $config | jq -r '.config.concourse_password')
 
-echo "$cacert" > cacert.pem
-
-bosh-cli \
-  --ca-cert=cacert.pem \
-  --environment $director_ip \
-  --client $username \
-  --client-secret $password \
-  releases
+fly --target system-test login --concourse-url http://$elb_dns_name --username $username --password $password
+fly --target chimichanga workers
 
 go run main.go --non-interactive destroy $deployment
 
