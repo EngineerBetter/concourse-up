@@ -1,17 +1,22 @@
 # Concourse-Up
 
-![Smiling Pilot](http://i.imgur.com/uLWVhJA.jpg)
-
 A tool for easily deploying [Concourse](concourse.ci) in a single command.
 
-# Features
+## Why?
 
-- Deploys you a Concourse CI using BOSH, without you having to know anything about BOSH
-- Idempotent deployment, using RDS for BOSH and Concourse databases
+Concourse is easy to get started with, but as soon as you want your team to use it you've
+previously had to learn BOSH. The goal of `concourse-up` is to hide the complexity of
+BOSH, providing you with a single command for getting your Concourse up and keeping it running.
 
-# Prerequisites
+## Features
 
-- AWS credentials, either configured via AWS CLI, or as [env vars](http://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html#cli-environment)
+- Deploys you a Concourse CI on AWS, without you having to know anything about BOSH
+- Idempotent deployment (uses RDS for BOSH and Concourse databases)
+- Supports https access by default
+
+## Prerequisites
+
+- AWS credentials, either configured via `aws configure`, or as [env vars](http://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html#cli-environment)
 - [Terraform](https://www.terraform.io/intro/getting-started/install.html) 0.9.3 or newer
 
 ## Install
@@ -25,9 +30,17 @@ git clone git@bitbucket.org:engineerbetter/concourse-up.git
 go get -u bitbucket.org/engineerbetter/concourse-up
 ```
 
-# How to Use it
+## Usage
+
+To deploy a new Concourse:
 
 `concourse-up deploy <your-project-name>`
+
+To destroy a Concourse:
+
+`concourse-up destroy <your-project-name>`
+
+That's it!
 
 ## Tests
 
