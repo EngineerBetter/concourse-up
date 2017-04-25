@@ -3,9 +3,10 @@
 set -eux
 
 which aws
-which terraform
+which bosh-cli
+which fly
 which go
 which jq
-which bosh-cli
+which terraform
 
 echo "GOPATH is $GOPATH"
