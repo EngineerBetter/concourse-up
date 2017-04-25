@@ -2,6 +2,16 @@
 
 A tool for easily setting up a Concourse deployment in a single command.
 
+# Features
+
+- Deploys you a Concourse CI using BOSH, without you having to know anything about BOSH
+- Idempotent deployment, using RDS for BOSH and Concourse databases
+
+# Prerequisites
+
+- AWS credentials, either configured via AWS CLI, or as envars
+- Terraform 0.9.3 or newer
+
 ## Install
 
 `go get` doesn't play nicely with private repos but there is an easy work-around:
@@ -12,6 +22,10 @@ cd $GOPATH/bitbucket.org/engineerbetter
 git clone git@bitbucket.org:engineerbetter/concourse-up.git
 go get -u bitbucket.org/engineerbetter/concourse-up
 ```
+
+# How to Use it
+
+`concourse-up deploy <your-project-name>`
 
 ## Tests
 
