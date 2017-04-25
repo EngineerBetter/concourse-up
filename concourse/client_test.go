@@ -9,6 +9,7 @@ import (
 	"bitbucket.org/engineerbetter/concourse-up/certs"
 	"bitbucket.org/engineerbetter/concourse-up/concourse"
 	"bitbucket.org/engineerbetter/concourse-up/config"
+	"bitbucket.org/engineerbetter/concourse-up/director"
 	"bitbucket.org/engineerbetter/concourse-up/terraform"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -104,13 +105,13 @@ var _ = Describe("Client", func() {
 			}, nil
 		}
 
-		boshClientFactory := func(config *config.Config, metadata *terraform.Metadata, stdout, stderr io.Writer) (bosh.IClient, error) {
+		boshClientFactory := func(config *config.Config, metadata *terraform.Metadata, director director.IClient) bosh.IClient {
 			return &FakeBoshClient{
-				FakeDeploy: func() ([]byte, error) {
+				FakeDeploy: func([]byte) ([]byte, error) {
 					actions = append(actions, "deploying director")
 					return []byte{}, nil
 				},
-				FakeDelete: func() ([]byte, error) {
+				FakeDelete: func([]byte) ([]byte, error) {
 					actions = append(actions, "deleting director")
 					return []byte{}, deleteBoshDirectorError
 				},
@@ -118,7 +119,7 @@ var _ = Describe("Client", func() {
 					actions = append(actions, "cleaning up bosh init")
 					return nil
 				},
-			}, nil
+			}
 		}
 
 		stdout = gbytes.NewBuffer()

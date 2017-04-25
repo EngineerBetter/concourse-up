@@ -6,6 +6,7 @@ import (
 	"bitbucket.org/engineerbetter/concourse-up/bosh"
 	"bitbucket.org/engineerbetter/concourse-up/certs"
 	"bitbucket.org/engineerbetter/concourse-up/config"
+	"bitbucket.org/engineerbetter/concourse-up/director"
 	"bitbucket.org/engineerbetter/concourse-up/terraform"
 	"bitbucket.org/engineerbetter/concourse-up/util"
 )
@@ -53,11 +54,20 @@ func (client *Client) buildTerraformClient(config *config.Config) (terraform.ICl
 }
 
 func (client *Client) buildBoshClient(config *config.Config, metadata *terraform.Metadata) (bosh.IClient, error) {
+	director, err := director.NewClient(director.Credentials{
+		Username: config.DirectorUsername,
+		Password: config.DirectorPassword,
+		Host:     metadata.DirectorPublicIP.Value,
+		CACert:   config.DirectorCACert,
+	}, client.stdout, client.stderr)
+
+	if err != nil {
+		return nil, err
+	}
+
 	return client.boshClientFactory(
 		config,
 		metadata,
-		client.stdout,
-		client.stderr,
-	)
+		director,
+	), nil
 }
-

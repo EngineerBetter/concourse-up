@@ -27,11 +27,6 @@ func (client *Client) createDefaultDatabases() error {
 }
 
 func (client *Client) runSQL(sqlStr string) error {
-	_, err := client.stdout.Write([]byte(fmt.Sprintf("Running SQL: `%s`", sqlStr)))
-	if err != nil {
-		return err
-	}
-
 	tmpFile, err := ioutil.TempFile("", "concourse-up")
 	if err != nil {
 		return err

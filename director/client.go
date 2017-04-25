@@ -8,8 +8,8 @@ import (
 
 // IClient represents a bosh director client
 type IClient interface {
-	RunCommand(args ...string) error
-	RunAuthenticatedCommand(args ...string) error
+	RunCommand(args ...string) ([]byte, error)
+	RunAuthenticatedCommand(args ...string) ([]byte, error)
 	SaveFileToWorkingDir(path string, contents []byte) (string, error)
 	PathInWorkingDir(filename string) string
 	Cleanup() error
