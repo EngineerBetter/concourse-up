@@ -34,6 +34,16 @@ func (client *Client) uploadConcourse() error {
 		}
 	}
 
+	concourseManifestBytes, err := generateConcourseManifest(client.config, client.metadata)
+	if err != nil {
+		return err
+	}
+
+	_, err = client.director.SaveFileToWorkingDir(cloudConfigFilename, concourseManifestBytes)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 

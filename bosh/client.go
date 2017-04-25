@@ -6,14 +6,9 @@ import (
 	"bitbucket.org/engineerbetter/concourse-up/config"
 	"bitbucket.org/engineerbetter/concourse-up/director"
 	"bitbucket.org/engineerbetter/concourse-up/terraform"
-	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 )
 
-const boshInitLogLevel = boshlog.LevelWarn
 const cloudConfigFilename = "cloud-config.yml"
-const caCertFilename = "ca-cert.pem"
-
-var defaultBoshArgs = []string{"--non-interactive", "--tty", "--no-color"}
 
 // StateFilename is default name for bosh-init state file
 const StateFilename = "director-state.json"
