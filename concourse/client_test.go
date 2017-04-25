@@ -48,6 +48,7 @@ var _ = Describe("Client", func() {
 			BlobstoreSecretAccessKey: terraform.MetadataStringValue{Value: "abc123"},
 			ELBSecurityGroupID:       terraform.MetadataStringValue{Value: "sg-789"},
 			ELBName:                  terraform.MetadataStringValue{Value: "elb-123"},
+			ELBDNSName:               terraform.MetadataStringValue{Value: "elb.aws.com"},
 		}
 		deleteBoshDirectorError = nil
 		actions = []string{}
@@ -80,14 +81,16 @@ ZSFal6ECgYBDXbrmvF+G5HoASez0WpgrHxf3oZh+gP40rzwc94m9rVP28i8xTvT9
 5SrvtzwjMsmQPUM/ttaBnNj1PvmOTTmRhXVw5ztAN9hhuIwVm8+mECFObq95NIgm
 sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 -----END RSA PRIVATE KEY-----`,
-			Region:           "eu-west-1",
-			Deployment:       "concourse-up-happymeal",
-			Project:          "happymeal",
-			TFStatePath:      "example-path",
-			DirectorUsername: "admin",
-			DirectorPassword: "secret123",
-			RDSUsername:      "admin",
-			RDSPassword:      "s3cret",
+			Region:            "eu-west-1",
+			Deployment:        "concourse-up-happymeal",
+			Project:           "happymeal",
+			TFStatePath:       "example-path",
+			DirectorUsername:  "admin",
+			DirectorPassword:  "secret123",
+			RDSUsername:       "admin",
+			RDSPassword:       "s3cret",
+			ConcoursePassword: "s3cret",
+			ConcourseUsername: "admin",
 		}
 		configClient := &FakeConfigClient{
 			FakeLoadOrCreate: func() (*config.Config, bool, error) {
@@ -233,8 +236,8 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 		It("Prints the bosh credentials", func() {
 			err := client.Deploy()
 			Expect(err).ToNot(HaveOccurred())
-			Eventually(stdout).Should(gbytes.Say(
-				"DEPLOY SUCCESSFUL. Bosh connection credentials:\n\tIP Address: 99.99.99.99\n\tUsername: admin\n\tPassword: secret123\n\tCA Cert:\n\t\t----EXAMPLE CERT----"))
+			Eventually(stdout).Should(gbytes.Say("DEPLOY SUCCESSFUL"))
+			Eventually(stdout).Should(gbytes.Say("fly --target happymeal login --concourse-url http://elb.aws.com --username admin --password s3cret"))
 		})
 
 		Context("When an existing config is loaded", func() {

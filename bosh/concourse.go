@@ -1,6 +1,8 @@
 package bosh
 
 import (
+	"fmt"
+
 	"bitbucket.org/engineerbetter/concourse-up/config"
 	"bitbucket.org/engineerbetter/concourse-up/db"
 	"bitbucket.org/engineerbetter/concourse-up/terraform"
@@ -8,6 +10,7 @@ import (
 )
 
 const concourseManifestFilename = "concourse.yml"
+const concourseDeploymentName = "concourse"
 
 const concourseStemcellURL = "https://bosh-jenkins-artifacts.s3.amazonaws.com/bosh-stemcell/aws/light-bosh-stemcell-3262.4.1-aws-xen-ubuntu-trusty-go_agent.tgz"
 
@@ -48,16 +51,41 @@ func (client *Client) uploadConcourse() error {
 	return nil
 }
 
+func (client *Client) deployConcourse() error {
+	concourseManifestBytes, err := generateConcourseManifest(client.config, client.metadata)
+	if err != nil {
+		return err
+	}
+
+	concourseManifestPath, err := client.director.SaveFileToWorkingDir(concourseManifestFilename, concourseManifestBytes)
+	if err != nil {
+		return err
+	}
+
+	_, err = client.director.RunAuthenticatedCommand(
+		"--deployment",
+		concourseDeploymentName,
+		"deploy",
+		concourseManifestPath,
+	)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func generateConcourseManifest(config *config.Config, metadata *terraform.Metadata) ([]byte, error) {
 	templateParams := awsConcourseManifestParams{
 		Workers:    config.ConcourseWorkerCount,
-		URL:        metadata.ELBName.Value,
+		URL:        fmt.Sprintf("http://%s", metadata.ELBDNSName.Value),
 		Username:   config.ConcourseUsername,
 		Password:   config.ConcoursePassword,
 		DBUsername: config.RDSUsername,
 		DBPassword: config.RDSPassword,
 		DBName:     config.ConcourseDBName,
 		DBHost:     metadata.BoshDBAddress.Value,
+		DBPort:     metadata.BoshDBPort.Value,
 		DBCACert:   db.RDSRootCert,
 		Network:    "default",
 	}
@@ -72,6 +100,7 @@ type awsConcourseManifestParams struct {
 	Password   string
 	DBHost     string
 	DBName     string
+	DBPort     string
 	DBUsername string
 	DBPassword string
 	DBCACert   string
@@ -120,7 +149,7 @@ instance_groups:
       basic_auth_username: <% .Username %>
       basic_auth_password: <% .Password %>
       postgresql:
-        port: 5432
+        port: <% .DBPort %>
         database: <% .DBName %>
         role:
           name: <% .DBUsername %>

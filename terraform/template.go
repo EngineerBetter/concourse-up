@@ -533,4 +533,8 @@ output "bosh_db_address" {
 output "elb_name" {
   value = "${aws_elb.concourse.name}"
 }
+
+output "elb_dns_name" {
+  value = "${aws_elb.concourse.dns_name}"
+}
 `

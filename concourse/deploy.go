@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"io"
 
-	"strings"
-
 	"bitbucket.org/engineerbetter/concourse-up/bosh"
 	"bitbucket.org/engineerbetter/concourse-up/config"
 	"bitbucket.org/engineerbetter/concourse-up/terraform"
@@ -136,14 +134,12 @@ func (client *Client) loadConfigWithUserIP() (*config.Config, error) {
 }
 
 func writeDeploySuccessMessage(config *config.Config, metadata *terraform.Metadata, stdout io.Writer) error {
-	caCert := strings.Replace(config.DirectorCACert, "\n", "\n\t\t", -1)
-
 	_, err := stdout.Write([]byte(fmt.Sprintf(
-		"\nDEPLOY SUCCESSFUL. Bosh connection credentials:\n\tIP Address: %s\n\tUsername: %s\n\tPassword: %s\n\tCA Cert:\n\t\t%s\n\n",
-		metadata.DirectorPublicIP.Value,
-		config.DirectorUsername,
-		config.DirectorPassword,
-		caCert,
+		"\nDEPLOY SUCCESSFUL. Log in with:\n\nfly --target %s login --concourse-url http://%s --username %s --password %s\n\n",
+		config.Project,
+		metadata.ELBDNSName.Value,
+		config.ConcourseUsername,
+		config.ConcoursePassword,
 	)))
 
 	return err

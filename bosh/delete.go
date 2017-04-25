@@ -7,6 +7,16 @@ import (
 
 // Delete deletes a bosh director
 func (client *Client) Delete(stateFileBytes []byte) ([]byte, error) {
+	_, err := client.director.RunAuthenticatedCommand(
+		"--deployment",
+		concourseDeploymentName,
+		"delete-deployment",
+		"--force",
+	)
+	if err != nil {
+		return nil, err
+	}
+
 	stateFilePath, err := client.saveStateFile(stateFileBytes)
 	if err != nil {
 		return stateFileBytes, err

@@ -29,6 +29,10 @@ func (client *Client) Deploy(stateFileBytes []byte) ([]byte, error) {
 		return stateFileBytes, err
 	}
 
+	if err := client.deployConcourse(); err != nil {
+		return stateFileBytes, err
+	}
+
 	return stateFileBytes, nil
 }
 
