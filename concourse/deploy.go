@@ -94,8 +94,14 @@ func (client *Client) deployBosh(config *config.Config, metadata *terraform.Meta
 	}
 	defer boshClient.Cleanup()
 
-	boshStateBytes, err := boshClient.Deploy()
+	boshStateBytes, err := loadDirectorState(client.configClient)
 	if err != nil {
+		return nil
+	}
+
+	boshStateBytes, err = boshClient.Deploy(boshStateBytes)
+	if err != nil {
+		client.configClient.StoreAsset(bosh.StateFilename, boshStateBytes)
 		return err
 	}
 
@@ -147,4 +153,17 @@ func writeConfigLoadedSuccessMessage(stdout io.Writer) error {
 	_, err := stdout.Write([]byte("\nUSING PREVIOUS DEPLOYMENT CONFIG\n"))
 
 	return err
+}
+
+func loadDirectorState(configClient config.IClient) ([]byte, error) {
+	hasState, err := configClient.HasAsset(bosh.StateFilename)
+	if err != nil {
+		return nil, err
+	}
+
+	if !hasState {
+		return nil, nil
+	}
+
+	return configClient.LoadAsset(bosh.StateFilename)
 }

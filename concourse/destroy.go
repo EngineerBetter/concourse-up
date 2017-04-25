@@ -3,6 +3,8 @@ package concourse
 import (
 	"fmt"
 	"io"
+
+	"bitbucket.org/engineerbetter/concourse-up/bosh"
 )
 
 // Destroy destroys a concourse instance
@@ -29,10 +31,20 @@ func (client *Client) Destroy() error {
 	}
 	defer boshClient.Cleanup()
 
-	if err := boshClient.Delete(); err != nil {
-		if err := writeDeleteBoshDirectorErrorWarning(client.stderr, err.Error()); err != nil {
+	boshStateBytes, err := loadDirectorState(client.configClient)
+	if err != nil {
+		return nil
+	}
+
+	boshStateBytes, err = boshClient.Delete(boshStateBytes)
+	if err != nil {
+		if err = writeDeleteBoshDirectorErrorWarning(client.stderr, err.Error()); err != nil {
 			return err
 		}
+	}
+
+	if err = client.configClient.StoreAsset(bosh.StateFilename, boshStateBytes); err != nil {
+		return err
 	}
 
 	if err := terraformClient.Destroy(); err != nil {

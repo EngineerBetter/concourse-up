@@ -71,16 +71,16 @@ func (client *FakeTerraformClient) Cleanup() error {
 }
 
 type FakeBoshClient struct {
-	FakeDeploy func() ([]byte, error)
-	FakeDelete func() error
-	FakeCleanup        func() error
+	FakeDeploy  func() ([]byte, error)
+	FakeDelete  func() ([]byte, error)
+	FakeCleanup func() error
 }
 
 func (client *FakeBoshClient) Deploy() ([]byte, error) {
 	return client.FakeDeploy()
 }
 
-func (client *FakeBoshClient) Delete() error {
+func (client *FakeBoshClient) Delete() ([]byte, error) {
 	return client.FakeDelete()
 }
 

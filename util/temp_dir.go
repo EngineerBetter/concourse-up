@@ -33,6 +33,11 @@ func (tempDir *TempDir) Save(filename string, contents []byte) (string, error) {
 	return path, nil
 }
 
+// Path returns a path for the given file into the tempDir
+func (tempDir *TempDir) Path(filename string) string {
+	return filepath.Join(tempDir.path, filename)
+}
+
 // Cleanup deletes the tempDir
 func (tempDir *TempDir) Cleanup() error {
 	return os.RemoveAll(tempDir.path)

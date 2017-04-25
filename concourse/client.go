@@ -53,29 +53,11 @@ func (client *Client) buildTerraformClient(config *config.Config) (terraform.ICl
 }
 
 func (client *Client) buildBoshClient(config *config.Config, metadata *terraform.Metadata) (bosh.IClient, error) {
-	directorStateBytes, err := loadDirectorState(client.configClient)
-	if err != nil {
-		return nil, err
-	}
-
 	return client.boshClientFactory(
 		config,
 		metadata,
-		directorStateBytes,
 		client.stdout,
 		client.stderr,
 	)
 }
 
-func loadDirectorState(configClient config.IClient) ([]byte, error) {
-	hasState, err := configClient.HasAsset(bosh.StateFilename)
-	if err != nil {
-		return nil, err
-	}
-
-	if !hasState {
-		return nil, nil
-	}
-
-	return configClient.LoadAsset(bosh.StateFilename)
-}

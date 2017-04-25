@@ -19,7 +19,7 @@ const boshReleaseSHA1 = "4da9cedbcc8fbf11378ef439fb89de08300ad091"
 const boshReleaseURL = "https://bosh.io/d/github.com/cloudfoundry/bosh?v=261.4"
 
 // GenerateBoshInitManifest generates a manifest for the bosh director on AWS
-func generateBoshInitManifest(conf *config.Config, metadata *terraform.Metadata) ([]byte, error) {
+func generateBoshInitManifest(conf *config.Config, metadata *terraform.Metadata, privateKeyPath string) ([]byte, error) {
 	dbPort, err := strconv.Atoi(metadata.BoshDBPort.Value)
 	if err != nil {
 		return nil, err
@@ -43,7 +43,7 @@ func generateBoshInitManifest(conf *config.Config, metadata *terraform.Metadata)
 		KeyPairName:            metadata.DirectorKeyPair.Value,
 		MbusPassword:           conf.DirectorMbusPassword,
 		NATSPassword:           conf.DirectorNATSPassword,
-		PrivateKeyPath:         "director.pem",
+		PrivateKeyPath:         privateKeyPath,
 		PublicIP:               metadata.DirectorPublicIP.Value,
 		RegistryPassword:       conf.DirectorRegistryPassword,
 		S3AWSAccessKeyID:       metadata.BlobstoreUserAccessKeyID.Value,

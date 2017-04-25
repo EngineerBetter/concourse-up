@@ -104,15 +104,15 @@ var _ = Describe("Client", func() {
 			}, nil
 		}
 
-		boshClientFactory := func(config *config.Config, metadata *terraform.Metadata, stateFileBytes []byte, stdout, stderr io.Writer) (bosh.IClient, error) {
+		boshClientFactory := func(config *config.Config, metadata *terraform.Metadata, stdout, stderr io.Writer) (bosh.IClient, error) {
 			return &FakeBoshClient{
 				FakeDeploy: func() ([]byte, error) {
 					actions = append(actions, "deploying director")
 					return []byte{}, nil
 				},
-				FakeDelete: func() error {
+				FakeDelete: func() ([]byte, error) {
 					actions = append(actions, "deleting director")
-					return deleteBoshDirectorError
+					return []byte{}, deleteBoshDirectorError
 				},
 				FakeCleanup: func() error {
 					actions = append(actions, "cleaning up bosh init")

@@ -6,6 +6,8 @@ import (
 	"bitbucket.org/engineerbetter/concourse-up/util"
 )
 
+const concourseManifestFilename = "concourse.yml"
+
 const concourseStemcellURL = "https://bosh-jenkins-artifacts.s3.amazonaws.com/bosh-stemcell/aws/light-bosh-stemcell-3262.4.1-aws-xen-ubuntu-trusty-go_agent.tgz"
 
 var concourseReleaseURLs = []string{
@@ -14,7 +16,7 @@ var concourseReleaseURLs = []string{
 }
 
 func (client *Client) uploadConcourse() error {
-	_, err := client.runAuthenticatedBoshCommand(
+	_, err := client.director.RunAuthenticatedCommand(
 		"upload-stemcell",
 		concourseStemcellURL,
 	)
@@ -23,7 +25,7 @@ func (client *Client) uploadConcourse() error {
 	}
 
 	for _, releaseURL := range concourseReleaseURLs {
-		_, err := client.runAuthenticatedBoshCommand(
+		_, err := client.director.RunAuthenticatedCommand(
 			"upload-release",
 			releaseURL,
 		)
