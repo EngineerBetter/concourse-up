@@ -20,6 +20,7 @@ type FakeConfigClient struct {
 	FakeLoadOrCreate func() (*config.Config, bool, error)
 	FakeStoreAsset   func(filename string, contents []byte) error
 	FakeLoadAsset    func(filename string) ([]byte, error)
+	FakeDeleteAsset  func(filename string) error
 	FakeHasAsset     func(filename string) (bool, error)
 }
 
@@ -41,6 +42,10 @@ func (client *FakeConfigClient) StoreAsset(filename string, contents []byte) err
 
 func (client *FakeConfigClient) LoadAsset(filename string) ([]byte, error) {
 	return client.FakeLoadAsset(filename)
+}
+
+func (client *FakeConfigClient) DeleteAsset(filename string) error {
+	return client.FakeDeleteAsset(filename)
 }
 
 func (client *FakeConfigClient) HasAsset(filename string) (bool, error) {

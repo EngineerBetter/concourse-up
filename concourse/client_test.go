@@ -71,6 +71,10 @@ var _ = Describe("Client", func() {
 				actions = append(actions, "loading config file")
 				return exampleConfig, nil
 			},
+			FakeDeleteAsset: func(filename string) error {
+				actions = append(actions, fmt.Sprintf("deleting config asset: %s", filename))
+				return nil
+			},
 			FakeUpdate: func(config *config.Config) error {
 				actions = append(actions, "updating config file")
 				return nil
@@ -178,6 +182,13 @@ var _ = Describe("Client", func() {
 			Expect(actions).To(ContainElement("deploying director"))
 		})
 
+		It("Saves the bosh state", func() {
+			err := client.Deploy()
+			Expect(err).ToNot(HaveOccurred())
+
+			Expect(actions).To(ContainElement("storing config asset: director-state.json"))
+		})
+
 		It("Cleans up the director", func() {
 			err := client.Deploy()
 			Expect(err).ToNot(HaveOccurred())
@@ -239,6 +250,13 @@ var _ = Describe("Client", func() {
 			Expect(actions).To(ContainElement("cleaning up bosh init"))
 		})
 
+		It("Deletes the bosh state", func() {
+			err := client.Destroy()
+			Expect(err).ToNot(HaveOccurred())
+
+			Expect(actions).To(ContainElement("deleting config asset: director-state.json"))
+		})
+
 		It("Destroys the terraform infrastructure", func() {
 			err := client.Destroy()
 			Expect(err).ToNot(HaveOccurred())
@@ -265,18 +283,9 @@ var _ = Describe("Client", func() {
 				deleteBoshDirectorError = errors.New("some error")
 			})
 
-			It("Still attemps to destroy the terraform", func() {
+			It("Returns the error", func() {
 				err := client.Destroy()
-				Expect(err).ToNot(HaveOccurred())
-
-				Expect(actions).To(ContainElement("destroying terraform"))
-			})
-
-			It("Prints a warning", func() {
-				err := client.Destroy()
-				Expect(err).ToNot(HaveOccurred())
-
-				Eventually(stderr).Should(gbytes.Say("Warning error deleting bosh director. Continuing with terraform deletion."))
+				Expect(err).To(MatchError("some error"))
 			})
 		})
 	})

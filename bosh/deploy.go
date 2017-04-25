@@ -60,6 +60,9 @@ func (client *Client) createEnv(stateFileBytes []byte) ([]byte, error) {
 		stateFilePath,
 	)
 	if err != nil {
+		// Even if deploy does not work, try and save the state file
+		// This prevents issues with re-trying
+		stateFileBytes, _ = ioutil.ReadFile(stateFilePath)
 		return stateFileBytes, err
 	}
 
