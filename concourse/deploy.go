@@ -32,20 +32,7 @@ func (client *Client) Deploy() error {
 		return err
 	}
 
-	if config.Domain == "" {
-		config.Domain = metadata.ELBDNSName.Value
-
-		if err = client.configClient.Update(config); err != nil {
-			return err
-		}
-	}
-
-	config, err = client.ensureDirectorCerts(config, metadata)
-	if err != nil {
-		return err
-	}
-
-	config, err = client.ensureConcourseCerts(config, metadata)
+	config, err = client.checkPredeployConfigRequiments(config, metadata)
 	if err != nil {
 		return err
 	}
@@ -61,7 +48,40 @@ func (client *Client) Deploy() error {
 	return nil
 }
 
+func (client *Client) checkPredeployConfigRequiments(config *config.Config, metadata *terraform.Metadata) (*config.Config, error) {
+	config, err := client.ensureDomain(config, metadata)
+	if err != nil {
+		return nil, err
+	}
+
+	config, err = client.ensureDirectorCerts(config, metadata)
+	if err != nil {
+		return nil, err
+	}
+
+	config, err = client.ensureConcourseCerts(config, metadata)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := client.configClient.Update(config); err != nil {
+		return nil, err
+	}
+
+	return config, nil
+}
+
+func (client *Client) ensureDomain(config *config.Config, metadata *terraform.Metadata) (*config.Config, error) {
+	if config.Domain == "" {
+		config.Domain = metadata.ELBDNSName.Value
+	}
+
+	return config, nil
+}
+
 func (client *Client) ensureDirectorCerts(config *config.Config, metadata *terraform.Metadata) (*config.Config, error) {
+	// If we already have director certificates, don't regenerate as changing them will
+	// force a bosh director re-deploy even if there are no other changes
 	if config.DirectorCACert != "" {
 		return config, nil
 	}
@@ -90,13 +110,10 @@ func (client *Client) ensureConcourseCerts(config *config.Config, metadata *terr
 		config.ConcourseCert = client.args["tls-cert"]
 		config.ConcourseKey = client.args["tls-key"]
 
-		if err := client.configClient.Update(config); err != nil {
-			return nil, err
-		}
-
 		return config, nil
 	}
 
+	// Skip concourse re-deploy if certs have already been set
 	if config.ConcourseCert != "" {
 		return config, nil
 	}
@@ -108,10 +125,6 @@ func (client *Client) ensureConcourseCerts(config *config.Config, metadata *terr
 
 	config.ConcourseCert = string(concourseCerts.Cert)
 	config.ConcourseKey = string(concourseCerts.Key)
-
-	if err = client.configClient.Update(config); err != nil {
-		return nil, err
-	}
 
 	return config, nil
 }
