@@ -44,7 +44,7 @@ Download the [latest release](https://github.com/EngineerBetter/concourse-up/rel
 
 ## Usage
 
-Deploy a new concourse with:
+Deploy a new Concourse with:
 
 ```
 $ concourse-up deploy <your-project-name>
@@ -65,7 +65,7 @@ fly --target ci login --concourse-url http://ci-concourse-up-1420669447.eu-west-
 
 A new deploy from scratch takes approximately 40 minutes.
 
-To fetch information about your concourse-up deployment:
+To fetch information about your `concourse-up` deployment:
 
 ```
 $ concourse-up info <your-project-name>
@@ -87,11 +87,11 @@ You can use a custom domain using the `--domain` flag eg:
 $ concourse-up deploy chimichanga --domain chimichanga.engineerbetter.com
 ```
 
-In the example above Concourse-Up will search for a Route 53 hosted zone that matches `chimichanga.engineerbetter.com` or `engineerbetter.com` and add a record to the longest match (`chimichanga.engineerbetter.com` in this example). The self-signed cert will also be generated using this domain.
+In the example above `concourse-up` will search for a Route 53 hosted zone that matches `chimichanga.engineerbetter.com` or `engineerbetter.com` and add a record to the longest match (`chimichanga.engineerbetter.com` in this example). The self-signed cert will also be generated using this domain.
 
 ## What it does
 
-Concourse up first creates an S3 bucket to store its own configuration and saves a `config.json` file there.
+`concourse-up` first creates an S3 bucket to store its own configuration and saves a `config.json` file there.
 
 It then uses Terraform to deploy the following infrastructure:
 
@@ -105,11 +105,11 @@ It then uses Terraform to deploy the following infrastructure:
 - A security group to allow access to Concourse from the internet
 - An RDS instance (default: db.t2.small) for BOSH and Concourse to use
 
-Once the terraform step is complete, concourse-up deploys a BOSH director on an t2.medium instance, and then uses that to deploy a concourse with the following settings:
+Once the terraform step is complete, `concourse-up` deploys a BOSH director on an t2.medium instance, and then uses that to deploy a Concourse with the following settings:
 
 - One m3.medium [spot](https://aws.amazon.com/ec2/spot/) instance for the Concourse web server
 - One m3.xlarge spot instance used as a Concourse worker
-- Access via a loadbalancer over HTTP and HTTPS using a self-signed cert created by concourse-up
+- Access via a loadbalancer over HTTP and HTTPS using a self-signed cert created by `concourse-up`
 
 ## Tests
 
