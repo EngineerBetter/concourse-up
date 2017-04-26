@@ -4,6 +4,15 @@ A tool for easily deploying [Concourse](https://concourse.ci) in a single comman
 
 ![](https://ci.engineerbetter.com/api/v1/teams/main/pipelines/concourse-up/jobs/test/badge)
 
+## TL;DR
+
+```
+$ AWS_ACCESS_KEY_ID=<access-key-id> \
+  AWS_SECRET_ACCESS_KEY=<secret-access-key> \
+  AWS_DEFAULT_REGION=<default-region> \
+  concourse-up deploy <your-project-name>
+```
+
 ## Why?
 
 Concourse is easy to get started with, but as soon as you want your team to use it you've
