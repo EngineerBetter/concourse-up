@@ -162,8 +162,8 @@ var _ = Describe("Deploy", func() {
 	It("Uploads the concourse releases", func() {
 		_, err := client.Deploy(nil)
 		Expect(err).ToNot(HaveOccurred())
-		Expect(actions).To(ContainElement("Running authenticated bosh command: upload-release https://bosh.io/d/github.com/concourse/concourse?v=2.7.3"))
-		Expect(actions).To(ContainElement("Running authenticated bosh command: upload-release https://bosh.io/d/github.com/cloudfoundry/garden-runc-release?v=1.4.0"))
+		Expect(actions).To(ContainElement("Running authenticated bosh command: upload-release https://s3-eu-west-1.amazonaws.com/concourse-up-public-artifacts/concourse-2.7.3-ubuntu-trusty-3262.4.1-20170426-133209-021044035.tgz"))
+		Expect(actions).To(ContainElement("Running authenticated bosh command: upload-release https://s3-eu-west-1.amazonaws.com/concourse-up-public-artifacts/garden-runc-1.4.0-ubuntu-trusty-3262.4.1-20170426-133405-860928324.tgz"))
 	})
 
 	It("Saves the concourse manifest", func() {

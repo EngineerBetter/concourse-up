@@ -14,9 +14,14 @@ const concourseDeploymentName = "concourse"
 
 const concourseStemcellURL = "https://bosh-jenkins-artifacts.s3.amazonaws.com/bosh-stemcell/aws/light-bosh-stemcell-3262.4.1-aws-xen-ubuntu-trusty-go_agent.tgz"
 
-var concourseReleaseURLs = []string{
-	"https://bosh.io/d/github.com/concourse/concourse?v=2.7.3",
-	"https://bosh.io/d/github.com/cloudfoundry/garden-runc-release?v=1.4.0",
+// var concourseReleaseURLs = []string{
+// 	"https://bosh.io/d/github.com/concourse/concourse?v=2.7.3",
+// 	"https://bosh.io/d/github.com/cloudfoundry/garden-runc-release?v=1.4.0",
+// }
+
+var concourseCompiledReleaseURLs = []string{
+	"https://s3-eu-west-1.amazonaws.com/concourse-up-public-artifacts/concourse-2.7.3-ubuntu-trusty-3262.4.1-20170426-133209-021044035.tgz",
+	"https://s3-eu-west-1.amazonaws.com/concourse-up-public-artifacts/garden-runc-1.4.0-ubuntu-trusty-3262.4.1-20170426-133405-860928324.tgz",
 }
 
 func (client *Client) uploadConcourse() error {
@@ -28,7 +33,7 @@ func (client *Client) uploadConcourse() error {
 		return err
 	}
 
-	for _, releaseURL := range concourseReleaseURLs {
+	for _, releaseURL := range concourseCompiledReleaseURLs {
 		_, err = client.director.RunAuthenticatedCommand(
 			"upload-release",
 			releaseURL,
