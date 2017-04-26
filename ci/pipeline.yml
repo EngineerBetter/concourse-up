@@ -5,7 +5,7 @@ resources:
   source:
     uri: https://github.com/EngineerBetter/concourse-up.git
     branch: master
-    private_key: {{private_key}}
+    paths: [ci/docker/*]
 
 - name: concourse-up
   type: git
