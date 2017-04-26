@@ -32,7 +32,10 @@ var _ = Describe("commands", func() {
 				Expect(err).ToNot(HaveOccurred(), "Error running CLI: "+cliPath)
 				Eventually(session).Should(Exit(0))
 				Expect(session.Out).To(Say("concourse-up deploy - Deploys or updates a Concourse"))
-				Expect(session.Out).To(Say("--region value  AWS region"))
+				Expect(session.Out).To(Say("--region value"))
+				Expect(session.Out).To(Say("--domain value"))
+				Expect(session.Out).To(Say("--tls-cert value"))
+				Expect(session.Out).To(Say("--tls-key value"))
 			})
 		})
 

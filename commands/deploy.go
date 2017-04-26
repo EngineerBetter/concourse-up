@@ -23,7 +23,7 @@ var deployFlags = []cli.Flag{
 	cli.StringFlag{
 		Name:        "region",
 		Value:       "eu-west-1",
-		Usage:       "AWS region",
+		Usage:       "(optional) AWS region",
 		EnvVar:      "AWS_REGION",
 		Destination: &awsRegion,
 	},
@@ -35,13 +35,13 @@ var deployFlags = []cli.Flag{
 	},
 	cli.StringFlag{
 		Name:        "tls-cert",
-		Usage:       "TLS cert to use with concourse endpoint",
+		Usage:       "(optional) TLS cert to use with concourse endpoint",
 		EnvVar:      "TLS_CERT",
 		Destination: &tlsCert,
 	},
 	cli.StringFlag{
 		Name:        "tls-key",
-		Usage:       "TLS private key to use with concourse endpoint",
+		Usage:       "(optional) TLS private key to use with concourse endpoint",
 		EnvVar:      "TLS_KEY",
 		Destination: &tlsKey,
 	},
