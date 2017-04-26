@@ -21,7 +21,6 @@ providing you with a single command for getting your Concourse up and keeping it
 
 ## Prerequisites
 
-- [Go](https://golang.org/doc/install) 1.6+
 - An authenticated AWS environment. This can be done by doing one of:
   - Installing the [AWS CLI](http://docs.aws.amazon.com/cli/latest/userguide/installing.html) and running `aws configure`
   - Exporting the following [environment variables](http://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html#cli-environment) before running `concourse-up`
@@ -32,11 +31,7 @@ providing you with a single command for getting your Concourse up and keeping it
 
 ## Install
 
-Run the following command to install Concourse-Up in your $PATH:
-
-```
-$ go get github.com/engineerbetter/concourse-up
-```
+Download the [latest release](https://github.com/EngineerBetter/concourse-up/releases) and install it into your $PATH:
 
 ## Usage
 
