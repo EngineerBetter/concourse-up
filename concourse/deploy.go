@@ -19,6 +19,8 @@ func (client *Client) Deploy() error {
 		return err
 	}
 
+	initialDomain := config.Domain
+
 	if err = client.setUserIP(config); err != nil {
 		return err
 	}
@@ -32,7 +34,8 @@ func (client *Client) Deploy() error {
 		return err
 	}
 
-	config, err = client.checkPredeployConfigRequiments(config, metadata)
+	isDomainUpdated := initialDomain != config.Domain
+	config, err = client.checkPredeployConfigRequiments(isDomainUpdated, config, metadata)
 	if err != nil {
 		return err
 	}
@@ -48,7 +51,7 @@ func (client *Client) Deploy() error {
 	return nil
 }
 
-func (client *Client) checkPredeployConfigRequiments(config *config.Config, metadata *terraform.Metadata) (*config.Config, error) {
+func (client *Client) checkPredeployConfigRequiments(isDomainUpdated bool, config *config.Config, metadata *terraform.Metadata) (*config.Config, error) {
 	config, err := client.ensureDomain(config, metadata)
 	if err != nil {
 		return nil, err
@@ -59,7 +62,7 @@ func (client *Client) checkPredeployConfigRequiments(config *config.Config, meta
 		return nil, err
 	}
 
-	config, err = client.ensureConcourseCerts(config, metadata)
+	config, err = client.ensureConcourseCerts(isDomainUpdated, config, metadata)
 	if err != nil {
 		return nil, err
 	}
@@ -105,7 +108,7 @@ func (client *Client) ensureDirectorCerts(config *config.Config, metadata *terra
 	return config, nil
 }
 
-func (client *Client) ensureConcourseCerts(config *config.Config, metadata *terraform.Metadata) (*config.Config, error) {
+func (client *Client) ensureConcourseCerts(domainUpdated bool, config *config.Config, metadata *terraform.Metadata) (*config.Config, error) {
 	if client.args["tls-cert"] != "" {
 		config.ConcourseCert = client.args["tls-cert"]
 		config.ConcourseKey = client.args["tls-key"]
@@ -114,8 +117,9 @@ func (client *Client) ensureConcourseCerts(config *config.Config, metadata *terr
 		return config, nil
 	}
 
-	// Skip concourse re-deploy if certs have already been set
-	if config.ConcourseCert != "" {
+	// Skip concourse re-deploy if certs have already been set,
+	// unless domain has changed
+	if !(config.ConcourseCert == "" || domainUpdated) {
 		return config, nil
 	}
 
