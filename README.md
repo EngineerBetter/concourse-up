@@ -16,33 +16,86 @@ BOSH, providing you with a single command for getting your Concourse up and keep
 
 ## Prerequisites
 
-- AWS credentials, either configured via `aws configure`, or as [env vars](http://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html#cli-environment)
+- [Go](https://golang.org/doc/install) 1.6+
+- An authenticated AWS environment. This can be done by doing one of:
+  - Installing the [AWS CLI](http://docs.aws.amazon.com/cli/latest/userguide/installing.html) and running `aws configure`
+  - Exporting the following [environment variables](http://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html#cli-environment) before running `concourse-up`
+    - `AWS_ACCESS_KEY_ID`
+    - `AWS_SECRET_ACCESS_KEY`
 - [Terraform](https://www.terraform.io/intro/getting-started/install.html) 0.9.3 or newer
 
 ## Install
 
-`go get github.com/engineerbetter/concourse-up`
+Run the following command to install Concourse-Up in your $PATH:
+
+```
+$ go get github.com/engineerbetter/concourse-up
+```
 
 ## Usage
 
-To deploy a new Concourse:
+Deploy a new concourse with:
 
-`concourse-up deploy <your-project-name>`
+```
+$ concourse-up deploy <your-project-name>
+```
+
+eg:
+
+```
+$ concourse-up deploy ci
+
+...
+
+DEPLOY SUCCESSFUL. Log in with:
+
+fly --target ci login --concourse-url http://ci-concourse-up-1420669447.eu-west-1.elb.amazonaws.com --username admin --password abc123def456
+
+```
+
+To fetch information about your concourse-up deployment:
+
+```
+$ concourse-up info <your-project-name>
+```
 
 To destroy a Concourse:
 
-`concourse-up destroy <your-project-name>`
+```
+$ concourse-up destroy <your-project-name>
+```
 
 That's it!
 
+## What it does
+
+Concourse up first creates an S3 bucket to store its own configuration and saves a `config.json` file there.
+
+It then uses Terraform to deploy the following infrastructure:
+
+- A VPC, with subnets and routing
+- A load balancer
+- An S3 bucket to use a BOSH blobstore
+- An IAM user that can access the blobstore
+- An IAM user that can deploy EC2 instances and update loadbalancers
+- An AWS keypair for BOSH to use
+- A security group to allow access to the BOSH director from your local IP
+- A security group to allow access to Concourse from the internet
+- An RDS instance (default: db.t2.small) for BOSH and Concourse to use
+
+Once the terraform step is complete, concourse-up deploys a BOSH director on an t2.medium instance, and then uses that to deploy a concourse with the following settings:
+
+- One m3.medium [spot](https://aws.amazon.com/ec2/spot/) instance for the Concourse web server
+- One m3.xlarge spot instance used as a Concourse worker
+- Access via a loadbalancer over HTTP and HTTPS using a self-signed cert created by concourse-up
+
 ## Tests
 
-`ginkgo -r`
+Tests use the [Ginkgo](https://onsi.github.io/ginkgo/) Go testing framework. The tests require that have set up AWS authentication locally.
 
-## CI
+Install ginkgo and run the tests with:
 
-Set the pipeline with:
-
-```sh
-fly -t sombrero set-pipeline -p concourse-up -c ci/pipeline.yml --var private_key="$(cat path/to/key)" -l secret_credentials.yml
+```
+$ go get github.com/onsi/ginkgo/ginkgo
+$ ginkgo -r
 ```
