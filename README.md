@@ -24,7 +24,7 @@ providing you with a single command for getting your Concourse up and keeping it
 
 - Deploys Concourse 2.7.3 CI on AWS, without you having to know anything about BOSH
 - Idempotent deployment (uses RDS for BOSH and Concourse databases)
-- Supports https access by default
+- Supports https access by default using a user-provided certificate or auto-generating a self-signed one
 - Uses cost effective AWS spot instances where possible (BOSH will take care of the service)
 - Easy destroy and cleanup
 
@@ -97,23 +97,26 @@ It then uses Terraform to deploy the following infrastructure:
 
 - A VPC, with subnets and routing
 - A load balancer
-- An S3 bucket to use a BOSH blobstore
+- An S3 bucket which BOSH uses as a blobstore
 - An IAM user that can access the blobstore
-- An IAM user that can deploy EC2 instances and update loadbalancers
-- An AWS keypair for BOSH to use
-- A security group to allow access to the BOSH director from your local IP
-- A security group to allow access to Concourse from the internet
+- An IAM user that can deploy EC2 instances and update load balancers
+- An AWS keypair for BOSH to use when deploying VMs
 - An RDS instance (default: db.t2.small) for BOSH and Concourse to use
+- A security group to allow access to the BOSH director from your local IP
+- A security group for BOSH-deployed VMs
+- A security group to allow access to the Concourse web server from the internet
+- A security group to allow access to the RDS database from BOSH and it's VMs
+
 
 Once the terraform step is complete, `concourse-up` deploys a BOSH director on an t2.medium instance, and then uses that to deploy a Concourse with the following settings:
 
-- One m3.medium [spot](https://aws.amazon.com/ec2/spot/) instance for the Concourse web server
+- One m3.medium [spot](https://aws.amazon.com/ec2/spot/) for the Concourse web server
 - One m3.xlarge spot instance used as a Concourse worker
-- Access via a loadbalancer over HTTP and HTTPS using a self-signed cert created by `concourse-up`
+- Access via a load balancer over HTTP and HTTPS using a user-provided certificate, or an auto-generated self-signed certificate if one isn't provided.
 
 ## Tests
 
-Tests use the [Ginkgo](https://onsi.github.io/ginkgo/) Go testing framework. The tests require that have set up AWS authentication locally.
+Tests use the [Ginkgo](https://onsi.github.io/ginkgo/) Go testing framework. The tests require you to have set up AWS authentication locally.
 
 Install ginkgo and run the tests with:
 
