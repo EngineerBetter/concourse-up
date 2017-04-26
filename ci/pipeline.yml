@@ -24,7 +24,6 @@ resources:
 - name: version
   type: semver
   source:
-    initial_version: 0.0.0
     driver: s3
     bucket: concourse-up-ci-artifacts
     key: version
@@ -78,8 +77,6 @@ jobs:
   serial: true
   plan:
   - get: version
-    params:
-      bump: minor
   - get: image
     passed:
     - test
@@ -89,10 +86,6 @@ jobs:
   - task: build
     image: image
     file: concourse-up/ci/tasks/build.yml
-  - put: version
-    resource: version
-    params:
-      file: version/version
   - put: release
     params:
       name: concourse-up/ci/release/name
