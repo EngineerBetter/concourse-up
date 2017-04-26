@@ -50,7 +50,7 @@ jobs:
     params:
       build: image-source/ci/docker
 
-- name: test
+- name: unit-tests
   plan:
   - get: image
     trigger: true
@@ -67,11 +67,35 @@ jobs:
       params:
         AWS_ACCESS_KEY_ID: {{aws_access_key_id}}
         AWS_SECRET_ACCESS_KEY: {{aws_secret_access_key}}
+
+- name: system-test
+  plan:
+  - get: image
+    trigger: true
+    passed: [build-image]
+  - get: concourse-up
+    trigger: true
   - task: system-test
     image: image
     file: concourse-up/ci/tasks/system-test.yml
     params:
-      ROOT_DOMAIN: concourse-up.engineerbetter.com
+      AWS_ACCESS_KEY_ID: {{aws_access_key_id}}
+      AWS_SECRET_ACCESS_KEY: {{aws_secret_access_key}}
+
+- name: system-test-custom-domain-and-cert
+  plan:
+  - get: image
+    trigger: true
+    passed: [build-image]
+  - get: concourse-up
+    trigger: true
+  - task: system-test
+    image: image
+    file: concourse-up/ci/tasks/system-test.yml
+    params:
+      DOMAIN: system-test.concourse-up.engineerbetter.com
+      TLS_CERT: {{system_test_domain_cert}}
+      TLS_KEY: {{system_test_domain_key}}
       AWS_ACCESS_KEY_ID: {{aws_access_key_id}}
       AWS_SECRET_ACCESS_KEY: {{aws_secret_access_key}}
 

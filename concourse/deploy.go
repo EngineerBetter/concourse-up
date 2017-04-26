@@ -40,7 +40,12 @@ func (client *Client) Deploy() error {
 		}
 	}
 
-	config, err = client.ensureCerts(config, metadata)
+	config, err = client.ensureDirectorCerts(config, metadata)
+	if err != nil {
+		return err
+	}
+
+	config, err = client.ensureConcourseCerts(config, metadata)
 	if err != nil {
 		return err
 	}
@@ -56,7 +61,7 @@ func (client *Client) Deploy() error {
 	return nil
 }
 
-func (client *Client) ensureCerts(config *config.Config, metadata *terraform.Metadata) (*config.Config, error) {
+func (client *Client) ensureDirectorCerts(config *config.Config, metadata *terraform.Metadata) (*config.Config, error) {
 	if config.DirectorCACert != "" {
 		return config, nil
 	}
@@ -76,6 +81,25 @@ func (client *Client) ensureCerts(config *config.Config, metadata *terraform.Met
 	config.DirectorCACert = string(directorCerts.CACert)
 	config.DirectorCert = string(directorCerts.Cert)
 	config.DirectorKey = string(directorCerts.Key)
+
+	return config, nil
+}
+
+func (client *Client) ensureConcourseCerts(config *config.Config, metadata *terraform.Metadata) (*config.Config, error) {
+	if client.args["tls-cert"] != "" {
+		config.ConcourseCert = client.args["tls-cert"]
+		config.ConcourseKey = client.args["tls-key"]
+
+		if err := client.configClient.Update(config); err != nil {
+			return nil, err
+		}
+
+		return config, nil
+	}
+
+	if config.ConcourseCert != "" {
+		return config, nil
+	}
 
 	concourseCerts, err := client.certGenerator(config.Deployment, config.Domain)
 	if err != nil {

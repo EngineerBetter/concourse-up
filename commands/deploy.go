@@ -16,6 +16,8 @@ import (
 
 var awsRegion string
 var domain string
+var tlsCert string
+var tlsKey string
 
 var deployFlags = []cli.Flag{
 	cli.StringFlag{
@@ -31,6 +33,18 @@ var deployFlags = []cli.Flag{
 		EnvVar:      "DOMAIN",
 		Destination: &domain,
 	},
+	cli.StringFlag{
+		Name:        "tls-cert",
+		Usage:       "TLS cert to use with concourse endpoint",
+		EnvVar:      "TLS_CERT",
+		Destination: &tlsCert,
+	},
+	cli.StringFlag{
+		Name:        "tls-key",
+		Usage:       "TLS private key to use with concourse endpoint",
+		EnvVar:      "TLS_KEY",
+		Destination: &tlsKey,
+	},
 }
 
 var deploy = cli.Command{
@@ -45,6 +59,8 @@ var deploy = cli.Command{
 			return errors.New("Usage is `concourse-up deploy <name>`")
 		}
 
+		// TODO: validate cert requirements
+
 		client := concourse.NewClient(
 			terraform.NewClient,
 			bosh.NewClient,
@@ -54,6 +70,8 @@ var deploy = cli.Command{
 			map[string]string{
 				"aws-region": awsRegion,
 				"domain":     domain,
+				"tls-cert":   tlsCert,
+				"tls-key":    tlsKey,
 			},
 			os.Stdout,
 			os.Stderr,
