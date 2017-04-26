@@ -33,8 +33,7 @@ jobs:
     params:
       build: image-source/ci/docker
 
-- name: unit-test
-  serial: true
+- name: test
   plan:
   - get: image
     trigger: true
@@ -51,16 +50,6 @@ jobs:
       params:
         AWS_ACCESS_KEY_ID: {{aws_access_key_id}}
         AWS_SECRET_ACCESS_KEY: {{aws_secret_access_key}}
-
-- name: system-test
-  plan:
-  - get: image
-    trigger: true
-    passed: [unit-test]
-  - get: concourse-up
-    trigger: true
-    passed: [unit-test]
-    image: image
   - task: system-test
     image: image
     file: concourse-up/ci/tasks/system-test.yml
