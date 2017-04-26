@@ -12,7 +12,7 @@ resources:
   source:
     uri: https://github.com/EngineerBetter/concourse-up.git
     branch: master
-    ignore_paths: [ci/docker/*, ci/pipeline.yml]
+    ignore_paths: [ci/docker/*, ci/pipeline.yml, README.md]
 
 - name: image
   type: docker-image
