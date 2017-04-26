@@ -1,7 +1,11 @@
 package terraform_test
 
 import (
+	"fmt"
+
+	"bitbucket.org/engineerbetter/concourse-up/aws"
 	. "bitbucket.org/engineerbetter/concourse-up/terraform"
+	"bitbucket.org/engineerbetter/concourse-up/util"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -9,11 +13,12 @@ import (
 )
 
 var _ = Describe("Apply & Destroy", func() {
-	It("Works", func() {
-		config := `
+	var bucket string
+
+	configTemplate := `
 terraform {
   backend "s3" {
-    bucket = "concourse-up-integration-tests"
+    bucket = "<% .Bucket %>"
     key    = "apply_test"
     region = "eu-west-1"
   }
@@ -39,6 +44,29 @@ output "director_subnet_id" {
   value = "example"
 }
 `
+
+	BeforeEach(func() {
+		bucket = fmt.Sprintf("concourse-up-integration-tests-%s", util.GeneratePassword())
+
+		err := aws.EnsureBucketExists(bucket, "eu-west-1")
+		Expect(err).ToNot(HaveOccurred())
+	})
+
+	AfterEach(func() {
+		err := aws.DeleteVersionedBucket(bucket, "eu-west-1")
+		Expect(err).ToNot(HaveOccurred())
+	})
+
+	It("Works", func() {
+		params := struct {
+			Bucket string
+		}{
+			Bucket: bucket,
+		}
+
+		config, err := util.RenderTemplate(configTemplate, &params)
+		Expect(err).ToNot(HaveOccurred())
+
 		stdout := gbytes.NewBuffer()
 		stderr := gbytes.NewBuffer()
 
