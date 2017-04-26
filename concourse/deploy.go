@@ -109,6 +109,7 @@ func (client *Client) ensureConcourseCerts(config *config.Config, metadata *terr
 	if client.args["tls-cert"] != "" {
 		config.ConcourseCert = client.args["tls-cert"]
 		config.ConcourseKey = client.args["tls-key"]
+		config.ConcourseUserProvidedCert = true
 
 		return config, nil
 	}
@@ -235,9 +236,14 @@ func (client *Client) setHostedZone(config *config.Config) error {
 }
 
 func writeDeploySuccessMessage(config *config.Config, metadata *terraform.Metadata, stdout io.Writer) error {
+	flags := ""
+	if !config.ConcourseUserProvidedCert {
+		flags = " --insecure"
+	}
 	_, err := stdout.Write([]byte(fmt.Sprintf(
-		"\nDEPLOY SUCCESSFUL. Log in with:\n\nfly --target %s login --insecure --concourse-url https://%s --username %s --password %s\n\n",
+		"\nDEPLOY SUCCESSFUL. Log in with:\n\nfly --target %s login%s --concourse-url https://%s --username %s --password %s\n\n",
 		config.Project,
+		flags,
 		config.Domain,
 		config.ConcourseUsername,
 		config.ConcoursePassword,

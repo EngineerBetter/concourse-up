@@ -295,6 +295,19 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 			Eventually(stdout).Should(gbytes.Say("fly --target happymeal login --insecure --concourse-url https://elb.aws.com --username admin --password s3cret"))
 		})
 
+		Context("When a custom cert is provided", func() {
+			It("Prints the correct domain and not suggest using --insecure", func() {
+				args["domain"] = "ci.google.com"
+				args["tls-cert"] = "--- CERTIFICATE ---"
+				args["tls-key"] = "--- KEY ---"
+
+				err := client.Deploy()
+				Expect(err).ToNot(HaveOccurred())
+				Eventually(stdout).Should(gbytes.Say("DEPLOY SUCCESSFUL"))
+				Eventually(stdout).Should(gbytes.Say("fly --target happymeal login --concourse-url https://ci.google.com --username admin --password s3cret"))
+			})
+		})
+
 		Context("When an existing config is loaded", func() {
 			It("Notifies the user", func() {
 				err := client.Deploy()

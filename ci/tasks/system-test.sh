@@ -16,6 +16,7 @@ domain=$(echo $config | jq -r '.config.domain')
 username=$(echo $config | jq -r '.config.concourse_username')
 password=$(echo $config | jq -r '.config.concourse_password')
 
+set -x
 if [[ -n $TLS_CERT ]]; then
   fly --target system-test login --concourse-url https://$domain --username $username --password $password
 else
@@ -23,6 +24,9 @@ else
 fi
 
 fly --target system-test workers
+
+set +x
+
 
 # DESTROY
 
