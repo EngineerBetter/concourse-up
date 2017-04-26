@@ -199,7 +199,7 @@ resource "aws_subnet" "default" {
 }
 
 resource "aws_elb" "concourse" {
-  name            = "${var.project}-concourse-up"
+  name            = "${var.deployment}"
   subnets         = ["${aws_subnet.default.id}"]
   security_groups = ["${aws_security_group.elb.id}"]
 
