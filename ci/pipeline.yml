@@ -89,10 +89,6 @@ jobs:
   - task: build
     image: image
     file: concourse-up/ci/tasks/build.yml
-  - put: version
-    resource: version
-    params:
-      file: version/version
   - put: release
     params:
       name: concourse-up/ci/release/name
@@ -100,6 +96,10 @@ jobs:
       tag: version/version
       globs:
       - build/*
+  - put: version
+    resource: version
+    params:
+      file: version/version
 
 - name: release-minor
   serial: true
@@ -116,10 +116,6 @@ jobs:
   - task: build
     image: image
     file: concourse-up/ci/tasks/build.yml
-  - put: version
-    resource: version
-    params:
-      file: version/version
   - put: release
     params:
       name: concourse-up/ci/release/name
@@ -127,6 +123,10 @@ jobs:
       tag: version/version
       globs:
       - build/*
+  - put: version
+    resource: version
+    params:
+      file: version/version
 
 - name: release-major
   serial: true
@@ -143,10 +143,6 @@ jobs:
   - task: build
     image: image
     file: concourse-up/ci/tasks/build.yml
-  - put: version
-    resource: version
-    params:
-      file: version/version
   - put: release
     params:
       name: concourse-up/ci/release/name
@@ -154,3 +150,7 @@ jobs:
       tag: version/version
       globs:
       - build/*
+  - put: version
+    resource: version
+    params:
+      file: version/version
