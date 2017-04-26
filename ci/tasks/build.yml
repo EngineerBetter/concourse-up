@@ -1,0 +1,11 @@
+---
+platform: linux
+
+inputs:
+- name: concourse-up
+
+outputs:
+- name: build
+
+run:
+  path: concourse-up/ci/tasks/build.sh

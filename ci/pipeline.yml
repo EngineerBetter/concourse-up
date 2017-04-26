@@ -54,3 +54,15 @@ jobs:
     params:
       AWS_ACCESS_KEY_ID: {{aws_access_key_id}}
       AWS_SECRET_ACCESS_KEY: {{aws_secret_access_key}}
+
+- name: release
+  plan:
+  - get: image
+    passed:
+    - test
+  - get: concourse-up
+    passed:
+    - test
+  - task: system-test
+    image: image
+    file: concourse-up/ci/tasks/build.yml
