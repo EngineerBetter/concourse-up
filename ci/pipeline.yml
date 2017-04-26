@@ -11,10 +11,9 @@ resources:
 - name: concourse-up
   type: git
   source:
-    uri: git@bitbucket.org:engineerbetter/concourse-up.git
+    uri: https://github.com/EngineerBetter/concourse-up.git
     branch: master
     ignore_paths: [ci/docker/*, ci/pipeline.yml]
-    private_key: {{private_key}}
 
 - name: image
   type: docker-image
