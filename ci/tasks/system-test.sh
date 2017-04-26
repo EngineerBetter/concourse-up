@@ -16,7 +16,12 @@ domain=$(echo $config | jq -r '.config.domain')
 username=$(echo $config | jq -r '.config.concourse_username')
 password=$(echo $config | jq -r '.config.concourse_password')
 
-fly --target system-test login --insecure --concourse-url https://$domain --username $username --password $password
+if [[ -n $TLS_CERT ]]; then
+  fly --target system-test login --concourse-url https://$domain --username $username --password $password
+else
+  fly --target system-test login --insecure --concourse-url https://$domain --username $username --password $password
+fi
+
 fly --target system-test workers
 
 # DESTROY
