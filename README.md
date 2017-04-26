@@ -5,14 +5,16 @@ A tool for easily deploying [Concourse](concourse.ci) in a single command.
 ## Why?
 
 Concourse is easy to get started with, but as soon as you want your team to use it you've
-previously had to learn BOSH. The goal of `concourse-up` is to hide the complexity of
-BOSH, providing you with a single command for getting your Concourse up and keeping it running.
+previously had to learn BOSH. Teams who just want great CI shouldn't need to think about this.
+The goal of `concourse-up` is to hide the complexity of BOSH, while giving you all the benefits,
+providing you with a single command for getting your Concourse up and keeping it running.
 
 ## Features
 
 - Deploys you a Concourse CI on AWS, without you having to know anything about BOSH
 - Idempotent deployment (uses RDS for BOSH and Concourse databases)
 - Supports https access by default
+- Uses cost effective AWS spot instances where possible (BOSH will take care of the service)
 
 ## Prerequisites
 
@@ -100,3 +102,7 @@ Install ginkgo and run the tests with:
 $ go get github.com/onsi/ginkgo/ginkgo
 $ ginkgo -r
 ```
+
+## Project
+
+[Pivotal Tracker] (https://www.pivotaltracker.com/n/projects/2011803)
