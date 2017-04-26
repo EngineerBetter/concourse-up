@@ -67,12 +67,20 @@ jobs:
       params:
         AWS_ACCESS_KEY_ID: {{aws_access_key_id}}
         AWS_SECRET_ACCESS_KEY: {{aws_secret_access_key}}
-  - task: system-test
-    image: image
-    file: concourse-up/ci/tasks/system-test.yml
-    params:
-      AWS_ACCESS_KEY_ID: {{aws_access_key_id}}
-      AWS_SECRET_ACCESS_KEY: {{aws_secret_access_key}}
+  - aggregate:
+    - task: system-test-with-custom-domain
+      image: image
+      file: concourse-up/ci/tasks/system-test.yml
+      params:
+        ROOT_DOMAIN: concourse-up.engineerbetter.com
+        AWS_ACCESS_KEY_ID: {{aws_access_key_id}}
+        AWS_SECRET_ACCESS_KEY: {{aws_secret_access_key}}
+    - task: system-test-with-no-domain
+      image: image
+      file: concourse-up/ci/tasks/system-test.yml
+      params:
+        AWS_ACCESS_KEY_ID: {{aws_access_key_id}}
+        AWS_SECRET_ACCESS_KEY: {{aws_secret_access_key}}
 
 - name: release-patch
   serial: true
