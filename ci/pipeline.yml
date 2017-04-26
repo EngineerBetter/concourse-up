@@ -3,9 +3,8 @@ resources:
 - name: image-source
   type: git
   source:
-    uri: git@bitbucket.org:engineerbetter/concourse-up.git
+    uri: https://github.com/EngineerBetter/concourse-up.git
     branch: master
-    paths: [ci/docker/*]
     private_key: {{private_key}}
 
 - name: concourse-up
