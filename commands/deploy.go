@@ -42,6 +42,9 @@ var deploy = cli.Command{
 			bosh.NewClient,
 			certs.Generate,
 			&config.Client{Project: name},
+			map[string]string{
+				"aws-region": awsRegion,
+			},
 			os.Stdout,
 			os.Stderr,
 		)

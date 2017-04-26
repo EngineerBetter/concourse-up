@@ -115,7 +115,7 @@ func (client *Client) deployBosh(config *config.Config, metadata *terraform.Meta
 }
 
 func (client *Client) loadConfigWithUserIP() (*config.Config, error) {
-	config, createdNewConfig, err := client.configClient.LoadOrCreate()
+	config, createdNewConfig, err := client.configClient.LoadOrCreate(client.args)
 	if err != nil {
 		return nil, err
 	}

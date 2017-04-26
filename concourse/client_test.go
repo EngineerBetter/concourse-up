@@ -24,6 +24,7 @@ var _ = Describe("Client", func() {
 	var stderr *gbytes.Buffer
 	var deleteBoshDirectorError error
 	var terraformMetadata *terraform.Metadata
+	var args map[string]string
 
 	certGenerator := func(caName string, ip string) (*certs.Certs, error) {
 		actions = append(actions, fmt.Sprintf("generating cert ca: %s, ca: %s", caName, ip))
@@ -33,6 +34,10 @@ var _ = Describe("Client", func() {
 	}
 
 	BeforeEach(func() {
+		args = map[string]string{
+			"aws-region": "eu-west-2",
+		}
+
 		terraformMetadata = &terraform.Metadata{
 			DirectorPublicIP:         terraform.MetadataStringValue{Value: "99.99.99.99"},
 			DirectorKeyPair:          terraform.MetadataStringValue{Value: "-- KEY --"},
@@ -93,7 +98,7 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 			ConcourseUsername: "admin",
 		}
 		configClient := &FakeConfigClient{
-			FakeLoadOrCreate: func() (*config.Config, bool, error) {
+			FakeLoadOrCreate: func(args map[string]string) (*config.Config, bool, error) {
 				actions = append(actions, "loading or creating config file")
 				return exampleConfig, false, nil
 			},
@@ -168,6 +173,7 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 			boshClientFactory,
 			certGenerator,
 			configClient,
+			args,
 			stdout,
 			stderr,
 		)

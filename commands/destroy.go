@@ -43,6 +43,7 @@ var destroy = cli.Command{
 			bosh.NewClient,
 			certs.Generate,
 			&config.Client{Project: name},
+			map[string]string{},
 			os.Stdout,
 			os.Stderr,
 		)
