@@ -248,7 +248,7 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 			err := client.Deploy()
 			Expect(err).ToNot(HaveOccurred())
 			Eventually(stdout).Should(gbytes.Say("DEPLOY SUCCESSFUL"))
-			Eventually(stdout).Should(gbytes.Say("fly --target happymeal login --concourse-url http://elb.aws.com --username admin --password s3cret"))
+			Eventually(stdout).Should(gbytes.Say("fly --target happymeal login --insecure --concourse-url https://elb.aws.com --username admin --password s3cret"))
 		})
 
 		Context("When an existing config is loaded", func() {
