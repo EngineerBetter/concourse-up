@@ -143,7 +143,7 @@ func (client *Client) loadConfigWithUserIP() (*config.Config, error) {
 
 func writeDeploySuccessMessage(config *config.Config, metadata *terraform.Metadata, stdout io.Writer) error {
 	_, err := stdout.Write([]byte(fmt.Sprintf(
-		"\nDEPLOY SUCCESSFUL. Log in with:\n\nfly --target %s login --concourse-url https://%s --username %s --password %s\n\n",
+		"\nDEPLOY SUCCESSFUL. Log in with:\n\nfly --target %s login --insecure --concourse-url https://%s --username %s --password %s\n\n",
 		config.Project,
 		metadata.ELBDNSName.Value,
 		config.ConcourseUsername,
