@@ -40,6 +40,7 @@ type Config struct {
 
 	ConcourseCert             string `json:"concourse_cert"`
 	ConcourseKey              string `json:"concourse_key"`
+	ConcourseCACert           string `json:"concourse_ca_cert"`
 	ConcourseUserProvidedCert bool   `json:"concourse_user_provided_cert"`
 
 	RDSInstanceClass string `json:"rds_instance_class"`

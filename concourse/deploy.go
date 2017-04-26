@@ -126,6 +126,7 @@ func (client *Client) ensureConcourseCerts(config *config.Config, metadata *terr
 
 	config.ConcourseCert = string(concourseCerts.Cert)
 	config.ConcourseKey = string(concourseCerts.Key)
+	config.ConcourseCACert = string(concourseCerts.CACert)
 
 	return config, nil
 }
