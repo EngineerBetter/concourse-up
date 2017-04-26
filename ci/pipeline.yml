@@ -24,6 +24,7 @@ resources:
 - name: version
   type: semver
   source:
+    initial_version: 0.0.0
     driver: s3
     bucket: concourse-up-ci-artifacts
     key: version
@@ -73,10 +74,12 @@ jobs:
       AWS_ACCESS_KEY_ID: {{aws_access_key_id}}
       AWS_SECRET_ACCESS_KEY: {{aws_secret_access_key}}
 
-- name: build
+- name: release-patch
   serial: true
   plan:
   - get: version
+    params:
+      bump: patch
   - get: image
     passed:
     - test
@@ -86,6 +89,64 @@ jobs:
   - task: build
     image: image
     file: concourse-up/ci/tasks/build.yml
+  - put: version
+    resource: version
+    params:
+      file: version/version
+  - put: release
+    params:
+      name: concourse-up/ci/release/name
+      body: concourse-up/ci/release/body
+      tag: version/version
+      globs:
+      - build/*
+
+- name: release-minor
+  serial: true
+  plan:
+  - get: version
+    params:
+      bump: minor
+  - get: image
+    passed:
+    - test
+  - get: concourse-up
+    passed:
+    - test
+  - task: build
+    image: image
+    file: concourse-up/ci/tasks/build.yml
+  - put: version
+    resource: version
+    params:
+      file: version/version
+  - put: release
+    params:
+      name: concourse-up/ci/release/name
+      body: concourse-up/ci/release/body
+      tag: version/version
+      globs:
+      - build/*
+
+- name: release-major
+  serial: true
+  plan:
+  - get: version
+    params:
+      bump: major
+  - get: image
+    passed:
+    - test
+  - get: concourse-up
+    passed:
+    - test
+  - task: build
+    image: image
+    file: concourse-up/ci/tasks/build.yml
+  - put: version
+    resource: version
+    params:
+      file: version/version
   - put: release
     params:
       name: concourse-up/ci/release/name
