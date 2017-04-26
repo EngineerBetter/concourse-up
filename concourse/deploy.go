@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"io"
 
-	"bitbucket.org/engineerbetter/concourse-up/bosh"
-	"bitbucket.org/engineerbetter/concourse-up/config"
-	"bitbucket.org/engineerbetter/concourse-up/terraform"
-	"bitbucket.org/engineerbetter/concourse-up/util"
+	"github.com/engineerbetter/concourse-up/bosh"
+	"github.com/engineerbetter/concourse-up/config"
+	"github.com/engineerbetter/concourse-up/terraform"
+	"github.com/engineerbetter/concourse-up/util"
 )
 
 // Deploy deploys a concourse instance

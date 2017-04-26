@@ -5,12 +5,12 @@ import (
 	"fmt"
 	"os"
 
-	"bitbucket.org/engineerbetter/concourse-up/bosh"
-	"bitbucket.org/engineerbetter/concourse-up/certs"
-	"bitbucket.org/engineerbetter/concourse-up/concourse"
-	"bitbucket.org/engineerbetter/concourse-up/config"
-	"bitbucket.org/engineerbetter/concourse-up/terraform"
-	"bitbucket.org/engineerbetter/concourse-up/util"
+	"github.com/engineerbetter/concourse-up/bosh"
+	"github.com/engineerbetter/concourse-up/certs"
+	"github.com/engineerbetter/concourse-up/concourse"
+	"github.com/engineerbetter/concourse-up/config"
+	"github.com/engineerbetter/concourse-up/terraform"
+	"github.com/engineerbetter/concourse-up/util"
 
 	"gopkg.in/urfave/cli.v1"
 )

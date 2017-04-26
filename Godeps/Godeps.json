@@ -1,5 +1,5 @@
 {
-	"ImportPath": "bitbucket.org/engineerbetter/concourse-up",
+	"ImportPath": "github.com/engineerbetter/concourse-up",
 	"GoVersion": "go1.8.1",
 	"Packages": [
 		"./..."

@@ -1,9 +1,9 @@
 package bosh
 
 import (
-	"bitbucket.org/engineerbetter/concourse-up/config"
-	"bitbucket.org/engineerbetter/concourse-up/terraform"
-	"bitbucket.org/engineerbetter/concourse-up/util"
+	"github.com/engineerbetter/concourse-up/config"
+	"github.com/engineerbetter/concourse-up/terraform"
+	"github.com/engineerbetter/concourse-up/util"
 )
 
 type awsCloudConfigParams struct {

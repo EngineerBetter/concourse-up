@@ -1,8 +1,8 @@
 package concourse_test
 
 import (
-	"bitbucket.org/engineerbetter/concourse-up/config"
-	"bitbucket.org/engineerbetter/concourse-up/terraform"
+	"github.com/engineerbetter/concourse-up/config"
+	"github.com/engineerbetter/concourse-up/terraform"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 

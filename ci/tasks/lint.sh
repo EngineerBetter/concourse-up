@@ -2,9 +2,9 @@
 
 set -eu
 
-mkdir -p $GOPATH/src/bitbucket.org/engineerbetter/concourse-up
-mv concourse-up/* $GOPATH/src/bitbucket.org/engineerbetter/concourse-up
-cd $GOPATH/src/bitbucket.org/engineerbetter/concourse-up
+mkdir -p $GOPATH/src/github.com/engineerbetter/concourse-up
+mv concourse-up/* $GOPATH/src/github.com/engineerbetter/concourse-up
+cd $GOPATH/src/github.com/engineerbetter/concourse-up
 
 gometalinter.v1 \
   --exclude vendor \

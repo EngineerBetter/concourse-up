@@ -1,8 +1,8 @@
 package concourse
 
 import (
-	"bitbucket.org/engineerbetter/concourse-up/config"
-	"bitbucket.org/engineerbetter/concourse-up/terraform"
+	"github.com/engineerbetter/concourse-up/config"
+	"github.com/engineerbetter/concourse-up/terraform"
 )
 
 // Info represents the terraform output and concourse-up config files

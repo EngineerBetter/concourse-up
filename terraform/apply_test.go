@@ -3,9 +3,9 @@ package terraform_test
 import (
 	"fmt"
 
-	"bitbucket.org/engineerbetter/concourse-up/aws"
-	. "bitbucket.org/engineerbetter/concourse-up/terraform"
-	"bitbucket.org/engineerbetter/concourse-up/util"
+	"github.com/engineerbetter/concourse-up/aws"
+	. "github.com/engineerbetter/concourse-up/terraform"
+	"github.com/engineerbetter/concourse-up/util"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"

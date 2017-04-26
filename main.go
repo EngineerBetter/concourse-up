@@ -3,7 +3,7 @@ package main
 import (
 	"os"
 
-	"bitbucket.org/engineerbetter/concourse-up/commands"
+	"github.com/engineerbetter/concourse-up/commands"
 
 	"gopkg.in/urfave/cli.v1"
 )

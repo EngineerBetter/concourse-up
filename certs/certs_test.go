@@ -1,7 +1,7 @@
 package certs_test
 
 import (
-	. "bitbucket.org/engineerbetter/concourse-up/certs"
+	. "github.com/engineerbetter/concourse-up/certs"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"

@@ -6,9 +6,9 @@ import (
 	"path/filepath"
 	"strings"
 
-	. "bitbucket.org/engineerbetter/concourse-up/bosh"
-	"bitbucket.org/engineerbetter/concourse-up/config"
-	"bitbucket.org/engineerbetter/concourse-up/terraform"
+	. "github.com/engineerbetter/concourse-up/bosh"
+	"github.com/engineerbetter/concourse-up/config"
+	"github.com/engineerbetter/concourse-up/terraform"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )

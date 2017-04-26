@@ -3,7 +3,7 @@ package director
 import (
 	"io"
 
-	"bitbucket.org/engineerbetter/concourse-up/util"
+	"github.com/engineerbetter/concourse-up/util"
 )
 
 // IClient represents a bosh director client

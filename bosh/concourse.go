@@ -3,10 +3,10 @@ package bosh
 import (
 	"fmt"
 
-	"bitbucket.org/engineerbetter/concourse-up/config"
-	"bitbucket.org/engineerbetter/concourse-up/db"
-	"bitbucket.org/engineerbetter/concourse-up/terraform"
-	"bitbucket.org/engineerbetter/concourse-up/util"
+	"github.com/engineerbetter/concourse-up/config"
+	"github.com/engineerbetter/concourse-up/db"
+	"github.com/engineerbetter/concourse-up/terraform"
+	"github.com/engineerbetter/concourse-up/util"
 )
 
 const concourseManifestFilename = "concourse.yml"

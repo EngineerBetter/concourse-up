@@ -21,14 +21,7 @@ BOSH, providing you with a single command for getting your Concourse up and keep
 
 ## Install
 
-`go get` doesn't play nicely with private repos but there is an easy work-around:
-
-```sh
-mkdir $GOPATH/bitbucket.org/engineerbetter/concourse-up
-cd $GOPATH/bitbucket.org/engineerbetter
-git clone git@bitbucket.org:engineerbetter/concourse-up.git
-go get -u bitbucket.org/engineerbetter/concourse-up
-```
+`go get github.com/engineerbetter/concourse-up`
 
 ## Usage
 

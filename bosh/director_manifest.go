@@ -3,10 +3,10 @@ package bosh
 import (
 	"strconv"
 
-	"bitbucket.org/engineerbetter/concourse-up/config"
+	"github.com/engineerbetter/concourse-up/config"
 
-	"bitbucket.org/engineerbetter/concourse-up/terraform"
-	"bitbucket.org/engineerbetter/concourse-up/util"
+	"github.com/engineerbetter/concourse-up/terraform"
+	"github.com/engineerbetter/concourse-up/util"
 )
 
 const stemcellSHA1 = "e02edcaa6d27ed57e5fbb11f90a58315908382f8"
