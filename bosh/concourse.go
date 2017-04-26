@@ -78,7 +78,7 @@ func (client *Client) deployConcourse() error {
 func generateConcourseManifest(config *config.Config, metadata *terraform.Metadata) ([]byte, error) {
 	templateParams := awsConcourseManifestParams{
 		Workers:              config.ConcourseWorkerCount,
-		URL:                  fmt.Sprintf("http://%s", metadata.ELBDNSName.Value),
+		URL:                  fmt.Sprintf("https://%s", metadata.ELBDNSName.Value),
 		Username:             config.ConcourseUsername,
 		Password:             config.ConcoursePassword,
 		DBUsername:           config.RDSUsername,
