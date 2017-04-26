@@ -13,7 +13,7 @@ providing you with a single command for getting your Concourse up and keeping it
 
 ## Features
 
-- Deploys you a Concourse CI on AWS, without you having to know anything about BOSH
+- Deploys Concourse 2.7.3 CI on AWS, without you having to know anything about BOSH
 - Idempotent deployment (uses RDS for BOSH and Concourse databases)
 - Supports https access by default
 - Uses cost effective AWS spot instances where possible (BOSH will take care of the service)
