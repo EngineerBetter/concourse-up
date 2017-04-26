@@ -21,6 +21,25 @@ resources:
     username: {{docker_user}}
     password: {{docker_password}}
 
+- name: version
+  type: semver
+  source:
+    initial_version: 0.0.0
+    driver: s3
+    bucket: concourse-up-ci-artifacts
+    key: version
+    access_key_id: {{aws_access_key_id}}
+    secret_access_key: {{aws_secret_access_key}}
+    region_name: eu-west-1
+
+- name: release
+  type: github-release
+  source:
+    user: engineerbetter
+    repository: concourse-up
+    access_token: {{github_access_token}}
+    pre_release: true
+
 jobs:
 - name: build-image
   public: false
@@ -55,14 +74,29 @@ jobs:
       AWS_ACCESS_KEY_ID: {{aws_access_key_id}}
       AWS_SECRET_ACCESS_KEY: {{aws_secret_access_key}}
 
-- name: release
+- name: build
+  serial: true
   plan:
+  - get: version
+    params:
+      bump: minor
   - get: image
     passed:
     - test
   - get: concourse-up
     passed:
     - test
-  - task: system-test
+  - task: build
     image: image
     file: concourse-up/ci/tasks/build.yml
+  - put: version
+    resource: version
+    params:
+      file: version/version
+  - put: release
+    params:
+      name: concourse-up/ci/release/name
+      body: concourse-up/ci/release/body
+      tag: version/version
+      globs:
+      - build/*
