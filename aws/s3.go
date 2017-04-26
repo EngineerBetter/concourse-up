@@ -3,7 +3,6 @@ package aws
 import (
 	"bytes"
 	"io/ioutil"
-	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
@@ -40,6 +39,18 @@ func DeleteVersionedBucket(name, region string) error {
 
 	client := s3.New(sess, &aws.Config{Region: &region})
 
+	bucketVersioningStatus := "Suspended"
+	_, err = client.PutBucketVersioning(&s3.PutBucketVersioningInput{
+		Bucket: &name,
+		VersioningConfiguration: &s3.VersioningConfiguration{
+			Status: &bucketVersioningStatus,
+		},
+	})
+	if err != nil {
+		return err
+	}
+
+	// Delete all object versions
 	versions := []*s3.ObjectVersion{}
 	err = client.ListObjectVersionsPages(&s3.ListObjectVersionsInput{Bucket: &name},
 		func(output *s3.ListObjectVersionsOutput, _ bool) bool {
@@ -61,8 +72,6 @@ func DeleteVersionedBucket(name, region string) error {
 			return nil
 		}
 	}
-
-	time.Sleep(time.Second)
 
 	_, err = client.DeleteBucket(&s3.DeleteBucketInput{Bucket: &name})
 	if err != nil {
