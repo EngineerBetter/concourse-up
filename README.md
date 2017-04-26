@@ -1,6 +1,6 @@
 # Concourse-Up
 
-A tool for easily deploying [Concourse](concourse.ci) in a single command.
+A tool for easily deploying [Concourse](https://concourse.ci) in a single command.
 
 ![](https://ci.engineerbetter.com/api/v1/teams/main/pipelines/concourse-up/jobs/test/badge)
 
