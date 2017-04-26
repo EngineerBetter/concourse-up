@@ -70,11 +70,15 @@ jobs:
 
 - name: system-test
   plan:
-  - get: image
-    trigger: true
-    passed: [build-image]
-  - get: concourse-up
-    trigger: true
+  - aggregate:
+    - get: image
+      trigger: true
+      passed:
+      - unit-tests
+    - get: concourse-up
+      trigger: true
+      passed:
+      - unit-tests
   - task: system-test
     image: image
     file: concourse-up/ci/tasks/system-test.yml
@@ -82,13 +86,18 @@ jobs:
       AWS_ACCESS_KEY_ID: {{aws_access_key_id}}
       AWS_SECRET_ACCESS_KEY: {{aws_secret_access_key}}
 
-- name: system-test-custom-domain-and-cert
+- name: system-test-tls
+  serial: true
   plan:
-  - get: image
-    trigger: true
-    passed: [build-image]
-  - get: concourse-up
-    trigger: true
+  - aggregate:
+    - get: image
+      trigger: true
+      passed:
+      - unit-tests
+    - get: concourse-up
+      trigger: true
+      passed:
+      - unit-tests
   - task: system-test
     image: image
     file: concourse-up/ci/tasks/system-test.yml
@@ -102,15 +111,18 @@ jobs:
 - name: release-patch
   serial: true
   plan:
-  - get: version
-    params:
-      bump: patch
-  - get: image
-    passed:
-    - test
-  - get: concourse-up
-    passed:
-    - test
+  - aggregate:
+    - get: version
+      params:
+        bump: patch
+    - get: image
+      passed:
+      - system-test
+      - system-test-tls
+    - get: concourse-up
+      passed:
+      - system-test
+      - system-test-tls
   - task: build
     image: image
     file: concourse-up/ci/tasks/build.yml
@@ -129,15 +141,18 @@ jobs:
 - name: release-minor
   serial: true
   plan:
-  - get: version
-    params:
-      bump: minor
-  - get: image
-    passed:
-    - test
-  - get: concourse-up
-    passed:
-    - test
+  - aggregate:
+    - get: version
+      params:
+        bump: patch
+    - get: image
+      passed:
+      - system-test
+      - system-test-tls
+    - get: concourse-up
+      passed:
+      - system-test
+      - system-test-tls
   - task: build
     image: image
     file: concourse-up/ci/tasks/build.yml
@@ -156,15 +171,18 @@ jobs:
 - name: release-major
   serial: true
   plan:
-  - get: version
-    params:
-      bump: major
-  - get: image
-    passed:
-    - test
-  - get: concourse-up
-    passed:
-    - test
+  - aggregate:
+    - get: version
+      params:
+        bump: patch
+    - get: image
+      passed:
+      - system-test
+      - system-test-tls
+    - get: concourse-up
+      passed:
+      - system-test
+      - system-test-tls
   - task: build
     image: image
     file: concourse-up/ci/tasks/build.yml
