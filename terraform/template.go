@@ -251,11 +251,11 @@ resource "aws_route53_record" "concourse" {
     evaluate_target_health = true
   }
 }
+<%end%>
 
 resource "aws_eip" "director" {
   vpc = true
 }
-<%end%>
 
 resource "aws_security_group" "director" {
   name        = "${var.deployment}-director"
