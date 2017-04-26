@@ -15,6 +15,7 @@ providing you with a single command for getting your Concourse up and keeping it
 - Idempotent deployment (uses RDS for BOSH and Concourse databases)
 - Supports https access by default
 - Uses cost effective AWS spot instances where possible (BOSH will take care of the service)
+- Easy destroy and cleanup
 
 ## Prerequisites
 
@@ -105,4 +106,4 @@ $ ginkgo -r
 
 ## Project
 
-[Pivotal Tracker] (https://www.pivotaltracker.com/n/projects/2011803)
+[Pivotal Tracker](https://www.pivotaltracker.com/n/projects/2011803)
