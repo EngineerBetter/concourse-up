@@ -41,42 +41,6 @@ func DeleteVersionedBucket(name, region string) error {
 
 	client := s3.New(sess, &aws.Config{Region: &region})
 
-	bucketVersioningStatus := "Suspended"
-	_, err = client.PutBucketVersioning(&s3.PutBucketVersioningInput{
-		Bucket: &name,
-		VersioningConfiguration: &s3.VersioningConfiguration{
-			Status: &bucketVersioningStatus,
-		},
-	})
-	if err != nil {
-		return err
-	}
-
-	time.Sleep(time.Second)
-
-	// Delete all object versions
-	versions := []*s3.ObjectVersion{}
-	err = client.ListObjectVersionsPages(&s3.ListObjectVersionsInput{Bucket: &name},
-		func(output *s3.ListObjectVersionsOutput, _ bool) bool {
-			versions = append(versions, output.Versions...)
-
-			return true
-		})
-	if err != nil {
-		return err
-	}
-
-	for _, version := range versions {
-		_, err = client.DeleteObject(&s3.DeleteObjectInput{
-			Bucket:    &name,
-			Key:       version.Key,
-			VersionId: version.VersionId,
-		})
-		if err != nil {
-			return nil
-		}
-	}
-
 	// Delete all objects
 	objects := []*s3.Object{}
 	err = client.ListObjectsPages(&s3.ListObjectsInput{Bucket: &name},
@@ -137,14 +101,6 @@ func EnsureBucketExists(name, region string) error {
 	if err != nil {
 		return err
 	}
-
-	versioningStatus := "Enabled"
-	_, err = client.PutBucketVersioning(&s3.PutBucketVersioningInput{
-		Bucket: &name,
-		VersioningConfiguration: &s3.VersioningConfiguration{
-			Status: &versioningStatus,
-		},
-	})
 
 	return err
 }
