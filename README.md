@@ -59,6 +59,8 @@ fly --target ci login --concourse-url http://ci-concourse-up-1420669447.eu-west-
 
 ```
 
+A new deploy from scratch takes approximately 40 minutes.
+
 To fetch information about your concourse-up deployment:
 
 ```
