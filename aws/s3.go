@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"io/ioutil"
 
+	"time"
+
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -50,6 +52,8 @@ func DeleteVersionedBucket(name, region string) error {
 		return err
 	}
 
+	time.Sleep(time.Second)
+
 	// Delete all object versions
 	versions := []*s3.ObjectVersion{}
 	err = client.ListObjectVersionsPages(&s3.ListObjectVersionsInput{Bucket: &name},
@@ -72,6 +76,30 @@ func DeleteVersionedBucket(name, region string) error {
 			return nil
 		}
 	}
+
+	// Delete all objects
+	objects := []*s3.Object{}
+	err = client.ListObjectsPages(&s3.ListObjectsInput{Bucket: &name},
+		func(output *s3.ListObjectsOutput, _ bool) bool {
+			objects = append(objects, output.Contents...)
+
+			return true
+		})
+	if err != nil {
+		return err
+	}
+
+	for _, object := range objects {
+		_, err = client.DeleteObject(&s3.DeleteObjectInput{
+			Bucket: &name,
+			Key:    object.Key,
+		})
+		if err != nil {
+			return nil
+		}
+	}
+
+	time.Sleep(time.Second)
 
 	_, err = client.DeleteBucket(&s3.DeleteBucketInput{Bucket: &name})
 	if err != nil {
