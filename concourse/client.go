@@ -17,6 +17,7 @@ type Client struct {
 	terraformClientFactory terraform.ClientFactory
 	boshClientFactory      bosh.ClientFactory
 	certGenerator          func(caName, ip string) (*certs.Certs, error)
+	hostedZoneFinder       func(string) (string, string, error)
 	configClient           config.IClient
 	args                   map[string]string
 	stdout                 io.Writer
@@ -35,6 +36,7 @@ func NewClient(
 	terraformClientFactory terraform.ClientFactory,
 	boshClientFactory bosh.ClientFactory,
 	certGenerator func(caName, ip string) (*certs.Certs, error),
+	hostedZoneFinder func(string) (string, string, error),
 	configClient config.IClient,
 	args map[string]string,
 	stdout, stderr io.Writer) *Client {
@@ -42,6 +44,7 @@ func NewClient(
 		terraformClientFactory: terraformClientFactory,
 		boshClientFactory:      boshClientFactory,
 		configClient:           configClient,
+		hostedZoneFinder:       hostedZoneFinder,
 		certGenerator:          certGenerator,
 		args:                   args,
 		stdout:                 stdout,

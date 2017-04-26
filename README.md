@@ -70,6 +70,16 @@ $ concourse-up destroy <your-project-name>
 
 That's it!
 
+### Custom Domains
+
+You can use a custom domain using the `--domain` flag eg:
+
+```
+$ concourse-up deploy chimichanga --domain chimichanga.engineerbetter.com
+```
+
+In the example above Concourse-Up will search for a Route 53 hosted zone that matches `chimichanga.engineerbetter.com` or `engineerbetter.com` and add a record to the longest match (`chimichanga.engineerbetter.com` in this example). The self-signed cert will also be generated using this domain.
+
 ## What it does
 
 Concourse up first creates an S3 bucket to store its own configuration and saves a `config.json` file there.

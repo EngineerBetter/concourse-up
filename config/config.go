@@ -10,6 +10,10 @@ import (
 
 // Config represents a concourse-up configuration file
 type Config struct {
+	HostedZoneID           string `json:"hosted_zone_id"`
+	HostedZoneRecordPrefix string `json:"hosted_zone_record_prefix"`
+	Domain                 string `json:"domain"`
+
 	ConcourseUsername        string `json:"concourse_username"`
 	ConcoursePassword        string `json:"concourse_password"`
 	ConcourseWorkerCount     int    `json:"concourse_worker_count"`
@@ -48,12 +52,6 @@ func generateDefaultConfig(project, deployment, region string) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-
-	accessIP, err := util.FindUserIP()
-	if err != nil {
-		return nil, err
-	}
-
 	configBucket := fmt.Sprintf("%s-config", deployment)
 
 	conf := Config{
@@ -66,7 +64,7 @@ func generateDefaultConfig(project, deployment, region string) ([]byte, error) {
 		Deployment:               deployment,
 		ConfigBucket:             configBucket,
 		RDSDefaultDatabaseName:   "bosh",
-		SourceAccessIP:           accessIP,
+		SourceAccessIP:           "",
 		Project:                  project,
 		TFStatePath:              terraformStateFileName,
 		Region:                   region,

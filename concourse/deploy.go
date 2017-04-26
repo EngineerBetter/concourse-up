@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"io"
 
+	"strings"
+
 	"github.com/engineerbetter/concourse-up/bosh"
 	"github.com/engineerbetter/concourse-up/config"
 	"github.com/engineerbetter/concourse-up/terraform"
@@ -12,14 +14,30 @@ import (
 
 // Deploy deploys a concourse instance
 func (client *Client) Deploy() error {
-	config, err := client.loadConfigWithUserIP()
+	config, err := client.loadConfig()
 	if err != nil {
+		return err
+	}
+
+	if err = client.setUserIP(config); err != nil {
+		return err
+	}
+
+	if err = client.setHostedZone(config); err != nil {
 		return err
 	}
 
 	metadata, err := client.applyTerraform(config)
 	if err != nil {
 		return err
+	}
+
+	if config.Domain == "" {
+		config.Domain = metadata.ELBDNSName.Value
+
+		if err = client.configClient.Update(config); err != nil {
+			return err
+		}
 	}
 
 	config, err = client.ensureCerts(config, metadata)
@@ -39,32 +57,36 @@ func (client *Client) Deploy() error {
 }
 
 func (client *Client) ensureCerts(config *config.Config, metadata *terraform.Metadata) (*config.Config, error) {
-	if config.DirectorCACert == "" {
-		ip := metadata.DirectorPublicIP.Value
-		_, err := client.stdout.Write(
-			[]byte(fmt.Sprintf("\nGENERATING CERTIFICATE FOR %s\n", ip)))
-		if err != nil {
-			return nil, err
-		}
+	if config.DirectorCACert != "" {
+		return config, nil
+	}
 
-		directorCerts, err := client.certGenerator(config.Deployment, ip)
-		if err != nil {
-			return nil, err
-		}
+	ip := metadata.DirectorPublicIP.Value
+	_, err := client.stdout.Write(
+		[]byte(fmt.Sprintf("\nGENERATING CERTIFICATE FOR %s\n", ip)))
+	if err != nil {
+		return nil, err
+	}
 
-		config.DirectorCACert = string(directorCerts.CACert)
-		config.DirectorCert = string(directorCerts.Cert)
-		config.DirectorKey = string(directorCerts.Key)
+	directorCerts, err := client.certGenerator(config.Deployment, ip)
+	if err != nil {
+		return nil, err
+	}
 
-		concourseCerts, err := client.certGenerator(config.Deployment, metadata.ELBDNSName.Value)
-		if err != nil {
-			return nil, err
-		}
+	config.DirectorCACert = string(directorCerts.CACert)
+	config.DirectorCert = string(directorCerts.Cert)
+	config.DirectorKey = string(directorCerts.Key)
 
-		config.ConcourseCert = string(concourseCerts.Cert)
-		config.ConcourseKey = string(concourseCerts.Key)
+	concourseCerts, err := client.certGenerator(config.Deployment, config.Domain)
+	if err != nil {
+		return nil, err
+	}
 
-		client.configClient.Update(config)
+	config.ConcourseCert = string(concourseCerts.Cert)
+	config.ConcourseKey = string(concourseCerts.Key)
+
+	if err = client.configClient.Update(config); err != nil {
+		return nil, err
 	}
 
 	return config, nil
@@ -114,7 +136,7 @@ func (client *Client) deployBosh(config *config.Config, metadata *terraform.Meta
 	return client.configClient.StoreAsset(bosh.StateFilename, boshStateBytes)
 }
 
-func (client *Client) loadConfigWithUserIP() (*config.Config, error) {
+func (client *Client) loadConfig() (*config.Config, error) {
 	config, createdNewConfig, err := client.configClient.LoadOrCreate(client.args)
 	if err != nil {
 		return nil, err
@@ -125,27 +147,61 @@ func (client *Client) loadConfigWithUserIP() (*config.Config, error) {
 			return nil, err
 		}
 	}
+	return config, nil
+}
 
+func (client *Client) setUserIP(config *config.Config) error {
 	userIP, err := util.FindUserIP()
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	config.SourceAccessIP = userIP
-	_, err = client.stderr.Write([]byte(fmt.Sprintf(
-		"\nWARNING: allowing access from local machine (address: %s)\n\n", userIP)))
+	if config.SourceAccessIP != userIP {
+		config.SourceAccessIP = userIP
+		_, err = client.stderr.Write([]byte(fmt.Sprintf(
+			"\nWARNING: allowing access from local machine (address: %s)\n\n", userIP)))
+		if err != nil {
+			return err
+		}
+		if err = client.configClient.Update(config); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (client *Client) setHostedZone(config *config.Config) error {
+	domain := client.args["domain"]
+	if domain == "" {
+		return nil
+	}
+
+	hostedZoneName, hostedZoneID, err := client.hostedZoneFinder(domain)
 	if err != nil {
-		return nil, err
+		return err
+	}
+	config.HostedZoneID = hostedZoneID
+	config.HostedZoneRecordPrefix = strings.TrimSuffix(domain, fmt.Sprintf(".%s", hostedZoneName))
+	config.Domain = domain
+
+	_, err = client.stderr.Write([]byte(fmt.Sprintf(
+		"\nWARNING: adding record %s to Route53 hosted zone %s ID: %s\n\n", domain, hostedZoneName, hostedZoneID)))
+	if err != nil {
+		return err
+	}
+	if err = client.configClient.Update(config); err != nil {
+		return err
 	}
 
-	return config, err
+	return nil
 }
 
 func writeDeploySuccessMessage(config *config.Config, metadata *terraform.Metadata, stdout io.Writer) error {
 	_, err := stdout.Write([]byte(fmt.Sprintf(
 		"\nDEPLOY SUCCESSFUL. Log in with:\n\nfly --target %s login --insecure --concourse-url https://%s --username %s --password %s\n\n",
 		config.Project,
-		metadata.ELBDNSName.Value,
+		config.Domain,
 		config.ConcourseUsername,
 		config.ConcoursePassword,
 	)))

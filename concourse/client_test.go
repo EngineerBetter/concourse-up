@@ -26,6 +26,14 @@ var _ = Describe("Client", func() {
 	var terraformMetadata *terraform.Metadata
 	var args map[string]string
 
+	hostedZoneFinder := func(subdomain string) (string, string, error) {
+		if subdomain == "ci.google.com" {
+			return "google.com", "ABC123", nil
+		}
+
+		return "", "", errors.New("hosted zone not found")
+	}
+
 	certGenerator := func(caName string, ip string) (*certs.Certs, error) {
 		actions = append(actions, fmt.Sprintf("generating cert ca: %s, ca: %s", caName, ip))
 		return &certs.Certs{
@@ -172,6 +180,7 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 			terraformClientFactory,
 			boshClientFactory,
 			certGenerator,
+			hostedZoneFinder,
 			configClient,
 			args,
 			stdout,
@@ -180,6 +189,24 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 	})
 
 	Describe("Deploy", func() {
+		It("Prints a warning about changing the sourceIP", func() {
+			err := client.Deploy()
+			Expect(err).ToNot(HaveOccurred())
+
+			Expect(stderr).To(gbytes.Say("WARNING: allowing access from local machine"))
+		})
+
+		Context("When a custom domain is required", func() {
+			It("Prints a warning about adding a DNS record", func() {
+				args["domain"] = "ci.google.com"
+
+				err := client.Deploy()
+				Expect(err).ToNot(HaveOccurred())
+
+				Expect(stderr).To(gbytes.Say("WARNING: adding record ci.google.com to Route53 hosted zone google.com ID: ABC123"))
+			})
+		})
+
 		It("Loads of creates config file", func() {
 			err := client.Deploy()
 			Expect(err).ToNot(HaveOccurred())
@@ -213,6 +240,17 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 			Expect(err).ToNot(HaveOccurred())
 
 			Expect(actions).To(ContainElement("generating cert ca: concourse-up-happymeal, ca: elb.aws.com"))
+		})
+
+		Context("When a custom domain is required", func() {
+			It("Generates certificates for concourse", func() {
+				args["domain"] = "ci.google.com"
+
+				err := client.Deploy()
+				Expect(err).ToNot(HaveOccurred())
+
+				Expect(actions).To(ContainElement("generating cert ca: concourse-up-happymeal, ca: ci.google.com"))
+			})
 		})
 
 		It("Updates the config", func() {

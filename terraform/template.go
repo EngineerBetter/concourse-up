@@ -65,6 +65,18 @@ variable "multi_az_rds" {
   default = <%if .MultiAZRDS %>true<%else%>false<%end%>
 }
 
+<%if .HostedZoneID %>
+variable "hosted_zone_id" {
+  type = "string"
+  default = "<% .HostedZoneID %>"
+}
+
+variable "hosted_zone_record_prefix" {
+  type = "string"
+  default = "<% .HostedZoneRecordPrefix %>"
+}
+<%end%>
+
 provider "aws" {
 	region = "<% .Region %>"
 }
@@ -227,9 +239,23 @@ resource "aws_elb" "concourse" {
   }
 }
 
+<%if .HostedZoneID %>
+resource "aws_route53_record" "concourse" {
+  zone_id = "${var.hosted_zone_id}"
+  name    = "${var.hosted_zone_record_prefix}"
+  type    = "A"
+
+  alias {
+    name                   = "${aws_elb.concourse.dns_name}"
+    zone_id                = "${aws_elb.concourse.zone_id}"
+    evaluate_target_health = true
+  }
+}
+
 resource "aws_eip" "director" {
   vpc = true
 }
+<%end%>
 
 resource "aws_security_group" "director" {
   name        = "${var.deployment}-director"

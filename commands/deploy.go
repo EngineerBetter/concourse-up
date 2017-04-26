@@ -4,6 +4,7 @@ import (
 	"errors"
 	"os"
 
+	"github.com/engineerbetter/concourse-up/aws"
 	"github.com/engineerbetter/concourse-up/bosh"
 	"github.com/engineerbetter/concourse-up/certs"
 	"github.com/engineerbetter/concourse-up/concourse"
@@ -14,6 +15,7 @@ import (
 )
 
 var awsRegion string
+var domain string
 
 var deployFlags = []cli.Flag{
 	cli.StringFlag{
@@ -22,6 +24,12 @@ var deployFlags = []cli.Flag{
 		Usage:       "AWS region",
 		EnvVar:      "AWS_REGION",
 		Destination: &awsRegion,
+	},
+	cli.StringFlag{
+		Name:        "domain",
+		Usage:       "Domain to use as endpoint for Concourse web interface (eg: ci.myproject.com)",
+		EnvVar:      "DOMAIN",
+		Destination: &domain,
 	},
 }
 
@@ -41,9 +49,11 @@ var deploy = cli.Command{
 			terraform.NewClient,
 			bosh.NewClient,
 			certs.Generate,
+			aws.FindLongestMatchingHostedZone,
 			&config.Client{Project: name},
 			map[string]string{
 				"aws-region": awsRegion,
+				"domain":     domain,
 			},
 			os.Stdout,
 			os.Stderr,

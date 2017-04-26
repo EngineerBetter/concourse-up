@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/engineerbetter/concourse-up/aws"
 	"github.com/engineerbetter/concourse-up/bosh"
 	"github.com/engineerbetter/concourse-up/certs"
 	"github.com/engineerbetter/concourse-up/concourse"
@@ -38,6 +39,7 @@ var info = cli.Command{
 			terraform.NewClient,
 			bosh.NewClient,
 			certs.Generate,
+			aws.FindLongestMatchingHostedZone,
 			&config.Client{Project: name},
 			map[string]string{},
 			os.Stdout,
