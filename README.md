@@ -2,6 +2,8 @@
 
 A tool for easily deploying [Concourse](concourse.ci) in a single command.
 
+![](https://ci.engineerbetter.com/api/v1/teams/main/pipelines/concourse-up/jobs/test/badge)
+
 ## Why?
 
 Concourse is easy to get started with, but as soon as you want your team to use it you've
