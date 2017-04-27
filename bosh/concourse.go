@@ -72,7 +72,8 @@ func (client *Client) deployConcourse() error {
 
 func generateConcourseManifest(config *config.Config, metadata *terraform.Metadata) ([]byte, error) {
 	templateParams := awsConcourseManifestParams{
-		Workers:              config.ConcourseWorkerCount,
+		WorkerCount:          config.ConcourseWorkerCount,
+		WorkerSize:           config.ConcourseWorkerSize,
 		URL:                  fmt.Sprintf("https://%s", config.Domain),
 		Username:             config.ConcourseUsername,
 		Password:             config.ConcoursePassword,
@@ -93,7 +94,8 @@ func generateConcourseManifest(config *config.Config, metadata *terraform.Metada
 }
 
 type awsConcourseManifestParams struct {
-	Workers              int
+	WorkerCount          int
+	WorkerSize           string
 	URL                  string
 	Username             string
 	Password             string
@@ -175,8 +177,8 @@ instance_groups:
     properties: {}
 
 - name: worker
-  instances: <% .Workers %>
-  vm_type: concourse-large
+  instances: <% .WorkerCount %>
+  vm_type: concourse-<% .WorkerSize %>
   stemcell: trusty
   azs:
   - z1

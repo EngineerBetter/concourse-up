@@ -1,6 +1,9 @@
 package config
 
-import "errors"
+import (
+	"errors"
+	"fmt"
+)
 
 type DeployArgs struct {
 	AWSRegion   string
@@ -8,7 +11,10 @@ type DeployArgs struct {
 	TLSCert     string
 	TLSKey      string
 	WorkerCount int
+	WorkerSize  string
 }
+
+var WorkerSizes = []string{"medium", "large", "xlarge"}
 
 // Validate validates that flag interdependencies
 func (args DeployArgs) Validate() error {
@@ -24,5 +30,17 @@ func (args DeployArgs) Validate() error {
 	if args.WorkerCount < 1 {
 		return errors.New("minimum of workers is 1")
 	}
+
+	knownSize := false
+	for _, size := range WorkerSizes {
+		if args.WorkerSize == size {
+			knownSize = true
+		}
+	}
+
+	if !knownSize {
+		return fmt.Errorf("unknown worker size: `%s`. Valid sizes are: %v", args.WorkerSize, WorkerSizes)
+	}
+
 	return nil
 }

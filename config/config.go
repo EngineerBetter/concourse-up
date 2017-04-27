@@ -17,6 +17,7 @@ type Config struct {
 	ConcourseUsername        string `json:"concourse_username"`
 	ConcoursePassword        string `json:"concourse_password"`
 	ConcourseWorkerCount     int    `json:"concourse_worker_count"`
+	ConcourseWorkerSize      string `json:"concourse_worker_size"`
 	ConcourseDBName          string `json:"concourse_db_name"`
 	PublicKey                string `json:"public_key"`
 	PrivateKey               string `json:"private_key"`
@@ -60,6 +61,7 @@ func generateDefaultConfig(project, deployment, region string) ([]byte, error) {
 		ConcourseUsername:        "admin",
 		ConcoursePassword:        util.GeneratePassword(),
 		ConcourseWorkerCount:     1,
+		ConcourseWorkerSize:      "xlarge",
 		ConcourseDBName:          "concourse_atc",
 		PublicKey:                strings.TrimSpace(string(publicKey)),
 		PrivateKey:               strings.TrimSpace(string(privateKey)),

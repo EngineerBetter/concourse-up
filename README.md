@@ -87,6 +87,21 @@ By default `concourse-up` deploys a single worker instance of the `m3.xlarge` ty
 $ concourse-up deploy chimichanga --workers 3
 ```
 
+You can also change the size of each worker instance using the `--worker-size` flag. eg:
+
+```
+$ concourse-up deploy chimichanga --worker-size xlarge
+```
+
+The following table shows the allowed worker sizes and the corresponding AWS instance types
+
+| --worker-size | AWS Instance type |
+|---------------|-------------------|
+| medium        | m3.medium         |
+| large         | m3.large          |
+| xlarge        | m3.xlarge         |
+
+
 ### Custom Domains
 
 You can use a custom domain using the `--domain` flag eg:

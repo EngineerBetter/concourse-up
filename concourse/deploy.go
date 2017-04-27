@@ -68,6 +68,7 @@ func (client *Client) checkPredeployConfigRequiments(isDomainUpdated bool, confi
 	}
 
 	config.ConcourseWorkerCount = client.deployArgs.WorkerCount
+	config.ConcourseWorkerSize = client.deployArgs.WorkerSize
 
 	if err := client.configClient.Update(config); err != nil {
 		return nil, err

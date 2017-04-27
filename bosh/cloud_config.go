@@ -46,8 +46,19 @@ vm_types:
 
 - name: concourse-large
   cloud_properties:
+    instance_type: m3.large
+    spot_bid_price: 0.18 # on-demand price: 0.146
+    spot_ondemand_fallback: true
+    ephemeral_disk:
+      size: 200_000
+      type: gp2
+    security_groups:
+    - <% .VMsSecurityGroupID %>
+
+- name: concourse-xlarge
+  cloud_properties:
     instance_type: m3.xlarge
-    spot_bid_price: 0.320 # on-demand price: 0.266
+    spot_bid_price: 0.35 # on-demand price: 0.293
     spot_ondemand_fallback: true
     ephemeral_disk:
       size: 200_000

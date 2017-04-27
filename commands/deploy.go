@@ -45,9 +45,16 @@ var deployFlags = []cli.Flag{
 	cli.IntFlag{
 		Name:        "workers",
 		Usage:       "Number of Concourse worker instances to deploy",
-		EnvVar:      "TLS_KEY",
+		EnvVar:      "WORKERS",
 		Value:       1,
 		Destination: &deployArgs.WorkerCount,
+	},
+	cli.StringFlag{
+		Name:        "worker-size",
+		Usage:       "Size of Concourse workers. Can be medium, large or xlarge",
+		EnvVar:      "WORKER_SIZE",
+		Value:       "xlarge",
+		Destination: &deployArgs.WorkerSize,
 	},
 }
 
