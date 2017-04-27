@@ -108,7 +108,7 @@ jobs:
   - aggregate:
     - get: version
       params:
-        bump: patch
+        bump: minor
     - get: image
       passed:
       - test
@@ -136,7 +136,7 @@ jobs:
   - aggregate:
     - get: version
       params:
-        bump: patch
+        bump: major
     - get: image
       passed:
       - test
