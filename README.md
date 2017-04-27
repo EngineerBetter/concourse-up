@@ -159,6 +159,12 @@ Once the terraform step is complete, `concourse-up` deploys a BOSH director on a
 - One m3.xlarge spot instance used as a Concourse worker
 - Access via a load balancer over HTTP and HTTPS using a user-provided certificate, or an auto-generated self-signed certificate if one isn't provided.
 
+## Using a dedicated AWS IAM account
+
+If you'd like to run concourse-up with it's own IAM account, create a user with the following permissions:
+
+![](http://i.imgur.com/Q0mOUjv.png)
+
 ## Tests
 
 Tests use the [Ginkgo](https://onsi.github.io/ginkgo/) Go testing framework. The tests require you to have set up AWS authentication locally.
