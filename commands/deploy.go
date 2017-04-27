@@ -59,7 +59,9 @@ var deploy = cli.Command{
 			return errors.New("Usage is `concourse-up deploy <name>`")
 		}
 
-		// TODO: validate cert requirements
+		if err := validateDeployArgs(domain, tlsCert, tlsKey); err != nil {
+			return err
+		}
 
 		client := concourse.NewClient(
 			terraform.NewClient,
@@ -79,4 +81,17 @@ var deploy = cli.Command{
 
 		return client.Deploy()
 	},
+}
+
+func validateDeployArgs(domain, tlsCert, tlsKey string) error {
+	if tlsKey != "" && tlsCert == "" {
+		return errors.New("--tls-key requires --tls-cert to also be provided")
+	}
+	if tlsCert != "" && tlsKey == "" {
+		return errors.New("--tls-cert requires --tls-key to also be provided")
+	}
+	if (tlsKey != "" || tlsCert != "") && domain == "" {
+		return errors.New("custom certificates require --domain to be provided")
+	}
+	return nil
 }
