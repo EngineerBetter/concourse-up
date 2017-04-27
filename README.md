@@ -87,7 +87,16 @@ You can use a custom domain using the `--domain` flag eg:
 $ concourse-up deploy chimichanga --domain chimichanga.engineerbetter.com
 ```
 
-In the example above `concourse-up` will search for a Route 53 hosted zone that matches `chimichanga.engineerbetter.com` or `engineerbetter.com` and add a record to the longest match (`chimichanga.engineerbetter.com` in this example). The self-signed cert will also be generated using this domain.
+In the example above `concourse-up` will search for a Route 53 hosted zone that matches `chimichanga.engineerbetter.com` or `engineerbetter.com` and add a record to the longest match (`chimichanga.engineerbetter.com` in this example).
+
+By default `concourse-up` will generate a self-signed cert using the given domain. If you'd like to provide your own certificate instead, pass the cert and private key as strings using the `--tls-cert` and `--tls-key` flags respectively. eg:
+
+```
+$ concourse-up deploy chimichanga \
+  --domain chimichanga.engineerbetter.com \
+  --tls-cert "$(cat chimichanga.engineerbetter.com.crt)" \
+  --tls-key "$(cat chimichanga.engineerbetter.com.key)"
+```
 
 ## What it does
 
