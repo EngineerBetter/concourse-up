@@ -90,7 +90,7 @@ func (client *Client) Destroy() error {
 
 func checkTerraformOnPath(stdout, stderr io.Writer) error {
 	if err := terraform([]string{"version"}, "", stdout, stderr); err != nil {
-		return fmt.Errorf("error running `terraform version`, is terraform in your PATH?\n%s\n\nDownload terraform here: https://www.terraform.io/downloads.html\n", err.Error())
+		return fmt.Errorf("error running `terraform version`, is terraform in your PATH? Download terraform here: https://www.terraform.io/downloads.html\n%s", err.Error())
 	}
 	return nil
 }
