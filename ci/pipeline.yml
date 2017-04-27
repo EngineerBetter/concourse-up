@@ -50,7 +50,7 @@ jobs:
     params:
       build: image-source/ci/docker
 
-- name: unit-tests
+- name: test
   plan:
   - get: image
     trigger: true
@@ -67,44 +67,10 @@ jobs:
       params:
         AWS_ACCESS_KEY_ID: {{aws_access_key_id}}
         AWS_SECRET_ACCESS_KEY: {{aws_secret_access_key}}
-
-- name: system-test
-  plan:
-  - aggregate:
-    - get: image
-      trigger: true
-      passed:
-      - unit-tests
-    - get: concourse-up
-      trigger: true
-      passed:
-      - unit-tests
   - task: system-test
     image: image
     file: concourse-up/ci/tasks/system-test.yml
     params:
-      AWS_ACCESS_KEY_ID: {{aws_access_key_id}}
-      AWS_SECRET_ACCESS_KEY: {{aws_secret_access_key}}
-
-- name: system-test-tls
-  serial: true
-  plan:
-  - aggregate:
-    - get: image
-      trigger: true
-      passed:
-      - unit-tests
-    - get: concourse-up
-      trigger: true
-      passed:
-      - unit-tests
-  - task: system-test
-    image: image
-    file: concourse-up/ci/tasks/system-test.yml
-    params:
-      DOMAIN: system-test.concourse-up.engineerbetter.com
-      TLS_CERT: {{system_test_domain_cert}}
-      TLS_KEY: {{system_test_domain_key}}
       AWS_ACCESS_KEY_ID: {{aws_access_key_id}}
       AWS_SECRET_ACCESS_KEY: {{aws_secret_access_key}}
 
@@ -117,12 +83,10 @@ jobs:
         bump: patch
     - get: image
       passed:
-      - system-test
-      - system-test-tls
+      - test
     - get: concourse-up
       passed:
-      - system-test
-      - system-test-tls
+      - test
   - task: build
     image: image
     file: concourse-up/ci/tasks/build.yml
@@ -147,12 +111,10 @@ jobs:
         bump: patch
     - get: image
       passed:
-      - system-test
-      - system-test-tls
+      - test
     - get: concourse-up
       passed:
-      - system-test
-      - system-test-tls
+      - test
   - task: build
     image: image
     file: concourse-up/ci/tasks/build.yml
@@ -177,12 +139,10 @@ jobs:
         bump: patch
     - get: image
       passed:
-      - system-test
-      - system-test-tls
+      - test
     - get: concourse-up
       passed:
-      - system-test
-      - system-test-tls
+      - test
   - task: build
     image: image
     file: concourse-up/ci/tasks/build.yml
