@@ -4,6 +4,7 @@ set -eux
 
 which aws
 which bosh-cli
+which certstrap
 which fly
 which go
 which jq

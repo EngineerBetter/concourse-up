@@ -25,7 +25,8 @@ RUN pip install --upgrade pip \
 
 RUN go get github.com/onsi/ginkgo/ginkgo \
            github.com/onsi/gomega \
-           gopkg.in/alecthomas/gometalinter.v1
+           gopkg.in/alecthomas/gometalinter.v1 \
+           github.com/square/certstrap
 
 RUN gometalinter.v1 --install
 
