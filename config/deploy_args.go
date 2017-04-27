@@ -21,7 +21,7 @@ func (args DeployArgs) Validate() error {
 	if (args.TLSKey != "" || args.TLSCert != "") && args.Domain == "" {
 		return errors.New("custom certificates require --domain to be provided")
 	}
-	if args.WorkerCount <= 1 {
+	if args.WorkerCount < 1 {
 		return errors.New("minimum of workers is 1")
 	}
 	return nil
