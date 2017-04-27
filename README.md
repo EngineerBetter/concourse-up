@@ -98,6 +98,19 @@ $ concourse-up deploy chimichanga \
   --tls-key "$(cat chimichanga.engineerbetter.com.key)"
 ```
 
+## Estimated Cost
+
+By default, `concourse-up` deploys to the AWS eu-west-1 (Ireland) region, and uses spot instances for the Concourse VMs. The estimated monthly cost is as follows:
+
+| Component     | Size             | Count | Price (USD) |
+|---------------|------------------|-------|------------:|
+| BOSH director | t2.medium        |     1 |       36.50 |
+| Web Server    | m3.medium (spot) |     1 |       10.80 |
+| Worker        | m3.xlarge (spot) |     1 |       48.47 |
+| RDS instance  | db.t2.small      |     1 |       28.47 |
+| Load balancer |         -        |     1 |       20.44 |
+| **Total**         |                  |       |      **144.68** |
+
 ## What it does
 
 `concourse-up` first creates an S3 bucket to store its own configuration and saves a `config.json` file there.
