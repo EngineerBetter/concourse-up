@@ -79,6 +79,14 @@ $ concourse-up destroy <your-project-name>
 
 That's it!
 
+### Worker Configuration
+
+By default `concourse-up` deploys a single worker instance of the `m3.xlarge` type. To increase the number of workers pass in the `--workers` flag eg:
+
+```
+$ concourse-up deploy chimichanga --workers 3
+```
+
 ### Custom Domains
 
 You can use a custom domain using the `--domain` flag eg:

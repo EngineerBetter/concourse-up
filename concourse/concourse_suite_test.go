@@ -17,7 +17,7 @@ func TestConcourse(t *testing.T) {
 type FakeConfigClient struct {
 	FakeLoad         func() (*config.Config, error)
 	FakeUpdate       func(*config.Config) error
-	FakeLoadOrCreate func(args map[string]string) (*config.Config, bool, error)
+	FakeLoadOrCreate func(deployArgs *config.DeployArgs) (*config.Config, bool, error)
 	FakeStoreAsset   func(filename string, contents []byte) error
 	FakeLoadAsset    func(filename string) ([]byte, error)
 	FakeDeleteAsset  func(filename string) error
@@ -33,8 +33,8 @@ func (client *FakeConfigClient) Update(config *config.Config) error {
 	return client.FakeUpdate(config)
 }
 
-func (client *FakeConfigClient) LoadOrCreate(args map[string]string) (*config.Config, bool, error) {
-	return client.FakeLoadOrCreate(args)
+func (client *FakeConfigClient) LoadOrCreate(deployArgs *config.DeployArgs) (*config.Config, bool, error) {
+	return client.FakeLoadOrCreate(deployArgs)
 }
 
 func (client *FakeConfigClient) StoreAsset(filename string, contents []byte) error {

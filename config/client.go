@@ -15,7 +15,7 @@ const configFilePath = "config.json"
 type IClient interface {
 	Load() (*Config, error)
 	DeleteAll(config *Config) error
-	LoadOrCreate(args map[string]string) (*Config, bool, error)
+	LoadOrCreate(deployArgs *DeployArgs) (*Config, bool, error)
 	Update(*Config) error
 	StoreAsset(filename string, contents []byte) error
 	HasAsset(filename string) (bool, error)
@@ -99,11 +99,11 @@ func (client *Client) Load() (*Config, error) {
 }
 
 // LoadOrCreate loads an existing config file from S3, or creates a default if one doesn't already exist
-func (client *Client) LoadOrCreate(args map[string]string) (*Config, bool, error) {
+func (client *Client) LoadOrCreate(deployArgs *DeployArgs) (*Config, bool, error) {
 	defaultConfigBytes, err := generateDefaultConfig(
 		client.Project,
 		client.deployment(),
-		args["aws-region"],
+		deployArgs.AWSRegion,
 	)
 	if err != nil {
 		return nil, false, err

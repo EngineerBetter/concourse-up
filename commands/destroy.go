@@ -45,7 +45,7 @@ var destroy = cli.Command{
 			certs.Generate,
 			aws.FindLongestMatchingHostedZone,
 			&config.Client{Project: name},
-			map[string]string{},
+			nil,
 			os.Stdout,
 			os.Stderr,
 		)

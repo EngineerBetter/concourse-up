@@ -14,10 +14,7 @@ import (
 	"gopkg.in/urfave/cli.v1"
 )
 
-var awsRegion string
-var domain string
-var tlsCert string
-var tlsKey string
+var deployArgs config.DeployArgs
 
 var deployFlags = []cli.Flag{
 	cli.StringFlag{
@@ -25,25 +22,32 @@ var deployFlags = []cli.Flag{
 		Value:       "eu-west-1",
 		Usage:       "(optional) AWS region",
 		EnvVar:      "AWS_REGION",
-		Destination: &awsRegion,
+		Destination: &deployArgs.AWSRegion,
 	},
 	cli.StringFlag{
 		Name:        "domain",
 		Usage:       "Domain to use as endpoint for Concourse web interface (eg: ci.myproject.com)",
 		EnvVar:      "DOMAIN",
-		Destination: &domain,
+		Destination: &deployArgs.Domain,
 	},
 	cli.StringFlag{
 		Name:        "tls-cert",
-		Usage:       "(optional) TLS cert to use with concourse endpoint",
+		Usage:       "(optional) TLS cert to use with Concourse endpoint",
 		EnvVar:      "TLS_CERT",
-		Destination: &tlsCert,
+		Destination: &deployArgs.TLSCert,
 	},
 	cli.StringFlag{
 		Name:        "tls-key",
-		Usage:       "(optional) TLS private key to use with concourse endpoint",
+		Usage:       "(optional) TLS private key to use with Concourse endpoint",
 		EnvVar:      "TLS_KEY",
-		Destination: &tlsKey,
+		Destination: &deployArgs.TLSKey,
+	},
+	cli.IntFlag{
+		Name:        "workers",
+		Usage:       "Number of Concourse worker instances to deploy",
+		EnvVar:      "TLS_KEY",
+		Value:       1,
+		Destination: &deployArgs.WorkerCount,
 	},
 }
 
@@ -59,7 +63,7 @@ var deploy = cli.Command{
 			return errors.New("Usage is `concourse-up deploy <name>`")
 		}
 
-		if err := validateDeployArgs(domain, tlsCert, tlsKey); err != nil {
+		if err := deployArgs.Validate(); err != nil {
 			return err
 		}
 
@@ -69,29 +73,11 @@ var deploy = cli.Command{
 			certs.Generate,
 			aws.FindLongestMatchingHostedZone,
 			&config.Client{Project: name},
-			map[string]string{
-				"aws-region": awsRegion,
-				"domain":     domain,
-				"tls-cert":   tlsCert,
-				"tls-key":    tlsKey,
-			},
+			&deployArgs,
 			os.Stdout,
 			os.Stderr,
 		)
 
 		return client.Deploy()
 	},
-}
-
-func validateDeployArgs(domain, tlsCert, tlsKey string) error {
-	if tlsKey != "" && tlsCert == "" {
-		return errors.New("--tls-key requires --tls-cert to also be provided")
-	}
-	if tlsCert != "" && tlsKey == "" {
-		return errors.New("--tls-cert requires --tls-key to also be provided")
-	}
-	if (tlsKey != "" || tlsCert != "") && domain == "" {
-		return errors.New("custom certificates require --domain to be provided")
-	}
-	return nil
 }

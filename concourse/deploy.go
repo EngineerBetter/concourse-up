@@ -67,6 +67,8 @@ func (client *Client) checkPredeployConfigRequiments(isDomainUpdated bool, confi
 		return nil, err
 	}
 
+	config.ConcourseWorkerCount = client.deployArgs.WorkerCount
+
 	if err := client.configClient.Update(config); err != nil {
 		return nil, err
 	}
@@ -109,9 +111,9 @@ func (client *Client) ensureDirectorCerts(config *config.Config, metadata *terra
 }
 
 func (client *Client) ensureConcourseCerts(domainUpdated bool, config *config.Config, metadata *terraform.Metadata) (*config.Config, error) {
-	if client.args["tls-cert"] != "" {
-		config.ConcourseCert = client.args["tls-cert"]
-		config.ConcourseKey = client.args["tls-key"]
+	if client.deployArgs.TLSCert != "" {
+		config.ConcourseCert = client.deployArgs.TLSCert
+		config.ConcourseKey = client.deployArgs.TLSKey
 		config.ConcourseUserProvidedCert = true
 
 		return config, nil
@@ -180,7 +182,7 @@ func (client *Client) deployBosh(config *config.Config, metadata *terraform.Meta
 }
 
 func (client *Client) loadConfig() (*config.Config, error) {
-	config, createdNewConfig, err := client.configClient.LoadOrCreate(client.args)
+	config, createdNewConfig, err := client.configClient.LoadOrCreate(client.deployArgs)
 	if err != nil {
 		return nil, err
 	}
@@ -215,7 +217,7 @@ func (client *Client) setUserIP(config *config.Config) error {
 }
 
 func (client *Client) setHostedZone(config *config.Config) error {
-	domain := client.args["domain"]
+	domain := client.deployArgs.Domain
 	if domain == "" {
 		return nil
 	}

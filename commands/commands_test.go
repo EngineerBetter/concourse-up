@@ -78,6 +78,16 @@ var _ = Describe("commands", func() {
 				Expect(session.Err).To(Say("custom certificates require --domain to be provided"))
 			})
 		})
+
+		Context("When an invalid worker count is provided", func() {
+			It("Should show a meaningful error", func() {
+				command := exec.Command(cliPath, "deploy", "abc", "--workers", "0")
+				session, err := Start(command, GinkgoWriter, GinkgoWriter)
+				Expect(err).ToNot(HaveOccurred())
+				Eventually(session).Should(Exit(1))
+				Expect(session.Err).To(Say("minimum of workers is 1"))
+			})
+		})
 	})
 
 	Describe("destroy", func() {

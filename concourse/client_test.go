@@ -24,7 +24,7 @@ var _ = Describe("Client", func() {
 	var stderr *gbytes.Buffer
 	var deleteBoshDirectorError error
 	var terraformMetadata *terraform.Metadata
-	var args map[string]string
+	var args *config.DeployArgs
 
 	hostedZoneFinder := func(subdomain string) (string, string, error) {
 		if subdomain == "ci.google.com" {
@@ -42,8 +42,8 @@ var _ = Describe("Client", func() {
 	}
 
 	BeforeEach(func() {
-		args = map[string]string{
-			"aws-region": "eu-west-2",
+		args = &config.DeployArgs{
+			AWSRegion: "eu-west-2",
 		}
 
 		terraformMetadata = &terraform.Metadata{
@@ -106,7 +106,7 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 			ConcourseUsername: "admin",
 		}
 		configClient := &FakeConfigClient{
-			FakeLoadOrCreate: func(args map[string]string) (*config.Config, bool, error) {
+			FakeLoadOrCreate: func(deployArgs *config.DeployArgs) (*config.Config, bool, error) {
 				actions = append(actions, "loading or creating config file")
 				return exampleConfig, false, nil
 			},
@@ -198,7 +198,7 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 
 		Context("When a custom domain is required", func() {
 			It("Prints a warning about adding a DNS record", func() {
-				args["domain"] = "ci.google.com"
+				args.Domain = "ci.google.com"
 
 				err := client.Deploy()
 				Expect(err).ToNot(HaveOccurred())
@@ -244,7 +244,7 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 
 		Context("When a custom domain is required", func() {
 			It("Generates certificates for concourse", func() {
-				args["domain"] = "ci.google.com"
+				args.Domain = "ci.google.com"
 
 				err := client.Deploy()
 				Expect(err).ToNot(HaveOccurred())
@@ -297,9 +297,9 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 
 		Context("When a custom cert is provided", func() {
 			It("Prints the correct domain and not suggest using --insecure", func() {
-				args["domain"] = "ci.google.com"
-				args["tls-cert"] = "--- CERTIFICATE ---"
-				args["tls-key"] = "--- KEY ---"
+				args.Domain = "ci.google.com"
+				args.TLSCert = "--- CERTIFICATE ---"
+				args.TLSKey = "--- KEY ---"
 
 				err := client.Deploy()
 				Expect(err).ToNot(HaveOccurred())
