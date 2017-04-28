@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -eu
+set -eux
 
 build_dir=$PWD/build
 mkdir -p build_dir
