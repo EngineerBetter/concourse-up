@@ -1,0 +1,13 @@
+---
+platform: linux
+
+inputs:
+- name: compilation-vars
+- name: version
+- name: concourse-up
+
+outputs:
+- name: release-vars
+
+run:
+  path: concourse-up/ci/tasks/write-release-vars.sh
