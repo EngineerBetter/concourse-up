@@ -18,13 +18,14 @@ import (
 )
 
 var _ = Describe("Client", func() {
-	var client concourse.IClient
+	var buildClient func() concourse.IClient
 	var actions []string
 	var stdout *gbytes.Buffer
 	var stderr *gbytes.Buffer
 	var deleteBoshDirectorError error
 	var terraformMetadata *terraform.Metadata
 	var args *config.DeployArgs
+	var exampleConfig *config.Config
 
 	hostedZoneFinder := func(subdomain string) (string, string, error) {
 		if subdomain == "ci.google.com" {
@@ -43,7 +44,7 @@ var _ = Describe("Client", func() {
 
 	BeforeEach(func() {
 		args = &config.DeployArgs{
-			AWSRegion: "eu-west-2",
+			AWSRegion: "eu-west-1",
 		}
 
 		terraformMetadata = &terraform.Metadata{
@@ -65,7 +66,7 @@ var _ = Describe("Client", func() {
 		}
 		deleteBoshDirectorError = nil
 		actions = []string{}
-		exampleConfig := &config.Config{
+		exampleConfig = &config.Config{
 			PublicKey: "example-public-key",
 			PrivateKey: `-----BEGIN RSA PRIVATE KEY-----
 MIIEpAIBAAKCAQEA2spClkDkFfy2c91Z7N3AImPf0v3o5OoqXUS6nE2NbV2bP/o7
@@ -176,20 +177,23 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 		stdout = gbytes.NewBuffer()
 		stderr = gbytes.NewBuffer()
 
-		client = concourse.NewClient(
-			terraformClientFactory,
-			boshClientFactory,
-			certGenerator,
-			hostedZoneFinder,
-			configClient,
-			args,
-			stdout,
-			stderr,
-		)
+		buildClient = func() concourse.IClient {
+			return concourse.NewClient(
+				terraformClientFactory,
+				boshClientFactory,
+				certGenerator,
+				hostedZoneFinder,
+				configClient,
+				args,
+				stdout,
+				stderr,
+			)
+		}
 	})
 
 	Describe("Deploy", func() {
 		It("Prints a warning about changing the sourceIP", func() {
+			client := buildClient()
 			err := client.Deploy()
 			Expect(err).ToNot(HaveOccurred())
 
@@ -200,6 +204,7 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 			It("Prints a warning about adding a DNS record", func() {
 				args.Domain = "ci.google.com"
 
+				client := buildClient()
 				err := client.Deploy()
 				Expect(err).ToNot(HaveOccurred())
 
@@ -208,6 +213,7 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 		})
 
 		It("Loads of creates config file", func() {
+			client := buildClient()
 			err := client.Deploy()
 			Expect(err).ToNot(HaveOccurred())
 
@@ -215,6 +221,7 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 		})
 
 		It("Generates the correct terraform infrastructure", func() {
+			client := buildClient()
 			err := client.Deploy()
 			Expect(err).ToNot(HaveOccurred())
 
@@ -222,6 +229,7 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 		})
 
 		It("Cleans up the correct terraform client", func() {
+			client := buildClient()
 			err := client.Deploy()
 			Expect(err).ToNot(HaveOccurred())
 
@@ -229,6 +237,7 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 		})
 
 		It("Generates certificates for bosh", func() {
+			client := buildClient()
 			err := client.Deploy()
 			Expect(err).ToNot(HaveOccurred())
 
@@ -236,16 +245,29 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 		})
 
 		It("Generates certificates for concourse", func() {
+			client := buildClient()
 			err := client.Deploy()
 			Expect(err).ToNot(HaveOccurred())
 
 			Expect(actions).To(ContainElement("generating cert ca: concourse-up-happymeal, ca: [elb.aws.com]"))
 		})
 
+		Context("When the user tries to change the region of an existing deployment", func() {
+			It("Returns a meaningful error message", func() {
+				args.AWSRegion = "eu-central-1"
+
+				client := buildClient()
+				err := client.Deploy()
+				Expect(err).To(MatchError("found previous deployment in eu-west-1. Refusing to deploy to eu-central-1 as changing regions for existing deployments is not supported"))
+			})
+
+		})
+
 		Context("When a custom domain is required", func() {
 			It("Generates certificates for concourse", func() {
 				args.Domain = "ci.google.com"
 
+				client := buildClient()
 				err := client.Deploy()
 				Expect(err).ToNot(HaveOccurred())
 
@@ -254,6 +276,7 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 		})
 
 		It("Updates the config", func() {
+			client := buildClient()
 			err := client.Deploy()
 			Expect(err).ToNot(HaveOccurred())
 
@@ -261,6 +284,7 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 		})
 
 		It("Deploys the director", func() {
+			client := buildClient()
 			err := client.Deploy()
 			Expect(err).ToNot(HaveOccurred())
 
@@ -268,6 +292,7 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 		})
 
 		It("Saves the bosh state", func() {
+			client := buildClient()
 			err := client.Deploy()
 			Expect(err).ToNot(HaveOccurred())
 
@@ -275,6 +300,7 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 		})
 
 		It("Cleans up the director", func() {
+			client := buildClient()
 			err := client.Deploy()
 			Expect(err).ToNot(HaveOccurred())
 
@@ -282,6 +308,7 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 		})
 
 		It("Warns about access to local machine", func() {
+			client := buildClient()
 			err := client.Deploy()
 			Expect(err).ToNot(HaveOccurred())
 
@@ -289,6 +316,7 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 		})
 
 		It("Prints the bosh credentials", func() {
+			client := buildClient()
 			err := client.Deploy()
 			Expect(err).ToNot(HaveOccurred())
 			Eventually(stdout).Should(gbytes.Say("DEPLOY SUCCESSFUL"))
@@ -301,6 +329,7 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 				args.TLSCert = "--- CERTIFICATE ---"
 				args.TLSKey = "--- KEY ---"
 
+				client := buildClient()
 				err := client.Deploy()
 				Expect(err).ToNot(HaveOccurred())
 				Eventually(stdout).Should(gbytes.Say("DEPLOY SUCCESSFUL"))
@@ -310,6 +339,7 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 
 		Context("When an existing config is loaded", func() {
 			It("Notifies the user", func() {
+				client := buildClient()
 				err := client.Deploy()
 				Expect(err).ToNot(HaveOccurred())
 
@@ -320,6 +350,7 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 		Context("When a metadata field is missing", func() {
 			It("Returns an error", func() {
 				terraformMetadata.DirectorKeyPair = terraform.MetadataStringValue{Value: ""}
+				client := buildClient()
 				err := client.Deploy()
 				Expect(err.Error()).To(ContainSubstring("director_key_pair"))
 				Expect(err.Error()).To(ContainSubstring("non zero value required"))
@@ -329,12 +360,14 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 
 	Describe("Destroy", func() {
 		It("Loads the config file", func() {
+			client := buildClient()
 			err := client.Destroy()
 			Expect(err).ToNot(HaveOccurred())
 
 			Expect(actions).To(ContainElement("loading config file"))
 		})
 		It("Deletes the director", func() {
+			client := buildClient()
 			err := client.Destroy()
 			Expect(err).ToNot(HaveOccurred())
 
@@ -342,6 +375,7 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 		})
 
 		It("Cleans up the director", func() {
+			client := buildClient()
 			err := client.Destroy()
 			Expect(err).ToNot(HaveOccurred())
 
@@ -349,6 +383,7 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 		})
 
 		It("Deletes the bosh state", func() {
+			client := buildClient()
 			err := client.Destroy()
 			Expect(err).ToNot(HaveOccurred())
 
@@ -356,6 +391,7 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 		})
 
 		It("Destroys the terraform infrastructure", func() {
+			client := buildClient()
 			err := client.Destroy()
 			Expect(err).ToNot(HaveOccurred())
 
@@ -363,6 +399,7 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 		})
 
 		It("Cleans up the terraform client", func() {
+			client := buildClient()
 			err := client.Destroy()
 			Expect(err).ToNot(HaveOccurred())
 
@@ -370,6 +407,7 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 		})
 
 		It("Deletes the config", func() {
+			client := buildClient()
 			err := client.Destroy()
 			Expect(err).ToNot(HaveOccurred())
 
@@ -377,6 +415,7 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 		})
 
 		It("Prints a destroy success message", func() {
+			client := buildClient()
 			err := client.Destroy()
 			Expect(err).ToNot(HaveOccurred())
 
@@ -389,6 +428,7 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 			})
 
 			It("Returns the error", func() {
+				client := buildClient()
 				err := client.Destroy()
 				Expect(err).To(MatchError("some error"))
 			})
