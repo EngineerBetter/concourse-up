@@ -59,5 +59,8 @@ stemcell_url=$(cat concourse-stemcell/url)
 echo "{
   \"stemcell_url\": \"$stemcell_url\",
   \"concourse_release_url\": \"https://s3-$AWS_DEFAULT_REGION.amazonaws.com/$PUBLIC_ARTIFACTS_BUCKET/$compiled_concourse_release\",
-  \"garden_release_url\": \"https://s3-$AWS_DEFAULT_REGION.amazonaws.com/$PUBLIC_ARTIFACTS_BUCKET/$compiled_garden_release\"
+  \"garden_release_url\": \"https://s3-$AWS_DEFAULT_REGION.amazonaws.com/$PUBLIC_ARTIFACTS_BUCKET/$compiled_garden_release\",
+  \"stemcell_version\": \"$stemcell_version\",
+  \"concourse_release_version\": \"concourse_release_version\",
+  \"garden_release_version\": \"garden_release_version\"
 }" > compilation-vars/compilation-vars.json
