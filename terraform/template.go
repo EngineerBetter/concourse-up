@@ -437,11 +437,6 @@ resource "aws_route_table_association" "rds_b" {
   route_table_id = "${aws_route_table.rds.id}"
 }
 
-resource "aws_route_table_association" "rds_c" {
-  subnet_id      = "${aws_subnet.rds_c.id}"
-  route_table_id = "${aws_route_table.rds.id}"
-}
-
 resource "aws_subnet" "rds_a" {
   vpc_id            = "${aws_vpc.default.id}"
   availability_zone = "${var.region}a"
@@ -466,21 +461,9 @@ resource "aws_subnet" "rds_b" {
   }
 }
 
-resource "aws_subnet" "rds_c" {
-  vpc_id            = "${aws_vpc.default.id}"
-  availability_zone = "${var.region}c"
-  cidr_block        = "10.0.6.0/24"
-
-  tags {
-    Name = "${var.deployment}-rds-c"
-    concourse-up-project = "${var.project}"
-    concourse-up-component = "rds"
-  }
-}
-
 resource "aws_db_subnet_group" "default" {
   name       = "${var.deployment}"
-  subnet_ids = ["${aws_subnet.rds_a.id}", "${aws_subnet.rds_b.id}", "${aws_subnet.rds_c.id}"]
+  subnet_ids = ["${aws_subnet.rds_a.id}", "${aws_subnet.rds_b.id}"]
 
   tags {
     Name = "${var.deployment}"
