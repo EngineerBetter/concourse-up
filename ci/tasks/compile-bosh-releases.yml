@@ -1,0 +1,22 @@
+---
+platform: linux
+
+inputs:
+- name: concourse-bosh-release
+- name: concourse-stemcell
+
+outputs:
+- name: compilation-vars
+
+run:
+  path: concourse-up/ci/tasks/compile-bosh-releases.sh
+
+params:
+  AWS_ACCESS_KEY_ID:
+  AWS_SECRET_ACCESS_KEY:
+  AWS_DEFAULT_REGION:
+  PUBLIC_ARTIFACTS_BUCKET:
+  BOSH_USERNAME:
+  BOSH_PASSWORD:
+  BOSH_CA_CERT:
+  BOSH_TARGET:
