@@ -31,6 +31,7 @@ go build -ldflags "
   -X main.concourseUpVersion=$version
 
   -X bosh.concourseStemcellURL=$concourse_stemcell_url
+  -X bosh.concourseStemcellVersion=$concourse_stemcell_version
   -X bosh.concourseCompiledReleaseURL=$concourse_release_url
   -X bosh.concourseReleaseVersion=$concourse_release_version
   -X bosh.gardenCompiledReleaseURL=$garden_release_url

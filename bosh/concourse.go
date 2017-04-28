@@ -13,6 +13,7 @@ const concourseManifestFilename = "concourse.yml"
 const concourseDeploymentName = "concourse"
 
 var concourseStemcellURL = "COMPILE_TIME_VARIABLE_bosh_concourseStemcellURL"
+var concourseStemcellVersion = "COMPILE_TIME_VARIABLE_bosh_concourseStemcellVersion"
 var concourseCompiledReleaseURL = "COMPILE_TIME_VARIABLE_bosh_concourseCompiledReleaseURL"
 var concourseReleaseVersion = "COMPILE_TIME_VARIABLE_bosh_concourseReleaseVersion"
 var gardenCompiledReleaseURL = "COMPILE_TIME_VARIABLE_bosh_gardenCompiledReleaseURL"
@@ -66,22 +67,25 @@ func (client *Client) deployConcourse() error {
 
 func generateConcourseManifest(config *config.Config, metadata *terraform.Metadata) ([]byte, error) {
 	templateParams := awsConcourseManifestParams{
-		WorkerCount:          config.ConcourseWorkerCount,
-		WorkerSize:           config.ConcourseWorkerSize,
-		URL:                  fmt.Sprintf("https://%s", config.Domain),
-		Username:             config.ConcourseUsername,
-		Password:             config.ConcoursePassword,
-		DBUsername:           config.RDSUsername,
-		DBPassword:           config.RDSPassword,
-		DBName:               config.ConcourseDBName,
-		DBHost:               metadata.BoshDBAddress.Value,
-		DBPort:               metadata.BoshDBPort.Value,
-		DBCACert:             db.RDSRootCert,
-		Project:              config.Project,
-		Network:              "default",
-		TLSCert:              config.ConcourseCert,
-		TLSKey:               config.ConcourseKey,
-		AllowSelfSignedCerts: "true",
+		WorkerCount:             config.ConcourseWorkerCount,
+		WorkerSize:              config.ConcourseWorkerSize,
+		URL:                     fmt.Sprintf("https://%s", config.Domain),
+		Username:                config.ConcourseUsername,
+		Password:                config.ConcoursePassword,
+		DBUsername:              config.RDSUsername,
+		DBPassword:              config.RDSPassword,
+		DBName:                  config.ConcourseDBName,
+		DBHost:                  metadata.BoshDBAddress.Value,
+		DBPort:                  metadata.BoshDBPort.Value,
+		DBCACert:                db.RDSRootCert,
+		Project:                 config.Project,
+		Network:                 "default",
+		TLSCert:                 config.ConcourseCert,
+		TLSKey:                  config.ConcourseKey,
+		AllowSelfSignedCerts:    "true",
+		ConcourseReleaseVersion: concourseReleaseVersion,
+		GardenReleaseVersion:    gardenReleaseVersion,
+		StemcellVersion:         concourseStemcellVersion,
 	}
 
 	return util.RenderTemplate(awsConcourseManifestTemplate, templateParams)
