@@ -196,7 +196,7 @@ jobs:
   plan:
   - aggregate:
     - get: image
-      passed: [compile-releases, unit-tests]
+      passed: [unit-tests]
     - get: concourse-up
       trigger: true
       passed: [unit-tests]
