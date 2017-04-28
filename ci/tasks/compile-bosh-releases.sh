@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -eux
+set -eu
 
 echo "$BOSH_CA_CERT" > bosh_ca_cert.pem
 
