@@ -54,7 +54,6 @@ compiled_garden_release=$(ls garden-runc-$garden_release_version-ubuntu-trusty-$
 aws s3 cp --acl public-read $compiled_concourse_release s3://$PUBLIC_ARTIFACTS_BUCKET/$compiled_concourse_release
 aws s3 cp --acl public-read $compiled_garden_release s3://$PUBLIC_ARTIFACTS_BUCKET/$compiled_garden_release
 
-concourse-up-version=$(cat version/version)
 stemcell_url=$(cat concourse-stemcell/url)
 
 echo "{
