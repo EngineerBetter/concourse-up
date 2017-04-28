@@ -8,8 +8,8 @@ import (
 
 // IClient represents a bosh director client
 type IClient interface {
-	RunCommand(args ...string) ([]byte, error)
-	RunAuthenticatedCommand(args ...string) ([]byte, error)
+	RunCommand(stdout, stderr io.Writer, args ...string) error
+	RunAuthenticatedCommand(stdout, stderr io.Writer, args ...string) error
 	SaveFileToWorkingDir(path string, contents []byte) (string, error)
 	PathInWorkingDir(filename string) string
 	Cleanup() error
@@ -28,14 +28,12 @@ type Client struct {
 	tempDir    *util.TempDir
 	creds      Credentials
 	caCertPath string
-	stdout     io.Writer
-	stderr     io.Writer
 }
 
 const caCertFilename = "ca-cert.pem"
 
 // NewClient returns a new client
-func NewClient(creds Credentials, stdout, stderr io.Writer) (*Client, error) {
+func NewClient(creds Credentials) (*Client, error) {
 	tempDir, err := util.NewTempDir()
 	if err != nil {
 		return nil, err
@@ -50,8 +48,6 @@ func NewClient(creds Credentials, stdout, stderr io.Writer) (*Client, error) {
 		tempDir:    tempDir,
 		creds:      creds,
 		caCertPath: caCertPath,
-		stdout:     stdout,
-		stderr:     stderr,
 	}, nil
 }
 

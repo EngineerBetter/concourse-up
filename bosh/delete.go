@@ -1,19 +1,22 @@
 package bosh
 
 import (
+	"bytes"
 	"errors"
+	"io"
 	"strings"
 )
 
 // Delete deletes a bosh director
 func (client *Client) Delete(stateFileBytes []byte) ([]byte, error) {
-	_, err := client.director.RunAuthenticatedCommand(
+	if err := client.director.RunAuthenticatedCommand(
+		client.stdout,
+		client.stderr,
 		"--deployment",
 		concourseDeploymentName,
 		"delete-deployment",
 		"--force",
-	)
-	if err != nil {
+	); err != nil {
 		return nil, err
 	}
 
@@ -36,17 +39,20 @@ func (client *Client) Delete(stateFileBytes []byte) ([]byte, error) {
 		return stateFileBytes, err
 	}
 
-	output, err := client.director.RunCommand(
+	output := bytes.NewBuffer(nil)
+	stdout := io.MultiWriter(client.stdout, output)
+	if err := client.director.RunCommand(
+		stdout,
+		client.stderr,
 		"delete-env",
 		directorManifestPath,
 		"--state",
 		stateFilePath,
-	)
-	if err != nil {
+	); err != nil {
 		return stateFileBytes, err
 	}
 
-	if !strings.Contains(string(output), "Finished deleting deployment") {
+	if !strings.Contains(output.String(), "Finished deleting deployment") {
 		return nil, errors.New("Couldn't find string `Finished deleting deployment` in bosh stdout/stderr output")
 	}
 

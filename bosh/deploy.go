@@ -1,7 +1,9 @@
 package bosh
 
 import (
+	"bytes"
 	"errors"
+	"io"
 	"io/ioutil"
 	"strings"
 )
@@ -57,13 +59,16 @@ func (client *Client) createEnv(stateFileBytes []byte) ([]byte, error) {
 		return stateFileBytes, err
 	}
 
-	output, err := client.director.RunCommand(
+	output := bytes.NewBuffer(nil)
+	stdout := io.MultiWriter(client.stdout, output)
+	if err := client.director.RunCommand(
+		stdout,
+		client.stderr,
 		"create-env",
 		directorManifestPath,
 		"--state",
 		stateFilePath,
-	)
-	if err != nil {
+	); err != nil {
 		// Even if deploy does not work, try and save the state file
 		// This prevents issues with re-trying
 		stateFileBytes, _ = ioutil.ReadFile(stateFilePath)
@@ -75,7 +80,8 @@ func (client *Client) createEnv(stateFileBytes []byte) ([]byte, error) {
 		return stateFileBytes, err
 	}
 
-	if !strings.Contains(string(output), "Finished deploying") && !strings.Contains(string(output), "Skipping deploy") {
+	outputStr := output.String()
+	if !strings.Contains(outputStr, "Finished deploying") && !strings.Contains(outputStr, "Skipping deploy") {
 		return stateFileBytes, errors.New("Couldn't find string `Finished deploying` or `Skipping deploy` in bosh stdout/stderr output")
 	}
 
@@ -93,12 +99,12 @@ func (client *Client) updateCloudConfig() error {
 		return err
 	}
 
-	_, err = client.director.RunAuthenticatedCommand(
+	return client.director.RunAuthenticatedCommand(
+		client.stdout,
+		client.stderr,
 		"update-cloud-config",
 		cloudConfigPath,
 	)
-
-	return err
 }
 
 func (client *Client) saveStateFile(bytes []byte) (string, error) {

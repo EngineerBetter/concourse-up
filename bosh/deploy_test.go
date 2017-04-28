@@ -1,7 +1,9 @@
 package bosh_test
 
 import (
+	"bytes"
 	"fmt"
+	"io"
 	"path/filepath"
 	"strings"
 
@@ -26,20 +28,22 @@ var _ = Describe("Deploy", func() {
 	}
 
 	directorClient := &FakeDirectorClient{
-		FakeRunCommand: func(args ...string) ([]byte, error) {
+		FakeRunCommand: func(stdout, stderr io.Writer, args ...string) error {
 			actions = append(actions, fmt.Sprintf("Running bosh command: %s", strings.Join(args, " ")))
 
 			err := ioutil.WriteFile(filepath.Join(tempDir, "director-state.json"), []byte("{ some state }"), 0700)
 			Expect(err).ToNot(HaveOccurred())
 
 			if strings.Contains(strings.Join(args, " "), "create-env") {
-				return []byte(createEnvOutput), nil
+				_, err := stdout.Write([]byte(createEnvOutput))
+				Expect(err).ToNot(HaveOccurred())
+				return nil
 			}
-			return []byte{}, nil
+			return nil
 		},
-		FakeRunAuthenticatedCommand: func(args ...string) ([]byte, error) {
+		FakeRunAuthenticatedCommand: func(stdout, stderr io.Writer, args ...string) error {
 			actions = append(actions, fmt.Sprintf("Running authenticated bosh command: %s", strings.Join(args, " ")))
-			return []byte{}, nil
+			return nil
 		},
 		FakeSaveFileToWorkingDir: func(filename string, contents []byte) (string, error) {
 			actions = append(actions, fmt.Sprintf("Saving file to working dir: %s", filename))
@@ -101,6 +105,8 @@ var _ = Describe("Deploy", func() {
 			terraformMetadata,
 			directorClient,
 			fakeDBRunner,
+			bytes.NewBuffer(nil),
+			bytes.NewBuffer(nil),
 		)
 	})
 

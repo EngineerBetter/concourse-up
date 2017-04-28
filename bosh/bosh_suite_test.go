@@ -1,6 +1,8 @@
 package bosh_test
 
 import (
+	"io"
+
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
@@ -13,19 +15,19 @@ func TestBosh(t *testing.T) {
 }
 
 type FakeDirectorClient struct {
-	FakeRunCommand              func(args ...string) ([]byte, error)
-	FakeRunAuthenticatedCommand func(args ...string) ([]byte, error)
+	FakeRunCommand              func(stdout, stderr io.Writer, args ...string) error
+	FakeRunAuthenticatedCommand func(stdout, stderr io.Writer, args ...string) error
 	FakeSaveFileToWorkingDir    func(path string, contents []byte) (string, error)
 	FakePathInWorkingDir        func(filename string) string
 	FakeCleanup                 func() error
 }
 
-func (client *FakeDirectorClient) RunCommand(args ...string) ([]byte, error) {
-	return client.FakeRunCommand(args...)
+func (client *FakeDirectorClient) RunCommand(stdout, stderr io.Writer, args ...string) error {
+	return client.FakeRunCommand(stdout, stderr, args...)
 }
 
-func (client *FakeDirectorClient) RunAuthenticatedCommand(args ...string) ([]byte, error) {
-	return client.FakeRunAuthenticatedCommand(args...)
+func (client *FakeDirectorClient) RunAuthenticatedCommand(stdout, stderr io.Writer, args ...string) error {
+	return client.FakeRunAuthenticatedCommand(stdout, stderr, args...)
 }
 
 func (client *FakeDirectorClient) SaveFileToWorkingDir(filename string, contents []byte) (string, error) {

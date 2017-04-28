@@ -1,10 +1,8 @@
 package director
 
 import (
-	"bytes"
 	"fmt"
 	"io"
-	"io/ioutil"
 
 	boshcmd "github.com/cloudfoundry/bosh-cli/cmd"
 	boshui "github.com/cloudfoundry/bosh-cli/ui"
@@ -16,7 +14,7 @@ const boshInitLogLevel = boshlog.LevelWarn
 var defaultBoshArgs = []string{"--non-interactive", "--tty", "--no-color"}
 
 // RunAuthenticatedCommand runs a command against the bosh director, after authenticating
-func (client *Client) RunAuthenticatedCommand(args ...string) ([]byte, error) {
+func (client *Client) RunAuthenticatedCommand(stdout, stderr io.Writer, args ...string) error {
 	args = append([]string{
 		"--environment",
 		fmt.Sprintf("https://%s", client.creds.Host),
@@ -28,20 +26,12 @@ func (client *Client) RunAuthenticatedCommand(args ...string) ([]byte, error) {
 		client.creds.Password,
 	}, args...)
 
-	return client.RunCommand(args...)
+	return client.RunCommand(stdout, stderr, args...)
 }
 
 // RunCommand runs a command against the bosh director
 // https://github.com/cloudfoundry/bosh-cli/blob/master/main.go
-func (client *Client) RunCommand(args ...string) ([]byte, error) {
-	return runBoshCLIV2Command(client.stdout, client.stderr, args...)
-}
-
-func runBoshCLIV2Command(stdout, stderr io.Writer, args ...string) ([]byte, error) {
-	combinedOutputBuffer := bytes.NewBuffer(nil)
-	stdout = io.MultiWriter(stdout, combinedOutputBuffer)
-	stderr = io.MultiWriter(stderr, combinedOutputBuffer)
-
+func (client *Client) RunCommand(stdout, stderr io.Writer, args ...string) error {
 	logger := boshlog.NewWriterLogger(boshInitLogLevel,
 		stdout,
 		stderr,
@@ -61,19 +51,14 @@ func runBoshCLIV2Command(stdout, stderr io.Writer, args ...string) ([]byte, erro
 
 	cmd, err := cmdFactory.New(args)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	if err = cmd.Execute(); err != nil {
-		return nil, err
+		return err
 	}
 
 	ui.Flush()
 
-	stdoutBytes, err := ioutil.ReadAll(combinedOutputBuffer)
-	if err != nil {
-		return nil, err
-	}
-
-	return stdoutBytes, nil
+	return nil
 }

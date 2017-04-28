@@ -67,7 +67,7 @@ func (client *Client) buildBoshClient(config *config.Config, metadata *terraform
 		Password: config.DirectorPassword,
 		Host:     metadata.DirectorPublicIP.Value,
 		CACert:   config.DirectorCACert,
-	}, client.stdout, client.stderr)
+	})
 
 	if err != nil {
 		return nil, err
@@ -93,5 +93,7 @@ func (client *Client) buildBoshClient(config *config.Config, metadata *terraform
 		metadata,
 		director,
 		dbRunner,
+		client.stdout,
+		client.stderr,
 	), nil
 }

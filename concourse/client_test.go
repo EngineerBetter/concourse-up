@@ -157,7 +157,7 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 			}, nil
 		}
 
-		boshClientFactory := func(config *config.Config, metadata *terraform.Metadata, director director.IClient, dbRunner db.Runner) bosh.IClient {
+		boshClientFactory := func(config *config.Config, metadata *terraform.Metadata, director director.IClient, dbRunner db.Runner, stdout, stderr io.Writer) bosh.IClient {
 			return &FakeBoshClient{
 				FakeDeploy: func([]byte) ([]byte, error) {
 					actions = append(actions, "deploying director")

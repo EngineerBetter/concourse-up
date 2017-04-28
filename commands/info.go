@@ -65,7 +65,6 @@ var info = cli.Command{
 			}
 			fmt.Println(string(bytes))
 		} else {
-
 			fmt.Println(info.String())
 		}
 

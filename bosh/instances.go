@@ -1,6 +1,9 @@
 package bosh
 
-import "encoding/json"
+import (
+	"bytes"
+	"encoding/json"
+)
 
 // Instance represents a vm deployed by BOSH
 type Instance struct {
@@ -11,13 +14,16 @@ type Instance struct {
 
 // Instances returns the list of Concourse VMs
 func (client *Client) Instances() ([]Instance, error) {
-	output, err := client.director.RunAuthenticatedCommand(
+	output := bytes.NewBuffer(nil)
+
+	if err := client.director.RunAuthenticatedCommand(
+		output,
+		client.stderr,
 		"--deployment",
 		concourseDeploymentName,
 		"instances",
 		"--json",
-	)
-	if err != nil {
+	); err != nil {
 		return nil, err
 	}
 
@@ -31,7 +37,7 @@ func (client *Client) Instances() ([]Instance, error) {
 		} `json:"Tables"`
 	}{}
 
-	if err = json.Unmarshal(output, &jsonOutput); err != nil {
+	if err := json.NewDecoder(output).Decode(&jsonOutput); err != nil {
 		return nil, err
 	}
 
@@ -47,5 +53,5 @@ func (client *Client) Instances() ([]Instance, error) {
 		}
 	}
 
-	return instances, err
+	return instances, nil
 }

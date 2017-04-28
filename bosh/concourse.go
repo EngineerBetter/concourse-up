@@ -20,20 +20,22 @@ var gardenCompiledReleaseURL = "COMPILE_TIME_VARIABLE_bosh_gardenCompiledRelease
 var gardenReleaseVersion = "COMPILE_TIME_VARIABLE_bosh_gardenReleaseVersion"
 
 func (client *Client) uploadConcourse() error {
-	_, err := client.director.RunAuthenticatedCommand(
+	if err := client.director.RunAuthenticatedCommand(
+		client.stdout,
+		client.stderr,
 		"upload-stemcell",
 		concourseStemcellURL,
-	)
-	if err != nil {
+	); err != nil {
 		return err
 	}
 
 	for _, releaseURL := range []string{concourseCompiledReleaseURL, gardenCompiledReleaseURL} {
-		_, err = client.director.RunAuthenticatedCommand(
+		if err := client.director.RunAuthenticatedCommand(
+			client.stdout,
+			client.stderr,
 			"upload-release",
 			releaseURL,
-		)
-		if err != nil {
+		); err != nil {
 			return err
 		}
 	}
@@ -52,13 +54,14 @@ func (client *Client) deployConcourse() error {
 		return err
 	}
 
-	_, err = client.director.RunAuthenticatedCommand(
+	if err = client.director.RunAuthenticatedCommand(
+		client.stdout,
+		client.stderr,
 		"--deployment",
 		concourseDeploymentName,
 		"deploy",
 		concourseManifestPath,
-	)
-	if err != nil {
+	); err != nil {
 		return err
 	}
 
