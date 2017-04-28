@@ -21,11 +21,8 @@ func (client *Client) Deploy() error {
 
 	initialDomain := config.Domain
 
-	if err = client.setUserIP(config); err != nil {
-		return err
-	}
-
-	if err = client.setHostedZone(config); err != nil {
+	config, err = client.checkPreTerraformConfigRequirements(config)
+	if err != nil {
 		return err
 	}
 
@@ -35,7 +32,7 @@ func (client *Client) Deploy() error {
 	}
 
 	isDomainUpdated := initialDomain != config.Domain
-	config, err = client.checkPredeployConfigRequiments(isDomainUpdated, config, metadata)
+	config, err = client.checkPreDeployConfigRequiments(isDomainUpdated, config, metadata)
 	if err != nil {
 		return err
 	}
@@ -51,7 +48,29 @@ func (client *Client) Deploy() error {
 	return nil
 }
 
-func (client *Client) checkPredeployConfigRequiments(isDomainUpdated bool, config *config.Config, metadata *terraform.Metadata) (*config.Config, error) {
+func (client *Client) checkPreTerraformConfigRequirements(config *config.Config) (*config.Config, error) {
+	region := client.deployArgs.AWSRegion
+
+	if config.Region != "" {
+		if config.Region != region {
+			return nil, fmt.Errorf("found previous deployment in %s. Refusing to deploy to %s as changing regions for existing deployments is not supported", config.Region, region)
+		}
+	}
+
+	config.Region = region
+
+	if err := client.setUserIP(config); err != nil {
+		return nil, err
+	}
+
+	if err := client.setHostedZone(config); err != nil {
+		return nil, err
+	}
+
+	return config, nil
+}
+
+func (client *Client) checkPreDeployConfigRequiments(isDomainUpdated bool, config *config.Config, metadata *terraform.Metadata) (*config.Config, error) {
 	config, err := client.ensureDomain(config, metadata)
 	if err != nil {
 		return nil, err
