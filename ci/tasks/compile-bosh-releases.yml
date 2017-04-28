@@ -5,6 +5,9 @@ inputs:
 - name: concourse-up
 - name: concourse-bosh-release
 - name: concourse-stemcell
+- name: director-stemcell
+- name: director-bosh-release
+- name: director-bosh-cpi-release
 
 outputs:
 - name: compilation-vars
