@@ -36,4 +36,8 @@ Deploys:
 
 echo "$body" > release-vars/body
 
-git rev-parse HEAD > release-vars/commit
+pushd concourse-up
+  commit=$(git rev-parse HEAD)
+popd
+
+echo $commit > release-vars/commit
