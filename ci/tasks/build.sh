@@ -6,11 +6,6 @@ build_dir=$PWD/build
 mkdir -p build_dir
 
 version=$(cat version/version)
-
-mkdir -p $GOPATH/src/github.com/engineerbetter/concourse-up
-mv concourse-up/* $GOPATH/src/github.com/engineerbetter/concourse-up
-cd $GOPATH/src/github.com/engineerbetter/concourse-up
-
 concourse_stemcell_url=$(cat compilation-vars/compilation-vars.json | jq -r .concourse_stemcell_url)
 concourse_stemcell_sha1=$(cat compilation-vars/compilation-vars.json | jq -r .concourse_stemcell_sha1)
 concourse_stemcell_version=$(cat compilation-vars/compilation-vars.json | jq -r .concourse_stemcell_version)
@@ -28,6 +23,9 @@ concourse_release_version=$(cat compilation-vars/compilation-vars.json | jq -r .
 garden_release_url=$(cat compilation-vars/compilation-vars.json | jq -r .garden_release_url)
 garden_release_version=$(cat compilation-vars/compilation-vars.json | jq -r .garden_release_version)
 
+mkdir -p $GOPATH/src/github.com/engineerbetter/concourse-up
+mv concourse-up/* $GOPATH/src/github.com/engineerbetter/concourse-up
+cd $GOPATH/src/github.com/engineerbetter/concourse-up
 
 go build -ldflags "
   -X main.concourseUpVersion=$version
