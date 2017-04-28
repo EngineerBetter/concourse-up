@@ -1,9 +1,15 @@
 ---
 platform: linux
 
+params:
+  GOOS:
+  GOARCH:
+  OUTPUT_FILE:
+
 inputs:
 - name: concourse-up
 - name: version
+- name: compilation-vars
 
 outputs:
 - name: build
