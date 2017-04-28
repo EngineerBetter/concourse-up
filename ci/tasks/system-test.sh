@@ -24,6 +24,7 @@ fly --target system-test login \
   --password $password
 
 set -x
+fly --target system-test sync
 fly --target system-test workers --details
 set +x
 
@@ -50,6 +51,7 @@ fly --target system-test-custom-domain login \
   --password $password
 
 set -x
+fly --target system-test-custom-domain sync
 fly --target system-test-custom-domain workers --details
 set +x
 
@@ -93,6 +95,7 @@ fly --target system-test-custom-domain-with-cert login \
   --password $password
 
 set -x
+fly --target system-test-custom-domain-with-cert sync
 fly --target system-test-custom-domain-with-cert workers --details
 set +x
 
