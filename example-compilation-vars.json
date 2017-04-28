@@ -1,0 +1,23 @@
+{
+  "concourse_stemcell_url": "https://s3.amazonaws.com/bosh-aws-light-stemcells/light-bosh-stemcell-3363.20-aws-xen-hvm-ubuntu-trusty-go_agent.tgz",
+  "concourse_stemcell_sha1": "16f1aa2a272befe87a9f0805ae9d367c8e2802ea",
+  "concourse_stemcell_version": "3363.20",
+
+  "director_stemcell_url": "https://s3.amazonaws.com/bosh-aws-light-stemcells/light-bosh-stemcell-3363.20-aws-xen-hvm-ubuntu-trusty-go_agent.tgz",
+  "director_stemcell_sha1": "16f1aa2a272befe87a9f0805ae9d367c8e2802ea",
+  "director_stemcell_version": "3363.20",
+
+  "director_bosh_release_url": "https://bosh.io/d/github.com/cloudfoundry/bosh?v=261.4",
+  "director_bosh_release_sha1": "4da9cedbcc8fbf11378ef439fb89de08300ad091",
+  "director_bosh_release_version": "261.4",
+
+  "director_bosh_cpi_release_url": "https://bosh.io/d/github.com/cloudfoundry-incubator/bosh-aws-cpi-release?v=64",
+  "director_bosh_cpi_release_sha1": "7fc8ac0f06999b73e426d8baa0345eacaad1d4c7",
+  "director_bosh_cpi_release_version": "64",
+
+  "concourse_release_url": "https://s3-eu-west-1.amazonaws.com/concourse-up-public-artifacts/concourse-2.7.4-ubuntu-trusty-3363.20-20170428-122831-43388294.tgz",
+  "concourse_release_version": "concourse_release_version",
+
+  "garden_release_url": "https://s3-eu-west-1.amazonaws.com/concourse-up-public-artifacts/garden-runc-1.5.0-ubuntu-trusty-3363.20-20170428-122901-486835029.tgz",
+  "garden_release_version": "garden_release_version"
+}
