@@ -2,12 +2,14 @@ package bosh
 
 import "encoding/json"
 
+// Instance represents a vm deployed by BOSH
 type Instance struct {
 	Name  string
 	IP    string
 	State string
 }
 
+// Instances returns the list of Concourse VMs
 func (client *Client) Instances() ([]Instance, error) {
 	output, err := client.director.RunAuthenticatedCommand(
 		"--deployment",
