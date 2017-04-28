@@ -20,7 +20,7 @@ concourse_release_version=$(cat compilation-vars/compilation-vars.json | jq -r .
 garden_release_url=$(cat compilation-vars/compilation-vars.json | jq -r .garden_release_url)
 garden_release_version=$(cat compilation-vars/compilation-vars.json | jq -r .garden_release_version)
 
-name="Concourse Up $version"
+name="concourse-up $version"
 
 echo "$name" > release-vars/name
 
