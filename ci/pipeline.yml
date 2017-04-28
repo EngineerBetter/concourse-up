@@ -1,4 +1,11 @@
 ---
+resource_types:
+- name: slack-notification
+  type: docker-image
+  source:
+    repository: cfcommunity/slack-notification-resource
+    tag: latest
+
 resources:
 - name: image-source
   type: git
@@ -32,13 +39,80 @@ resources:
     secret_access_key: {{aws_secret_access_key}}
     region_name: eu-west-1
 
+- name: compilation-vars
+  type: s3
+  source:
+    bucket: concourse-up-ci-artifacts
+    versioned_file: compilation-vars.json
+    access_key_id: {{aws_access_key_id}}
+    secret_access_key: {{aws_secret_access_key}}
+    region_name: eu-west-1
+
+- name: binary-linux
+  type: s3
+  source:
+    bucket: concourse-up-ci-artifacts
+    versioned_file: concourse-up-linux-amd64
+    access_key_id: {{aws_access_key_id}}
+    secret_access_key: {{aws_secret_access_key}}
+    region_name: eu-west-1
+
+- name: binary-darwin
+  type: s3
+  source:
+    bucket: concourse-up-ci-artifacts
+    versioned_file: concourse-up-darwin-amd64
+    access_key_id: {{aws_access_key_id}}
+    secret_access_key: {{aws_secret_access_key}}
+    region_name: eu-west-1
+
+- name: binary-windows
+  type: s3
+  source:
+    bucket: concourse-up-ci-artifacts
+    versioned_file: concourse-up-windows-amd64.exe
+    access_key_id: {{aws_access_key_id}}
+    secret_access_key: {{aws_secret_access_key}}
+    region_name: eu-west-1
+
 - name: release
   type: github-release
   source:
     user: engineerbetter
     repository: concourse-up
     access_token: {{github_access_token}}
-    pre_release: true
+
+- name: concourse-bosh-release
+  type: github-release
+  source:
+    user: concourse
+    repository: concourse
+    access_token: {{github_access_token}}
+
+- name: concourse-stemcell
+  type: bosh-io-stemcell
+  source:
+    name: bosh-aws-xen-hvm-ubuntu-trusty-go_agent
+
+- name: director-stemcell
+  type: bosh-io-stemcell
+  source:
+    name: bosh-aws-xen-hvm-ubuntu-trusty-go_agent
+
+- name: director-bosh-release
+  type: bosh-io-release
+  source:
+    repository: cloudfoundry/bosh
+
+- name: director-bosh-cpi-release
+  type: bosh-io-release
+  source:
+    repository: cloudfoundry-incubator/bosh-aws-cpi-release
+
+- name: slack-alert
+  type: slack-notification
+  source:
+    url: {{slack_notification_url}}
 
 jobs:
 - name: build-image
@@ -50,13 +124,13 @@ jobs:
     params:
       build: image-source/ci/docker
 
-- name: test
+- name: unit-tests
   plan:
-  - get: image
-    trigger: true
-    passed: [build-image]
-  - get: concourse-up
-    trigger: true
+  - aggregate:
+    - get: image
+      passed: [build-image]
+    - get: concourse-up
+      trigger: true
   - aggregate:
     - task: lint
       image: image
@@ -67,93 +141,282 @@ jobs:
       params:
         AWS_ACCESS_KEY_ID: {{aws_access_key_id}}
         AWS_SECRET_ACCESS_KEY: {{aws_secret_access_key}}
+        AWS_DEFAULT_REGION: {{aws_default_region}}
+
+- name: compile-releases
+  plan:
+  - get: version
+    params:
+      bump: patch
+  - get: image
+    passed: [build-image]
+  - get: concourse-bosh-release
+    trigger: true
+  - get: concourse-stemcell
+    trigger: true
+  - get: director-stemcell
+    trigger: true
+  - get: director-bosh-release
+    trigger: true
+  - get: director-bosh-cpi-release
+    trigger: true
+  - get: concourse-up
+  - task: compile
+    image: image
+    file: concourse-up/ci/tasks/compile-bosh-releases.yml
+    params:
+      AWS_ACCESS_KEY_ID: {{aws_access_key_id}}
+      AWS_SECRET_ACCESS_KEY: {{aws_secret_access_key}}
+      AWS_DEFAULT_REGION: {{aws_default_region}}
+      BOSH_USERNAME: {{bosh_username}}
+      BOSH_PASSWORD: {{bosh_password}}
+      BOSH_TARGET: {{bosh_target}}
+      BOSH_CA_CERT: {{bosh_ca_cert}}
+      PUBLIC_ARTIFACTS_BUCKET: concourse-up-public-artifacts
+  - put: compilation-vars
+    params:
+      file: compilation-vars/compilation-vars.json
+  - put: version
+    params:
+      file: version/version
+
+- name: build
+  plan:
+  - aggregate:
+    - get: image
+      passed: [compile-releases, unit-tests]
+    - get: concourse-up
+      trigger: true
+      passed: [unit-tests]
+    - get: compilation-vars
+      trigger: true
+      passed: [compile-releases]
+    - get: version
+      passed: [compile-releases]
+  - aggregate:
+    - do:
+      - task: build-linux
+        image: image
+        params:
+          GOOS: linux
+          GOARCH: amd64
+          OUTPUT_FILE: concourse-up-linux-amd64
+        file: concourse-up/ci/tasks/build.yml
+      - put: binary-linux
+        params:
+          file: build/concourse-up-linux-amd64
+    - do:
+      - task: build-darwin
+        image: image
+        params:
+          GOOS: darwin
+          GOARCH: amd64
+          OUTPUT_FILE: concourse-up-darwin-amd64
+        file: concourse-up/ci/tasks/build.yml
+      - put: binary-darwin
+        params:
+          file: build/concourse-up-darwin-amd64
+    - do:
+      - task: build-windows
+        image: image
+        params:
+          GOOS: windows
+          GOARCH: amd64
+          OUTPUT_FILE: concourse-up-windows-amd64.exe
+        file: concourse-up/ci/tasks/build.yml
+      - put: binary-windows
+        params:
+          file: build/concourse-up-windows-amd64.exe
+
+- name: system-test
+  plan:
+  - aggregate:
+    - get: version
+      passed: [build]
+    - get: compilation-vars
+      trigger: true
+      passed: [build]
+    - get: binary-linux
+      trigger: true
+      passed: [build]
+    - get: binary-darwin
+      trigger: true
+      passed: [build]
+    - get: binary-windows
+      trigger: true
+      passed: [build]
+    - get: concourse-up
+      trigger: true
+      passed: [build]
+    - get: image
+      passed: [build]
   - task: system-test
     image: image
     file: concourse-up/ci/tasks/system-test.yml
     params:
       AWS_ACCESS_KEY_ID: {{aws_access_key_id}}
       AWS_SECRET_ACCESS_KEY: {{aws_secret_access_key}}
+      AWS_DEFAULT_REGION: {{aws_default_region}}
+      BINARY_PATH: binary-linux/concourse-up-linux-amd64
 
-- name: release-patch
+- name: auto
   serial: true
   plan:
   - aggregate:
+    - get: compilation-vars
+      trigger: true
+      passed: [system-test]
+    - get: image
+      passed: [system-test]
+    - get: concourse-up
+      passed: [system-test]
+    - get: binary-linux
+      passed: [system-test]
+    - get: binary-darwin
+      passed: [system-test]
+    - get: binary-windows
+      passed: [system-test]
+    - get: version
+      passed: [system-test]
+  - task: write-release-vars
+    image: image
+    file: concourse-up/ci/tasks/write-release-vars.yml
+  - put: release
+    params:
+      name: release-vars/name
+      commitish: release-vars/commit
+      body: release-vars/body
+      tag: version/version
+      globs:
+      - binary-linux/concourse-up-linux-amd64
+      - binary-darwin/concourse-up-darwin-amd64
+      - binary-windows/concourse-up-windows-amd64.exe
+  - put: slack-alert
+    params:
+      channel: "#integrations"
+      text: |
+        <!channel> Concourse Up $TEXT_FILE_CONTENT published to Github
+      text_file: version/version
+
+- name: patch
+  serial: true
+  plan:
+  - aggregate:
+    - get: binary-linux
+      passed: [system-test]
+    - get: binary-darwin
+      passed: [system-test]
+    - get: binary-windows
+      passed: [system-test]
     - get: version
       params:
         bump: patch
     - get: image
-      passed:
-      - test
+      passed: [system-test]
     - get: concourse-up
-      passed:
-      - test
-  - task: build
+      passed: [system-test]
+  - task: write-release-vars
     image: image
-    file: concourse-up/ci/tasks/build.yml
+    file: concourse-up/ci/tasks/write-release-vars.yml
   - put: release
     params:
-      name: concourse-up/ci/release/name
+      name: release-vars/name
+      commitish: release-vars/commit
       body: concourse-up/ci/release/body
       tag: version/version
       globs:
-      - build/*
+      - binary-linux/concourse-up-linux-amd64
+      - binary-darwin/concourse-up-darwin-amd64
+      - binary-windows/concourse-up-windows-amd64.exe
   - put: version
     resource: version
     params:
       file: version/version
+  - put: slack-alert
+    params:
+      channel: "#integrations"
+      text: |
+        <!channel> Concourse Up $TEXT_FILE_CONTENT published to Github
+      text_file: version/version
 
-- name: release-minor
+- name: minor
   serial: true
   plan:
   - aggregate:
+    - get: binary-linux
+      passed: [system-test]
+    - get: binary-darwin
+      passed: [system-test]
+    - get: binary-windows
+      passed: [system-test]
     - get: version
       params:
         bump: minor
     - get: image
-      passed:
-      - test
+      passed: [system-test]
     - get: concourse-up
-      passed:
-      - test
-  - task: build
+      passed: [system-test]
+  - task: write-release-vars
     image: image
-    file: concourse-up/ci/tasks/build.yml
+    file: concourse-up/ci/tasks/write-release-vars.yml
   - put: release
     params:
-      name: concourse-up/ci/release/name
+      name: release-vars/name
+      commitish: release-vars/commit
       body: concourse-up/ci/release/body
       tag: version/version
       globs:
-      - build/*
+      - binary-linux/concourse-up-linux-amd64
+      - binary-darwin/concourse-up-darwin-amd64
+      - binary-windows/concourse-up-windows-amd64.exe
   - put: version
     resource: version
     params:
       file: version/version
+  - put: slack-alert
+    params:
+      channel: "#integrations"
+      text: |
+        <!channel> Concourse Up $TEXT_FILE_CONTENT published to Github
+      text_file: version/version
 
-- name: release-major
+- name: major
   serial: true
   plan:
   - aggregate:
+    - get: binary-linux
+      passed: [system-test]
+    - get: binary-darwin
+      passed: [system-test]
+    - get: binary-windows
+      passed: [system-test]
     - get: version
       params:
         bump: major
     - get: image
-      passed:
-      - test
+      passed: [system-test]
     - get: concourse-up
-      passed:
-      - test
-  - task: build
+      passed: [system-test]
+  - task: write-release-vars
     image: image
-    file: concourse-up/ci/tasks/build.yml
+    file: concourse-up/ci/tasks/write-release-vars.yml
   - put: release
     params:
-      name: concourse-up/ci/release/name
+      name: release-vars/name
+      commitish: release-vars/commit
       body: concourse-up/ci/release/body
       tag: version/version
       globs:
-      - build/*
+      - binary-linux/concourse-up-linux-amd64
+      - binary-darwin/concourse-up-darwin-amd64
+      - binary-windows/concourse-up-windows-amd64.exe
   - put: version
     resource: version
     params:
       file: version/version
+  - put: slack-alert
+    params:
+      channel: "#integrations"
+      text: |
+        <!channel> Concourse Up $TEXT_FILE_CONTENT published to Github
+      text_file: version/version
