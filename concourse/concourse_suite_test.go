@@ -1,6 +1,7 @@
 package concourse_test
 
 import (
+	"github.com/engineerbetter/concourse-up/bosh"
 	"github.com/engineerbetter/concourse-up/config"
 	"github.com/engineerbetter/concourse-up/terraform"
 	. "github.com/onsi/ginkgo"
@@ -81,9 +82,10 @@ func (client *FakeTerraformClient) Cleanup() error {
 }
 
 type FakeBoshClient struct {
-	FakeDeploy  func([]byte) ([]byte, error)
-	FakeDelete  func([]byte) ([]byte, error)
-	FakeCleanup func() error
+	FakeDeploy    func([]byte) ([]byte, error)
+	FakeDelete    func([]byte) ([]byte, error)
+	FakeCleanup   func() error
+	FakeInstances func() ([]bosh.Instance, error)
 }
 
 func (client *FakeBoshClient) Deploy(stateFileBytes []byte) ([]byte, error) {
@@ -96,4 +98,8 @@ func (client *FakeBoshClient) Delete(stateFileBytes []byte) ([]byte, error) {
 
 func (client *FakeBoshClient) Cleanup() error {
 	return client.FakeCleanup()
+}
+
+func (client *FakeBoshClient) Instances() ([]bosh.Instance, error) {
+	return client.FakeInstances()
 }

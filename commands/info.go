@@ -12,8 +12,6 @@ import (
 	"github.com/engineerbetter/concourse-up/config"
 	"github.com/engineerbetter/concourse-up/terraform"
 
-	"encoding/json"
-
 	"gopkg.in/urfave/cli.v1"
 )
 
@@ -51,12 +49,7 @@ var info = cli.Command{
 			return err
 		}
 
-		bytes, err := json.MarshalIndent(info, "", "  ")
-		if err != nil {
-			return err
-		}
-
-		fmt.Println(string(bytes))
+		fmt.Println(info.String())
 
 		return nil
 	},

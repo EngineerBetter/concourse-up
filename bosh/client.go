@@ -25,6 +25,7 @@ type IClient interface {
 	Deploy([]byte) ([]byte, error)
 	Delete([]byte) ([]byte, error)
 	Cleanup() error
+	Instances() ([]Instance, error)
 }
 
 // ClientFactory creates a new IClient
