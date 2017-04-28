@@ -135,6 +135,12 @@ jobs:
     - task: lint
       image: image
       file: concourse-up/ci/tasks/lint.yml
+      on_failure:
+        put: slack-alert
+        params:
+          channel: "#integrations"
+          text: |
+            <!channel> Concourse Up lint failure!
     - task: unit-test
       image: image
       file: concourse-up/ci/tasks/unit-test.yml
@@ -142,6 +148,12 @@ jobs:
         AWS_ACCESS_KEY_ID: {{aws_access_key_id}}
         AWS_SECRET_ACCESS_KEY: {{aws_secret_access_key}}
         AWS_DEFAULT_REGION: {{aws_default_region}}
+      on_failure:
+        put: slack-alert
+        params:
+          channel: "#integrations"
+          text: |
+            <!channel> Concourse Up unit tests failure!
 
 - name: compile-releases
   plan:
@@ -258,6 +270,12 @@ jobs:
       AWS_SECRET_ACCESS_KEY: {{aws_secret_access_key}}
       AWS_DEFAULT_REGION: {{aws_default_region}}
       BINARY_PATH: binary-linux/concourse-up-linux-amd64
+    on_failure:
+      put: slack-alert
+      params:
+        channel: "#integrations"
+        text: |
+          <!channel> Concourse Up system test failure!
 
 - name: auto
   serial: true
