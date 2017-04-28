@@ -11,7 +11,7 @@ chmod +x ./cup
 
 ./cup deploy $deployment
 
-config=$(./cup info $deployment)
+config=$(./cup info --json $deployment)
 domain=$(echo $config | jq -r '.config.domain')
 username=$(echo $config | jq -r '.config.concourse_username')
 password=$(echo $config | jq -r '.config.concourse_password')
@@ -39,7 +39,7 @@ custom_domain="$deployment-auto-2.concourse-up.engineerbetter.com"
 
 sleep 60
 
-config=$(./cup info $deployment)
+config=$(./cup info --json $deployment)
 username=$(echo $config | jq -r '.config.concourse_username')
 password=$(echo $config | jq -r '.config.concourse_password')
 echo $config | jq -r '.config.concourse_ca_cert' > generated-ca-cert.pem
@@ -83,7 +83,7 @@ certstrap sign "$custom_domain" --CA "$deployment"
 
 sleep 60
 
-config=$(./cup info $deployment)
+config=$(./cup info --json $deployment)
 username=$(echo $config | jq -r '.config.concourse_username')
 password=$(echo $config | jq -r '.config.concourse_password')
 echo $config | jq -r '.config.concourse_ca_cert' > generated-ca-cert.pem

@@ -12,15 +12,24 @@ import (
 	"github.com/engineerbetter/concourse-up/config"
 	"github.com/engineerbetter/concourse-up/terraform"
 
+	"encoding/json"
+
 	"gopkg.in/urfave/cli.v1"
 )
+
+var infoFlagJSON bool
 
 var info = cli.Command{
 	Name:      "info",
 	Aliases:   []string{"i"},
 	Usage:     "Fetches information on a deployed environment",
 	ArgsUsage: "<name>",
-	Flags:     deployFlags,
+	Flags: []cli.Flag{cli.BoolFlag{
+		Name:        "json",
+		Usage:       "Output as json",
+		EnvVar:      "JSON",
+		Destination: &infoFlagJSON,
+	}},
 	Action: func(c *cli.Context) error {
 		name := c.Args().Get(0)
 		if name == "" {
@@ -49,7 +58,16 @@ var info = cli.Command{
 			return err
 		}
 
-		fmt.Println(info.String())
+		if infoFlagJSON {
+			bytes, err := json.Marshal(info)
+			if err != nil {
+				return err
+			}
+			fmt.Println(string(bytes))
+		} else {
+
+			fmt.Println(info.String())
+		}
 
 		return nil
 	},
