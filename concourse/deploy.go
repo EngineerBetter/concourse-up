@@ -99,7 +99,7 @@ func (client *Client) ensureDirectorCerts(config *config.Config, metadata *terra
 		return nil, err
 	}
 
-	directorCerts, err := client.certGenerator(config.Deployment, ip)
+	directorCerts, err := client.certGenerator(config.Deployment, ip, "10.0.0.6")
 	if err != nil {
 		return nil, err
 	}

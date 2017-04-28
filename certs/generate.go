@@ -15,13 +15,13 @@ type Certs struct {
 }
 
 // Generate generates certs for use in a bosh director manifest
-func Generate(caName, ipOrDomain string) (*Certs, error) {
+func Generate(caName string, ipOrDomains ...string) (*Certs, error) {
 	caCert, caKey, err := generateCACert(caName)
 	if err != nil {
 		return nil, err
 	}
 
-	csr, key, err := generateCertificateSigningRequest(ipOrDomain)
+	csr, key, err := generateCertificateSigningRequest(ipOrDomains)
 	if err != nil {
 		return nil, err
 	}
@@ -85,22 +85,26 @@ func generateCACert(caName string) (*pkix.Certificate, *pkix.Key, error) {
 	return caCert, key, nil
 }
 
-func generateCertificateSigningRequest(ipOrDomain string) (*pkix.CertificateSigningRequest, *pkix.Key, error) {
+func generateCertificateSigningRequest(ipOrDomains []string) (*pkix.CertificateSigningRequest, *pkix.Key, error) {
 	var name string
-	var domains []string
+	domains := []string{}
+	ips := []net.IP{}
 
-	ips, err := pkix.ParseAndValidateIPs(ipOrDomain)
-	if err != nil {
-		// if invalid IP address, assume domain instead
-		if strings.Contains(err.Error(), "Invalid IP address") {
+	for _, ipOrDomain := range ipOrDomains {
+		if name == "" {
 			name = ipOrDomain
-			domains = []string{ipOrDomain}
-			ips = []net.IP{}
-		} else {
-			return nil, nil, err
 		}
-	} else {
-		name = ips[0].String()
+
+		if parsedIPs, err := pkix.ParseAndValidateIPs(ipOrDomain); err != nil {
+			// if invalid IP address, assume domain instead
+			if strings.Contains(err.Error(), "Invalid IP address") {
+				domains = append(domains, ipOrDomain)
+			} else {
+				return nil, nil, err
+			}
+		} else {
+			ips = append(ips, parsedIPs[0])
+		}
 	}
 
 	key, err := pkix.CreateRSAKey(2048)

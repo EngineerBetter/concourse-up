@@ -34,7 +34,7 @@ var _ = Describe("Client", func() {
 		return "", "", errors.New("hosted zone not found")
 	}
 
-	certGenerator := func(caName string, ip string) (*certs.Certs, error) {
+	certGenerator := func(caName string, ip ...string) (*certs.Certs, error) {
 		actions = append(actions, fmt.Sprintf("generating cert ca: %s, ca: %s", caName, ip))
 		return &certs.Certs{
 			CACert: []byte("----EXAMPLE CERT----"),
@@ -232,14 +232,14 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 			err := client.Deploy()
 			Expect(err).ToNot(HaveOccurred())
 
-			Expect(actions).To(ContainElement("generating cert ca: concourse-up-happymeal, ca: 99.99.99.99"))
+			Expect(actions).To(ContainElement("generating cert ca: concourse-up-happymeal, ca: [99.99.99.99 10.0.0.6]"))
 		})
 
 		It("Generates certificates for concourse", func() {
 			err := client.Deploy()
 			Expect(err).ToNot(HaveOccurred())
 
-			Expect(actions).To(ContainElement("generating cert ca: concourse-up-happymeal, ca: elb.aws.com"))
+			Expect(actions).To(ContainElement("generating cert ca: concourse-up-happymeal, ca: [elb.aws.com]"))
 		})
 
 		Context("When a custom domain is required", func() {
@@ -249,7 +249,7 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 				err := client.Deploy()
 				Expect(err).ToNot(HaveOccurred())
 
-				Expect(actions).To(ContainElement("generating cert ca: concourse-up-happymeal, ca: ci.google.com"))
+				Expect(actions).To(ContainElement("generating cert ca: concourse-up-happymeal, ca: [ci.google.com]"))
 			})
 		})
 

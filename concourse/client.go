@@ -16,7 +16,7 @@ import (
 type Client struct {
 	terraformClientFactory terraform.ClientFactory
 	boshClientFactory      bosh.ClientFactory
-	certGenerator          func(caName, ip string) (*certs.Certs, error)
+	certGenerator          func(caName string, ip ...string) (*certs.Certs, error)
 	hostedZoneFinder       func(string) (string, string, error)
 	configClient           config.IClient
 	deployArgs             *config.DeployArgs
@@ -35,7 +35,7 @@ type IClient interface {
 func NewClient(
 	terraformClientFactory terraform.ClientFactory,
 	boshClientFactory bosh.ClientFactory,
-	certGenerator func(caName, ip string) (*certs.Certs, error),
+	certGenerator func(caName string, ip ...string) (*certs.Certs, error),
 	hostedZoneFinder func(string) (string, string, error),
 	configClient config.IClient,
 	deployArgs *config.DeployArgs,
