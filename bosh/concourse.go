@@ -123,14 +123,14 @@ name: concourse
 
 releases:
 - name: concourse
-  version: <% .ConcourseReleaseVersion %>
+  version: "<% .ConcourseReleaseVersion %>"
 - name: garden-runc
-  version: <% .GardenReleaseVersion %>
+  version: "<% .GardenReleaseVersion %>"
 
 stemcells:
 - alias: trusty
   os: ubuntu-trusty
-  version: <% .StemcellVersion %>
+  version: "<% .StemcellVersion %>"
 
 tags:
   concourse-up-project: <% .Project %>
