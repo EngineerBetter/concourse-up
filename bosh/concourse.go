@@ -12,17 +12,11 @@ import (
 const concourseManifestFilename = "concourse.yml"
 const concourseDeploymentName = "concourse"
 
-const concourseStemcellURL = "https://bosh-jenkins-artifacts.s3.amazonaws.com/bosh-stemcell/aws/light-bosh-stemcell-3262.4.1-aws-xen-ubuntu-trusty-go_agent.tgz"
-
-// var concourseReleaseURLs = []string{
-// 	"https://bosh.io/d/github.com/concourse/concourse?v=2.7.3",
-// 	"https://bosh.io/d/github.com/cloudfoundry/garden-runc-release?v=1.4.0",
-// }
-
-var concourseCompiledReleaseURLs = []string{
-	"https://s3-eu-west-1.amazonaws.com/concourse-up-public-artifacts/concourse-2.7.3-ubuntu-trusty-3262.4.1-20170426-133209-021044035.tgz",
-	"https://s3-eu-west-1.amazonaws.com/concourse-up-public-artifacts/garden-runc-1.4.0-ubuntu-trusty-3262.4.1-20170426-133405-860928324.tgz",
-}
+var concourseStemcellURL = "COMPILE_TIME_VARIABLE_bosh_concourseStemcellURL"
+var concourseCompiledReleaseURL = "COMPILE_TIME_VARIABLE_bosh_concourseCompiledReleaseURL"
+var concourseReleaseVersion = "COMPILE_TIME_VARIABLE_bosh_concourseReleaseVersion"
+var gardenCompiledReleaseURL = "COMPILE_TIME_VARIABLE_bosh_gardenCompiledReleaseURL"
+var gardenReleaseVersion = "COMPILE_TIME_VARIABLE_bosh_gardenReleaseVersion"
 
 func (client *Client) uploadConcourse() error {
 	_, err := client.director.RunAuthenticatedCommand(
@@ -33,7 +27,7 @@ func (client *Client) uploadConcourse() error {
 		return err
 	}
 
-	for _, releaseURL := range concourseCompiledReleaseURLs {
+	for _, releaseURL := range []string{concourseCompiledReleaseURL, gardenCompiledReleaseURL} {
 		_, err = client.director.RunAuthenticatedCommand(
 			"upload-release",
 			releaseURL,
@@ -94,22 +88,25 @@ func generateConcourseManifest(config *config.Config, metadata *terraform.Metada
 }
 
 type awsConcourseManifestParams struct {
-	WorkerCount          int
-	WorkerSize           string
-	URL                  string
-	Username             string
-	Password             string
-	DBHost               string
-	DBName               string
-	DBPort               string
-	DBUsername           string
-	DBPassword           string
-	Project              string
-	DBCACert             string
-	Network              string
-	TLSCert              string
-	TLSKey               string
-	AllowSelfSignedCerts string
+	WorkerCount             int
+	WorkerSize              string
+	URL                     string
+	Username                string
+	Password                string
+	DBHost                  string
+	DBName                  string
+	DBPort                  string
+	DBUsername              string
+	DBPassword              string
+	Project                 string
+	DBCACert                string
+	Network                 string
+	TLSCert                 string
+	TLSKey                  string
+	AllowSelfSignedCerts    string
+	ConcourseReleaseVersion string
+	GardenReleaseVersion    string
+	StemcellVersion         string
 }
 
 // Indent is a helper function to indent the field a given number of spaces
@@ -122,14 +119,14 @@ name: concourse
 
 releases:
 - name: concourse
-  version: latest
+  version: <% .ConcourseReleaseVersion %>
 - name: garden-runc
-  version: latest
+  version: <% .GardenReleaseVersion %>
 
 stemcells:
 - alias: trusty
   os: ubuntu-trusty
-  version: latest
+  version: <% .StemcellVersion %>
 
 tags:
   concourse-up-project: <% .Project %>

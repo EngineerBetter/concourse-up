@@ -8,7 +8,7 @@ import (
 	"gopkg.in/urfave/cli.v1"
 )
 
-var concourseUpVersion = "release-candidate"
+var concourseUpVersion = "COMPILE_TIME_VARIABLE_main_concourseUpVersion"
 
 func main() {
 	app := cli.NewApp()

@@ -9,14 +9,14 @@ import (
 	"github.com/engineerbetter/concourse-up/util"
 )
 
-const stemcellSHA1 = "e02edcaa6d27ed57e5fbb11f90a58315908382f8"
-const stemcellURL = "https://bosh.io/d/stemcells/bosh-aws-xen-hvm-ubuntu-trusty-go_agent?v=3363.19"
+var directorStemcellSHA1 = "COMPILE_TIME_VARIABLE_bosh_directorStemcellSHA1"
+var directorStemcellURL = "COMPILE_TIME_VARIABLE_bosh_directorStemcellURL"
 
-const boshCPIReleaseSHA1 = "239fc7797d280f140fc03009fb39060107ff0ee1"
-const boshCPIReleaseURL = "https://bosh.io/d/github.com/cloudfoundry-incubator/bosh-aws-cpi-release?v=63"
+var directorCPIReleaseSHA1 = "COMPILE_TIME_VARIABLE_bosh_directorCPIReleaseSHA1"
+var directorCPIReleaseURL = "COMPILE_TIME_VARIABLE_bosh_directorCPIReleaseURL"
 
-const boshReleaseSHA1 = "4da9cedbcc8fbf11378ef439fb89de08300ad091"
-const boshReleaseURL = "https://bosh.io/d/github.com/cloudfoundry/bosh?v=261.4"
+var directorReleaseSHA1 = "COMPILE_TIME_VARIABLE_bosh_directorReleaseSHA1"
+var directorReleaseURL = "COMPILE_TIME_VARIABLE_bosh_directorReleaseURL"
 
 // GenerateBoshInitManifest generates a manifest for the bosh director on AWS
 func generateBoshInitManifest(conf *config.Config, metadata *terraform.Metadata, privateKeyPath string) ([]byte, error) {
@@ -49,12 +49,12 @@ func generateBoshInitManifest(conf *config.Config, metadata *terraform.Metadata,
 		RegistryPassword:       conf.DirectorRegistryPassword,
 		S3AWSAccessKeyID:       metadata.BlobstoreUserAccessKeyID.Value,
 		S3AWSSecretAccessKey:   metadata.BlobstoreSecretAccessKey.Value,
-		StemcellSHA1:           stemcellSHA1,
-		StemcellURL:            stemcellURL,
-		BoshAWSCPIReleaseSHA1:  boshCPIReleaseSHA1,
-		BoshAWSCPIReleaseURL:   boshCPIReleaseURL,
-		BoshReleaseSHA1:        boshReleaseSHA1,
-		BoshReleaseURL:         boshReleaseURL,
+		StemcellSHA1:           directorStemcellSHA1,
+		StemcellURL:            directorStemcellURL,
+		DirectorCPIReleaseSHA1: directorCPIReleaseSHA1,
+		DirectorCPIReleaseURL:  directorCPIReleaseURL,
+		DirectorReleaseSHA1:    directorReleaseSHA1,
+		DirectorReleaseURL:     directorReleaseURL,
 		VMsSecurityGroupID:     metadata.VMsSecurityGroupID.Value,
 		DirectorCACert:         conf.DirectorCACert,
 		DirectorCert:           conf.DirectorCert,
@@ -65,23 +65,26 @@ func generateBoshInitManifest(conf *config.Config, metadata *terraform.Metadata,
 }
 
 type awsDirectorManifestParams struct {
+	AWSRegion              string
 	AdminUserName          string
 	AdminUserPassword      string
 	AvailabilityZone       string
-	AWSRegion              string
 	BlobstoreBucket        string
 	BoshAWSAccessKeyID     string
-	BoshAWSCPIReleaseSHA1  string
-	BoshAWSCPIReleaseURL   string
 	BoshAWSSecretAccessKey string
-	BoshReleaseSHA1        string
-	BoshReleaseURL         string
 	BoshSecurityGroupID    string
 	DBHost                 string
+	DBName                 string
 	DBPassword             string
 	DBPort                 int
 	DBUsername             string
-	DBName                 string
+	DirectorCACert         string
+	DirectorCPIReleaseSHA1 string
+	DirectorCPIReleaseURL  string
+	DirectorCert           string
+	DirectorKey            string
+	DirectorReleaseSHA1    string
+	DirectorReleaseURL     string
 	DirectorSubnetID       string
 	HMUserPassword         string
 	KeyPairName            string
@@ -95,9 +98,6 @@ type awsDirectorManifestParams struct {
 	StemcellSHA1           string
 	StemcellURL            string
 	VMsSecurityGroupID     string
-	DirectorCACert         string
-	DirectorCert           string
-	DirectorKey            string
 }
 
 // Indent is a helper function to indent the field a given number of spaces
@@ -109,11 +109,11 @@ var awsDirectorManifestTemplate = `---
 name: bosh
 releases:
 - name: bosh
-  url: <% .BoshReleaseURL %>
-  sha1: <% .BoshReleaseSHA1 %>
+  url: <% .DirectorReleaseURL %>
+  sha1: <% .DirectorReleaseSHA1 %>
 - name: bosh-aws-cpi
-  url: <% .BoshAWSCPIReleaseURL %>
-  sha1: <% .BoshAWSCPIReleaseSHA1 %>
+  url: <% .DirectorCPIReleaseURL %>
+  sha1: <% .DirectorCPIReleaseSHA1 %>
 
 resource_pools:
 - name: vms
