@@ -87,8 +87,8 @@ echo "{
   \"director_bosh_cpi_release_version\": \"$director_bosh_cpi_release_version\",
 
   \"concourse_release_url\": \"https://s3-$AWS_DEFAULT_REGION.amazonaws.com/$PUBLIC_ARTIFACTS_BUCKET/$compiled_concourse_release\",
-  \"concourse_release_version\": \"concourse_release_version\",
+  \"concourse_release_version\": \"$concourse_release_version\",
 
   \"garden_release_url\": \"https://s3-$AWS_DEFAULT_REGION.amazonaws.com/$PUBLIC_ARTIFACTS_BUCKET/$compiled_garden_release\",
-  \"garden_release_version\": \"garden_release_version\"
+  \"garden_release_version\": \"$garden_release_version\"
 }" > compilation-vars/compilation-vars.json
