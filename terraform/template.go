@@ -6,7 +6,7 @@ terraform {
 	backend "s3" {
 		bucket = "<% .ConfigBucket %>"
 		key    = "<% .TFStatePath %>"
-		region = "<% .Region %>"
+		region = "eu-west-1"
 	}
 }
 
