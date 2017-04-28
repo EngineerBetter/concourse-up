@@ -30,8 +30,8 @@ RUN go get github.com/onsi/ginkgo/ginkgo \
 
 RUN gometalinter.v1 --install
 
-RUN wget https://releases.hashicorp.com/terraform/0.9.3/terraform_0.9.3_linux_amd64.zip \
-    && unzip terraform_0.9.3_linux_amd64.zip \
+RUN wget https://releases.hashicorp.com/terraform/0.9.4/terraform_0.9.4_linux_amd64.zip \
+    && unzip terraform_0.9.4_linux_amd64.zip \
     && chmod +x terraform \
     && mv terraform /usr/bin/terraform
 
