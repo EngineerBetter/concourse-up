@@ -19,7 +19,7 @@ $ AWS_ACCESS_KEY_ID=<access-key-id> \
 
 Concourse is easy to get started with, but as soon as you want your team to use it you've
 previously had to learn BOSH. Teams who just want great CI shouldn't need to think about this.
-The goal of `concourse-up` is to hide the complexity of BOSH, while giving you all the benefits,
+The goal of `concourse-up` is to hide the complexity of [BOSH](https://bosh.io), while giving you all the benefits,
 providing you with a single command for getting your Concourse up and keeping it running.
 
 ## Features
@@ -122,6 +122,12 @@ $ concourse-up deploy chimichanga \
   --tls-cert "$(cat chimichanga.engineerbetter.com.crt)" \
   --tls-key "$(cat chimichanga.engineerbetter.com.key)"
 ```
+
+## Upgrading your Concourse
+
+Patch releases of `concourse-up` are compiled, tested and released automatically whenever a new stemcell or component release appears on [bosh.io](https://bosh.io).
+
+To upgrade your Concourse, grab the [latest release](https://github.com/EngineerBetter/concourse-up/releases/latest) and run `concourse-up deploy <your-project-name>` again.
 
 ## Estimated Cost
 
