@@ -308,7 +308,7 @@ jobs:
       globs:
       - binary-linux/concourse-up-linux-amd64
       - binary-darwin/concourse-up-darwin-amd64
-      - binary-windows/concourse-up-windows-amd64.exe
+      #- binary-windows/concourse-up-windows-amd64.exe
   - put: slack-alert
     params:
       channel: "#integrations"
@@ -345,7 +345,7 @@ jobs:
       globs:
       - binary-linux/concourse-up-linux-amd64
       - binary-darwin/concourse-up-darwin-amd64
-      - binary-windows/concourse-up-windows-amd64.exe
+      #- binary-windows/concourse-up-windows-amd64.exe
   - put: version
     resource: version
     params:
@@ -386,7 +386,7 @@ jobs:
       globs:
       - binary-linux/concourse-up-linux-amd64
       - binary-darwin/concourse-up-darwin-amd64
-      - binary-windows/concourse-up-windows-amd64.exe
+      #- binary-windows/concourse-up-windows-amd64.exe
   - put: version
     resource: version
     params:
@@ -427,7 +427,7 @@ jobs:
       globs:
       - binary-linux/concourse-up-linux-amd64
       - binary-darwin/concourse-up-darwin-amd64
-      - binary-windows/concourse-up-windows-amd64.exe
+      #- binary-windows/concourse-up-windows-amd64.exe
   - put: version
     resource: version
     params:
