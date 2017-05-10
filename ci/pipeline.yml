@@ -321,7 +321,6 @@ jobs:
   plan:
   - aggregate:
     - get: compilation-vars
-      trigger: true
       passed: [system-test]
     - get: binary-linux
       passed: [system-test]
@@ -365,7 +364,6 @@ jobs:
   plan:
   - aggregate:
     - get: compilation-vars
-      trigger: true
       passed: [system-test]
     - get: binary-linux
       passed: [system-test]
@@ -409,7 +407,6 @@ jobs:
   plan:
   - aggregate:
     - get: compilation-vars
-      trigger: true
       passed: [system-test]
     - get: binary-linux
       passed: [system-test]
