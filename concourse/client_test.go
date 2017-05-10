@@ -252,6 +252,14 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 			Expect(actions).To(ContainElement("generating cert ca: concourse-up-happymeal, ca: [elb.aws.com]"))
 		})
 
+		It("Sets the director public IP on the config", func() {
+			client := buildClient()
+			err := client.Deploy()
+			Expect(err).ToNot(HaveOccurred())
+
+			Expect(exampleConfig.DirectorPublicIP).To(Equal("99.99.99.99"))
+		})
+
 		Context("When the user tries to change the region of an existing deployment", func() {
 			It("Returns a meaningful error message", func() {
 				args.AWSRegion = "eu-central-1"

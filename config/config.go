@@ -38,6 +38,7 @@ type Config struct {
 	DirectorCACert           string `json:"director_ca_cert"`
 	DirectorCert             string `json:"director_cert"`
 	DirectorKey              string `json:"director_key"`
+	DirectorPublicIP         string `json:"director_public_ip"`
 
 	ConcourseCert             string `json:"concourse_cert"`
 	ConcourseKey              string `json:"concourse_key"`
