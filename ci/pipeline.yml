@@ -320,6 +320,9 @@ jobs:
   serial: true
   plan:
   - aggregate:
+    - get: compilation-vars
+      trigger: true
+      passed: [system-test]
     - get: binary-linux
       passed: [system-test]
     - get: binary-darwin
@@ -361,6 +364,9 @@ jobs:
   serial: true
   plan:
   - aggregate:
+    - get: compilation-vars
+      trigger: true
+      passed: [system-test]
     - get: binary-linux
       passed: [system-test]
     - get: binary-darwin
@@ -402,6 +408,9 @@ jobs:
   serial: true
   plan:
   - aggregate:
+    - get: compilation-vars
+      trigger: true
+      passed: [system-test]
     - get: binary-linux
       passed: [system-test]
     - get: binary-darwin
