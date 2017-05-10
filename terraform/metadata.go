@@ -25,6 +25,7 @@ type Metadata struct {
 	BoshDBAddress            MetadataStringValue `json:"bosh_db_address" valid:"required"`
 	ELBName                  MetadataStringValue `json:"elb_name"`
 	ELBDNSName               MetadataStringValue `json:"elb_dns_name"`
+	SourceAccessIP           MetadataStringValue `json:"source_access_ip"`
 }
 
 // AssertValid returns an error if the struct contains any missing fields

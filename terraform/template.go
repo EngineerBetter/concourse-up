@@ -494,6 +494,10 @@ resource "aws_db_instance" "default" {
   }
 }
 
+output "source_access_ip" {
+  value = "${var.source_access_ip}"
+}
+
 output "director_key_pair" {
   value = "${aws_key_pair.default.key_name}"
 }
