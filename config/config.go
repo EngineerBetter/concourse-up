@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/engineerbetter/concourse-up/util"
+	"github.com/EngineerBetter/concourse-up/util"
 )
 
 // Config represents a concourse-up configuration file

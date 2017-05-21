@@ -1,7 +1,7 @@
 package aws_test
 
 import (
-	. "github.com/engineerbetter/concourse-up/aws"
+	. "github.com/EngineerBetter/concourse-up/aws"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"

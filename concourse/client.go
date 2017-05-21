@@ -3,13 +3,13 @@ package concourse
 import (
 	"io"
 
-	"github.com/engineerbetter/concourse-up/bosh"
-	"github.com/engineerbetter/concourse-up/certs"
-	"github.com/engineerbetter/concourse-up/config"
-	"github.com/engineerbetter/concourse-up/db"
-	"github.com/engineerbetter/concourse-up/director"
-	"github.com/engineerbetter/concourse-up/terraform"
-	"github.com/engineerbetter/concourse-up/util"
+	"github.com/EngineerBetter/concourse-up/bosh"
+	"github.com/EngineerBetter/concourse-up/certs"
+	"github.com/EngineerBetter/concourse-up/config"
+	"github.com/EngineerBetter/concourse-up/db"
+	"github.com/EngineerBetter/concourse-up/director"
+	"github.com/EngineerBetter/concourse-up/terraform"
+	"github.com/EngineerBetter/concourse-up/util"
 )
 
 // Client is a concrete implementation of IClient interface

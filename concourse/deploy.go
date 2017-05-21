@@ -6,10 +6,10 @@ import (
 
 	"strings"
 
-	"github.com/engineerbetter/concourse-up/bosh"
-	"github.com/engineerbetter/concourse-up/config"
-	"github.com/engineerbetter/concourse-up/terraform"
-	"github.com/engineerbetter/concourse-up/util"
+	"github.com/EngineerBetter/concourse-up/bosh"
+	"github.com/EngineerBetter/concourse-up/config"
+	"github.com/EngineerBetter/concourse-up/terraform"
+	"github.com/EngineerBetter/concourse-up/util"
 )
 
 // Deploy deploys a concourse instance

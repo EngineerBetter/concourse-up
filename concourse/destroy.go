@@ -3,9 +3,9 @@ package concourse
 import (
 	"io"
 
-	"github.com/engineerbetter/concourse-up/bosh"
-	"github.com/engineerbetter/concourse-up/config"
-	"github.com/engineerbetter/concourse-up/terraform"
+	"github.com/EngineerBetter/concourse-up/bosh"
+	"github.com/EngineerBetter/concourse-up/config"
+	"github.com/EngineerBetter/concourse-up/terraform"
 )
 
 // Destroy destroys a concourse instance

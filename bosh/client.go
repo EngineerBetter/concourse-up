@@ -3,10 +3,10 @@ package bosh
 import (
 	"io"
 
-	"github.com/engineerbetter/concourse-up/config"
-	"github.com/engineerbetter/concourse-up/db"
-	"github.com/engineerbetter/concourse-up/director"
-	"github.com/engineerbetter/concourse-up/terraform"
+	"github.com/EngineerBetter/concourse-up/config"
+	"github.com/EngineerBetter/concourse-up/db"
+	"github.com/EngineerBetter/concourse-up/director"
+	"github.com/EngineerBetter/concourse-up/terraform"
 )
 
 const cloudConfigFilename = "cloud-config.yml"

@@ -3,9 +3,9 @@ package concourse
 import (
 	"fmt"
 
-	"github.com/engineerbetter/concourse-up/bosh"
-	"github.com/engineerbetter/concourse-up/config"
-	"github.com/engineerbetter/concourse-up/terraform"
+	"github.com/EngineerBetter/concourse-up/bosh"
+	"github.com/EngineerBetter/concourse-up/config"
+	"github.com/EngineerBetter/concourse-up/terraform"
 )
 
 // Info represents the terraform output and concourse-up config files

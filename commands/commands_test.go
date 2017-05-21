@@ -16,7 +16,7 @@ var (
 var _ = Describe("commands", func() {
 	BeforeSuite(func() {
 		var err error
-		cliPath, err = Build("github.com/engineerbetter/concourse-up")
+		cliPath, err = Build("github.com/EngineerBetter/concourse-up")
 		Expect(err).ToNot(HaveOccurred(), "Error building source")
 	})
 

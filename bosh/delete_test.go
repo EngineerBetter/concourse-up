@@ -8,9 +8,9 @@ import (
 	"path/filepath"
 	"strings"
 
-	. "github.com/engineerbetter/concourse-up/bosh"
-	"github.com/engineerbetter/concourse-up/config"
-	"github.com/engineerbetter/concourse-up/terraform"
+	. "github.com/EngineerBetter/concourse-up/bosh"
+	"github.com/EngineerBetter/concourse-up/config"
+	"github.com/EngineerBetter/concourse-up/terraform"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )

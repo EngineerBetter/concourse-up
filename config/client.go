@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/engineerbetter/concourse-up/aws"
+	"github.com/EngineerBetter/concourse-up/aws"
 )
 
 const terraformStateFileName = "terraform.tfstate"

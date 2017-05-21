@@ -3,10 +3,10 @@ package bosh
 import (
 	"strconv"
 
-	"github.com/engineerbetter/concourse-up/config"
+	"github.com/EngineerBetter/concourse-up/config"
 
-	"github.com/engineerbetter/concourse-up/terraform"
-	"github.com/engineerbetter/concourse-up/util"
+	"github.com/EngineerBetter/concourse-up/terraform"
+	"github.com/EngineerBetter/concourse-up/util"
 )
 
 var directorStemcellSHA1 = "COMPILE_TIME_VARIABLE_bosh_directorStemcellSHA1"
