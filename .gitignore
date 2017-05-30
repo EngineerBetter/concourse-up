@@ -4,3 +4,4 @@ terraform.combined.log
 concourse-up-*.yml
 concourse-up-*.pem
 concourse-up-*.json
+.idea
