@@ -36,6 +36,7 @@ custom_domain="$deployment-auto-2.concourse-up.engineerbetter.com"
   --domain $custom_domain \
   --workers 2 \
   --worker-size medium
+  --region us-east-1
 
 sleep 60
 

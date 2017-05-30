@@ -89,6 +89,7 @@ resource "aws_key_pair" "default" {
 resource "aws_s3_bucket" "blobstore" {
   bucket        = "${var.deployment}-blobstore"
   force_destroy = true
+  region = "<% .Region %>"
 
   tags {
     Name = "${var.deployment}"
