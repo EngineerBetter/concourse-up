@@ -21,18 +21,18 @@ garden_release_url=$(cat example-compilation-vars.json | jq -r .garden_release_u
 garden_release_version=$(cat example-compilation-vars.json | jq -r .garden_release_version)
 
 go build -ldflags "
-  -X github.com/engineerbetter/concourse-up/bosh.concourseStemcellURL=$concourse_stemcell_url
-  -X github.com/engineerbetter/concourse-up/bosh.concourseStemcellVersion=$concourse_stemcell_version
-  -X github.com/engineerbetter/concourse-up/bosh.concourseCompiledReleaseURL=$concourse_release_url
-  -X github.com/engineerbetter/concourse-up/bosh.concourseReleaseVersion=$concourse_release_version
-  -X github.com/engineerbetter/concourse-up/bosh.gardenCompiledReleaseURL=$garden_release_url
-  -X github.com/engineerbetter/concourse-up/bosh.gardenReleaseVersion=$garden_release_version
-  -X github.com/engineerbetter/concourse-up/bosh.directorStemcellURL=$director_stemcell_url
-  -X github.com/engineerbetter/concourse-up/bosh.directorStemcellSHA1=$director_stemcell_sha1
-  -X github.com/engineerbetter/concourse-up/bosh.directorCPIReleaseURL=$director_bosh_cpi_release_url
-  -X github.com/engineerbetter/concourse-up/bosh.directorCPIReleaseSHA1=$director_bosh_cpi_release_sha1
-  -X github.com/engineerbetter/concourse-up/bosh.directorReleaseURL=$director_bosh_release_url
-  -X github.com/engineerbetter/concourse-up/bosh.directorReleaseSHA1=$director_bosh_release_sha1
+  -X github.com/EngineerBetter/concourse-up/bosh.concourseStemcellURL=$concourse_stemcell_url
+  -X github.com/EngineerBetter/concourse-up/bosh.concourseStemcellVersion=$concourse_stemcell_version
+  -X github.com/EngineerBetter/concourse-up/bosh.concourseCompiledReleaseURL=$concourse_release_url
+  -X github.com/EngineerBetter/concourse-up/bosh.concourseReleaseVersion=$concourse_release_version
+  -X github.com/EngineerBetter/concourse-up/bosh.gardenCompiledReleaseURL=$garden_release_url
+  -X github.com/EngineerBetter/concourse-up/bosh.gardenReleaseVersion=$garden_release_version
+  -X github.com/EngineerBetter/concourse-up/bosh.directorStemcellURL=$director_stemcell_url
+  -X github.com/EngineerBetter/concourse-up/bosh.directorStemcellSHA1=$director_stemcell_sha1
+  -X github.com/EngineerBetter/concourse-up/bosh.directorCPIReleaseURL=$director_bosh_cpi_release_url
+  -X github.com/EngineerBetter/concourse-up/bosh.directorCPIReleaseSHA1=$director_bosh_cpi_release_sha1
+  -X github.com/EngineerBetter/concourse-up/bosh.directorReleaseURL=$director_bosh_release_url
+  -X github.com/EngineerBetter/concourse-up/bosh.directorReleaseSHA1=$director_bosh_release_sha1
   -X main.concourseUpVersion=$version
 " -o concourse-up
 
