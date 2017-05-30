@@ -66,15 +66,6 @@ resources:
     secret_access_key: {{aws_secret_access_key}}
     region_name: eu-west-1
 
-- name: binary-windows
-  type: s3
-  source:
-    bucket: concourse-up-ci-artifacts
-    versioned_file: concourse-up-windows-amd64.exe
-    access_key_id: {{aws_access_key_id}}
-    secret_access_key: {{aws_secret_access_key}}
-    region_name: eu-west-1
-
 - name: release
   type: github-release
   source:
@@ -228,17 +219,6 @@ jobs:
       - put: binary-darwin
         params:
           file: build/concourse-up-darwin-amd64
-    - do:
-      - task: build-windows
-        image: image
-        params:
-          GOOS: windows
-          GOARCH: amd64
-          OUTPUT_FILE: concourse-up-windows-amd64.exe
-        file: concourse-up/ci/tasks/build.yml
-      - put: binary-windows
-        params:
-          file: build/concourse-up-windows-amd64.exe
 
 - name: system-test
   plan:
@@ -252,9 +232,6 @@ jobs:
       trigger: true
       passed: [build]
     - get: binary-darwin
-      trigger: true
-      passed: [build]
-    - get: binary-windows
       trigger: true
       passed: [build]
     - get: concourse-up
@@ -292,8 +269,6 @@ jobs:
       passed: [system-test]
     - get: binary-darwin
       passed: [system-test]
-    - get: binary-windows
-      passed: [system-test]
     - get: version
       passed: [system-test]
   - task: write-release-vars
@@ -308,7 +283,6 @@ jobs:
       globs:
       - binary-linux/concourse-up-linux-amd64
       - binary-darwin/concourse-up-darwin-amd64
-      #- binary-windows/concourse-up-windows-amd64.exe
   - put: slack-alert
     params:
       channel: "#integrations"
@@ -325,8 +299,6 @@ jobs:
     - get: binary-linux
       passed: [system-test]
     - get: binary-darwin
-      passed: [system-test]
-    - get: binary-windows
       passed: [system-test]
     - get: version
       params:
@@ -347,7 +319,6 @@ jobs:
       globs:
       - binary-linux/concourse-up-linux-amd64
       - binary-darwin/concourse-up-darwin-amd64
-      #- binary-windows/concourse-up-windows-amd64.exe
   - put: version
     resource: version
     params:
@@ -369,8 +340,6 @@ jobs:
       passed: [system-test]
     - get: binary-darwin
       passed: [system-test]
-    - get: binary-windows
-      passed: [system-test]
     - get: version
       params:
         bump: minor
@@ -390,7 +359,6 @@ jobs:
       globs:
       - binary-linux/concourse-up-linux-amd64
       - binary-darwin/concourse-up-darwin-amd64
-      #- binary-windows/concourse-up-windows-amd64.exe
   - put: version
     resource: version
     params:
@@ -412,8 +380,6 @@ jobs:
       passed: [system-test]
     - get: binary-darwin
       passed: [system-test]
-    - get: binary-windows
-      passed: [system-test]
     - get: version
       params:
         bump: major
@@ -433,7 +399,6 @@ jobs:
       globs:
       - binary-linux/concourse-up-linux-amd64
       - binary-darwin/concourse-up-darwin-amd64
-      #- binary-windows/concourse-up-windows-amd64.exe
   - put: version
     resource: version
     params:
