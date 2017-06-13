@@ -18,6 +18,8 @@ username=$(echo $config | jq -r '.config.concourse_username')
 password=$(echo $config | jq -r '.config.concourse_password')
 echo $config | jq -r '.config.concourse_ca_cert' > generated-ca-cert.pem
 
+sleep 60
+
 fly --target system-test login \
   --ca-cert generated-ca-cert.pem \
   --concourse-url https://$domain \
@@ -43,6 +45,8 @@ username=$(echo $config | jq -r '.config.concourse_username')
 password=$(echo $config | jq -r '.config.concourse_password')
 echo $config | jq -r '.config.concourse_ca_cert' > generated-ca-cert.pem
 
+sleep 60
+
 fly --target system-test login \
   --ca-cert generated-ca-cert.pem \
   --concourse-url https://$domain \
@@ -63,12 +67,12 @@ custom_domain="$deployment-auto-2.concourse-up.engineerbetter.com"
   --workers 2 \
   --worker-size medium
 
-sleep 60
-
 config=$(./cup info --json $deployment)
 username=$(echo $config | jq -r '.config.concourse_username')
 password=$(echo $config | jq -r '.config.concourse_password')
 echo $config | jq -r '.config.concourse_ca_cert' > generated-ca-cert.pem
+
+sleep 60
 
 fly --target system-test-custom-domain login \
   --ca-cert generated-ca-cert.pem \
@@ -107,12 +111,12 @@ certstrap sign "$custom_domain" --CA "$deployment"
   --workers 1 \
   --worker-size large
 
-sleep 60
-
 config=$(./cup info --json $deployment)
 username=$(echo $config | jq -r '.config.concourse_username')
 password=$(echo $config | jq -r '.config.concourse_password')
 echo $config | jq -r '.config.concourse_ca_cert' > generated-ca-cert.pem
+
+sleep 60
 
 fly --target system-test-custom-domain-with-cert login \
   --ca-cert out/$deployment.crt \
