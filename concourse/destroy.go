@@ -1,6 +1,7 @@
 package concourse
 
 import (
+	"fmt"
 	"io"
 
 	"github.com/EngineerBetter/concourse-up/bosh"
@@ -27,7 +28,7 @@ func (client *Client) Destroy() error {
 	}
 
 	if err = client.deleteBosh(conf, metadata); err != nil {
-		return err
+		fmt.Printf("Warning error deleting bosh: \n%s\n\nContinuing with terraform destroy\n", err.Error())
 	}
 
 	if err := terraformClient.Destroy(); err != nil {
