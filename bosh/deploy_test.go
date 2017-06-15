@@ -168,8 +168,8 @@ var _ = Describe("Deploy", func() {
 	It("Uploads the concourse releases", func() {
 		_, err := client.Deploy(nil)
 		Expect(err).ToNot(HaveOccurred())
-		Expect(actions).To(ContainElement("Running authenticated bosh command: upload-release COMPILE_TIME_VARIABLE_bosh_concourseCompiledReleaseURL"))
-		Expect(actions).To(ContainElement("Running authenticated bosh command: upload-release COMPILE_TIME_VARIABLE_bosh_gardenCompiledReleaseURL"))
+		Expect(actions).To(ContainElement("Running authenticated bosh command: upload-release COMPILE_TIME_VARIABLE_bosh_concourseReleaseURL"))
+		Expect(actions).To(ContainElement("Running authenticated bosh command: upload-release COMPILE_TIME_VARIABLE_bosh_gardenReleaseURL"))
 	})
 
 	It("Saves the concourse manifest", func() {

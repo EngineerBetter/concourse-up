@@ -14,10 +14,13 @@ const concourseDeploymentName = "concourse"
 
 var concourseStemcellURL = "COMPILE_TIME_VARIABLE_bosh_concourseStemcellURL"
 var concourseStemcellVersion = "COMPILE_TIME_VARIABLE_bosh_concourseStemcellVersion"
-var concourseCompiledReleaseURL = "COMPILE_TIME_VARIABLE_bosh_concourseCompiledReleaseURL"
+var concourseStemcellSHA1 = "COMPILE_TIME_VARIABLE_bosh_concourseStemcellSHA1"
+var concourseReleaseURL = "COMPILE_TIME_VARIABLE_bosh_concourseReleaseURL"
 var concourseReleaseVersion = "COMPILE_TIME_VARIABLE_bosh_concourseReleaseVersion"
-var gardenCompiledReleaseURL = "COMPILE_TIME_VARIABLE_bosh_gardenCompiledReleaseURL"
+var concourseReleaseSHA1 = "COMPILE_TIME_VARIABLE_bosh_concourseReleaseSHA1"
+var gardenReleaseURL = "COMPILE_TIME_VARIABLE_bosh_gardenReleaseURL"
 var gardenReleaseVersion = "COMPILE_TIME_VARIABLE_bosh_gardenReleaseVersion"
+var gardenReleaseSHA1 = "COMPILE_TIME_VARIABLE_bosh_gardenReleaseSHA1"
 
 func (client *Client) uploadConcourse() error {
 	if err := client.director.RunAuthenticatedCommand(
@@ -29,7 +32,7 @@ func (client *Client) uploadConcourse() error {
 		return err
 	}
 
-	for _, releaseURL := range []string{concourseCompiledReleaseURL, gardenCompiledReleaseURL} {
+	for _, releaseURL := range []string{concourseReleaseURL, gardenReleaseURL} {
 		if err := client.director.RunAuthenticatedCommand(
 			client.stdout,
 			client.stderr,
