@@ -1,0 +1,15 @@
+---
+platform: linux
+
+inputs:
+- name: concourse-up
+- name: binary-linux
+
+run:
+  path: concourse-up/ci/tasks/system-test-alt-region.sh
+
+params:
+  AWS_ACCESS_KEY_ID:
+  AWS_SECRET_ACCESS_KEY:
+  AWS_DEFAULT_REGION:
+  BINARY_PATH:

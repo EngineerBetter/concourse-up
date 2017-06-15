@@ -239,20 +239,35 @@ jobs:
       passed: [build]
     - get: image
       passed: [build]
-  - task: system-test
-    image: image
-    file: concourse-up/ci/tasks/system-test.yml
-    params:
-      AWS_ACCESS_KEY_ID: {{aws_access_key_id}}
-      AWS_SECRET_ACCESS_KEY: {{aws_secret_access_key}}
-      AWS_DEFAULT_REGION: {{aws_default_region}}
-      BINARY_PATH: binary-linux/concourse-up-linux-amd64
-    on_failure:
-      put: slack-alert
+  - aggregate:
+    - task: system-test-alt-region
+      image: image
+      file: concourse-up/ci/tasks/system-test-alt-region.yml
       params:
-        channel: "#integrations"
-        text: |
-          <!channel> Concourse Up system test failure!
+        AWS_ACCESS_KEY_ID: {{aws_access_key_id}}
+        AWS_SECRET_ACCESS_KEY: {{aws_secret_access_key}}
+        AWS_DEFAULT_REGION: {{aws_default_region}}
+        BINARY_PATH: binary-linux/concourse-up-linux-amd64
+      on_failure:
+        put: slack-alert
+        params:
+          channel: "#integrations"
+          text: |
+            <!channel> Concourse Up alt region system test failure!
+    - task: system-test
+      image: image
+      file: concourse-up/ci/tasks/system-test.yml
+      params:
+        AWS_ACCESS_KEY_ID: {{aws_access_key_id}}
+        AWS_SECRET_ACCESS_KEY: {{aws_secret_access_key}}
+        AWS_DEFAULT_REGION: {{aws_default_region}}
+        BINARY_PATH: binary-linux/concourse-up-linux-amd64
+      on_failure:
+        put: slack-alert
+        params:
+          channel: "#integrations"
+          text: |
+            <!channel> Concourse Up system test failure!
 
 - name: auto
   serial: true
