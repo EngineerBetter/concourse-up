@@ -32,17 +32,6 @@ func (client *Client) uploadConcourse() error {
 		return err
 	}
 
-	for _, releaseURL := range []string{concourseReleaseURL, gardenReleaseURL} {
-		if err := client.director.RunAuthenticatedCommand(
-			client.stdout,
-			client.stderr,
-			"upload-release",
-			releaseURL,
-		); err != nil {
-			return err
-		}
-	}
-
 	return nil
 }
 
@@ -91,10 +80,13 @@ func generateConcourseManifest(config *config.Config, metadata *terraform.Metada
 		AllowSelfSignedCerts:    "true",
 		ConcourseReleaseVersion: concourseReleaseVersion,
 		ConcourseReleaseSHA1:    concourseReleaseSHA1,
+		ConcourseReleaseURL:     concourseReleaseURL,
 		GardenReleaseVersion:    gardenReleaseVersion,
+		GardenReleaseURL:        gardenReleaseURL,
 		GardenReleaseSHA1:       gardenReleaseSHA1,
 		StemcellVersion:         concourseStemcellVersion,
 		StemcellSHA1:            concourseStemcellSHA1,
+		StemcellURL:             concourseStemcellURL,
 	}
 
 	return util.RenderTemplate(awsConcourseManifestTemplate, templateParams)
@@ -119,10 +111,13 @@ type awsConcourseManifestParams struct {
 	AllowSelfSignedCerts    string
 	ConcourseReleaseVersion string
 	ConcourseReleaseSHA1    string
+	ConcourseReleaseURL     string
 	GardenReleaseVersion    string
+	GardenReleaseURL        string
 	GardenReleaseSHA1       string
 	StemcellVersion         string
 	StemcellSHA1            string
+	StemcellURL             string
 }
 
 // Indent is a helper function to indent the field a given number of spaces
@@ -135,9 +130,11 @@ name: concourse
 
 releases:
 - name: concourse
-  version: "<% .ConcourseReleaseVersion %>"
+  url: "<% .ConcourseReleaseURL %>"
+  sha1: "<% .ConcourseReleaseSHA1 %>"
 - name: garden-runc
-  version: "<% .GardenReleaseVersion %>"
+  url: "<% .GardenReleaseURL %>"
+  sha1: "<% .GardenReleaseSHA1 %>"
 
 stemcells:
 - alias: trusty
