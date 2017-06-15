@@ -155,6 +155,9 @@ jobs:
     passed: [build-image]
   - get: concourse-bosh-release
     trigger: true
+    params:
+      globs:
+      - "*"
   - get: concourse-stemcell
     trigger: true
   - get: director-stemcell
