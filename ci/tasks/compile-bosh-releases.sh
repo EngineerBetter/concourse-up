@@ -108,6 +108,6 @@ echo "{
   \"concourse_release_version\": \"$concourse_release_version\",
 
   \"garden_release_url\": \"https://s3-$AWS_DEFAULT_REGION.amazonaws.com/$PUBLIC_ARTIFACTS_BUCKET/$compiled_garden_release\",
-  \"garden_release_sha1\": \"$garden_release_sha1\"
+  \"garden_release_sha1\": \"$garden_release_sha1\",
   \"garden_release_version\": \"$garden_release_version\"
 }" > compilation-vars/compilation-vars.json
