@@ -90,8 +90,11 @@ func generateConcourseManifest(config *config.Config, metadata *terraform.Metada
 		TLSKey:                  config.ConcourseKey,
 		AllowSelfSignedCerts:    "true",
 		ConcourseReleaseVersion: concourseReleaseVersion,
+		ConcourseReleaseSHA1:    concourseReleaseSHA1,
 		GardenReleaseVersion:    gardenReleaseVersion,
+		GardenReleaseSHA1:       gardenReleaseSHA1,
 		StemcellVersion:         concourseStemcellVersion,
+		StemcellSHA1:            concourseStemcellSHA1,
 	}
 
 	return util.RenderTemplate(awsConcourseManifestTemplate, templateParams)
@@ -115,8 +118,11 @@ type awsConcourseManifestParams struct {
 	TLSKey                  string
 	AllowSelfSignedCerts    string
 	ConcourseReleaseVersion string
+	ConcourseReleaseSHA1    string
 	GardenReleaseVersion    string
+	GardenReleaseSHA1       string
 	StemcellVersion         string
+	StemcellSHA1            string
 }
 
 // Indent is a helper function to indent the field a given number of spaces
