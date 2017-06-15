@@ -23,7 +23,7 @@ func (client *Client) Deploy(stateFileBytes []byte) ([]byte, error) {
 		return stateFileBytes, err
 	}
 
-	if err := client.uploadConcourse(); err != nil {
+	if err := client.uploadConcourseStemcell(); err != nil {
 		return stateFileBytes, err
 	}
 

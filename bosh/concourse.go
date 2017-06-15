@@ -22,7 +22,7 @@ var gardenReleaseURL = "COMPILE_TIME_VARIABLE_bosh_gardenReleaseURL"
 var gardenReleaseVersion = "COMPILE_TIME_VARIABLE_bosh_gardenReleaseVersion"
 var gardenReleaseSHA1 = "COMPILE_TIME_VARIABLE_bosh_gardenReleaseSHA1"
 
-func (client *Client) uploadConcourse() error {
+func (client *Client) uploadConcourseStemcell() error {
 	if err := client.director.RunAuthenticatedCommand(
 		client.stdout,
 		client.stderr,
@@ -132,9 +132,12 @@ releases:
 - name: concourse
   url: "<% .ConcourseReleaseURL %>"
   sha1: "<% .ConcourseReleaseSHA1 %>"
+  version: <% .ConcourseReleaseVersion %>
+
 - name: garden-runc
   url: "<% .GardenReleaseURL %>"
   sha1: "<% .GardenReleaseSHA1 %>"
+  version: <% .GardenReleaseVersion %>
 
 stemcells:
 - alias: trusty
