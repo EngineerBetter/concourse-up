@@ -435,10 +435,10 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 				deleteBoshDirectorError = errors.New("some error")
 			})
 
-			It("Returns the error", func() {
+			It("Continues the error", func() {
 				client := buildClient()
 				err := client.Destroy()
-				Expect(err).To(MatchError("some error"))
+				Expect(err).ToNot(HaveOccurred())
 			})
 		})
 	})
