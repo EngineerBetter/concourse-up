@@ -7,19 +7,19 @@
   "director_stemcell_sha1": "e0d4a0964f1e131d78be15e85158c4e12591f75f",
   "director_stemcell_version": "3421.6",
 
-  "director_bosh_release_url": "https://s3-eu-west-1.amazonaws.com/concourse-up-public-artifacts/bosh-262.1-ubuntu-trusty-3421.6-20170615-175328-455435141.tgz",
-  "director_bosh_release_sha1": "6605a90c7d194e8c143c1d754b30f8c6ef75d279",
+  "director_bosh_release_url": "https://s3-eu-west-1.amazonaws.com/concourse-up-public-artifacts/bosh-262.1-ubuntu-trusty-3421.6-20170615-191141-574456329.tgz",
+  "director_bosh_release_sha1": "ac69982ccb35938a5139cb96c2ca26f76aa5478f",
   "director_bosh_release_version": "262.1",
 
-  "director_bosh_cpi_release_url": "https://s3-eu-west-1.amazonaws.com/concourse-up-public-artifacts/bosh-aws-cpi-65-ubuntu-trusty-3421.6-20170615-175336-117253974.tgz",
-  "director_bosh_cpi_release_sha1": "38aa9091c042151234cad70e361ce0cc426e8d9b",
+  "director_bosh_cpi_release_url": "https://bosh.io/d/github.com/cloudfoundry-incubator/bosh-aws-cpi-release?v=65",
+  "director_bosh_cpi_release_sha1": "26b3a5c43e6f82594a373309a495660d6db26254",
   "director_bosh_cpi_release_version": "65",
 
-  "concourse_release_url": "https://s3-eu-west-1.amazonaws.com/concourse-up-public-artifacts/concourse-3.1.1-ubuntu-trusty-3421.6-20170615-175243-247679631.tgz",
-  "concourse_release_sha1": "9909c4ef78e67807a2aee1dc91a95a011b90cf3b",
-  "concourse_release_version": "3.1.1",
+  "concourse_release_url": "https://s3-eu-west-1.amazonaws.com/concourse-up-public-artifacts/concourse-3.2.0-ubuntu-trusty-3421.6-20170615-191054-941524627.tgz",
+  "concourse_release_sha1": "163673b238d4f1c5a642e6b9cdc0e7e1c0d6112b",
+  "concourse_release_version": "3.2.0",
 
-  "garden_release_url": "https://s3-eu-west-1.amazonaws.com/concourse-up-public-artifacts/garden-runc-1.6.0-ubuntu-trusty-3421.6-20170615-175309-354031981.tgz",
-  "garden_release_sha1": "5f78f58ef51cbec1704fc64797cdcbf8f6f941fa",
+  "garden_release_url": "https://s3-eu-west-1.amazonaws.com/concourse-up-public-artifacts/garden-runc-1.6.0-ubuntu-trusty-3421.6-20170615-191121-806063521.tgz",
+  "garden_release_sha1": "c27d50e44a823bcc4b22362e10dc736b04361642",
   "garden_release_version": "1.6.0"
 }
