@@ -30,20 +30,20 @@ RUN go get github.com/onsi/ginkgo/ginkgo \
 
 RUN gometalinter.v1 --install
 
-RUN wget https://releases.hashicorp.com/terraform/0.9.8/terraform_0.9.8_linux_amd64.zip \
-    && unzip terraform_0.9.8_linux_amd64.zip \
+RUN wget https://releases.hashicorp.com/terraform/0.9.11/terraform_0.9.11_linux_amd64.zip \
+    && unzip terraform_0.9.11_linux_amd64.zip \
     && chmod +x terraform \
     && mv terraform /usr/bin/terraform
 
-RUN wget https://s3.amazonaws.com/bosh-cli-artifacts/bosh-cli-2.0.1-linux-amd64 \
-    && mv bosh-cli-2.0.1-linux-amd64 /usr/bin/bosh-cli \
+RUN wget https://s3.amazonaws.com/bosh-cli-artifacts/bosh-cli-2.0.28-linux-amd64 \
+    && mv bosh-cli-2.0.28-linux-amd64 /usr/bin/bosh-cli \
     && chmod +x /usr/bin/bosh-cli
 
 RUN wget https://github.com/stedolan/jq/releases/download/jq-1.5/jq-linux64 \
     && mv jq-linux64 /usr/bin/jq \
     && chmod +x /usr/bin/jq
 
-RUN wget https://github.com/concourse/concourse/releases/download/v3.2.0/fly_linux_amd64 \
+RUN wget https://github.com/concourse/concourse/releases/download/v3.3.2/fly_linux_amd64 \
     && mv fly_linux_amd64 /usr/bin/fly \
     && chmod +x /usr/bin/fly
 
