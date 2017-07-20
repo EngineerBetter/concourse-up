@@ -29,7 +29,7 @@ providing you with a single command for getting your Concourse up and keeping it
 - Supports https access by default using a user-provided certificate or auto-generating a self-signed one
 - Supports custom domains for your Concourse URL
 - Uses cost effective AWS spot instances where possible (BOSH will take care of the service)
-- Uses precompiled BOSH packages to save you time
+- Uses precompiled BOSH packages to minimise install time
 - Horizontal and vertical worker scaling
 - Easy destroy and cleanup
 
@@ -68,7 +68,7 @@ fly --target ci login --concourse-url http://ci-concourse-up-1420669447.eu-west-
 
 ```
 
-A new deploy from scratch takes approximately 40 minutes.
+A new deploy from scratch takes approximately 12 minutes.
 
 To fetch information about your `concourse-up` deployment:
 
