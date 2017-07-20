@@ -158,6 +158,8 @@ instance_groups:
   networks:
   - name: <% .Network %>
     default: [dns, gateway]
+  vm_extensions:
+  - elb
   jobs:
   - name: atc
     release: concourse
