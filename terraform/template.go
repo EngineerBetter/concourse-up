@@ -384,7 +384,7 @@ resource "aws_security_group" "elb" {
   vpc_id      = "${aws_vpc.default.id}"
 
   tags {
-    Name = "${var.deployment}-concourse"
+    Name = "${var.deployment}-elb"
     concourse-up-project = "${var.project}"
     concourse-up-component = "concourse"
   }
