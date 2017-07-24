@@ -32,6 +32,7 @@ providing you with a single command for getting your Concourse up and keeping it
 - Uses precompiled BOSH packages to minimise install time
 - Horizontal and vertical worker scaling
 - Easy destroy and cleanup
+- Deploy to any AWS region (note that internal configuration is always saved to an S3 bucket in `eu-west-1`)
 
 ## Prerequisites
 
@@ -83,6 +84,16 @@ $ concourse-up destroy <your-project-name>
 ```
 
 That's it!
+
+### Region Configuration
+
+By default `concourse-up` deploys the BOSH director and Concourse VMs into `eu-west-1` region. To change the region, use the `--region` flag eg:
+
+```
+$ concourse-up deploy chimichanga --region us-east-1
+```
+
+Note that `concourse-up` stores some internal configuration in an S3 bucket in `eu-west-1`. This internal configuration is always stored in `eu-west-1` regardless of the `--region` flag.
 
 ### Worker Configuration
 
