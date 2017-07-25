@@ -73,7 +73,7 @@ resources:
     repository: concourse-up
     access_token: {{github_access_token}}
 
-- name: concourse-bosh-release2
+- name: concourse-github-release
   type: github-release
   source:
     user: concourse
@@ -153,7 +153,7 @@ jobs:
       bump: patch
   - get: image
     passed: [build-image]
-  - get: concourse-bosh-release2
+  - get: concourse-github-release
     trigger: true
     params:
       globs:
