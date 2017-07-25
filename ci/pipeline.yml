@@ -157,7 +157,8 @@ jobs:
     trigger: true
     params:
       globs:
-      - "*"
+      - "concourse-*.tgz"
+      - "garden-runc-*.tgz"
   - get: concourse-stemcell
     trigger: true
   - get: director-stemcell
