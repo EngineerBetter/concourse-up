@@ -147,6 +147,7 @@ jobs:
             <!channel> Concourse Up unit tests failure!
 
 - name: compile-releases
+  serial: true
   plan:
   - get: version
     params:
