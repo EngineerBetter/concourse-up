@@ -5,6 +5,9 @@ inputs:
 - name: concourse-up
 - name: binary-linux
 
+cache:
+- path: /root/.bosh
+
 run:
   path: concourse-up/ci/tasks/system-test-alt-region.sh
 
