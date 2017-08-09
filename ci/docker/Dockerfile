@@ -30,8 +30,8 @@ RUN go get github.com/onsi/ginkgo/ginkgo \
 
 RUN gometalinter.v1 --install
 
-RUN wget https://releases.hashicorp.com/terraform/0.9.11/terraform_0.9.11_linux_amd64.zip \
-    && unzip terraform_0.9.11_linux_amd64.zip \
+RUN wget https://releases.hashicorp.com/terraform/0.10.0/terraform_0.10.0_linux_amd64.zip \
+    && unzip terraform_0.10.0_linux_amd64.zip \
     && chmod +x terraform \
     && mv terraform /usr/bin/terraform
 
@@ -43,7 +43,7 @@ RUN wget https://github.com/stedolan/jq/releases/download/jq-1.5/jq-linux64 \
     && mv jq-linux64 /usr/bin/jq \
     && chmod +x /usr/bin/jq
 
-RUN wget https://github.com/concourse/concourse/releases/download/v3.3.2/fly_linux_amd64 \
+RUN wget https://github.com/concourse/concourse/releases/download/v3.3.4/fly_linux_amd64 \
     && mv fly_linux_amd64 /usr/bin/fly \
     && chmod +x /usr/bin/fly
 
