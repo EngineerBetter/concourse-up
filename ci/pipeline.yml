@@ -156,10 +156,6 @@ jobs:
     passed: [build-image]
   - get: concourse-bosh-release
     trigger: true
-    params:
-      globs:
-      - "concourse-*.tgz"
-      - "garden-runc-*.tgz"
   - get: concourse-stemcell
     trigger: true
   - get: director-stemcell
