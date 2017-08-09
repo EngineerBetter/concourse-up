@@ -3,22 +3,20 @@
 set -eu
 
 version=$(cat version/version)
-concourse_stemcell_url=$(cat compilation-vars/compilation-vars.json | jq -r .concourse_stemcell_url)
-concourse_stemcell_sha1=$(cat compilation-vars/compilation-vars.json | jq -r .concourse_stemcell_sha1)
-concourse_stemcell_version=$(cat compilation-vars/compilation-vars.json | jq -r .concourse_stemcell_version)
-director_stemcell_url=$(cat compilation-vars/compilation-vars.json | jq -r .director_stemcell_url)
-director_stemcell_sha1=$(cat compilation-vars/compilation-vars.json | jq -r .director_stemcell_sha1)
-director_stemcell_version=$(cat compilation-vars/compilation-vars.json | jq -r .director_stemcell_version)
-director_bosh_release_url=$(cat compilation-vars/compilation-vars.json | jq -r .director_bosh_release_url)
-director_bosh_release_sha1=$(cat compilation-vars/compilation-vars.json | jq -r .director_bosh_release_sha1)
-director_bosh_release_version=$(cat compilation-vars/compilation-vars.json | jq -r .director_bosh_release_version)
-director_bosh_cpi_release_url=$(cat compilation-vars/compilation-vars.json | jq -r .director_bosh_cpi_release_url)
-director_bosh_cpi_release_sha1=$(cat compilation-vars/compilation-vars.json | jq -r .director_bosh_cpi_release_sha1)
-director_bosh_cpi_release_version=$(cat compilation-vars/compilation-vars.json | jq -r .director_bosh_cpi_release_version)
-concourse_release_url=$(cat compilation-vars/compilation-vars.json | jq -r .concourse_release_url)
-concourse_release_version=$(cat compilation-vars/compilation-vars.json | jq -r .concourse_release_version)
-garden_release_url=$(cat compilation-vars/compilation-vars.json | jq -r .garden_release_url)
-garden_release_version=$(cat compilation-vars/compilation-vars.json | jq -r .garden_release_version)
+pushd compilation-vars
+  concourse_stemcell_url=$(jq -r .concourse_stemcell_url | compilation-vars.json)
+  concourse_stemcell_version=$(jq -r .concourse_stemcell_version | compilation-vars.json)
+  director_stemcell_url=$(jq -r .director_stemcell_url | compilation-vars.json)
+  director_stemcell_version=$(jq -r .director_stemcell_version | compilation-vars.json)
+  director_bosh_release_url=$(jq -r .director_bosh_release_url | compilation-vars.json)
+  director_bosh_release_version=$(jq -r .director_bosh_release_version | compilation-vars.json)
+  director_bosh_cpi_release_url=$(jq -r .director_bosh_cpi_release_url | compilation-vars.json)
+  director_bosh_cpi_release_version=$(jq -r .director_bosh_cpi_release_version | compilation-vars.json)
+  concourse_release_url=$(jq -r .concourse_release_url | compilation-vars.json)
+  concourse_release_version=$(jq -r .concourse_release_version | compilation-vars.json)
+  garden_release_url=$(jq -r .garden_release_url | compilation-vars.json)
+  garden_release_version=$(jq -r .garden_release_version | compilation-vars.json)
+popd
 
 name="concourse-up $version"
 
@@ -40,4 +38,4 @@ pushd concourse-up
   commit=$(git rev-parse HEAD)
 popd
 
-echo $commit > release-vars/commit
+echo "$commit" > release-vars/commit

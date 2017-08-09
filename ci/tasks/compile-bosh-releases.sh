@@ -4,7 +4,7 @@ set -eu
 
 echo "$BOSH_CA_CERT" > bosh_ca_cert.pem
 
-bosh_flags="--non-interactive --environment $BOSH_TARGET --client $BOSH_USERNAME --client-secret $BOSH_PASSWORD --ca-cert bosh_ca_cert.pem"
+bosh="bosh-cli --non-interactive --environment $BOSH_TARGET --client $BOSH_USERNAME --client-secret $BOSH_PASSWORD --ca-cert bosh_ca_cert.pem"
 
 concourse_stemcell_version=$(cat concourse-stemcell/version)
 concourse_stemcell_url=$(cat concourse-stemcell/url)
@@ -22,10 +22,10 @@ director_bosh_release_version=$(cat director-bosh-release/version)
 concourse_release_version=$(ls concourse-bosh-release/concourse-*.tgz | awk -F"-" '{ print $4 }' | awk -F".tgz" '{ print $1 }')
 garden_release_version=$(ls concourse-bosh-release/garden-runc-*.tgz | awk -F"-" '{ print $5 }' | awk -F".tgz" '{ print $1 }')
 
-bosh-cli $bosh_flags upload-stemcell "concourse-stemcell/stemcell.tgz"
-bosh-cli $bosh_flags upload-release "concourse-bosh-release/garden-runc-$garden_release_version.tgz"
-bosh-cli $bosh_flags upload-release "concourse-bosh-release/concourse-$concourse_release_version.tgz"
-bosh-cli $bosh_flags upload-release "director-bosh-release/release.tgz"
+$bosh upload-stemcell "concourse-stemcell/stemcell.tgz"
+$bosh upload-release "concourse-bosh-release/garden-runc-$garden_release_version.tgz"
+$bosh upload-release "concourse-bosh-release/concourse-$concourse_release_version.tgz"
+$bosh upload-release "director-bosh-release/release.tgz"
 
 echo "---
 name: concourse-empty
@@ -50,22 +50,22 @@ update:
   canary_watch_time: 1000-60000
   update_watch_time: 1000-60000" > concourse-empty.yml
 
-bosh-cli $bosh_flags \
+$bosh \
   --deployment concourse-empty \
   deploy \
   concourse-empty.yml
 
-bosh-cli $bosh_flags \
+$bosh \
   --deployment concourse-empty \
-  export-release concourse/$concourse_release_version ubuntu-trusty/$concourse_stemcell_version
+  export-release "concourse/$concourse_release_version" "ubuntu-trusty/$concourse_stemcell_version"
 
-bosh-cli $bosh_flags \
+$bosh \
   --deployment concourse-empty \
-  export-release garden-runc/$garden_release_version ubuntu-trusty/$concourse_stemcell_version
+  export-release "garden-runc/$garden_release_version" "ubuntu-trusty/$concourse_stemcell_version"
 
-bosh-cli $bosh_flags \
+$bosh \
   --deployment concourse-empty \
-  export-release bosh/$director_bosh_release_version ubuntu-trusty/$concourse_stemcell_version
+  export-release "bosh/$director_bosh_release_version" "ubuntu-trusty/$concourse_stemcell_version"
 
 compiled_concourse_release=$(ls concourse-$concourse_release_version-ubuntu-trusty-$concourse_stemcell_version-*.tgz)
 compiled_garden_release=$(ls garden-runc-$garden_release_version-ubuntu-trusty-$concourse_stemcell_version-*.tgz)
