@@ -5,7 +5,7 @@ inputs:
 - name: concourse-up
 - name: binary-linux
 
-cache:
+caches:
 - path: /root/.bosh
 
 run:
