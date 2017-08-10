@@ -4,18 +4,18 @@ set -eu
 
 version=$(cat version/version)
 pushd compilation-vars
-  concourse_stemcell_url=$(jq -r .concourse_stemcell_url | compilation-vars.json)
-  concourse_stemcell_version=$(jq -r .concourse_stemcell_version | compilation-vars.json)
-  director_stemcell_url=$(jq -r .director_stemcell_url | compilation-vars.json)
-  director_stemcell_version=$(jq -r .director_stemcell_version | compilation-vars.json)
-  director_bosh_release_url=$(jq -r .director_bosh_release_url | compilation-vars.json)
-  director_bosh_release_version=$(jq -r .director_bosh_release_version | compilation-vars.json)
-  director_bosh_cpi_release_url=$(jq -r .director_bosh_cpi_release_url | compilation-vars.json)
-  director_bosh_cpi_release_version=$(jq -r .director_bosh_cpi_release_version | compilation-vars.json)
-  concourse_release_url=$(jq -r .concourse_release_url | compilation-vars.json)
-  concourse_release_version=$(jq -r .concourse_release_version | compilation-vars.json)
-  garden_release_url=$(jq -r .garden_release_url | compilation-vars.json)
-  garden_release_version=$(jq -r .garden_release_version | compilation-vars.json)
+  concourse_stemcell_url=$(jq -r .concourse_stemcell_url compilation-vars.json)
+  concourse_stemcell_version=$(jq -r .concourse_stemcell_version compilation-vars.json)
+  director_stemcell_url=$(jq -r .director_stemcell_url compilation-vars.json)
+  director_stemcell_version=$(jq -r .director_stemcell_version compilation-vars.json)
+  director_bosh_release_url=$(jq -r .director_bosh_release_url compilation-vars.json)
+  director_bosh_release_version=$(jq -r .director_bosh_release_version compilation-vars.json)
+  director_bosh_cpi_release_url=$(jq -r .director_bosh_cpi_release_url compilation-vars.json)
+  director_bosh_cpi_release_version=$(jq -r .director_bosh_cpi_release_version compilation-vars.json)
+  concourse_release_url=$(jq -r .concourse_release_url compilation-vars.json)
+  concourse_release_version=$(jq -r .concourse_release_version compilation-vars.json)
+  garden_release_url=$(jq -r .garden_release_url compilation-vars.json)
+  garden_release_version=$(jq -r .garden_release_version compilation-vars.json)
 popd
 
 name="concourse-up $version"
