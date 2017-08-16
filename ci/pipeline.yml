@@ -247,7 +247,6 @@ jobs:
       params:
         AWS_ACCESS_KEY_ID: {{aws_access_key_id}}
         AWS_SECRET_ACCESS_KEY: {{aws_secret_access_key}}
-        AWS_DEFAULT_REGION: {{aws_default_region}}
         BINARY_PATH: binary-linux/concourse-up-linux-amd64
       on_failure:
         put: slack-alert
@@ -261,7 +260,6 @@ jobs:
       params:
         AWS_ACCESS_KEY_ID: {{aws_access_key_id}}
         AWS_SECRET_ACCESS_KEY: {{aws_secret_access_key}}
-        AWS_DEFAULT_REGION: {{aws_default_region}}
         BINARY_PATH: binary-linux/concourse-up-linux-amd64
       on_failure:
         put: slack-alert
