@@ -11,7 +11,6 @@ A tool for easily deploying [Concourse](https://concourse.ci) in a single comman
 ```
 $ AWS_ACCESS_KEY_ID=<access-key-id> \
   AWS_SECRET_ACCESS_KEY=<secret-access-key> \
-  AWS_DEFAULT_REGION=<default-region> \
   concourse-up deploy <your-project-name>
 ```
 
@@ -41,7 +40,6 @@ providing you with a single command for getting your Concourse up and keeping it
   - Exporting the following [environment variables](http://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html#cli-environment) before running `concourse-up`
     - `AWS_ACCESS_KEY_ID`
     - `AWS_SECRET_ACCESS_KEY`
-    - `AWS_DEFAULT_REGION`
 - [Terraform](https://www.terraform.io/intro/getting-started/install.html) 0.9.3 or newer
 
 ## Install
