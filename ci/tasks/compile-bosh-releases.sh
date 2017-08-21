@@ -78,7 +78,11 @@ aws s3 cp --acl public-read "$compiled_garden_release" "s3://$PUBLIC_ARTIFACTS_B
 aws s3 cp --acl public-read "$compiled_director_bosh_release" "s3://$PUBLIC_ARTIFACTS_BUCKET/$compiled_director_bosh_release"
 
 director_bosh_release_sha1=$(sha1sum "$compiled_director_bosh_release" | awk '{ print $1 }')
+director_bosh_release_url="https://s3-$AWS_DEFAULT_REGION.amazonaws.com/$PUBLIC_ARTIFACTS_BUCKET/$compiled_director_bosh_release"
 concourse_release_sha1=$(sha1sum "$compiled_concourse_release" | awk '{ print $1 }')
+# concourse_release_url="https://s3-$AWS_DEFAULT_REGION.amazonaws.com/$PUBLIC_ARTIFACTS_BUCKET/$compiled_concourse_release"
+concourse_release_url="http://bosh.io/d/github.com/concourse/concourse?v=$concourse_release_version"
+garden_release_url="https://s3-$AWS_DEFAULT_REGION.amazonaws.com/$PUBLIC_ARTIFACTS_BUCKET/$compiled_garden_release"
 garden_release_sha1=$(sha1sum "$compiled_garden_release" | awk '{ print $1 }')
 
 echo "{
@@ -90,7 +94,7 @@ echo "{
   \"director_stemcell_sha1\": \"$director_stemcell_sha1\",
   \"director_stemcell_version\": \"$director_stemcell_version\",
 
-  \"director_bosh_release_url\": \"https://s3-$AWS_DEFAULT_REGION.amazonaws.com/$PUBLIC_ARTIFACTS_BUCKET/$compiled_director_bosh_release\",
+  \"director_bosh_release_url\": \"$director_bosh_release_url\",
   \"director_bosh_release_sha1\": \"$director_bosh_release_sha1\",
   \"director_bosh_release_version\": \"$director_bosh_release_version\",
 
@@ -98,11 +102,11 @@ echo "{
   \"director_bosh_cpi_release_sha1\": \"$director_bosh_cpi_release_sha1\",
   \"director_bosh_cpi_release_version\": \"$director_bosh_cpi_release_version\",
 
-  \"concourse_release_url\": \"https://s3-$AWS_DEFAULT_REGION.amazonaws.com/$PUBLIC_ARTIFACTS_BUCKET/$compiled_concourse_release\",
+  \"concourse_release_url\": \"$concourse_release_url\",
   \"concourse_release_sha1\": \"$concourse_release_sha1\",
   \"concourse_release_version\": \"$concourse_release_version\",
 
-  \"garden_release_url\": \"https://s3-$AWS_DEFAULT_REGION.amazonaws.com/$PUBLIC_ARTIFACTS_BUCKET/$compiled_garden_release\",
+  \"garden_release_url\": \"$garden_release_url\",
   \"garden_release_sha1\": \"$garden_release_sha1\",
   \"garden_release_version\": \"$garden_release_version\"
 }" > compilation-vars/compilation-vars.json
