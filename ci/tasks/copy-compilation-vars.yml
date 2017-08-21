@@ -5,5 +5,8 @@ inputs:
 - name: concourse-up
 - name: compilation-vars
 
+outputs:
+- name: concourse-up-new
+
 run:
   path: concourse-up/ci/tasks/copy-compilation-vars.sh

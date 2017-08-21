@@ -296,7 +296,7 @@ jobs:
       file: concourse-up/ci/tasks/copy-compilation-vars.yml
     - put: concourse-up
       params:
-        repository: concourse-up
+        repository: concourse-up-new
         rebase: true
         notes: "update compilation vars"
 
