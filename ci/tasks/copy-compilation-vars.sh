@@ -7,8 +7,10 @@ cp compilation-vars/compilation-vars.json concourse-up-new/compilation-vars.json
 version=$(cat version/version)
 
 pushd concourse-up-new
-  git add compilation-vars.json
-  git config --global user.email "systems@engineerbetter.com"
-  git config --global user.name "CI"
-  git commit -m "add compilation-vars.json latest version"
+  if [[ `git status --porcelain` ]]; then
+    git add compilation-vars.json
+    git config --global user.email "systems@engineerbetter.com"
+    git config --global user.name "CI"
+    git commit -m "add compilation-vars.json latest version"
+  fi
 popd
