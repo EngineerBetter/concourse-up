@@ -92,12 +92,18 @@ func EnsureBucketExists(name, region string) error {
 		return err
 	}
 
-	_, err = client.CreateBucket(&s3.CreateBucketInput{
+	bucketInput := &s3.CreateBucketInput{
 		Bucket: &name,
-		CreateBucketConfiguration: &s3.CreateBucketConfiguration{
+	}
+	// NOTE the location constraint should only be set if using a bucket OTHER than us-east-1
+	// http://docs.aws.amazon.com/AmazonS3/latest/API/RESTBucketPUT.html
+	if region != "us-east-1" {
+		bucketInput.CreateBucketConfiguration = &s3.CreateBucketConfiguration{
 			LocationConstraint: &region,
-		},
-	})
+		}
+	}
+
+	_, err = client.CreateBucket(bucketInput)
 	if err != nil {
 		return err
 	}
