@@ -79,7 +79,7 @@ var deploy = cli.Command{
 			bosh.NewClient,
 			certs.Generate,
 			aws.FindLongestMatchingHostedZone,
-			&config.Client{Project: name},
+			&config.Client{Project: name, S3Region: deployArgs.AWSRegion},
 			&deployArgs,
 			os.Stdout,
 			os.Stderr,

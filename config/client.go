@@ -8,7 +8,6 @@ import (
 )
 
 const terraformStateFileName = "terraform.tfstate"
-const configBucketS3Region = "eu-west-1"
 const configFilePath = "config.json"
 
 // IClient is an interface for the config file client
@@ -25,14 +24,15 @@ type IClient interface {
 
 // Client is a client for loading the config file  from S3
 type Client struct {
-	Project string
+	Project  string
+	S3Region string
 }
 
 // StoreAsset stores an associated configuration file
 func (client *Client) StoreAsset(filename string, contents []byte) error {
 	return aws.WriteFile(client.configBucket(),
 		filename,
-		configBucketS3Region,
+		client.S3Region,
 		contents,
 	)
 }
@@ -42,7 +42,7 @@ func (client *Client) LoadAsset(filename string) ([]byte, error) {
 	return aws.LoadFile(
 		client.configBucket(),
 		filename,
-		configBucketS3Region,
+		client.S3Region,
 	)
 }
 
@@ -51,7 +51,7 @@ func (client *Client) DeleteAsset(filename string) error {
 	return aws.DeleteFile(
 		client.configBucket(),
 		filename,
-		configBucketS3Region,
+		client.S3Region,
 	)
 }
 
@@ -60,7 +60,7 @@ func (client *Client) HasAsset(filename string) (bool, error) {
 	return aws.HasFile(
 		client.configBucket(),
 		filename,
-		configBucketS3Region,
+		client.S3Region,
 	)
 }
 
@@ -71,12 +71,12 @@ func (client *Client) Update(config *Config) error {
 		return err
 	}
 
-	return aws.WriteFile(client.configBucket(), configFilePath, configBucketS3Region, bytes)
+	return aws.WriteFile(client.configBucket(), configFilePath, client.S3Region, bytes)
 }
 
 // DeleteAll deletes the entire configuration bucket
 func (client *Client) DeleteAll(config *Config) error {
-	return aws.DeleteVersionedBucket(config.ConfigBucket, configBucketS3Region)
+	return aws.DeleteVersionedBucket(config.ConfigBucket, client.S3Region)
 }
 
 // Load loads an existing config file from S3
@@ -84,7 +84,7 @@ func (client *Client) Load() (*Config, error) {
 	configBytes, err := aws.LoadFile(
 		client.configBucket(),
 		configFilePath,
-		configBucketS3Region,
+		client.S3Region,
 	)
 	if err != nil {
 		return nil, err
@@ -109,14 +109,14 @@ func (client *Client) LoadOrCreate(deployArgs *DeployArgs) (*Config, bool, error
 		return nil, false, err
 	}
 
-	if err = aws.EnsureBucketExists(client.configBucket(), configBucketS3Region); err != nil {
+	if err = aws.EnsureBucketExists(client.configBucket(), client.S3Region); err != nil {
 		return nil, false, err
 	}
 
 	configBytes, createdNewFile, err := aws.EnsureFileExists(
 		client.configBucket(),
 		configFilePath,
-		configBucketS3Region,
+		client.S3Region,
 		defaultConfigBytes,
 	)
 	if err != nil {
