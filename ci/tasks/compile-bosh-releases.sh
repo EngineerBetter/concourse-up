@@ -79,7 +79,8 @@ aws s3 cp --acl public-read "$compiled_director_bosh_release" "s3://$PUBLIC_ARTI
 
 director_bosh_release_sha1=$(sha1sum "$compiled_director_bosh_release" | awk '{ print $1 }')
 director_bosh_release_url="https://s3-$AWS_DEFAULT_REGION.amazonaws.com/$PUBLIC_ARTIFACTS_BUCKET/$compiled_director_bosh_release"
-concourse_release_sha1=$(sha1sum "$compiled_concourse_release" | awk '{ print $1 }')
+# concourse_release_sha1=$(sha1sum "$compiled_concourse_release" | awk '{ print $1 }')
+concourse_release_sha1=$(cat concourse-bosh-release/sha1)
 # concourse_release_url="https://s3-$AWS_DEFAULT_REGION.amazonaws.com/$PUBLIC_ARTIFACTS_BUCKET/$compiled_concourse_release"
 concourse_release_url="http://bosh.io/d/github.com/concourse/concourse?v=$concourse_release_version"
 garden_release_url="https://s3-$AWS_DEFAULT_REGION.amazonaws.com/$PUBLIC_ARTIFACTS_BUCKET/$compiled_garden_release"
