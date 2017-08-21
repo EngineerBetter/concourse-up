@@ -77,6 +77,7 @@ var deploy = cli.Command{
 		client := concourse.NewClient(
 			terraform.NewClient,
 			bosh.NewClient,
+			aws.DeleteVMsInVPC,
 			certs.Generate,
 			aws.FindLongestMatchingHostedZone,
 			&config.Client{Project: name, S3Region: deployArgs.AWSRegion},

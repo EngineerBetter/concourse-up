@@ -15,6 +15,7 @@ type Metadata struct {
 	VMsSecurityGroupID      MetadataStringValue `json:"vms_security_group_id" valid:"required"`
 	ELBSecurityGroupID      MetadataStringValue `json:"elb_security_group_id" valid:"required"`
 	DefaultSubnetID         MetadataStringValue `json:"default_subnet_id" valid:"required"`
+	VPCID                   MetadataStringValue `json:"vpc_id" valid:"required"`
 
 	BlobstoreBucket          MetadataStringValue `json:"blobstore_bucket" valid:"required"`
 	BlobstoreUserAccessKeyID MetadataStringValue `json:"blobstore_user_access_key_id" valid:"required"`

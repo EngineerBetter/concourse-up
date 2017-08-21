@@ -35,6 +35,11 @@ var _ = Describe("Client", func() {
 		return "", "", errors.New("hosted zone not found")
 	}
 
+	vpcEmptier := func(vpcID string, region string) error {
+		actions = append(actions, fmt.Sprintf("deleting vms in %s in region %s", vpcID, region))
+		return nil
+	}
+
 	certGenerator := func(caName string, ip ...string) (*certs.Certs, error) {
 		actions = append(actions, fmt.Sprintf("generating cert ca: %s, ca: %s", caName, ip))
 		return &certs.Certs{
@@ -63,6 +68,7 @@ var _ = Describe("Client", func() {
 			ELBSecurityGroupID:       terraform.MetadataStringValue{Value: "sg-789"},
 			ELBName:                  terraform.MetadataStringValue{Value: "elb-123"},
 			ELBDNSName:               terraform.MetadataStringValue{Value: "elb.aws.com"},
+			VPCID:                    terraform.MetadataStringValue{Value: "vpc-112233"},
 		}
 		deleteBoshDirectorError = nil
 		actions = []string{}
@@ -181,6 +187,7 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 			return concourse.NewClient(
 				terraformClientFactory,
 				boshClientFactory,
+				vpcEmptier,
 				certGenerator,
 				hostedZoneFinder,
 				configClient,
@@ -374,28 +381,13 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 
 			Expect(actions).To(ContainElement("loading config file"))
 		})
-		It("Deletes the director", func() {
+
+		It("Deletes the vms in the vpcs", func() {
 			client := buildClient()
 			err := client.Destroy()
 			Expect(err).ToNot(HaveOccurred())
 
-			Expect(actions).To(ContainElement("deleting director"))
-		})
-
-		It("Cleans up the director", func() {
-			client := buildClient()
-			err := client.Destroy()
-			Expect(err).ToNot(HaveOccurred())
-
-			Expect(actions).To(ContainElement("cleaning up bosh init"))
-		})
-
-		It("Deletes the bosh state", func() {
-			client := buildClient()
-			err := client.Destroy()
-			Expect(err).ToNot(HaveOccurred())
-
-			Expect(actions).To(ContainElement("deleting config asset: director-state.json"))
+			Expect(actions).To(ContainElement("deleting vms in vpc-112233 in region eu-west-1"))
 		})
 
 		It("Destroys the terraform infrastructure", func() {

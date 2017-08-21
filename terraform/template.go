@@ -495,6 +495,10 @@ resource "aws_db_instance" "default" {
   }
 }
 
+output "vpc_id" {
+  value = "${aws_vpc.default.id}"
+}
+
 output "source_access_ip" {
   value = "${var.source_access_ip}"
 }
