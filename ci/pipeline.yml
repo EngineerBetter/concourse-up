@@ -276,21 +276,21 @@ jobs:
   plan:
   - aggregate:
     - get: version
-      passed: [build]
+      passed: [system-test]
     - get: compilation-vars
       trigger: true
-      passed: [build]
+      passed: [system-test]
     - get: binary-linux
       trigger: true
-      passed: [build]
+      passed: [system-test]
     - get: binary-darwin
       trigger: true
-      passed: [build]
+      passed: [system-test]
     - get: concourse-up
       trigger: true
-      passed: [build]
+      passed: [system-test]
     - get: image
-      passed: [build]
+      passed: [system-test]
     - task: copy-compilation-vars
       image: image
       file: concourse-up/ci/tasks/copy-compilation-vars.yml
