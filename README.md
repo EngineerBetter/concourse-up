@@ -95,7 +95,7 @@ Note that `concourse-up` stores some internal configuration in an S3 bucket in `
 
 ### Worker Configuration
 
-By default `concourse-up` deploys a single worker instance of the `m3.xlarge` type. To increase the number of workers pass in the `--workers` flag eg:
+By default `concourse-up` deploys a single worker instance of the `m4.xlarge` type. To increase the number of workers pass in the `--workers` flag eg:
 
 ```
 $ concourse-up deploy chimichanga --workers 3
@@ -111,9 +111,9 @@ The following table shows the allowed worker sizes and the corresponding AWS ins
 
 | --worker-size | AWS Instance type |
 |---------------|-------------------|
-| medium        | m3.medium         |
-| large         | m3.large          |
-| xlarge        | m3.xlarge         |
+| medium        | t2.medium         |
+| large         | m4.large          |
+| xlarge        | m4.xlarge         |
 
 
 ### Custom Domains
@@ -143,16 +143,16 @@ To upgrade your Concourse, grab the [latest release](https://github.com/Engineer
 
 ## Estimated Cost
 
-By default, `concourse-up` deploys to the AWS eu-west-1 (Ireland) region, and uses spot instances for the Concourse VMs. The estimated monthly cost is as follows:
+By default, `concourse-up` deploys to the AWS eu-west-1 (Ireland) region, and uses spot instances for large and xlarge Concourse VMs. The estimated monthly cost is as follows:
 
 | Component     | Size             | Count | Price (USD) |
 |---------------|------------------|-------|------------:|
-| BOSH director | t2.medium        |     1 |       36.50 |
-| Web Server    | m3.medium (spot) |     1 |       10.80 |
-| Worker        | m3.xlarge (spot) |     1 |       48.47 |
-| RDS instance  | db.t2.small      |     1 |       28.47 |
+| BOSH director | t2.medium        |     1 |       34.31 |
+| Web Server    | t2.medium        |     1 |       34.31 |
+| Worker        | m4.xlarge (spot) |     1 |       40.15 |
+| RDS instance  | db.t2.small      |     1 |       26.28 |
 | Load balancer |         -        |     1 |       20.44 |
-| **Total**         |                  |       |      **144.68** |
+| **Total**     |                  |       |      **155.59** |
 
 ## What it does
 
@@ -175,8 +175,8 @@ It then uses Terraform to deploy the following infrastructure:
 
 Once the terraform step is complete, `concourse-up` deploys a BOSH director on an t2.medium instance, and then uses that to deploy a Concourse with the following settings:
 
-- One m3.medium [spot](https://aws.amazon.com/ec2/spot/) for the Concourse web server
-- One m3.xlarge spot instance used as a Concourse worker
+- One t2.medium for the Concourse web server
+- One m4.xlarge [spot](https://aws.amazon.com/ec2/spot/) instance used as a Concourse worker
 - Access via a load balancer over HTTP and HTTPS using a user-provided certificate, or an auto-generated self-signed certificate if one isn't provided.
 
 ## Using a dedicated AWS IAM account

@@ -35,9 +35,7 @@ azs:
 vm_types:
 - name: concourse-medium
   cloud_properties:
-    instance_type: m3.medium
-    spot_bid_price: 0.09 # on-demand price: 0.073
-    spot_ondemand_fallback: true
+    instance_type: t2.medium
     ephemeral_disk:
       size: 200_000
       type: gp2
@@ -46,8 +44,8 @@ vm_types:
 
 - name: concourse-large
   cloud_properties:
-    instance_type: m3.large
-    spot_bid_price: 0.18 # on-demand price: 0.146
+    instance_type: m4.large
+    spot_bid_price: 0.13 # on-demand price: 0.111
     spot_ondemand_fallback: true
     ephemeral_disk:
       size: 200_000
@@ -57,8 +55,8 @@ vm_types:
 
 - name: concourse-xlarge
   cloud_properties:
-    instance_type: m3.xlarge
-    spot_bid_price: 0.35 # on-demand price: 0.293
+    instance_type: m4.xlarge
+    spot_bid_price: 0.27 # on-demand price: 0.222
     spot_ondemand_fallback: true
     ephemeral_disk:
       size: 200_000
@@ -68,8 +66,8 @@ vm_types:
 
 - name: compilation
   cloud_properties:
-    instance_type: m3.medium
-    spot_bid_price: 0.09 # on-demand price: 0.073
+    instance_type: m4.large
+    spot_bid_price: 0.13 # on-demand price: 0.111
     spot_ondemand_fallback: true
     ephemeral_disk:
       size: 5_000
