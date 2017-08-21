@@ -272,23 +272,51 @@ jobs:
           text: |
             <!channel> Concourse Up system test failure!
 
+- name: commit-compilation-vars
+  plan:
+  - aggregate:
+    - get: version
+      passed: [build]
+    - get: compilation-vars
+      trigger: true
+      passed: [build]
+    - get: binary-linux
+      trigger: true
+      passed: [build]
+    - get: binary-darwin
+      trigger: true
+      passed: [build]
+    - get: concourse-up
+      trigger: true
+      passed: [build]
+    - get: image
+      passed: [build]
+    - task: copy-compilation-vars
+      image: image
+      file: concourse-up/ci/tasks/copy-compilation-vars.yml
+    - put: concourse-up
+      params:
+        repository: concourse-up
+        rebase: true
+        notes: "update compilation vars"
+
 - name: auto
   serial: true
   plan:
   - aggregate:
     - get: compilation-vars
       trigger: true
-      passed: [system-test]
+      passed: [commit-compilation-vars]
     - get: image
-      passed: [system-test]
+      passed: [commit-compilation-vars]
     - get: concourse-up
-      passed: [system-test]
+      passed: [commit-compilation-vars]
     - get: binary-linux
-      passed: [system-test]
+      passed: [commit-compilation-vars]
     - get: binary-darwin
-      passed: [system-test]
+      passed: [commit-compilation-vars]
     - get: version
-      passed: [system-test]
+      passed: [commit-compilation-vars]
   - task: write-release-vars
     image: image
     file: concourse-up/ci/tasks/write-release-vars.yml
@@ -313,18 +341,18 @@ jobs:
   plan:
   - aggregate:
     - get: compilation-vars
-      passed: [system-test]
+      passed: [commit-compilation-vars]
     - get: binary-linux
-      passed: [system-test]
+      passed: [commit-compilation-vars]
     - get: binary-darwin
-      passed: [system-test]
+      passed: [commit-compilation-vars]
     - get: version
       params:
         bump: patch
     - get: image
-      passed: [system-test]
+      passed: [commit-compilation-vars]
     - get: concourse-up
-      passed: [system-test]
+      passed: [commit-compilation-vars]
   - task: write-release-vars
     image: image
     file: concourse-up/ci/tasks/write-release-vars.yml
@@ -353,18 +381,18 @@ jobs:
   plan:
   - aggregate:
     - get: compilation-vars
-      passed: [system-test]
+      passed: [commit-compilation-vars]
     - get: binary-linux
-      passed: [system-test]
+      passed: [commit-compilation-vars]
     - get: binary-darwin
-      passed: [system-test]
+      passed: [commit-compilation-vars]
     - get: version
       params:
         bump: minor
     - get: image
-      passed: [system-test]
+      passed: [commit-compilation-vars]
     - get: concourse-up
-      passed: [system-test]
+      passed: [commit-compilation-vars]
   - task: write-release-vars
     image: image
     file: concourse-up/ci/tasks/write-release-vars.yml
@@ -393,18 +421,18 @@ jobs:
   plan:
   - aggregate:
     - get: compilation-vars
-      passed: [system-test]
+      passed: [commit-compilation-vars]
     - get: binary-linux
-      passed: [system-test]
+      passed: [commit-compilation-vars]
     - get: binary-darwin
-      passed: [system-test]
+      passed: [commit-compilation-vars]
     - get: version
       params:
         bump: major
     - get: image
-      passed: [system-test]
+      passed: [commit-compilation-vars]
     - get: concourse-up
-      passed: [system-test]
+      passed: [commit-compilation-vars]
   - task: write-release-vars
     image: image
     file: concourse-up/ci/tasks/write-release-vars.yml

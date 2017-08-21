@@ -1,0 +1,9 @@
+---
+platform: linux
+
+inputs:
+- name: concourse-up
+- name: compilation-vars
+
+run:
+  path: concourse-up/ci/tasks/copy-compilation-vars.sh
