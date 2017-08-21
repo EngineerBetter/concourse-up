@@ -17,9 +17,10 @@ resources:
 - name: concourse-up
   type: git
   source:
-    uri: https://github.com/EngineerBetter/concourse-up.git
+    uri: git@github.com:EngineerBetter/concourse-up.git
     branch: master
     ignore_paths: [ci/docker/*, ci/pipeline.yml, README.md]
+    private_key: {{github_oncourse_up_private_key}}
 
 - name: image
   type: docker-image
@@ -292,14 +293,14 @@ jobs:
       passed: [system-test]
     - get: image
       passed: [system-test]
-    - task: copy-compilation-vars
-      image: image
-      file: concourse-up/ci/tasks/copy-compilation-vars.yml
-    - put: concourse-up
-      params:
-        repository: concourse-up-new
-        rebase: true
-        notes: "update compilation vars"
+  - task: copy-compilation-vars
+    image: image
+    file: concourse-up/ci/tasks/copy-compilation-vars.yml
+  - put: concourse-up
+    params:
+      repository: concourse-up-new
+      rebase: true
+      notes: "update compilation vars"
 
 - name: auto
   serial: true
