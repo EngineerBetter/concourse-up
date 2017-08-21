@@ -10,5 +10,5 @@ pushd concourse-up-new
   git add compilation-vars.json
   git config --global user.email "systems@engineerbetter.com"
   git config --global user.name "CI"
-  git commit -m "add compilation-vars.json for version $version"
+  git commit -m "add compilation-vars.json latest version"
 popd
