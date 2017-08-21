@@ -22,9 +22,12 @@ director_bosh_release_version=$(cat director-bosh-release/version)
 concourse_release_version=$(ls concourse-bosh-release/concourse-*.tgz | awk -F"-" '{ print $4 }' | awk -F".tgz" '{ print $1 }')
 garden_release_version=$(ls concourse-bosh-release/garden-runc-*.tgz | awk -F"-" '{ print $5 }' | awk -F".tgz" '{ print $1 }')
 
+# Download concourse from BOSH as version from github can have compiled packages
+curl -L -J -O "https://bosh.io/d/github.com/concourse/concourse?v=$concourse_release_version"
+
 $bosh upload-stemcell "concourse-stemcell/stemcell.tgz"
 $bosh upload-release "concourse-bosh-release/garden-runc-$garden_release_version.tgz"
-$bosh upload-release "concourse-bosh-release/concourse-$concourse_release_version.tgz"
+$bosh upload-release "concourse-$concourse_release_version.tgz"
 $bosh upload-release "director-bosh-release/release.tgz"
 
 echo "---
@@ -79,9 +82,8 @@ aws s3 cp --acl public-read "$compiled_director_bosh_release" "s3://$PUBLIC_ARTI
 
 director_bosh_release_sha1=$(sha1sum "$compiled_director_bosh_release" | awk '{ print $1 }')
 director_bosh_release_url="https://s3-$AWS_DEFAULT_REGION.amazonaws.com/$PUBLIC_ARTIFACTS_BUCKET/$compiled_director_bosh_release"
-# concourse_release_sha1=$(sha1sum "$compiled_concourse_release" | awk '{ print $1 }')
-concourse_release_sha1=$(sha1sum concourse-bosh-release/concourse-$concourse_release_version.tgz | awk '{ print $1 }')
-# concourse_release_url="https://s3-$AWS_DEFAULT_REGION.amazonaws.com/$PUBLIC_ARTIFACTS_BUCKET/$compiled_concourse_release"
+concourse_release_sha1=$(sha1sum "$compiled_concourse_release" | awk '{ print $1 }')
+concourse_release_url="https://s3-$AWS_DEFAULT_REGION.amazonaws.com/$PUBLIC_ARTIFACTS_BUCKET/$compiled_concourse_release"
 concourse_release_url="http://bosh.io/d/github.com/concourse/concourse?v=$concourse_release_version"
 garden_release_url="https://s3-$AWS_DEFAULT_REGION.amazonaws.com/$PUBLIC_ARTIFACTS_BUCKET/$compiled_garden_release"
 garden_release_sha1=$(sha1sum "$compiled_garden_release" | awk '{ print $1 }')
