@@ -273,6 +273,7 @@ jobs:
             <!channel> Concourse Up system test failure!
 
 - name: commit-compilation-vars
+  serial: true
   plan:
   - aggregate:
     - get: version

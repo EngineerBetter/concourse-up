@@ -4,6 +4,7 @@ platform: linux
 inputs:
 - name: concourse-up
 - name: compilation-vars
+- name: version
 
 outputs:
 - name: concourse-up-new
