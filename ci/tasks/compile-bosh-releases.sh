@@ -43,6 +43,8 @@ stemcells:
   os: ubuntu-trusty
   version: \"$concourse_stemcell_version\"
 
+jobs: []
+
 update:
   canaries: 1
   max_in_flight: 1
