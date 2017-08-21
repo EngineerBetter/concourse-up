@@ -8,6 +8,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/ec2"
 )
 
+// DeleteVMsInVPC deletes all the VMs in the given VPC
 func DeleteVMsInVPC(vpcID string, region string) error {
 	sess, err := session.NewSession(aws.NewConfig().WithCredentialsChainVerboseErrors(true))
 	if err != nil {
