@@ -6,7 +6,7 @@ terraform {
 	backend "s3" {
 		bucket = "<% .ConfigBucket %>"
 		key    = "<% .TFStatePath %>"
-		region = "eu-west-1"
+		region = "<% .Region %>"
 	}
 }
 
@@ -87,7 +87,7 @@ resource "aws_key_pair" "default" {
 }
 
 resource "aws_s3_bucket" "blobstore" {
-  bucket        = "${var.deployment}-blobstore"
+  bucket        = "${var.deployment}-${var.region}-blobstore"
   force_destroy = true
   region = "<% .Region %>"
 
@@ -99,16 +99,16 @@ resource "aws_s3_bucket" "blobstore" {
 }
 
 resource "aws_iam_user" "blobstore" {
-  name = "${var.deployment}-blobstore"
+  name = "${var.deployment}-${var.region}-blobstore"
 }
 
 resource "aws_iam_access_key" "blobstore" {
-  user = "${var.deployment}-blobstore"
+  user = "${var.deployment}-${var.region}-blobstore"
   depends_on = ["aws_iam_user.blobstore"]
 }
 
 resource "aws_iam_user_policy" "blobstore" {
-  name = "${var.deployment}-blobstore"
+  name = "${var.deployment}-${var.region}-blobstore"
   user = "${aws_iam_user.blobstore.name}"
 
   policy = <<EOF
@@ -131,16 +131,16 @@ EOF
 }
 
 resource "aws_iam_user" "bosh" {
-  name = "${var.deployment}-bosh"
+  name = "${var.deployment}-${var.region}-bosh"
 }
 
 resource "aws_iam_access_key" "bosh" {
-  user = "${var.deployment}-bosh"
+  user = "${var.deployment}-${var.region}-bosh"
   depends_on = ["aws_iam_user.bosh"]
 }
 
 resource "aws_iam_user_policy" "bosh" {
-  name = "${var.deployment}-bosh"
+  name = "${var.deployment}-${var.region}-bosh"
   user = "${aws_iam_user.bosh.name}"
 
   policy = <<EOF
