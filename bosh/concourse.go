@@ -12,14 +12,31 @@ import (
 const concourseManifestFilename = "concourse.yml"
 const concourseDeploymentName = "concourse"
 
+// ConcourseStemcellURL is a compile-time variable set with -ldflags
 var ConcourseStemcellURL = "COMPILE_TIME_VARIABLE_bosh_concourseStemcellURL"
+
+// ConcourseStemcellVersion is a compile-time variable set with -ldflags
 var ConcourseStemcellVersion = "COMPILE_TIME_VARIABLE_bosh_concourseStemcellVersion"
+
+// ConcourseStemcellSHA1 is a compile-time variable set with -ldflags
 var ConcourseStemcellSHA1 = "COMPILE_TIME_VARIABLE_bosh_concourseStemcellSHA1"
+
+// ConcourseReleaseURL is a compile-time variable set with -ldflags
 var ConcourseReleaseURL = "COMPILE_TIME_VARIABLE_bosh_concourseReleaseURL"
+
+// ConcourseReleaseVersion is a compile-time variable set with -ldflags
 var ConcourseReleaseVersion = "COMPILE_TIME_VARIABLE_bosh_concourseReleaseVersion"
+
+// ConcourseReleaseSHA1 is a compile-time variable set with -ldflags
 var ConcourseReleaseSHA1 = "COMPILE_TIME_VARIABLE_bosh_concourseReleaseSHA1"
+
+// GardenReleaseURL is a compile-time variable set with -ldflags
 var GardenReleaseURL = "COMPILE_TIME_VARIABLE_bosh_gardenReleaseURL"
+
+// GardenReleaseVersion is a compile-time variable set with -ldflags
 var GardenReleaseVersion = "COMPILE_TIME_VARIABLE_bosh_gardenReleaseVersion"
+
+// GardenReleaseSHA1 is a compile-time variable set with -ldflags
 var GardenReleaseSHA1 = "COMPILE_TIME_VARIABLE_bosh_gardenReleaseSHA1"
 
 func (client *Client) uploadConcourseStemcell() error {

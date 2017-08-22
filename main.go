@@ -11,6 +11,7 @@ import (
 	"gopkg.in/urfave/cli.v1"
 )
 
+// ConcourseUpVersion is a compile-time variable set with -ldflags
 var ConcourseUpVersion = "COMPILE_TIME_VARIABLE_main_concourseUpVersion"
 
 func main() {

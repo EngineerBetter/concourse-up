@@ -9,14 +9,31 @@ import (
 	"github.com/EngineerBetter/concourse-up/util"
 )
 
+// DirectorCPIReleaseSHA1 is a compile-time varaible set with -ldflags
 var DirectorCPIReleaseSHA1 = "COMPILE_TIME_VARIABLE_bosh_directorCPIReleaseSHA1"
+
+// DirectorCPIReleaseURL is a compile-time varaible set with -ldflags
 var DirectorCPIReleaseURL = "COMPILE_TIME_VARIABLE_bosh_directorCPIReleaseURL"
+
+// DirectorCPIReleaseVersion is a compile-time varaible set with -ldflags
 var DirectorCPIReleaseVersion = "COMPILE_TIME_VARIABLE_bosh_directorCPIReleaseVersion"
+
+// DirectorReleaseSHA1 is a compile-time varaible set with -ldflags
 var DirectorReleaseSHA1 = "COMPILE_TIME_VARIABLE_bosh_directorReleaseSHA1"
+
+// DirectorReleaseURL is a compile-time varaible set with -ldflags
 var DirectorReleaseURL = "COMPILE_TIME_VARIABLE_bosh_directorReleaseURL"
+
+// DirectorReleaseVersion is a compile-time varaible set with -ldflags
 var DirectorReleaseVersion = "COMPILE_TIME_VARIABLE_bosh_directorReleaseVersion"
+
+// DirectorStemcellSHA1 is a compile-time varaible set with -ldflags
 var DirectorStemcellSHA1 = "COMPILE_TIME_VARIABLE_bosh_directorStemcellSHA1"
+
+// DirectorStemcellURL is a compile-time varaible set with -ldflags
 var DirectorStemcellURL = "COMPILE_TIME_VARIABLE_bosh_directorStemcellURL"
+
+// DirectorStemcellVersion is a compile-time varaible set with -ldflags
 var DirectorStemcellVersion = "COMPILE_TIME_VARIABLE_bosh_directorStemcellVersion"
 
 // GenerateBoshInitManifest generates a manifest for the bosh director on AWS
