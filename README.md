@@ -88,23 +88,28 @@ That's it!
 By default `concourse-up` deploys the BOSH director and Concourse VMs into `eu-west-1` region. To change the region, use the `--region` flag eg:
 
 ```
-$ concourse-up deploy chimichanga --region us-east-1
+$ concourse-up deploy --region us-east-1 chimichanga
 ```
 
-Note that `concourse-up` stores some internal configuration in an S3 bucket in `eu-west-1`. This internal configuration is always stored in `eu-west-1` regardless of the `--region` flag.
+When deploying to a non-default region, you *must* pass the `--region` flag with all subsequent commands eg:
+
+```
+$ concourse-up info --region us-east-1 chimichanga
+$ concourse-up destroy --region us-east-1 chimichanga
+```
 
 ### Worker Configuration
 
 By default `concourse-up` deploys a single worker instance of the `m4.xlarge` type. To increase the number of workers pass in the `--workers` flag eg:
 
 ```
-$ concourse-up deploy chimichanga --workers 3
+$ concourse-up deploy --workers 3 chimichanga
 ```
 
 You can also change the size of each worker instance using the `--worker-size` flag. eg:
 
 ```
-$ concourse-up deploy chimichanga --worker-size xlarge
+$ concourse-up deploy --worker-size xlarge chimichanga
 ```
 
 The following table shows the allowed worker sizes and the corresponding AWS instance types
@@ -121,7 +126,7 @@ The following table shows the allowed worker sizes and the corresponding AWS ins
 You can use a custom domain using the `--domain` flag eg:
 
 ```
-$ concourse-up deploy chimichanga --domain chimichanga.engineerbetter.com
+$ concourse-up deploy --domain chimichanga.engineerbetter.com chimichanga
 ```
 
 In the example above `concourse-up` will search for a Route 53 hosted zone that matches `chimichanga.engineerbetter.com` or `engineerbetter.com` and add a record to the longest match (`chimichanga.engineerbetter.com` in this example).
@@ -129,10 +134,11 @@ In the example above `concourse-up` will search for a Route 53 hosted zone that 
 By default `concourse-up` will generate a self-signed cert using the given domain. If you'd like to provide your own certificate instead, pass the cert and private key as strings using the `--tls-cert` and `--tls-key` flags respectively. eg:
 
 ```
-$ concourse-up deploy chimichanga \
+$ concourse-up deploy \
   --domain chimichanga.engineerbetter.com \
   --tls-cert "$(cat chimichanga.engineerbetter.com.crt)" \
-  --tls-key "$(cat chimichanga.engineerbetter.com.key)"
+  --tls-key "$(cat chimichanga.engineerbetter.com.key)" \
+  chimichanga
 ```
 
 ## Upgrading your Concourse
