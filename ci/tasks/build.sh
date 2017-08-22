@@ -32,7 +32,7 @@ mv concourse-up/* "$GOPATH/src/github.com/EngineerBetter/concourse-up"
 cd "$GOPATH/src/github.com/EngineerBetter/concourse-up"
 
 go build -ldflags "
-  -X main.concourseUpVersion=$version
+  -X main.ConcourseUpVersion=$version
   -X github.com/EngineerBetter/concourse-up/bosh.ConcourseStemcellURL=$concourse_stemcell_url
   -X github.com/EngineerBetter/concourse-up/bosh.ConcourseStemcellVersion=$concourse_stemcell_version
   -X github.com/EngineerBetter/concourse-up/bosh.ConcourseStemcellSHA1=$concourse_stemcell_sha1
