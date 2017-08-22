@@ -29,7 +29,7 @@ var infoFlags = []cli.Flag{
 	},
 	cli.BoolFlag{
 		Name:        "json",
-		Usage:       "Output as json",
+		Usage:       "(optional) Output as json",
 		EnvVar:      "JSON",
 		Destination: &infoArgs.JSON,
 	},

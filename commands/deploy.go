@@ -26,7 +26,7 @@ var deployFlags = []cli.Flag{
 	},
 	cli.StringFlag{
 		Name:        "domain",
-		Usage:       "Domain to use as endpoint for Concourse web interface (eg: ci.myproject.com)",
+		Usage:       "(optional) Domain to use as endpoint for Concourse web interface (eg: ci.myproject.com)",
 		EnvVar:      "DOMAIN",
 		Destination: &deployArgs.Domain,
 	},
@@ -44,14 +44,14 @@ var deployFlags = []cli.Flag{
 	},
 	cli.IntFlag{
 		Name:        "workers",
-		Usage:       "Number of Concourse worker instances to deploy",
+		Usage:       "(optional) Number of Concourse worker instances to deploy",
 		EnvVar:      "WORKERS",
 		Value:       1,
 		Destination: &deployArgs.WorkerCount,
 	},
 	cli.StringFlag{
 		Name:        "worker-size",
-		Usage:       "Size of Concourse workers. Can be medium, large or xlarge",
+		Usage:       "(optional) Size of Concourse workers. Can be medium, large or xlarge",
 		EnvVar:      "WORKER_SIZE",
 		Value:       "xlarge",
 		Destination: &deployArgs.WorkerSize,
