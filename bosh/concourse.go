@@ -91,7 +91,6 @@ func generateConcourseManifest(config *config.Config, metadata *terraform.Metada
 		DBPort:                  metadata.BoshDBPort.Value,
 		DBCACert:                db.RDSRootCert,
 		Project:                 config.Project,
-		Network:                 "default",
 		TLSCert:                 config.ConcourseCert,
 		TLSKey:                  config.ConcourseKey,
 		AllowSelfSignedCerts:    "true",
@@ -122,7 +121,6 @@ type awsConcourseManifestParams struct {
 	DBPassword              string
 	Project                 string
 	DBCACert                string
-	Network                 string
 	TLSCert                 string
 	TLSKey                  string
 	AllowSelfSignedCerts    string
@@ -173,7 +171,7 @@ instance_groups:
   azs:
   - z1
   networks:
-  - name: <% .Network %>
+  - name: public
     default: [dns, gateway]
   vm_extensions:
   - elb
@@ -213,7 +211,7 @@ instance_groups:
   azs:
   - z1
   networks:
-  - name: default
+  - name: private
     default: [dns, gateway]
   jobs:
   - name: groundcrew

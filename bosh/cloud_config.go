@@ -11,7 +11,8 @@ type awsCloudConfigParams struct {
 	VMsSecurityGroupID          string
 	LoadBalancerSecurityGroupID string
 	LoadBalancerID              string
-	DefaultSubnetID             string
+	PublicSubnetID              string
+	PrivateSubnetID             string
 }
 
 func generateCloudConfig(conf *config.Config, metadata *terraform.Metadata) ([]byte, error) {
@@ -20,7 +21,8 @@ func generateCloudConfig(conf *config.Config, metadata *terraform.Metadata) ([]b
 		VMsSecurityGroupID:          metadata.VMsSecurityGroupID.Value,
 		LoadBalancerSecurityGroupID: metadata.ELBSecurityGroupID.Value,
 		LoadBalancerID:              metadata.ELBName.Value,
-		DefaultSubnetID:             metadata.DefaultSubnetID.Value,
+		PublicSubnetID:              metadata.PublicSubnetID.Value,
+		PrivateSubnetID:             metadata.PrivateSubnetID.Value,
 	}
 
 	return util.RenderTemplate(awsCloudConfigtemplate, templateParams)
@@ -86,7 +88,7 @@ disk_types:
     type: gp2
 
 networks:
-- name: default
+- name: public
   type: manual
   subnets:
   - range: 10.0.0.0/24
@@ -99,7 +101,19 @@ networks:
     reserved:
     - 10.0.0.1-10.0.0.5
     cloud_properties:
-      subnet: <% .DefaultSubnetID %>
+      subnet: <% .PublicSubnetID %>
+- name: private
+  type: manual
+  subnets:
+  - range: 10.0.1.0/24
+    gateway: 10.0.1.1
+    dns:
+    - 10.0.0.2
+    az: z1
+    reserved:
+    - 10.0.1.1-10.0.1.5
+    cloud_properties:
+      subnet: <% .PrivateSubnetID %>
 
 - name: vip
   type: vip
@@ -117,5 +131,5 @@ compilation:
   reuse_compilation_vms: true
   az: z1
   vm_type: compilation
-  network: default
+  network: private
 `

@@ -186,22 +186,62 @@ resource "aws_route" "internet_access" {
   gateway_id             = "${aws_internet_gateway.default.id}"
 }
 
-resource "aws_subnet" "default" {
+ resource "aws_nat_gateway" "default" {
+  allocation_id = "${aws_eip.nat.id}"
+  subnet_id     = "${aws_subnet.public.id}"
+
+  depends_on = ["aws_internet_gateway.default"]
+}
+
+resource "aws_route_table" "private" {
+  vpc_id = "${aws_vpc.default.id}"
+
+  route {
+    cidr_block = "0.0.0.0/0"
+    gateway_id = "${aws_nat_gateway.default.id}"
+  }
+
+  tags {
+    Name = "${var.deployment}-private"
+    concourse-up-project = "${var.project}"
+    concourse-up-component = "bosh"
+  }
+}
+
+resource "aws_subnet" "public" {
   vpc_id                  = "${aws_vpc.default.id}"
   availability_zone       = "${var.availability_zone}"
   cidr_block              = "10.0.0.0/24"
   map_public_ip_on_launch = true
 
   tags {
-    Name = "${var.deployment}"
+    Name = "${var.deployment}-public"
     concourse-up-project = "${var.project}"
     concourse-up-component = "bosh"
   }
 }
 
+resource "aws_subnet" "private" {
+  vpc_id                  = "${aws_vpc.default.id}"
+  availability_zone       = "${var.availability_zone}"
+  cidr_block              = "10.0.1.0/24"
+  map_public_ip_on_launch = false
+
+  tags {
+    Name = "${var.deployment}-private"
+    concourse-up-project = "${var.project}"
+    concourse-up-component = "bosh"
+  }
+}
+
+resource "aws_route_table_association" "private" {
+  subnet_id      = "${aws_subnet.private.id}"
+  route_table_id = "${aws_route_table.private.id}"
+}
+
 resource "aws_elb" "concourse" {
   name            = "${var.deployment}"
-  subnets         = ["${aws_subnet.default.id}"]
+  subnets         = ["${aws_subnet.public.id}"]
   security_groups = ["${aws_security_group.elb.id}"]
 
   listener {
@@ -255,6 +295,10 @@ resource "aws_route53_record" "concourse" {
 <%end%>
 
 resource "aws_eip" "director" {
+  vpc = true
+}
+
+resource "aws_eip" "nat" {
   vpc = true
 }
 
@@ -523,8 +567,16 @@ output "elb_security_group_id" {
   value = "${aws_security_group.elb.id}"
 }
 
-output "default_subnet_id" {
-  value = "${aws_subnet.default.id}"
+output "nat_gateway_ip" {
+  value = "${aws_nat_gateway.default.public_ip}"
+}
+
+output "public_subnet_id" {
+  value = "${aws_subnet.public.id}"
+}
+
+output "private_subnet_id" {
+  value = "${aws_subnet.private.id}"
 }
 
 output "blobstore_bucket" {
