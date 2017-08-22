@@ -10,7 +10,7 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	. "github.com/onsi/gomega/gbytes"
-	"github.com/onsi/gomega/gexec"
+	. "github.com/onsi/gomega/gexec"
 )
 
 var (
@@ -18,6 +18,8 @@ var (
 )
 
 var _ = Describe("concourse-up", func() {
+	var ldFlags []string
+
 	BeforeSuite(func() {
 		compilationVars := map[string]string{}
 
@@ -28,7 +30,7 @@ var _ = Describe("concourse-up", func() {
 		err = json.NewDecoder(file).Decode(&compilationVars)
 		Expect(err).To(Succeed())
 
-		ldflags := []string{
+		ldFlags = []string{
 			fmt.Sprintf("-X main.ConcourseUpVersion=%s", "0.0.0"),
 			fmt.Sprintf("-X github.com/EngineerBetter/concourse-up/bosh.ConcourseStemcellURL=%s", compilationVars["concourse_stemcell_url"]),
 			fmt.Sprintf("-X github.com/EngineerBetter/concourse-up/bosh.ConcourseStemcellVersion=%s", compilationVars["concourse_stemcell_version"]),
@@ -50,21 +52,37 @@ var _ = Describe("concourse-up", func() {
 			fmt.Sprintf("-X github.com/EngineerBetter/concourse-up/bosh.DirectorReleaseSHA1=%s", compilationVars["director_bosh_release_sha1"]),
 		}
 
-		cliPath, err = gexec.Build("github.com/EngineerBetter/concourse-up", "-ldflags", strings.Join(ldflags, " "))
+		cliPath, err = Build("github.com/EngineerBetter/concourse-up", "-ldflags", strings.Join(ldFlags, " "))
 		Expect(err).ToNot(HaveOccurred(), "Error building source")
 	})
 
 	AfterSuite(func() {
-		gexec.CleanupBuildArtifacts()
+		CleanupBuildArtifacts()
 	})
 
 	It("displays usage instructions on --help", func() {
 		command := exec.Command(cliPath, "--help")
-		session, err := gexec.Start(command, GinkgoWriter, GinkgoWriter)
+		session, err := Start(command, GinkgoWriter, GinkgoWriter)
 		Expect(err).ToNot(HaveOccurred(), "Error running CLI: "+cliPath)
-		Eventually(session).Should(gexec.Exit(0))
+		Eventually(session).Should(Exit(0))
 		Expect(session.Out).To(Say("Concourse-Up - A CLI tool to deploy Concourse CI"))
 		Expect(session.Out).To(Say("deploy, d   Deploys or updates a Concourse"))
 		Expect(session.Out).To(Say("destroy, x  Destroys a Concourse"))
+	})
+
+	Context("When a compile-time variable is missing", func() {
+		It("Returns an error", func() {
+			ldFlagsMising := ldFlags[0 : len(ldFlags)-1]
+
+			cliPath, err := Build("github.com/EngineerBetter/concourse-up", "-ldflags", strings.Join(ldFlagsMising, " "))
+			Expect(err).ToNot(HaveOccurred(), "Error building source")
+
+			command := exec.Command(cliPath, "--help")
+			session, err := Start(command, GinkgoWriter, GinkgoWriter)
+			Expect(err).ToNot(HaveOccurred(), "Error running CLI: "+cliPath)
+
+			Eventually(session).Should(Exit(1))
+			Expect(session.Err).To(Say("Compile-time variable bosh.DirectorReleaseSHA1 not set, please build with: `go build -ldflags \"-X github.com/EngineerBetter/concourse-up/bosh.DirectorReleaseSHA1=SOME_VALUE\"`"))
+		})
 	})
 })

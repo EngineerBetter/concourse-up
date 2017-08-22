@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"strings"
@@ -34,8 +35,7 @@ func main() {
 }
 
 func checkCompileTimeArgs() error {
-	args := map[string]string{
-		"main.ConcourseUpVersion":        ConcourseUpVersion,
+	boshCompileTimeArgs := map[string]string{
 		"bosh.ConcourseStemcellURL":      bosh.ConcourseStemcellURL,
 		"bosh.ConcourseStemcellVersion":  bosh.ConcourseStemcellVersion,
 		"bosh.ConcourseStemcellSHA1":     bosh.ConcourseStemcellSHA1,
@@ -56,7 +56,11 @@ func checkCompileTimeArgs() error {
 		"bosh.DirectorStemcellVersion":   bosh.DirectorStemcellVersion,
 	}
 
-	for key, value := range args {
+	if ConcourseUpVersion == "" || strings.HasPrefix(ConcourseUpVersion, "COMPILE_TIME_VARIABLE") {
+		return errors.New("Compile-time variable main.ConcourseUpVersion not set, please build with: `go build -ldflags \"-X main.ConcourseUpVersion=0.0.0\"`")
+	}
+
+	for key, value := range boshCompileTimeArgs {
 		if value == "" || strings.HasPrefix(value, "COMPILE_TIME_VARIABLE") {
 			return fmt.Errorf("Compile-time variable %s not set, please build with: `go build -ldflags \"-X github.com/EngineerBetter/concourse-up/%s=SOME_VALUE\"`", key, key)
 		}
