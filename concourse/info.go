@@ -2,6 +2,7 @@ package concourse
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/EngineerBetter/concourse-up/bosh"
 	"github.com/EngineerBetter/concourse-up/config"
@@ -52,16 +53,18 @@ func (client *Client) FetchInfo() (*Info, error) {
 }
 
 func (info *Info) String() string {
+	boshCACert := strings.Join(strings.Split(info.Config.DirectorCACert, "\n"), "\n\t\t")
+
 	str := "\n"
-	str += fmt.Sprintf("Concourse credentials:\n\tusername: %s\n\tpassword: %s\n\tURL: https://%s\n\n", info.Config.ConcourseUsername, info.Config.ConcoursePassword, info.Config.Domain)
-	str += fmt.Sprintf("Bosh credentials:\n\tusername: %s\n\tpassword: %s\n\tIP: %s\n\n", info.Config.DirectorUsername, info.Config.DirectorPassword, info.Terraform.DirectorPublicIP.Value)
-	str += fmt.Sprintf("Workers:\n\tCount: %d\n\tSize: %s\n\n", info.Config.ConcourseWorkerCount, info.Config.ConcourseWorkerSize)
-	str += fmt.Sprintf("Deployment:\n\tIAAS: aws\n\tRegion: %s\n\n", info.Config.Region)
+	str += fmt.Sprintf("Deployment:\n\tIAAS:   aws\n\tRegion: %s\n\n", info.Config.Region)
+	str += fmt.Sprintf("Workers:\n\tCount: %d\n\tSize:  %s\n\n", info.Config.ConcourseWorkerCount, info.Config.ConcourseWorkerSize)
 	str += "Instances:"
 	for _, instance := range info.Instances {
 		str += fmt.Sprintf("\n\t%s\t%s\t%s", instance.Name, instance.IP, instance.State)
 	}
 	str += "\n\n"
+	str += fmt.Sprintf("Concourse credentials:\n\tusername: %s\n\tpassword: %s\n\tURL:      https://%s\n\n", info.Config.ConcourseUsername, info.Config.ConcoursePassword, info.Config.Domain)
+	str += fmt.Sprintf("Bosh credentials:\n\tusername: %s\n\tpassword: %s\n\tIP:       %s\n\tCA Cert:\n\t\t%s\n\n", info.Config.DirectorUsername, info.Config.DirectorPassword, info.Terraform.DirectorPublicIP.Value, boshCACert)
 
 	return str
 }
