@@ -29,6 +29,7 @@ providing you with a single command for getting your Concourse up and keeping it
 - Supports custom domains for your Concourse URL
 - Uses cost effective AWS spot instances where possible (BOSH will take care of the service)
 - Uses precompiled BOSH packages to minimise install time
+- Workers are placed in a private subnet with NATted outbound traffic for easy firewall set up
 - Horizontal and vertical worker scaling
 - Easy destroy and cleanup
 - Deploy to any AWS region
@@ -166,8 +167,9 @@ By default, `concourse-up` deploys to the AWS eu-west-1 (Ireland) region, and us
 
 It then uses Terraform to deploy the following infrastructure:
 
-- A VPC, with subnets and routing
-- A load balancer
+- An elastic load balancer
+- A VPC, with public and private subnets and routing
+- A NAT gateway for outbound traffic from the private subnet
 - An S3 bucket which BOSH uses as a blobstore
 - An IAM user that can access the blobstore
 - An IAM user that can deploy EC2 instances and update load balancers
