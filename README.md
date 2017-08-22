@@ -72,7 +72,7 @@ A new deploy from scratch takes approximately 12 minutes.
 To fetch information about your `concourse-up` deployment:
 
 ```
-$ concourse-up info <your-project-name>
+$ concourse-up info --json <your-project-name>
 ```
 
 To destroy a Concourse:

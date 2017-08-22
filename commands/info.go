@@ -71,7 +71,7 @@ var info = cli.Command{
 		}
 
 		if infoArgs.JSON {
-			bytes, err := json.Marshal(info)
+			bytes, err := json.MarshalIndent(info, "", "  ")
 			if err != nil {
 				return err
 			}
