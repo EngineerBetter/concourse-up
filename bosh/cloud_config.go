@@ -109,9 +109,6 @@ vm_extensions:
   cloud_properties:
     elbs:
     - <% .LoadBalancerID %>
-    security_groups:
-    - <% .LoadBalancerSecurityGroupID %>
-    - <% .VMsSecurityGroupID %>
 
 compilation:
   workers: 5
