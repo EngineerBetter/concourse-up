@@ -10,45 +10,43 @@ import (
 
 // Config represents a concourse-up configuration file
 type Config struct {
-	HostedZoneID           string `json:"hosted_zone_id"`
-	HostedZoneRecordPrefix string `json:"hosted_zone_record_prefix"`
-	Domain                 string `json:"domain"`
-
-	ConcourseUsername        string `json:"concourse_username"`
-	ConcoursePassword        string `json:"concourse_password"`
-	ConcourseWorkerCount     int    `json:"concourse_worker_count"`
-	ConcourseWorkerSize      string `json:"concourse_worker_size"`
-	ConcourseDBName          string `json:"concourse_db_name"`
-	PublicKey                string `json:"public_key"`
-	PrivateKey               string `json:"private_key"`
-	Region                   string `json:"region"`
-	AvailabilityZone         string `json:"availability_zone"`
-	Deployment               string `json:"deployment"`
-	RDSDefaultDatabaseName   string `json:"rds_default_database_name"`
-	SourceAccessIP           string `json:"source_access_ip"`
-	TFStatePath              string `json:"tf_state_path"`
-	Project                  string `json:"project"`
-	ConfigBucket             string `json:"config_bucket"`
-	DirectorUsername         string `json:"director_username"`
-	DirectorPassword         string `json:"director_password"`
-	DirectorHMUserPassword   string `json:"director_hm_user_password"`
-	DirectorMbusPassword     string `json:"director_mbus_password"`
-	DirectorNATSPassword     string `json:"director_nats_password"`
-	DirectorRegistryPassword string `json:"director_registry_password"`
-	DirectorCACert           string `json:"director_ca_cert"`
-	DirectorCert             string `json:"director_cert"`
-	DirectorKey              string `json:"director_key"`
-	DirectorPublicIP         string `json:"director_public_ip"`
-
-	ConcourseCert             string `json:"concourse_cert"`
-	ConcourseKey              string `json:"concourse_key"`
+	AvailabilityZone          string `json:"availability_zone"`
 	ConcourseCACert           string `json:"concourse_ca_cert"`
+	ConcourseCert             string `json:"concourse_cert"`
+	ConcourseDBName           string `json:"concourse_db_name"`
+	ConcourseKey              string `json:"concourse_key"`
+	ConcoursePassword         string `json:"concourse_password"`
+	ConcourseUsername         string `json:"concourse_username"`
 	ConcourseUserProvidedCert bool   `json:"concourse_user_provided_cert"`
-
-	RDSInstanceClass string `json:"rds_instance_class"`
-	RDSUsername      string `json:"rds_username"`
-	RDSPassword      string `json:"rds_password"`
-	MultiAZRDS       bool   `json:"multi_az_rds"`
+	ConcourseWorkerCount      int    `json:"concourse_worker_count"`
+	ConcourseWorkerSize       string `json:"concourse_worker_size"`
+	ConfigBucket              string `json:"config_bucket"`
+	Deployment                string `json:"deployment"`
+	DirectorCACert            string `json:"director_ca_cert"`
+	DirectorCert              string `json:"director_cert"`
+	DirectorHMUserPassword    string `json:"director_hm_user_password"`
+	DirectorKey               string `json:"director_key"`
+	DirectorMbusPassword      string `json:"director_mbus_password"`
+	DirectorNATSPassword      string `json:"director_nats_password"`
+	DirectorPassword          string `json:"director_password"`
+	DirectorPublicIP          string `json:"director_public_ip"`
+	DirectorRegistryPassword  string `json:"director_registry_password"`
+	DirectorUsername          string `json:"director_username"`
+	Domain                    string `json:"domain"`
+	EncryptionKey             string `json:"encryption_key"`
+	HostedZoneID              string `json:"hosted_zone_id"`
+	HostedZoneRecordPrefix    string `json:"hosted_zone_record_prefix"`
+	MultiAZRDS                bool   `json:"multi_az_rds"`
+	PrivateKey                string `json:"private_key"`
+	Project                   string `json:"project"`
+	PublicKey                 string `json:"public_key"`
+	RDSDefaultDatabaseName    string `json:"rds_default_database_name"`
+	RDSInstanceClass          string `json:"rds_instance_class"`
+	RDSPassword               string `json:"rds_password"`
+	RDSUsername               string `json:"rds_username"`
+	Region                    string `json:"region"`
+	SourceAccessIP            string `json:"source_access_ip"`
+	TFStatePath               string `json:"tf_state_path"`
 }
 
 func generateDefaultConfig(project, deployment, configBucket, region string) ([]byte, error) {
@@ -76,6 +74,7 @@ func generateDefaultConfig(project, deployment, configBucket, region string) ([]
 		DirectorUsername:         "admin",
 		DirectorPassword:         util.GeneratePassword(),
 		DirectorHMUserPassword:   util.GeneratePassword(),
+		EncryptionKey:            util.GeneratePasswordWithLength(32),
 		DirectorMbusPassword:     util.GeneratePassword(),
 		DirectorNATSPassword:     util.GeneratePassword(),
 		DirectorRegistryPassword: util.GeneratePassword(),

@@ -79,60 +79,62 @@ func (client *Client) deployConcourse() error {
 
 func generateConcourseManifest(config *config.Config, metadata *terraform.Metadata) ([]byte, error) {
 	templateParams := awsConcourseManifestParams{
-		WorkerCount:             config.ConcourseWorkerCount,
-		WorkerSize:              config.ConcourseWorkerSize,
-		URL:                     fmt.Sprintf("https://%s", config.Domain),
-		Username:                config.ConcourseUsername,
-		Password:                config.ConcoursePassword,
-		DBUsername:              config.RDSUsername,
-		DBPassword:              config.RDSPassword,
-		DBName:                  config.ConcourseDBName,
-		DBHost:                  metadata.BoshDBAddress.Value,
-		DBPort:                  metadata.BoshDBPort.Value,
-		DBCACert:                db.RDSRootCert,
-		Project:                 config.Project,
-		TLSCert:                 config.ConcourseCert,
-		TLSKey:                  config.ConcourseKey,
 		AllowSelfSignedCerts:    "true",
-		ConcourseReleaseVersion: ConcourseReleaseVersion,
 		ConcourseReleaseSHA1:    ConcourseReleaseSHA1,
 		ConcourseReleaseURL:     ConcourseReleaseURL,
-		GardenReleaseVersion:    GardenReleaseVersion,
-		GardenReleaseURL:        GardenReleaseURL,
+		ConcourseReleaseVersion: ConcourseReleaseVersion,
+		DBCACert:                db.RDSRootCert,
+		DBHost:                  metadata.BoshDBAddress.Value,
+		DBName:                  config.ConcourseDBName,
+		DBPassword:              config.RDSPassword,
+		DBPort:                  metadata.BoshDBPort.Value,
+		DBUsername:              config.RDSUsername,
+		EncryptionKey:           config.EncryptionKey,
 		GardenReleaseSHA1:       GardenReleaseSHA1,
-		StemcellVersion:         ConcourseStemcellVersion,
+		GardenReleaseURL:        GardenReleaseURL,
+		GardenReleaseVersion:    GardenReleaseVersion,
+		Password:                config.ConcoursePassword,
+		Project:                 config.Project,
 		StemcellSHA1:            ConcourseStemcellSHA1,
 		StemcellURL:             ConcourseStemcellURL,
+		StemcellVersion:         ConcourseStemcellVersion,
+		TLSCert:                 config.ConcourseCert,
+		TLSKey:                  config.ConcourseKey,
+		URL:                     fmt.Sprintf("https://%s", config.Domain),
+		Username:                config.ConcourseUsername,
+		WorkerCount:             config.ConcourseWorkerCount,
+		WorkerSize:              config.ConcourseWorkerSize,
 	}
 
 	return util.RenderTemplate(awsConcourseManifestTemplate, templateParams)
 }
 
 type awsConcourseManifestParams struct {
-	WorkerCount             int
-	WorkerSize              string
-	URL                     string
-	Username                string
-	Password                string
-	DBHost                  string
-	DBName                  string
-	DBPort                  string
-	DBUsername              string
-	DBPassword              string
-	Project                 string
-	DBCACert                string
-	TLSCert                 string
-	TLSKey                  string
 	AllowSelfSignedCerts    string
-	ConcourseReleaseVersion string
 	ConcourseReleaseSHA1    string
 	ConcourseReleaseURL     string
-	GardenReleaseVersion    string
-	GardenReleaseURL        string
+	ConcourseReleaseVersion string
+	DBCACert                string
+	DBHost                  string
+	DBName                  string
+	DBPassword              string
+	DBPort                  string
+	DBUsername              string
+	EncryptionKey           string
 	GardenReleaseSHA1       string
-	StemcellVersion         string
+	GardenReleaseURL        string
+	GardenReleaseVersion    string
+	Password                string
+	Project                 string
 	StemcellSHA1            string
 	StemcellURL             string
+	StemcellVersion         string
+	TLSCert                 string
+	TLSKey                  string
+	URL                     string
+	Username                string
+	WorkerCount             int
+	WorkerSize              string
 }
 
 // Indent is a helper function to indent the field a given number of spaces
@@ -181,6 +183,7 @@ instance_groups:
     properties:
       allow_self_signed_certificates: <% .AllowSelfSignedCerts %>
       external_url: <% .URL %>
+      encryption_key: <% .EncryptionKey %>
       basic_auth_username: <% .Username %>
       basic_auth_password: <% .Password %>
       tls_cert: |-
