@@ -59,6 +59,7 @@ var _ = Describe("Client", func() {
 			VMsSecurityGroupID:       terraform.MetadataStringValue{Value: "sg-456"},
 			PublicSubnetID:           terraform.MetadataStringValue{Value: "sn-public-123"},
 			PrivateSubnetID:          terraform.MetadataStringValue{Value: "sn-private-123"},
+			NatGatewayIP:             terraform.MetadataStringValue{Value: "88.88.88.88"},
 			BoshDBPort:               terraform.MetadataStringValue{Value: "5432"},
 			BoshDBAddress:            terraform.MetadataStringValue{Value: "rds.aws.com"},
 			BoshUserAccessKeyID:      terraform.MetadataStringValue{Value: "abc123"},
