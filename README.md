@@ -175,6 +175,7 @@ It then uses Terraform to deploy the following infrastructure:
 - An IAM user that can deploy EC2 instances and update load balancers
 - An AWS keypair for BOSH to use when deploying VMs
 - An RDS instance (default: db.t2.small) for BOSH and Concourse to use
+- Concourse database is [encrypted](http://concourse.ci/encryption.html) by default
 - A security group to allow access to the BOSH director from your local IP
 - A security group for BOSH-deployed VMs
 - A security group to allow access to the Concourse web server from the internet
