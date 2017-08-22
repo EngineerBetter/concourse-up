@@ -12,22 +12,22 @@ import (
 const concourseManifestFilename = "concourse.yml"
 const concourseDeploymentName = "concourse"
 
-var concourseStemcellURL = "COMPILE_TIME_VARIABLE_bosh_concourseStemcellURL"
-var concourseStemcellVersion = "COMPILE_TIME_VARIABLE_bosh_concourseStemcellVersion"
-var concourseStemcellSHA1 = "COMPILE_TIME_VARIABLE_bosh_concourseStemcellSHA1"
-var concourseReleaseURL = "COMPILE_TIME_VARIABLE_bosh_concourseReleaseURL"
-var concourseReleaseVersion = "COMPILE_TIME_VARIABLE_bosh_concourseReleaseVersion"
-var concourseReleaseSHA1 = "COMPILE_TIME_VARIABLE_bosh_concourseReleaseSHA1"
-var gardenReleaseURL = "COMPILE_TIME_VARIABLE_bosh_gardenReleaseURL"
-var gardenReleaseVersion = "COMPILE_TIME_VARIABLE_bosh_gardenReleaseVersion"
-var gardenReleaseSHA1 = "COMPILE_TIME_VARIABLE_bosh_gardenReleaseSHA1"
+var ConcourseStemcellURL = "COMPILE_TIME_VARIABLE_bosh_concourseStemcellURL"
+var ConcourseStemcellVersion = "COMPILE_TIME_VARIABLE_bosh_concourseStemcellVersion"
+var ConcourseStemcellSHA1 = "COMPILE_TIME_VARIABLE_bosh_concourseStemcellSHA1"
+var ConcourseReleaseURL = "COMPILE_TIME_VARIABLE_bosh_concourseReleaseURL"
+var ConcourseReleaseVersion = "COMPILE_TIME_VARIABLE_bosh_concourseReleaseVersion"
+var ConcourseReleaseSHA1 = "COMPILE_TIME_VARIABLE_bosh_concourseReleaseSHA1"
+var GardenReleaseURL = "COMPILE_TIME_VARIABLE_bosh_gardenReleaseURL"
+var GardenReleaseVersion = "COMPILE_TIME_VARIABLE_bosh_gardenReleaseVersion"
+var GardenReleaseSHA1 = "COMPILE_TIME_VARIABLE_bosh_gardenReleaseSHA1"
 
 func (client *Client) uploadConcourseStemcell() error {
 	if err := client.director.RunAuthenticatedCommand(
 		client.stdout,
 		client.stderr,
 		"upload-stemcell",
-		concourseStemcellURL,
+		ConcourseStemcellURL,
 	); err != nil {
 		return err
 	}
@@ -78,15 +78,15 @@ func generateConcourseManifest(config *config.Config, metadata *terraform.Metada
 		TLSCert:                 config.ConcourseCert,
 		TLSKey:                  config.ConcourseKey,
 		AllowSelfSignedCerts:    "true",
-		ConcourseReleaseVersion: concourseReleaseVersion,
-		ConcourseReleaseSHA1:    concourseReleaseSHA1,
-		ConcourseReleaseURL:     concourseReleaseURL,
-		GardenReleaseVersion:    gardenReleaseVersion,
-		GardenReleaseURL:        gardenReleaseURL,
-		GardenReleaseSHA1:       gardenReleaseSHA1,
-		StemcellVersion:         concourseStemcellVersion,
-		StemcellSHA1:            concourseStemcellSHA1,
-		StemcellURL:             concourseStemcellURL,
+		ConcourseReleaseVersion: ConcourseReleaseVersion,
+		ConcourseReleaseSHA1:    ConcourseReleaseSHA1,
+		ConcourseReleaseURL:     ConcourseReleaseURL,
+		GardenReleaseVersion:    GardenReleaseVersion,
+		GardenReleaseURL:        GardenReleaseURL,
+		GardenReleaseSHA1:       GardenReleaseSHA1,
+		StemcellVersion:         ConcourseStemcellVersion,
+		StemcellSHA1:            ConcourseStemcellSHA1,
+		StemcellURL:             ConcourseStemcellURL,
 	}
 
 	return util.RenderTemplate(awsConcourseManifestTemplate, templateParams)

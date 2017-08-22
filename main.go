@@ -1,23 +1,65 @@
 package main
 
 import (
+	"fmt"
 	"os"
+	"strings"
 
+	"github.com/EngineerBetter/concourse-up/bosh"
 	"github.com/EngineerBetter/concourse-up/commands"
 
 	"gopkg.in/urfave/cli.v1"
 )
 
-var concourseUpVersion = "COMPILE_TIME_VARIABLE_main_concourseUpVersion"
+var ConcourseUpVersion = "COMPILE_TIME_VARIABLE_main_concourseUpVersion"
 
 func main() {
 	app := cli.NewApp()
 	app.Name = "Concourse-Up"
 	app.Usage = "A CLI tool to deploy Concourse CI"
-	app.Version = concourseUpVersion
+	app.Version = ConcourseUpVersion
 	app.Commands = commands.Commands
 	app.Flags = commands.GlobalFlags
-	if err := app.Run(os.Args); err != nil {
+
+	if err := checkCompileTimeArgs(); err != nil {
+		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
+
+	if err := app.Run(os.Args); err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
+}
+
+func checkCompileTimeArgs() error {
+	args := map[string]string{
+		"main.ConcourseUpVersion":        ConcourseUpVersion,
+		"bosh.ConcourseStemcellURL":      bosh.ConcourseStemcellURL,
+		"bosh.ConcourseStemcellVersion":  bosh.ConcourseStemcellVersion,
+		"bosh.ConcourseStemcellSHA1":     bosh.ConcourseStemcellSHA1,
+		"bosh.ConcourseReleaseURL":       bosh.ConcourseReleaseURL,
+		"bosh.ConcourseReleaseVersion":   bosh.ConcourseReleaseVersion,
+		"bosh.ConcourseReleaseSHA1":      bosh.ConcourseReleaseSHA1,
+		"bosh.GardenReleaseURL":          bosh.GardenReleaseURL,
+		"bosh.GardenReleaseVersion":      bosh.GardenReleaseVersion,
+		"bosh.GardenReleaseSHA1":         bosh.GardenReleaseSHA1,
+		"bosh.DirectorCPIReleaseSHA1":    bosh.DirectorCPIReleaseSHA1,
+		"bosh.DirectorCPIReleaseURL":     bosh.DirectorCPIReleaseURL,
+		"bosh.DirectorCPIReleaseVersion": bosh.DirectorCPIReleaseVersion,
+		"bosh.DirectorReleaseSHA1":       bosh.DirectorReleaseSHA1,
+		"bosh.DirectorReleaseURL":        bosh.DirectorReleaseURL,
+		"bosh.DirectorReleaseVersion":    bosh.DirectorReleaseVersion,
+		"bosh.DirectorStemcellSHA1":      bosh.DirectorStemcellSHA1,
+		"bosh.DirectorStemcellURL":       bosh.DirectorStemcellURL,
+		"bosh.DirectorStemcellVersion":   bosh.DirectorStemcellVersion,
+	}
+
+	for key, value := range args {
+		if value == "" || strings.HasPrefix(value, "COMPILE_TIME_VARIABLE") {
+			return fmt.Errorf("Compile-time variable %s not set, please build with: `go build -ldflags \"-X github.com/EngineerBetter/concourse-up/%s=SOME_VALUE\"`", key, key)
+		}
+	}
+
+	return nil
 }

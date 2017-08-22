@@ -9,15 +9,15 @@ import (
 	"github.com/EngineerBetter/concourse-up/util"
 )
 
-var directorCPIReleaseSHA1 = "COMPILE_TIME_VARIABLE_bosh_directorCPIReleaseSHA1"
-var directorCPIReleaseURL = "COMPILE_TIME_VARIABLE_bosh_directorCPIReleaseURL"
-var directorCPIReleaseVersion = "COMPILE_TIME_VARIABLE_bosh_directorCPIReleaseVersion"
-var directorReleaseSHA1 = "COMPILE_TIME_VARIABLE_bosh_directorReleaseSHA1"
-var directorReleaseURL = "COMPILE_TIME_VARIABLE_bosh_directorReleaseURL"
-var directorReleaseVersion = "COMPILE_TIME_VARIABLE_bosh_directorReleaseVersion"
-var directorStemcellSHA1 = "COMPILE_TIME_VARIABLE_bosh_directorStemcellSHA1"
-var directorStemcellURL = "COMPILE_TIME_VARIABLE_bosh_directorStemcellURL"
-var directorStemcellVersion = "COMPILE_TIME_VARIABLE_bosh_directorStemcellVersion"
+var DirectorCPIReleaseSHA1 = "COMPILE_TIME_VARIABLE_bosh_directorCPIReleaseSHA1"
+var DirectorCPIReleaseURL = "COMPILE_TIME_VARIABLE_bosh_directorCPIReleaseURL"
+var DirectorCPIReleaseVersion = "COMPILE_TIME_VARIABLE_bosh_directorCPIReleaseVersion"
+var DirectorReleaseSHA1 = "COMPILE_TIME_VARIABLE_bosh_directorReleaseSHA1"
+var DirectorReleaseURL = "COMPILE_TIME_VARIABLE_bosh_directorReleaseURL"
+var DirectorReleaseVersion = "COMPILE_TIME_VARIABLE_bosh_directorReleaseVersion"
+var DirectorStemcellSHA1 = "COMPILE_TIME_VARIABLE_bosh_directorStemcellSHA1"
+var DirectorStemcellURL = "COMPILE_TIME_VARIABLE_bosh_directorStemcellURL"
+var DirectorStemcellVersion = "COMPILE_TIME_VARIABLE_bosh_directorStemcellVersion"
 
 // GenerateBoshInitManifest generates a manifest for the bosh director on AWS
 func generateBoshInitManifest(conf *config.Config, metadata *terraform.Metadata, privateKeyPath string) ([]byte, error) {
@@ -41,14 +41,14 @@ func generateBoshInitManifest(conf *config.Config, metadata *terraform.Metadata,
 		DBPort:                    dbPort,
 		DBUsername:                conf.RDSUsername,
 		DirectorCACert:            conf.DirectorCACert,
-		DirectorCPIReleaseSHA1:    directorCPIReleaseSHA1,
-		DirectorCPIReleaseURL:     directorCPIReleaseURL,
-		DirectorCPIReleaseVersion: directorCPIReleaseVersion,
+		DirectorCPIReleaseSHA1:    DirectorCPIReleaseSHA1,
+		DirectorCPIReleaseURL:     DirectorCPIReleaseURL,
+		DirectorCPIReleaseVersion: DirectorCPIReleaseVersion,
 		DirectorCert:              conf.DirectorCert,
 		DirectorKey:               conf.DirectorKey,
-		DirectorReleaseSHA1:       directorReleaseSHA1,
-		DirectorReleaseURL:        directorReleaseURL,
-		DirectorReleaseVersion:    directorReleaseVersion,
+		DirectorReleaseSHA1:       DirectorReleaseSHA1,
+		DirectorReleaseURL:        DirectorReleaseURL,
+		DirectorReleaseVersion:    DirectorReleaseVersion,
 		DirectorSubnetID:          metadata.DefaultSubnetID.Value,
 		HMUserPassword:            conf.DirectorHMUserPassword,
 		KeyPairName:               metadata.DirectorKeyPair.Value,
@@ -59,9 +59,9 @@ func generateBoshInitManifest(conf *config.Config, metadata *terraform.Metadata,
 		RegistryPassword:          conf.DirectorRegistryPassword,
 		S3AWSAccessKeyID:          metadata.BlobstoreUserAccessKeyID.Value,
 		S3AWSSecretAccessKey:      metadata.BlobstoreSecretAccessKey.Value,
-		StemcellSHA1:              directorStemcellSHA1,
-		StemcellURL:               directorStemcellURL,
-		StemcellVersion:           directorStemcellVersion,
+		StemcellSHA1:              DirectorStemcellSHA1,
+		StemcellURL:               DirectorStemcellURL,
+		StemcellVersion:           DirectorStemcellVersion,
 		VMsSecurityGroupID:        metadata.VMsSecurityGroupID.Value,
 	}
 
