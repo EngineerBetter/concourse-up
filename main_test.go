@@ -17,7 +17,7 @@ var (
 	cliPath string
 )
 
-var _ = FDescribe("concourse-up", func() {
+var _ = Describe("concourse-up", func() {
 	BeforeSuite(func() {
 		compilationVars := map[string]string{}
 
