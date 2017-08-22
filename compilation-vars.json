@@ -7,19 +7,19 @@
   "director_stemcell_sha1": "ba32c8fff8016862d0b0ef3dd4762d090365c0e8",
   "director_stemcell_version": "3445.2",
 
-  "director_bosh_release_url": "https://s3-eu-west-1.amazonaws.com/concourse-up-public-artifacts/bosh-263-ubuntu-trusty-3445.2-20170821-102205-859498047.tgz",
-  "director_bosh_release_sha1": "21b38d679f53340fee38ad992bfd283abc39c12f",
+  "director_bosh_release_url": "https://s3-eu-west-1.amazonaws.com/concourse-up-public-artifacts/bosh-263-ubuntu-trusty-3445.2-20170822-133345-86000251.tgz",
+  "director_bosh_release_sha1": "0fd969fab564f527cb0a15586b13852b8fbb2b0f",
   "director_bosh_release_version": "263",
 
   "director_bosh_cpi_release_url": "https://bosh.io/d/github.com/cloudfoundry-incubator/bosh-aws-cpi-release?v=66",
   "director_bosh_cpi_release_sha1": "117d5518f1b1de8937c163244de8db45ad8ce1a9",
   "director_bosh_cpi_release_version": "66",
 
-  "concourse_release_url": "https://s3-eu-west-1.amazonaws.com/concourse-up-public-artifacts/concourse-3.4.0-ubuntu-trusty-3445.2-20170821-102107-404434251.tgz",
-  "concourse_release_sha1": "acad061d53d9f50c0d09a7d49829221fd559536b",
+  "concourse_release_url": "https://s3-eu-west-1.amazonaws.com/concourse-up-public-artifacts/concourse-3.4.0-ubuntu-trusty-3445.2-20170822-133104-034863883.tgz",
+  "concourse_release_sha1": "bfaf5cddd1046f1898302ce67328895afdb0f563",
   "concourse_release_version": "3.4.0",
 
-  "garden_release_url": "https://s3-eu-west-1.amazonaws.com/concourse-up-public-artifacts/garden-runc-1.6.0-ubuntu-trusty-3445.2-20170821-102139-869444681.tgz",
-  "garden_release_sha1": "91a97a0996884f7cbe6c780d9fcfad14d8dbfac5",
+  "garden_release_url": "https://s3-eu-west-1.amazonaws.com/concourse-up-public-artifacts/garden-runc-1.6.0-ubuntu-trusty-3445.2-20170822-133133-179485691.tgz",
+  "garden_release_sha1": "f01561fe8f8850ff83e16b4d2f0d5b4d3b4a5a0e",
   "garden_release_version": "1.6.0"
 }
