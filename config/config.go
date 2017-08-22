@@ -51,12 +51,11 @@ type Config struct {
 	MultiAZRDS       bool   `json:"multi_az_rds"`
 }
 
-func generateDefaultConfig(project, deployment, region string) ([]byte, error) {
+func generateDefaultConfig(project, deployment, configBucket, region string) ([]byte, error) {
 	privateKey, publicKey, err := util.GenerateSSHKeyPair()
 	if err != nil {
 		return nil, err
 	}
-	configBucket := fmt.Sprintf("%s-config", deployment)
 
 	conf := Config{
 		ConcourseUsername:        "admin",

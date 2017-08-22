@@ -103,6 +103,7 @@ func (client *Client) LoadOrCreate(deployArgs *DeployArgs) (*Config, bool, error
 	defaultConfigBytes, err := generateDefaultConfig(
 		client.Project,
 		client.deployment(),
+		client.configBucket(),
 		deployArgs.AWSRegion,
 	)
 	if err != nil {
@@ -136,5 +137,5 @@ func (client *Client) deployment() string {
 }
 
 func (client *Client) configBucket() string {
-	return fmt.Sprintf("%s-config", client.deployment())
+	return fmt.Sprintf("%s-%s-config", client.deployment(), client.S3Region)
 }
