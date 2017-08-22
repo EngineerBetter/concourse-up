@@ -31,7 +31,7 @@ providing you with a single command for getting your Concourse up and keeping it
 - Uses precompiled BOSH packages to minimise install time
 - Horizontal and vertical worker scaling
 - Easy destroy and cleanup
-- Deploy to any AWS region (note that internal configuration is always saved to an S3 bucket in `eu-west-1`)
+- Deploy to any AWS region
 
 ## Prerequisites
 
