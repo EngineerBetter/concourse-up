@@ -94,7 +94,7 @@ garden_release_sha1=$(sha1sum "$compiled_garden_release" | awk '{ print $1 }')
 
 fly_darwin_binary_url="https://s3-$AWS_DEFAULT_REGION.amazonaws.com/$PUBLIC_ARTIFACTS_BUCKET/fly_darwin_amd64-$concourse_release_version"
 fly_linux_binary_url="https://s3-$AWS_DEFAULT_REGION.amazonaws.com/$PUBLIC_ARTIFACTS_BUCKET/fly_linux_amd64-$concourse_release_version"
-fly_windows_binary_url="https://s3-$AWS_DEFAULT_REGION.amazonaws.com/$PUBLIC_ARTIFACTS_BUCKET/fly_windows_amd64-$concourse_release_version"
+fly_windows_binary_url="https://s3-$AWS_DEFAULT_REGION.amazonaws.com/$PUBLIC_ARTIFACTS_BUCKET/fly_windows_amd64-$concourse_release_version.exe"
 
 echo "{
   \"concourse_stemcell_url\": \"$concourse_stemcell_url\",
