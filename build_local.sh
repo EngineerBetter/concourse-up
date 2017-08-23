@@ -21,9 +21,9 @@ concourse_release_sha1=$(jq -r .concourse_release_sha1 compilation-vars.json)
 garden_release_url=$(jq -r .garden_release_url compilation-vars.json)
 garden_release_version=$(jq -r .garden_release_version compilation-vars.json)
 garden_release_sha1=$(jq -r .garden_release_sha1 compilation-vars.json)
-darwin_binary_url=$(jq -r .darwin_binary_url compilation-vars.json)
-linux_binary_url=$(jq -r .linux_binary_url compilation-vars.json)
-windows_binary_url=$(jq -r .windows_binary_url compilation-vars.json)
+fly_darwin_binary_url=$(jq -r .fly_darwin_binary_url compilation-vars.json)
+fly_linux_binary_url=$(jq -r .fly_linux_binary_url compilation-vars.json)
+fly_windows_binary_url=$(jq -r .fly_windows_binary_url compilation-vars.json)
 
 go build -ldflags "
   -X github.com/EngineerBetter/concourse-up/bosh.ConcourseStemcellURL=$concourse_stemcell_url
@@ -43,9 +43,10 @@ go build -ldflags "
   -X github.com/EngineerBetter/concourse-up/bosh.DirectorCPIReleaseSHA1=$director_bosh_cpi_release_sha1
   -X github.com/EngineerBetter/concourse-up/bosh.DirectorReleaseURL=$director_bosh_release_url
   -X github.com/EngineerBetter/concourse-up/bosh.DirectorReleaseVersion=$director_bosh_release_version
-  -X github.com/EngineerBetter/concourse-up/fly.DarwinBinaryURL=$darwin_binary_url
-  -X github.com/EngineerBetter/concourse-up/fly.LinuxBinaryURL=$linux_binary_url
-  -X github.com/EngineerBetter/concourse-up/fly.WindowsBinaryURL=$windows_binary_url
+  -X github.com/EngineerBetter/concourse-up/bosh.DirectorReleaseSHA1=$director_bosh_release_sha1
+  -X github.com/EngineerBetter/concourse-up/fly.DarwinBinaryURL=$fly_darwin_binary_url
+  -X github.com/EngineerBetter/concourse-up/fly.LinuxBinaryURL=$fly_linux_binary_url
+  -X github.com/EngineerBetter/concourse-up/fly.WindowsBinaryURL=$fly_windows_binary_url
   -X main.ConcourseUpVersion=$version
 " -o concourse-up
 
