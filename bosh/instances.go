@@ -14,7 +14,7 @@ type Instance struct {
 
 // Instances returns the list of Concourse VMs
 func (client *Client) Instances() ([]Instance, error) {
-	output := bytes.NewBuffer(nil)
+	output := new(bytes.Buffer)
 
 	if err := client.director.RunAuthenticatedCommand(
 		output,
