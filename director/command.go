@@ -38,6 +38,8 @@ func (client *Client) RunCommand(stdout, stderr io.Writer, args ...string) error
 		return err
 	}
 
+	args = append(defaultBoshArgs, args...)
+
 	cmd := exec.Command(client.tempDir.Path("bosh-cli"), args...)
 	cmd.Stdout = stdout
 	cmd.Stderr = stderr
