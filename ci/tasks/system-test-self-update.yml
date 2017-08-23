@@ -4,6 +4,7 @@ platform: linux
 inputs:
 - name: concourse-up
 - name: binary-linux
+- name: previous-release
 
 run:
   path: concourse-up/ci/tasks/system-test-self-update.sh
