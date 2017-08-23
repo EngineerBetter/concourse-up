@@ -56,6 +56,9 @@ var _ = Describe("Client", func() {
 		FakeCleanup: func() error {
 			return nil
 		},
+		FakeCanConnect: func() (bool, error) {
+			return false, nil
+		},
 	}
 
 	BeforeEach(func() {
@@ -178,8 +181,12 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 
 		boshClientFactory := func(config *config.Config, metadata *terraform.Metadata, director director.IClient, dbRunner db.Runner, stdout, stderr io.Writer) bosh.IClient {
 			return &FakeBoshClient{
-				FakeDeploy: func([]byte) ([]byte, error) {
-					actions = append(actions, "deploying director")
+				FakeDeploy: func(stateFileBytes []byte, detach bool) ([]byte, error) {
+					if detach {
+						actions = append(actions, "deploying director in detached mode")
+					} else {
+						actions = append(actions, "deploying director")
+					}
 					return []byte{}, nil
 				},
 				FakeDelete: func([]byte) ([]byte, error) {
@@ -322,6 +329,31 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 			Expect(actions).To(ContainElement("deploying director"))
 		})
 
+		It("Sets the default pipeline, after deploying the bosh director", func() {
+			client := buildClient()
+			err := client.Deploy()
+			Expect(err).ToNot(HaveOccurred())
+
+			Expect(actions[8]).To(Equal("deploying director"))
+			Expect(actions[11]).To(Equal("setting default pipeline"))
+		})
+
+		Context("When running in detached mode and the concourse is already deployed", func() {
+			It("Sets the default pipeline, before deploying the bosh director", func() {
+				fakeFlyClient.FakeCanConnect = func() (bool, error) {
+					return true, nil
+				}
+				args.DetachBoshDeployment = true
+
+				client := buildClient()
+				err := client.Deploy()
+				Expect(err).ToNot(HaveOccurred())
+
+				Expect(actions[8]).To(Equal("setting default pipeline"))
+				Expect(actions[9]).To(Equal("deploying director in detached mode"))
+			})
+		})
+
 		It("Saves the bosh state", func() {
 			client := buildClient()
 			err := client.Deploy()
@@ -352,14 +384,6 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 			Expect(err).ToNot(HaveOccurred())
 			Eventually(stdout).Should(gbytes.Say("DEPLOY SUCCESSFUL"))
 			Eventually(stdout).Should(gbytes.Say("fly --target happymeal login --insecure --concourse-url https://elb.aws.com --username admin --password s3cret"))
-		})
-
-		It("Sets the default pipeline", func() {
-			client := buildClient()
-			err := client.Deploy()
-			Expect(err).ToNot(HaveOccurred())
-
-			Expect(actions).To(ContainElement("setting default pipeline"))
 		})
 
 		Context("When a custom cert is provided", func() {

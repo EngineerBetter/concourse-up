@@ -18,6 +18,7 @@ func TestConcourse(t *testing.T) {
 type FakeFlyClient struct {
 	FakeSetDefaultPipeline func() error
 	FakeCleanup            func() error
+	FakeCanConnect         func() (bool, error)
 }
 
 func (client *FakeFlyClient) SetDefaultPipeline() error {
@@ -26,6 +27,10 @@ func (client *FakeFlyClient) SetDefaultPipeline() error {
 
 func (client *FakeFlyClient) Cleanup() error {
 	return client.FakeCleanup()
+}
+
+func (client *FakeFlyClient) CanConnect() (bool, error) {
+	return client.FakeCanConnect()
 }
 
 type FakeConfigClient struct {
@@ -95,14 +100,14 @@ func (client *FakeTerraformClient) Cleanup() error {
 }
 
 type FakeBoshClient struct {
-	FakeDeploy    func([]byte) ([]byte, error)
+	FakeDeploy    func([]byte, bool) ([]byte, error)
 	FakeDelete    func([]byte) ([]byte, error)
 	FakeCleanup   func() error
 	FakeInstances func() ([]bosh.Instance, error)
 }
 
-func (client *FakeBoshClient) Deploy(stateFileBytes []byte) ([]byte, error) {
-	return client.FakeDeploy(stateFileBytes)
+func (client *FakeBoshClient) Deploy(stateFileBytes []byte, detach bool) ([]byte, error) {
+	return client.FakeDeploy(stateFileBytes, detach)
 }
 
 func (client *FakeBoshClient) Delete(stateFileBytes []byte) ([]byte, error) {

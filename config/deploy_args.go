@@ -7,12 +7,13 @@ import (
 
 // DeployArgs are arguments passed to the deploy command
 type DeployArgs struct {
-	AWSRegion   string
-	Domain      string
-	TLSCert     string
-	TLSKey      string
-	WorkerCount int
-	WorkerSize  string
+	AWSRegion            string
+	Domain               string
+	TLSCert              string
+	TLSKey               string
+	WorkerCount          int
+	WorkerSize           string
+	DetachBoshDeployment bool
 }
 
 // WorkerSizes are the permitted concourse worker sizes

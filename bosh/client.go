@@ -26,7 +26,7 @@ type Client struct {
 
 // IClient is a client for performing bosh-init commands
 type IClient interface {
-	Deploy([]byte) ([]byte, error)
+	Deploy([]byte, bool) ([]byte, error)
 	Delete([]byte) ([]byte, error)
 	Cleanup() error
 	Instances() ([]Instance, error)

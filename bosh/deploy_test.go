@@ -114,7 +114,7 @@ var _ = Describe("Deploy", func() {
 	Context("When an initial director state exists", func() {
 		It("Saves the director state", func() {
 			stateFileBytes := []byte("{}")
-			_, err := client.Deploy(stateFileBytes)
+			_, err := client.Deploy(stateFileBytes, false)
 			Expect(err).ToNot(HaveOccurred())
 			Expect(actions).To(ContainElement("Saving file to working dir: director-state.json"))
 		})
@@ -122,64 +122,64 @@ var _ = Describe("Deploy", func() {
 
 	Context("When an initial director state does not exist", func() {
 		It("Does not save the director state", func() {
-			_, err := client.Deploy(nil)
+			_, err := client.Deploy(nil, false)
 			Expect(err).ToNot(HaveOccurred())
 			Expect(actions).ToNot(ContainElement("Saving file to working dir: director-state.json"))
 		})
 	})
 
 	It("Saves the private key", func() {
-		_, err := client.Deploy(nil)
+		_, err := client.Deploy(nil, false)
 		Expect(err).ToNot(HaveOccurred())
 		Expect(actions).To(ContainElement("Saving file to working dir: director.pem"))
 	})
 
 	It("Saves the manifest", func() {
-		_, err := client.Deploy(nil)
+		_, err := client.Deploy(nil, false)
 		Expect(err).ToNot(HaveOccurred())
 		Expect(actions).To(ContainElement("Saving file to working dir: director.yml"))
 	})
 
 	It("Deploys the director", func() {
-		_, err := client.Deploy(nil)
+		_, err := client.Deploy(nil, false)
 		Expect(err).ToNot(HaveOccurred())
 		expectedCommand := fmt.Sprintf("Running bosh command: create-env %s/director.yml --state %s/director-state.json", tempDir, tempDir)
 		Expect(actions).To(ContainElement(expectedCommand))
 	})
 
 	It("Saves the cloud config", func() {
-		_, err := client.Deploy(nil)
+		_, err := client.Deploy(nil, false)
 		Expect(err).ToNot(HaveOccurred())
 		Expect(actions).To(ContainElement("Saving file to working dir: cloud-config.yml"))
 	})
 
 	It("Updates the cloud config", func() {
-		_, err := client.Deploy(nil)
+		_, err := client.Deploy(nil, false)
 		Expect(err).ToNot(HaveOccurred())
 		expectedCommand := fmt.Sprintf("Running authenticated bosh command: update-cloud-config %s/cloud-config.yml", tempDir)
 		Expect(actions).To(ContainElement(expectedCommand))
 	})
 
 	It("Uploads the concourse stemcell", func() {
-		_, err := client.Deploy(nil)
+		_, err := client.Deploy(nil, false)
 		Expect(err).ToNot(HaveOccurred())
 		Expect(actions).To(ContainElement("Running authenticated bosh command: upload-stemcell COMPILE_TIME_VARIABLE_bosh_concourseStemcellURL"))
 	})
 
 	It("Saves the concourse manifest", func() {
-		_, err := client.Deploy(nil)
+		_, err := client.Deploy(nil, false)
 		Expect(err).ToNot(HaveOccurred())
 		Expect(actions).To(ContainElement("Saving file to working dir: concourse.yml"))
 	})
 
 	It("Creates the default concourse DB", func() {
-		_, err := client.Deploy(nil)
+		_, err := client.Deploy(nil, false)
 		Expect(err).ToNot(HaveOccurred())
 		Expect(actions).To(ContainElement("Running SQL: CREATE DATABASE concourse_atc;"))
 	})
 
 	It("Deploys concourse", func() {
-		_, err := client.Deploy(nil)
+		_, err := client.Deploy(nil, false)
 		Expect(err).ToNot(HaveOccurred())
 		expectedCommand := fmt.Sprintf("Running authenticated bosh command: --deployment concourse deploy %s/concourse.yml", tempDir)
 		Expect(actions).To(ContainElement(expectedCommand))

@@ -81,6 +81,7 @@ func (client *Client) DeleteAll(config *Config) error {
 
 // Load loads an existing config file from S3
 func (client *Client) Load() (*Config, error) {
+	fmt.Println(client.configBucket())
 	configBytes, err := aws.LoadFile(
 		client.configBucket(),
 		configFilePath,

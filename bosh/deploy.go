@@ -13,7 +13,11 @@ const directorManifestFilename = "director.yml"
 
 // Deploy deploys a new Bosh director or converges an existing deployment
 // Returns new contents of bosh state file
-func (client *Client) Deploy(stateFileBytes []byte) ([]byte, error) {
+func (client *Client) Deploy(stateFileBytes []byte, detach bool) ([]byte, error) {
+	if detach {
+		return nil, errors.New("detach mode not yet implemented")
+	}
+
 	stateFileBytes, err := client.createEnv(stateFileBytes)
 	if err != nil {
 		return stateFileBytes, err

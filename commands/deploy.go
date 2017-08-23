@@ -57,6 +57,13 @@ var deployFlags = []cli.Flag{
 		Value:       "xlarge",
 		Destination: &deployArgs.WorkerSize,
 	},
+	cli.BoolFlag{
+		Name:        "detach-bosh-deployment",
+		Usage:       "(optional) Causes Concourse-up to exit as soon as the BOSH deployment starts. May only be used when upgrading an existing deplomnt",
+		EnvVar:      "DETACH_BOSH_DEPLOYMENT",
+		Hidden:      true,
+		Destination: &deployArgs.DetachBoshDeployment,
+	},
 }
 
 var deploy = cli.Command{

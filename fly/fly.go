@@ -26,6 +26,7 @@ var WindowsBinaryURL = "COMPILE_TIME_VARIABLE_fly_windows_binary_url"
 
 // IClient represents an interface for a client
 type IClient interface {
+	CanConnect() (bool, error)
 	SetDefaultPipeline() error
 	Cleanup() error
 }
@@ -91,6 +92,48 @@ func New(creds Credentials, stdout, stderr io.Writer) (IClient, error) {
 	}, nil
 }
 
+// CanConnect returns true if it can connect to the concourse
+func (client *Client) CanConnect() (bool, error) {
+	cmd := exec.Command(
+		client.tempDir.Path("fly"),
+		"--target",
+		client.creds.Target,
+		"login",
+		"--insecure",
+		"--concourse-url",
+		client.creds.API,
+		"--username",
+		client.creds.Username,
+		"--password",
+		client.creds.Password,
+	)
+
+	stderr := bytes.NewBuffer(nil)
+	cmd.Stdout = client.stdout
+	cmd.Stderr = stderr
+
+	runErr := cmd.Run()
+	if runErr == nil {
+		return true, nil
+	}
+
+	stderrBytes, err := ioutil.ReadAll(stderr)
+	if err != nil {
+		return false, err
+	}
+
+	if strings.Contains(string(stderrBytes), "could not reach the Concourse server") {
+		return false, nil
+	}
+
+	// if there is a legitimate error, copy it to stderr for debugging
+	if _, err := client.stderr.Write(stderrBytes); err != nil {
+		return false, err
+	}
+
+	return false, runErr
+}
+
 // SetDefaultPipeline sets the default pipeline against a given concourse
 func (client *Client) SetDefaultPipeline() error {
 	if err := client.login(); err != nil {
@@ -140,45 +183,15 @@ func (client *Client) login() error {
 	client.stdout.Write([]byte("Waiting for Concourse ATC to start... \n"))
 
 	for i := 0; i < attempts; i++ {
-		cmd := exec.Command(
-			client.tempDir.Path("fly"),
-			"--target",
-			client.creds.Target,
-			"login",
-			"--insecure",
-			"--concourse-url",
-			client.creds.API,
-			"--username",
-			client.creds.Username,
-			"--password",
-			client.creds.Password,
-		)
-
-		stderr := bytes.NewBuffer(nil)
-		cmd.Stdout = client.stdout
-		cmd.Stderr = stderr
-
-		runErr := cmd.Run()
-		if runErr == nil {
-			return nil
-		}
-
-		stderrBytes, err := ioutil.ReadAll(stderr)
+		canConnect, err := client.CanConnect()
 		if err != nil {
 			return err
 		}
-
-		if strings.Contains(string(stderrBytes), "could not reach the Concourse server") {
-			time.Sleep(time.Second)
-			continue
+		if canConnect {
+			return nil
 		}
 
-		// if there is a legitimate error, copy it to stderr for debugging
-		if _, err := client.stderr.Write(stderrBytes); err != nil {
-			return err
-		}
-
-		return runErr
+		time.Sleep(time.Second)
 	}
 
 	return fmt.Errorf("failed to log in to %s after %d attempts", client.creds.API, attempts)

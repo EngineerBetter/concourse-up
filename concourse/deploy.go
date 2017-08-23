@@ -38,19 +38,69 @@ func (client *Client) Deploy() error {
 		return err
 	}
 
-	if err = client.deployBosh(config, metadata); err != nil {
+	flyClient, err := client.flyClientFactory(fly.Credentials{
+		Target:   config.Deployment,
+		API:      fmt.Sprintf("https://%s", config.Domain),
+		Username: config.ConcourseUsername,
+		Password: config.ConcoursePassword,
+	},
+		client.stdout,
+		client.stderr,
+	)
+	if err != nil {
+		return err
+	}
+	defer flyClient.Cleanup()
+
+	if client.deployArgs.DetachBoshDeployment {
+		return client.updateBoshAndPipeline(config, metadata, flyClient)
+	}
+
+	return client.deployBoshAndPipeline(config, metadata, flyClient)
+}
+
+func (client *Client) deployBoshAndPipeline(config *config.Config, metadata *terraform.Metadata, flyClient fly.IClient) error {
+	// When we are deploying for the first time rather than updating
+	// ensure that the pipeline is set _after_ the concourse is deployed
+	if err := client.deployBosh(config, metadata, false); err != nil {
 		return err
 	}
 
-	if err = client.setDefaultPipeline(config); err != nil {
+	if err := flyClient.SetDefaultPipeline(); err != nil {
 		return err
 	}
 
-	if err = writeDeploySuccessMessage(config, metadata, client.stdout); err != nil {
+	if err := writeDeploySuccessMessage(config, metadata, client.stdout); err != nil {
 		return err
 	}
 
 	return nil
+}
+
+func (client *Client) updateBoshAndPipeline(config *config.Config, metadata *terraform.Metadata, flyClient fly.IClient) error {
+	// If concourse is already running this is an update rather than a fresh deploy
+	// When updating we need to deploy the BOSH as the final step in order to
+	// Detach from the update, so the update job can exit
+	concourseAlreadyRunning, err := flyClient.CanConnect()
+	if err != nil {
+		return err
+	}
+
+	if !concourseAlreadyRunning {
+		return fmt.Errorf("In detach mode but it seems that concourse is not currently running")
+	}
+
+	if err := flyClient.SetDefaultPipeline(); err != nil {
+		return err
+	}
+
+	if err := client.deployBosh(config, metadata, true); err != nil {
+		return err
+	}
+
+	_, err = client.stdout.Write([]byte("\nUPGRADE SUCCESSFUL\n\n"))
+
+	return err
 }
 
 func (client *Client) checkPreTerraformConfigRequirements(config *config.Config) (*config.Config, error) {
@@ -186,7 +236,7 @@ func (client *Client) applyTerraform(config *config.Config) (*terraform.Metadata
 	return metadata, nil
 }
 
-func (client *Client) deployBosh(config *config.Config, metadata *terraform.Metadata) error {
+func (client *Client) deployBosh(config *config.Config, metadata *terraform.Metadata, detach bool) error {
 	boshClient, err := client.buildBoshClient(config, metadata)
 	if err != nil {
 		return err
@@ -198,7 +248,7 @@ func (client *Client) deployBosh(config *config.Config, metadata *terraform.Meta
 		return nil
 	}
 
-	boshStateBytes, err = boshClient.Deploy(boshStateBytes)
+	boshStateBytes, err = boshClient.Deploy(boshStateBytes, detach)
 	if err != nil {
 		client.configClient.StoreAsset(bosh.StateFilename, boshStateBytes)
 		return err
@@ -262,32 +312,6 @@ func (client *Client) setHostedZone(config *config.Config) error {
 		return err
 	}
 	if err = client.configClient.Update(config); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (client *Client) setDefaultPipeline(config *config.Config) error {
-	if _, err := client.stdout.Write([]byte("\nSETTING DEFAULT PIPELINE\n")); err != nil {
-		return err
-	}
-
-	flyClient, err := client.flyClientFactory(fly.Credentials{
-		Target:   config.Deployment,
-		API:      fmt.Sprintf("https://%s", config.Domain),
-		Username: config.ConcourseUsername,
-		Password: config.ConcoursePassword,
-	},
-		client.stdout,
-		client.stderr,
-	)
-	if err != nil {
-		return err
-	}
-	defer flyClient.Cleanup()
-
-	if err := flyClient.SetDefaultPipeline(); err != nil {
 		return err
 	}
 
