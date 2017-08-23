@@ -8,6 +8,7 @@ import (
 
 	"github.com/EngineerBetter/concourse-up/bosh"
 	"github.com/EngineerBetter/concourse-up/commands"
+	"github.com/EngineerBetter/concourse-up/fly"
 
 	"gopkg.in/urfave/cli.v1"
 )
@@ -36,15 +37,12 @@ func main() {
 
 func checkCompileTimeArgs() error {
 	boshCompileTimeArgs := map[string]string{
-		"bosh.ConcourseStemcellURL":      bosh.ConcourseStemcellURL,
-		"bosh.ConcourseStemcellVersion":  bosh.ConcourseStemcellVersion,
-		"bosh.ConcourseStemcellSHA1":     bosh.ConcourseStemcellSHA1,
+		"bosh.ConcourseReleaseSHA1":      bosh.ConcourseReleaseSHA1,
 		"bosh.ConcourseReleaseURL":       bosh.ConcourseReleaseURL,
 		"bosh.ConcourseReleaseVersion":   bosh.ConcourseReleaseVersion,
-		"bosh.ConcourseReleaseSHA1":      bosh.ConcourseReleaseSHA1,
-		"bosh.GardenReleaseURL":          bosh.GardenReleaseURL,
-		"bosh.GardenReleaseVersion":      bosh.GardenReleaseVersion,
-		"bosh.GardenReleaseSHA1":         bosh.GardenReleaseSHA1,
+		"bosh.ConcourseStemcellSHA1":     bosh.ConcourseStemcellSHA1,
+		"bosh.ConcourseStemcellURL":      bosh.ConcourseStemcellURL,
+		"bosh.ConcourseStemcellVersion":  bosh.ConcourseStemcellVersion,
 		"bosh.DirectorCPIReleaseSHA1":    bosh.DirectorCPIReleaseSHA1,
 		"bosh.DirectorCPIReleaseURL":     bosh.DirectorCPIReleaseURL,
 		"bosh.DirectorCPIReleaseVersion": bosh.DirectorCPIReleaseVersion,
@@ -54,6 +52,12 @@ func checkCompileTimeArgs() error {
 		"bosh.DirectorStemcellSHA1":      bosh.DirectorStemcellSHA1,
 		"bosh.DirectorStemcellURL":       bosh.DirectorStemcellURL,
 		"bosh.DirectorStemcellVersion":   bosh.DirectorStemcellVersion,
+		"bosh.GardenReleaseSHA1":         bosh.GardenReleaseSHA1,
+		"bosh.GardenReleaseURL":          bosh.GardenReleaseURL,
+		"bosh.GardenReleaseVersion":      bosh.GardenReleaseVersion,
+		"fly.DarwinBinaryURL":            fly.DarwinBinaryURL,
+		"fly.LinuxBinaryURL":             fly.LinuxBinaryURL,
+		"fly.WindowsBinaryURL":           fly.WindowsBinaryURL,
 	}
 
 	if ConcourseUpVersion == "" || strings.HasPrefix(ConcourseUpVersion, "COMPILE_TIME_VARIABLE") {
