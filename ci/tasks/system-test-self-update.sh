@@ -14,6 +14,8 @@ echo "DEPLOY PREVIOUS VERSION"
 
 ./cup-old deploy $deployment
 
+sleep 60
+
 config=$(./cup-old info --json $deployment)
 domain=$(echo "$config" | jq -r '.config.domain')
 username=$(echo "$config" | jq -r '.config.concourse_username')
