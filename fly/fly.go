@@ -178,7 +178,7 @@ func (client *Client) Cleanup() error {
 }
 
 func (client *Client) login() error {
-	attempts := 50
+	attempts := 100
 
 	client.stdout.Write([]byte("Waiting for Concourse ATC to start... \n"))
 
