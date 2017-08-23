@@ -4,13 +4,8 @@ import (
 	"errors"
 	"fmt"
 	"io"
-
-	boshcmd "github.com/cloudfoundry/bosh-cli/cmd"
-	boshui "github.com/cloudfoundry/bosh-cli/ui"
-	boshlog "github.com/cloudfoundry/bosh-utils/logger"
+	"os/exec"
 )
-
-const boshInitLogLevel = boshlog.LevelWarn
 
 var defaultBoshArgs = []string{"--non-interactive", "--tty", "--no-color"}
 
@@ -18,6 +13,9 @@ var defaultBoshArgs = []string{"--non-interactive", "--tty", "--no-color"}
 func (client *Client) RunAuthenticatedCommand(stdout, stderr io.Writer, detach bool, args ...string) error {
 	if detach {
 		return errors.New("detach mode not yet implemented")
+	}
+	if err := client.ensureBinaryDownloaded(); err != nil {
+		return err
 	}
 	args = append([]string{
 		"--environment",
@@ -36,33 +34,12 @@ func (client *Client) RunAuthenticatedCommand(stdout, stderr io.Writer, detach b
 // RunCommand runs a command against the bosh director
 // https://github.com/cloudfoundry/bosh-cli/blob/master/main.go
 func (client *Client) RunCommand(stdout, stderr io.Writer, args ...string) error {
-	logger := boshlog.NewWriterLogger(boshInitLogLevel,
-		stdout,
-		stderr,
-	)
-
-	ui := boshui.NewConfUI(logger)
-	defer ui.Flush()
-	writerUI := boshui.NewWriterUI(stdout, stderr, logger)
-
-	// NOTE SetParent is implemented manually on vendored version of bosh-cli
-	ui.SetParent(writerUI)
-
-	basicDeps := boshcmd.NewBasicDeps(ui, logger)
-	cmdFactory := boshcmd.NewFactory(basicDeps)
-
-	args = append(defaultBoshArgs, args...)
-
-	cmd, err := cmdFactory.New(args)
-	if err != nil {
+	if err := client.ensureBinaryDownloaded(); err != nil {
 		return err
 	}
 
-	if err = cmd.Execute(); err != nil {
-		return err
-	}
-
-	ui.Flush()
-
-	return nil
+	cmd := exec.Command(client.tempDir.Path("bosh-cli"), args...)
+	cmd.Stdout = stdout
+	cmd.Stderr = stderr
+	return cmd.Run()
 }

@@ -1,7 +1,11 @@
 package director
 
 import (
+	"fmt"
 	"io"
+	"net/http"
+	"os"
+	"runtime"
 
 	"github.com/EngineerBetter/concourse-up/util"
 )
@@ -34,9 +38,10 @@ type Credentials struct {
 
 // Client represents a low-level wrapper for bosh director
 type Client struct {
-	tempDir    *util.TempDir
-	creds      Credentials
-	caCertPath string
+	tempDir             *util.TempDir
+	creds               Credentials
+	caCertPath          string
+	hasDownloadedBinary bool
 }
 
 const caCertFilename = "ca-cert.pem"
@@ -54,9 +59,10 @@ func NewClient(creds Credentials) (*Client, error) {
 	}
 
 	return &Client{
-		tempDir:    tempDir,
-		creds:      creds,
-		caCertPath: caCertPath,
+		tempDir:             tempDir,
+		creds:               creds,
+		caCertPath:          caCertPath,
+		hasDownloadedBinary: false,
 	}, nil
 }
 
@@ -73,4 +79,55 @@ func (client *Client) PathInWorkingDir(filename string) string {
 // Cleanup removes tempfiles
 func (client *Client) Cleanup() error {
 	return client.tempDir.Cleanup()
+}
+
+func (client *Client) ensureBinaryDownloaded() error {
+	if client.hasDownloadedBinary {
+		return nil
+	}
+
+	fileHandler, err := os.Create(client.tempDir.Path("bosh-cli"))
+	if err != nil {
+		return err
+	}
+	defer fileHandler.Close()
+
+	url, err := getBoshCLIURL()
+	if err != nil {
+		return err
+	}
+
+	resp, err := http.Get(url)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	if _, err := io.Copy(fileHandler, resp.Body); err != nil {
+		return err
+	}
+
+	if err := fileHandler.Sync(); err != nil {
+		return err
+	}
+
+	if err := os.Chmod(fileHandler.Name(), 0700); err != nil {
+		return err
+	}
+
+	client.hasDownloadedBinary = true
+
+	return nil
+}
+
+func getBoshCLIURL() (string, error) {
+	os := runtime.GOOS
+	if os == "darwin" {
+		return DarwinBinaryURL, nil
+	} else if os == "linux" {
+		return LinuxBinaryURL, nil
+	} else if os == "windows" {
+		return WindowsBinaryURL, nil
+	}
+	return "", fmt.Errorf("unknown os: `%s`", os)
 }

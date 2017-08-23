@@ -1,11 +1,7 @@
 package bosh
 
 import (
-	"bytes"
-	"errors"
-	"io"
 	"io/ioutil"
-	"strings"
 )
 
 const pemFilename = "director.pem"
@@ -59,10 +55,8 @@ func (client *Client) createEnv(stateFileBytes []byte) ([]byte, error) {
 		return stateFileBytes, err
 	}
 
-	output := bytes.NewBuffer(nil)
-	stdout := io.MultiWriter(client.stdout, output)
 	if err := client.director.RunCommand(
-		stdout,
+		client.stdout,
 		client.stderr,
 		"create-env",
 		directorManifestPath,
@@ -78,11 +72,6 @@ func (client *Client) createEnv(stateFileBytes []byte) ([]byte, error) {
 	stateFileBytes, err = ioutil.ReadFile(stateFilePath)
 	if err != nil {
 		return stateFileBytes, err
-	}
-
-	outputStr := output.String()
-	if !strings.Contains(outputStr, "Finished deploying") && !strings.Contains(outputStr, "Skipping deploy") {
-		return stateFileBytes, errors.New("Couldn't find string `Finished deploying` or `Skipping deploy` in bosh stdout/stderr output")
 	}
 
 	return stateFileBytes, nil
