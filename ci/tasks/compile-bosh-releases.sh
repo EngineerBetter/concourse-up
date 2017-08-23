@@ -2,6 +2,10 @@
 
 set -eu
 
+
+# delete any concourse versions that have pre-compiled packages
+rm concourse-bosh-release/concourse-*-*.tgz
+
 echo "$BOSH_CA_CERT" > bosh_ca_cert.pem
 
 bosh="bosh-cli --non-interactive --environment $BOSH_TARGET --client $BOSH_USERNAME --client-secret $BOSH_PASSWORD --ca-cert bosh_ca_cert.pem"
@@ -22,12 +26,9 @@ director_bosh_release_version=$(cat director-bosh-release/version)
 concourse_release_version=$(ls concourse-bosh-release/concourse-*.tgz | awk -F"-" '{ print $4 }' | awk -F".tgz" '{ print $1 }')
 garden_release_version=$(ls concourse-bosh-release/garden-runc-*.tgz | awk -F"-" '{ print $5 }' | awk -F".tgz" '{ print $1 }')
 
-# Download concourse from BOSH as version from github can have compiled packages
-curl -L -J -O "https://bosh.io/d/github.com/concourse/concourse?v=$concourse_release_version"
-
 $bosh upload-stemcell "concourse-stemcell/stemcell.tgz"
 $bosh upload-release "concourse-bosh-release/garden-runc-$garden_release_version.tgz"
-$bosh upload-release "concourse-$concourse_release_version.tgz"
+$bosh upload-release "concourse-bosh-release/concourse-$concourse_release_version.tgz"
 $bosh upload-release "director-bosh-release/release.tgz"
 
 echo "---
@@ -80,12 +81,20 @@ aws s3 cp --acl public-read "$compiled_concourse_release" "s3://$PUBLIC_ARTIFACT
 aws s3 cp --acl public-read "$compiled_garden_release" "s3://$PUBLIC_ARTIFACTS_BUCKET/$compiled_garden_release"
 aws s3 cp --acl public-read "$compiled_director_bosh_release" "s3://$PUBLIC_ARTIFACTS_BUCKET/$compiled_director_bosh_release"
 
+aws s3 cp --acl public-read "concourse-bosh-release/fly_darwin_amd64" "s3://$PUBLIC_ARTIFACTS_BUCKET/fly_darwin_amd64-$concourse_release_version"
+aws s3 cp --acl public-read "concourse-bosh-release/fly_linux_amd64" "s3://$PUBLIC_ARTIFACTS_BUCKET/fly_linux_amd64-$concourse_release_version"
+aws s3 cp --acl public-read "concourse-bosh-release/fly_windows_amd64" "s3://$PUBLIC_ARTIFACTS_BUCKET/fly_windows_amd64-$concourse_release_version"
+
 director_bosh_release_sha1=$(sha1sum "$compiled_director_bosh_release" | awk '{ print $1 }')
 director_bosh_release_url="https://s3-$AWS_DEFAULT_REGION.amazonaws.com/$PUBLIC_ARTIFACTS_BUCKET/$compiled_director_bosh_release"
 concourse_release_sha1=$(sha1sum "$compiled_concourse_release" | awk '{ print $1 }')
 concourse_release_url="https://s3-$AWS_DEFAULT_REGION.amazonaws.com/$PUBLIC_ARTIFACTS_BUCKET/$compiled_concourse_release"
 garden_release_url="https://s3-$AWS_DEFAULT_REGION.amazonaws.com/$PUBLIC_ARTIFACTS_BUCKET/$compiled_garden_release"
 garden_release_sha1=$(sha1sum "$compiled_garden_release" | awk '{ print $1 }')
+
+fly_darwin_binary_url="https://s3-$AWS_DEFAULT_REGION.amazonaws.com/$PUBLIC_ARTIFACTS_BUCKET/fly_darwin_amd64-$concourse_release_version"
+fly_linux_binary_url="https://s3-$AWS_DEFAULT_REGION.amazonaws.com/$PUBLIC_ARTIFACTS_BUCKET/fly_linux_amd64-$concourse_release_version"
+fly_windows_binary_url="https://s3-$AWS_DEFAULT_REGION.amazonaws.com/$PUBLIC_ARTIFACTS_BUCKET/fly_windows_amd64-$concourse_release_version"
 
 echo "{
   \"concourse_stemcell_url\": \"$concourse_stemcell_url\",
@@ -110,5 +119,9 @@ echo "{
 
   \"garden_release_url\": \"$garden_release_url\",
   \"garden_release_sha1\": \"$garden_release_sha1\",
-  \"garden_release_version\": \"$garden_release_version\"
+  \"garden_release_version\": \"$garden_release_version\",
+
+  \"fly_darwin_binary_url\": \"$fly_darwin_binary_url\",
+  \"fly_linux_binary_url\": \"$fly_linux_binary_url\",
+  \"fly_windows_binary_url\": \"$fly_windows_binary_url\"
 }" > compilation-vars/compilation-vars.json
