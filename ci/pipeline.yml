@@ -162,6 +162,7 @@ jobs:
       - garden-runc-*.tgz
       - fly_darwin_amd64
       - fly_linux_amd64
+      - fly_windows_amd64
   - get: concourse-stemcell
     trigger: true
   - get: director-stemcell
