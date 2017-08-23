@@ -83,7 +83,7 @@ aws s3 cp --acl public-read "$compiled_director_bosh_release" "s3://$PUBLIC_ARTI
 
 aws s3 cp --acl public-read "concourse-bosh-release/fly_darwin_amd64" "s3://$PUBLIC_ARTIFACTS_BUCKET/fly_darwin_amd64-$concourse_release_version"
 aws s3 cp --acl public-read "concourse-bosh-release/fly_linux_amd64" "s3://$PUBLIC_ARTIFACTS_BUCKET/fly_linux_amd64-$concourse_release_version"
-aws s3 cp --acl public-read "concourse-bosh-release/fly_windows_amd64" "s3://$PUBLIC_ARTIFACTS_BUCKET/fly_windows_amd64-$concourse_release_version"
+aws s3 cp --acl public-read "concourse-bosh-release/fly_windows_amd64.exe" "s3://$PUBLIC_ARTIFACTS_BUCKET/fly_windows_amd64-$concourse_release_version.exe"
 
 director_bosh_release_sha1=$(sha1sum "$compiled_director_bosh_release" | awk '{ print $1 }')
 director_bosh_release_url="https://s3-$AWS_DEFAULT_REGION.amazonaws.com/$PUBLIC_ARTIFACTS_BUCKET/$compiled_director_bosh_release"
