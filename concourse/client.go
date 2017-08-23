@@ -8,6 +8,7 @@ import (
 	"github.com/EngineerBetter/concourse-up/config"
 	"github.com/EngineerBetter/concourse-up/db"
 	"github.com/EngineerBetter/concourse-up/director"
+	"github.com/EngineerBetter/concourse-up/fly"
 	"github.com/EngineerBetter/concourse-up/terraform"
 	"github.com/EngineerBetter/concourse-up/util"
 )
@@ -16,6 +17,7 @@ import (
 type Client struct {
 	terraformClientFactory terraform.ClientFactory
 	boshClientFactory      bosh.ClientFactory
+	flyClientFactory       func(fly.Credentials, io.Writer, io.Writer) (fly.IClient, error)
 	vpcEmptier             func(vpcID string, region string) error
 	certGenerator          func(caName string, ip ...string) (*certs.Certs, error)
 	hostedZoneFinder       func(string) (string, string, error)
@@ -36,6 +38,7 @@ type IClient interface {
 func NewClient(
 	terraformClientFactory terraform.ClientFactory,
 	boshClientFactory bosh.ClientFactory,
+	flyClientFactory func(fly.Credentials, io.Writer, io.Writer) (fly.IClient, error),
 	vpcEmptier func(vpcID string, region string) error,
 	certGenerator func(caName string, ip ...string) (*certs.Certs, error),
 	hostedZoneFinder func(string) (string, string, error),
@@ -45,6 +48,7 @@ func NewClient(
 	return &Client{
 		terraformClientFactory: terraformClientFactory,
 		boshClientFactory:      boshClientFactory,
+		flyClientFactory:       flyClientFactory,
 		vpcEmptier:             vpcEmptier,
 		configClient:           configClient,
 		hostedZoneFinder:       hostedZoneFinder,

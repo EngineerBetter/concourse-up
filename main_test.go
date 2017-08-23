@@ -50,6 +50,9 @@ var _ = Describe("concourse-up", func() {
 			fmt.Sprintf("-X github.com/EngineerBetter/concourse-up/bosh.DirectorReleaseURL=%s", compilationVars["director_bosh_release_url"]),
 			fmt.Sprintf("-X github.com/EngineerBetter/concourse-up/bosh.DirectorReleaseVersion=%s", compilationVars["director_bosh_release_version"]),
 			fmt.Sprintf("-X github.com/EngineerBetter/concourse-up/bosh.DirectorReleaseSHA1=%s", compilationVars["director_bosh_release_sha1"]),
+			fmt.Sprintf("-X github.com/EngineerBetter/concourse-up/fly.DarwinBinaryURL=%s", compilationVars["fly_darwin_binary_url"]),
+			fmt.Sprintf("-X github.com/EngineerBetter/concourse-up/fly.LinuxBinaryURL=%s", compilationVars["fly_linux_binary_url"]),
+			fmt.Sprintf("-X github.com/EngineerBetter/concourse-up/fly.WindowsBinaryURL=%s", compilationVars["fly_windows_binary_url"]),
 		}
 
 		cliPath, err = Build("github.com/EngineerBetter/concourse-up", "-ldflags", strings.Join(ldFlags, " "))
@@ -82,7 +85,7 @@ var _ = Describe("concourse-up", func() {
 			Expect(err).ToNot(HaveOccurred(), "Error running CLI: "+cliPath)
 
 			Eventually(session).Should(Exit(1))
-			Expect(session.Err).To(Say("Compile-time variable bosh.DirectorReleaseSHA1 not set, please build with: `go build -ldflags \"-X github.com/EngineerBetter/concourse-up/bosh.DirectorReleaseSHA1=SOME_VALUE\"`"))
+			Expect(session.Err).To(Say("Compile-time variable fly.WindowsBinaryURL not set, please build with: `go build -ldflags \"-X github.com/EngineerBetter/concourse-up/fly.WindowsBinaryURL=SOME_VALUE\"`"))
 		})
 	})
 })

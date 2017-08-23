@@ -10,6 +10,7 @@ import (
 	"github.com/EngineerBetter/concourse-up/certs"
 	"github.com/EngineerBetter/concourse-up/concourse"
 	"github.com/EngineerBetter/concourse-up/config"
+	"github.com/EngineerBetter/concourse-up/fly"
 	"github.com/EngineerBetter/concourse-up/terraform"
 
 	"encoding/json"
@@ -56,6 +57,7 @@ var info = cli.Command{
 		client := concourse.NewClient(
 			terraform.NewClient,
 			bosh.NewClient,
+			fly.New,
 			aws.DeleteVMsInVPC,
 			certs.Generate,
 			aws.FindLongestMatchingHostedZone,

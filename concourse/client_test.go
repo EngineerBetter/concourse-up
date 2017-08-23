@@ -11,6 +11,7 @@ import (
 	"github.com/EngineerBetter/concourse-up/config"
 	"github.com/EngineerBetter/concourse-up/db"
 	"github.com/EngineerBetter/concourse-up/director"
+	"github.com/EngineerBetter/concourse-up/fly"
 	"github.com/EngineerBetter/concourse-up/terraform"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -45,6 +46,16 @@ var _ = Describe("Client", func() {
 		return &certs.Certs{
 			CACert: []byte("----EXAMPLE CERT----"),
 		}, nil
+	}
+
+	fakeFlyClient := &FakeFlyClient{
+		FakeSetDefaultPipeline: func() error {
+			actions = append(actions, "setting default pipeline")
+			return nil
+		},
+		FakeCleanup: func() error {
+			return nil
+		},
 	}
 
 	BeforeEach(func() {
@@ -189,6 +200,9 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 			return concourse.NewClient(
 				terraformClientFactory,
 				boshClientFactory,
+				func(fly.Credentials, io.Writer, io.Writer) (fly.IClient, error) {
+					return fakeFlyClient, nil
+				},
 				vpcEmptier,
 				certGenerator,
 				hostedZoneFinder,
@@ -338,6 +352,14 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 			Expect(err).ToNot(HaveOccurred())
 			Eventually(stdout).Should(gbytes.Say("DEPLOY SUCCESSFUL"))
 			Eventually(stdout).Should(gbytes.Say("fly --target happymeal login --insecure --concourse-url https://elb.aws.com --username admin --password s3cret"))
+		})
+
+		It("Sets the default pipeline", func() {
+			client := buildClient()
+			err := client.Deploy()
+			Expect(err).ToNot(HaveOccurred())
+
+			Expect(actions).To(ContainElement("setting default pipeline"))
 		})
 
 		Context("When a custom cert is provided", func() {

@@ -8,6 +8,7 @@ import (
 
 	"github.com/EngineerBetter/concourse-up/bosh"
 	"github.com/EngineerBetter/concourse-up/config"
+	"github.com/EngineerBetter/concourse-up/fly"
 	"github.com/EngineerBetter/concourse-up/terraform"
 	"github.com/EngineerBetter/concourse-up/util"
 )
@@ -38,6 +39,10 @@ func (client *Client) Deploy() error {
 	}
 
 	if err = client.deployBosh(config, metadata); err != nil {
+		return err
+	}
+
+	if err = client.setDefaultPipeline(config); err != nil {
 		return err
 	}
 
@@ -114,7 +119,7 @@ func (client *Client) ensureDirectorCerts(config *config.Config, metadata *terra
 
 	ip := metadata.DirectorPublicIP.Value
 	_, err := client.stdout.Write(
-		[]byte(fmt.Sprintf("\nGENERATING CERTIFICATE FOR %s\n", ip)))
+		[]byte(fmt.Sprintf("\nGENERATING BOSH DIRECTOR CERTIFICATE (%s, 10.0.0.6)\n", ip)))
 	if err != nil {
 		return nil, err
 	}
@@ -257,6 +262,32 @@ func (client *Client) setHostedZone(config *config.Config) error {
 		return err
 	}
 	if err = client.configClient.Update(config); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (client *Client) setDefaultPipeline(config *config.Config) error {
+	if _, err := client.stdout.Write([]byte("\nSETTING DEFAULT PIPELINE\n")); err != nil {
+		return err
+	}
+
+	flyClient, err := client.flyClientFactory(fly.Credentials{
+		Target:   config.Deployment,
+		API:      fmt.Sprintf("https://%s", config.Domain),
+		Username: config.ConcourseUsername,
+		Password: config.ConcoursePassword,
+	},
+		client.stdout,
+		client.stderr,
+	)
+	if err != nil {
+		return err
+	}
+	defer flyClient.Cleanup()
+
+	if err := flyClient.SetDefaultPipeline(); err != nil {
 		return err
 	}
 

@@ -49,6 +49,9 @@ var _ = Describe("commands", func() {
 			fmt.Sprintf("-X github.com/EngineerBetter/concourse-up/bosh.DirectorReleaseURL=%s", compilationVars["director_bosh_release_url"]),
 			fmt.Sprintf("-X github.com/EngineerBetter/concourse-up/bosh.DirectorReleaseVersion=%s", compilationVars["director_bosh_release_version"]),
 			fmt.Sprintf("-X github.com/EngineerBetter/concourse-up/bosh.DirectorReleaseSHA1=%s", compilationVars["director_bosh_release_sha1"]),
+			fmt.Sprintf("-X github.com/EngineerBetter/concourse-up/fly.DarwinBinaryURL=%s", compilationVars["fly_darwin_binary_url"]),
+			fmt.Sprintf("-X github.com/EngineerBetter/concourse-up/fly.LinuxBinaryURL=%s", compilationVars["fly_linux_binary_url"]),
+			fmt.Sprintf("-X github.com/EngineerBetter/concourse-up/fly.WindowsBinaryURL=%s", compilationVars["fly_windows_binary_url"]),
 		}
 
 		cliPath, err = Build("github.com/EngineerBetter/concourse-up", "-ldflags", strings.Join(ldflags, " "))

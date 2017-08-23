@@ -15,6 +15,19 @@ func TestConcourse(t *testing.T) {
 	RunSpecs(t, "Concourse Suite")
 }
 
+type FakeFlyClient struct {
+	FakeSetDefaultPipeline func() error
+	FakeCleanup            func() error
+}
+
+func (client *FakeFlyClient) SetDefaultPipeline() error {
+	return client.FakeSetDefaultPipeline()
+}
+
+func (client *FakeFlyClient) Cleanup() error {
+	return client.FakeCleanup()
+}
+
 type FakeConfigClient struct {
 	FakeLoad         func() (*config.Config, error)
 	FakeUpdate       func(*config.Config) error
