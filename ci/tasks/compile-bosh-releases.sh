@@ -104,31 +104,24 @@ echo "{
   \"concourse_stemcell_url\": \"$concourse_stemcell_url\",
   \"concourse_stemcell_sha1\": \"$concourse_stemcell_sha1\",
   \"concourse_stemcell_version\": \"$concourse_stemcell_version\",
-
   \"director_stemcell_url\": \"$director_stemcell_url\",
   \"director_stemcell_sha1\": \"$director_stemcell_sha1\",
   \"director_stemcell_version\": \"$director_stemcell_version\",
-
   \"director_bosh_release_url\": \"$director_bosh_release_url\",
   \"director_bosh_release_sha1\": \"$director_bosh_release_sha1\",
   \"director_bosh_release_version\": \"$director_bosh_release_version\",
-
   \"director_bosh_cpi_release_url\": \"$director_bosh_cpi_release_url\",
   \"director_bosh_cpi_release_sha1\": \"$director_bosh_cpi_release_sha1\",
   \"director_bosh_cpi_release_version\": \"$director_bosh_cpi_release_version\",
-
   \"concourse_release_url\": \"$concourse_release_url\",
   \"concourse_release_sha1\": \"$concourse_release_sha1\",
   \"concourse_release_version\": \"$concourse_release_version\",
-
   \"garden_release_url\": \"$garden_release_url\",
   \"garden_release_sha1\": \"$garden_release_sha1\",
   \"garden_release_version\": \"$garden_release_version\",
-
   \"fly_darwin_binary_url\": \"$fly_darwin_binary_url\",
   \"fly_linux_binary_url\": \"$fly_linux_binary_url\",
-  \"fly_windows_binary_url\": \"$fly_windows_binary_url\"
-
+  \"fly_windows_binary_url\": \"$fly_windows_binary_url\",
   \"director_darwin_binary_url\": \"$director_darwin_binary_url\",
   \"director_linux_binary_url\": \"$director_linux_binary_url\",
   \"director_windows_binary_url\": \"$director_windows_binary_url\"
