@@ -8,6 +8,7 @@ import (
 
 	"github.com/EngineerBetter/concourse-up/bosh"
 	"github.com/EngineerBetter/concourse-up/commands"
+	"github.com/EngineerBetter/concourse-up/director"
 	"github.com/EngineerBetter/concourse-up/fly"
 
 	"gopkg.in/urfave/cli.v1"
@@ -58,6 +59,9 @@ func checkCompileTimeArgs() error {
 		"fly.DarwinBinaryURL":            fly.DarwinBinaryURL,
 		"fly.LinuxBinaryURL":             fly.LinuxBinaryURL,
 		"fly.WindowsBinaryURL":           fly.WindowsBinaryURL,
+		"director.DarwinBinaryURL":       director.DarwinBinaryURL,
+		"director.LinuxBinaryURL":        director.LinuxBinaryURL,
+		"director.WindowsBinaryURL":      director.WindowsBinaryURL,
 	}
 
 	if ConcourseUpVersion == "" || strings.HasPrefix(ConcourseUpVersion, "COMPILE_TIME_VARIABLE") {

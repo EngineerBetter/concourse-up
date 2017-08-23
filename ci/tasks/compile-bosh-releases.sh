@@ -96,6 +96,10 @@ fly_darwin_binary_url="https://s3-$AWS_DEFAULT_REGION.amazonaws.com/$PUBLIC_ARTI
 fly_linux_binary_url="https://s3-$AWS_DEFAULT_REGION.amazonaws.com/$PUBLIC_ARTIFACTS_BUCKET/fly_linux_amd64-$concourse_release_version"
 fly_windows_binary_url="https://s3-$AWS_DEFAULT_REGION.amazonaws.com/$PUBLIC_ARTIFACTS_BUCKET/fly_windows_amd64-$concourse_release_version.exe"
 
+director_darwin_binary_url="https://s3.amazonaws.com/bosh-cli-artifacts/bosh-cli-2.0.28-darwin-amd64"
+director_linux_binary_url="https://s3.amazonaws.com/bosh-cli-artifacts/bosh-cli-2.0.28-linux-amd64"
+director_windows_binary_url="https://s3.amazonaws.com/bosh-cli-artifacts/bosh-cli-2.0.28-windows-amd64.exe"
+
 echo "{
   \"concourse_stemcell_url\": \"$concourse_stemcell_url\",
   \"concourse_stemcell_sha1\": \"$concourse_stemcell_sha1\",
@@ -124,4 +128,8 @@ echo "{
   \"fly_darwin_binary_url\": \"$fly_darwin_binary_url\",
   \"fly_linux_binary_url\": \"$fly_linux_binary_url\",
   \"fly_windows_binary_url\": \"$fly_windows_binary_url\"
+
+  \"director_darwin_binary_url\": \"$director_darwin_binary_url\",
+  \"director_linux_binary_url\": \"$director_linux_binary_url\",
+  \"director_windows_binary_url\": \"$director_windows_binary_url\"
 }" > compilation-vars/compilation-vars.json

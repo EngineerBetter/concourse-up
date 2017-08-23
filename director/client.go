@@ -6,6 +6,15 @@ import (
 	"github.com/EngineerBetter/concourse-up/util"
 )
 
+// DarwinBinaryURL is a compile-time variable set with -ldflags
+var DarwinBinaryURL = "COMPILE_TIME_VARIABLE_director_darwin_binary_url"
+
+// LinuxBinaryURL is a compile-time variable set with -ldflags
+var LinuxBinaryURL = "COMPILE_TIME_VARIABLE_director_linux_binary_url"
+
+// WindowsBinaryURL is a compile-time variable set with -ldflags
+var WindowsBinaryURL = "COMPILE_TIME_VARIABLE_director_windows_binary_url"
+
 // IClient represents a bosh director client
 type IClient interface {
 	RunCommand(stdout, stderr io.Writer, args ...string) error

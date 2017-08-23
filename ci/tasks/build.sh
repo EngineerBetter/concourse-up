@@ -28,6 +28,9 @@ pushd compilation-vars
   fly_darwin_binary_url=$(jq -r .fly_darwin_binary_url compilation-vars.json)
   fly_linux_binary_url=$(jq -r .fly_linux_binary_url compilation-vars.json)
   fly_windows_binary_url=$(jq -r .fly_windows_binary_url compilation-vars.json)
+  director_darwin_binary_url=$(jq -r .director_darwin_binary_url compilation-vars.json)
+  director_linux_binary_url=$(jq -r .director_linux_binary_url compilation-vars.json)
+  director_windows_binary_url=$(jq -r .director_windows_binary_url compilation-vars.json)
 popd
 
 mkdir -p "$GOPATH/src/github.com/EngineerBetter/concourse-up"
@@ -57,4 +60,7 @@ go build -ldflags "
   -X github.com/EngineerBetter/concourse-up/fly.DarwinBinaryURL=$fly_darwin_binary_url
   -X github.com/EngineerBetter/concourse-up/fly.LinuxBinaryURL=$fly_linux_binary_url
   -X github.com/EngineerBetter/concourse-up/fly.WindowsBinaryURL=$fly_windows_binary_url
+  -X github.com/EngineerBetter/concourse-up/director.DarwinBinaryURL=$director_darwin_binary_url
+  -X github.com/EngineerBetter/concourse-up/director.LinuxBinaryURL=$director_linux_binary_url
+  -X github.com/EngineerBetter/concourse-up/director.WindowsBinaryURL=$director_windows_binary_url
 " -o "$build_dir/$OUTPUT_FILE"
