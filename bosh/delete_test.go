@@ -39,8 +39,8 @@ var _ = Describe("Delete", func() {
 			}
 			return nil
 		},
-		FakeRunAuthenticatedCommand: func(stdout, stderr io.Writer, args ...string) error {
-			actions = append(actions, fmt.Sprintf("Running authenticated bosh command: %s", strings.Join(args, " ")))
+		FakeRunAuthenticatedCommand: func(stdout, stderr io.Writer, detach bool, args ...string) error {
+			actions = append(actions, fmt.Sprintf("Running authenticated bosh command: %s (detach: %t)", strings.Join(args, " "), detach))
 			return nil
 		},
 		FakeSaveFileToWorkingDir: func(filename string, contents []byte) (string, error) {
@@ -142,7 +142,7 @@ var _ = Describe("Delete", func() {
 	It("Deletes concourse", func() {
 		_, err := client.Delete(nil)
 		Expect(err).ToNot(HaveOccurred())
-		Expect(actions).To(ContainElement("Running authenticated bosh command: --deployment concourse delete-deployment --force"))
+		Expect(actions).To(ContainElement("Running authenticated bosh command: --deployment concourse delete-deployment --force (detach: false)"))
 	})
 
 })

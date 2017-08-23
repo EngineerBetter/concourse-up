@@ -12,6 +12,7 @@ func (client *Client) Delete(stateFileBytes []byte) ([]byte, error) {
 	if err := client.director.RunAuthenticatedCommand(
 		client.stdout,
 		client.stderr,
+		false,
 		"--deployment",
 		concourseDeploymentName,
 		"delete-deployment",

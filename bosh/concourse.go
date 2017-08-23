@@ -43,6 +43,7 @@ func (client *Client) uploadConcourseStemcell() error {
 	if err := client.director.RunAuthenticatedCommand(
 		client.stdout,
 		client.stderr,
+		false,
 		"upload-stemcell",
 		ConcourseStemcellURL,
 	); err != nil {
@@ -52,7 +53,7 @@ func (client *Client) uploadConcourseStemcell() error {
 	return nil
 }
 
-func (client *Client) deployConcourse() error {
+func (client *Client) deployConcourse(detach bool) error {
 	concourseManifestBytes, err := generateConcourseManifest(client.config, client.metadata)
 	if err != nil {
 		return err
@@ -66,6 +67,7 @@ func (client *Client) deployConcourse() error {
 	if err = client.director.RunAuthenticatedCommand(
 		client.stdout,
 		client.stderr,
+		detach,
 		"--deployment",
 		concourseDeploymentName,
 		"deploy",

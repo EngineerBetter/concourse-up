@@ -16,7 +16,7 @@ func TestBosh(t *testing.T) {
 
 type FakeDirectorClient struct {
 	FakeRunCommand              func(stdout, stderr io.Writer, args ...string) error
-	FakeRunAuthenticatedCommand func(stdout, stderr io.Writer, args ...string) error
+	FakeRunAuthenticatedCommand func(stdout, stderr io.Writer, detach bool, args ...string) error
 	FakeSaveFileToWorkingDir    func(path string, contents []byte) (string, error)
 	FakePathInWorkingDir        func(filename string) string
 	FakeCleanup                 func() error
@@ -26,8 +26,8 @@ func (client *FakeDirectorClient) RunCommand(stdout, stderr io.Writer, args ...s
 	return client.FakeRunCommand(stdout, stderr, args...)
 }
 
-func (client *FakeDirectorClient) RunAuthenticatedCommand(stdout, stderr io.Writer, args ...string) error {
-	return client.FakeRunAuthenticatedCommand(stdout, stderr, args...)
+func (client *FakeDirectorClient) RunAuthenticatedCommand(stdout, stderr io.Writer, detach bool, args ...string) error {
+	return client.FakeRunAuthenticatedCommand(stdout, stderr, detach, args...)
 }
 
 func (client *FakeDirectorClient) SaveFileToWorkingDir(filename string, contents []byte) (string, error) {

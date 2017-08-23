@@ -41,8 +41,8 @@ var _ = Describe("Deploy", func() {
 			}
 			return nil
 		},
-		FakeRunAuthenticatedCommand: func(stdout, stderr io.Writer, args ...string) error {
-			actions = append(actions, fmt.Sprintf("Running authenticated bosh command: %s", strings.Join(args, " ")))
+		FakeRunAuthenticatedCommand: func(stdout, stderr io.Writer, detach bool, args ...string) error {
+			actions = append(actions, fmt.Sprintf("Running authenticated bosh command: %s (detach: %t)", strings.Join(args, " "), detach))
 			return nil
 		},
 		FakeSaveFileToWorkingDir: func(filename string, contents []byte) (string, error) {
@@ -156,14 +156,14 @@ var _ = Describe("Deploy", func() {
 	It("Updates the cloud config", func() {
 		_, err := client.Deploy(nil, false)
 		Expect(err).ToNot(HaveOccurred())
-		expectedCommand := fmt.Sprintf("Running authenticated bosh command: update-cloud-config %s/cloud-config.yml", tempDir)
+		expectedCommand := fmt.Sprintf("Running authenticated bosh command: update-cloud-config %s/cloud-config.yml (detach: false)", tempDir)
 		Expect(actions).To(ContainElement(expectedCommand))
 	})
 
 	It("Uploads the concourse stemcell", func() {
 		_, err := client.Deploy(nil, false)
 		Expect(err).ToNot(HaveOccurred())
-		Expect(actions).To(ContainElement("Running authenticated bosh command: upload-stemcell COMPILE_TIME_VARIABLE_bosh_concourseStemcellURL"))
+		Expect(actions).To(ContainElement("Running authenticated bosh command: upload-stemcell COMPILE_TIME_VARIABLE_bosh_concourseStemcellURL (detach: false)"))
 	})
 
 	It("Saves the concourse manifest", func() {
@@ -181,7 +181,7 @@ var _ = Describe("Deploy", func() {
 	It("Deploys concourse", func() {
 		_, err := client.Deploy(nil, false)
 		Expect(err).ToNot(HaveOccurred())
-		expectedCommand := fmt.Sprintf("Running authenticated bosh command: --deployment concourse deploy %s/concourse.yml", tempDir)
+		expectedCommand := fmt.Sprintf("Running authenticated bosh command: --deployment concourse deploy %s/concourse.yml (detach: false)", tempDir)
 		Expect(actions).To(ContainElement(expectedCommand))
 	})
 

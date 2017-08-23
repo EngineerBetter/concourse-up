@@ -19,6 +19,7 @@ func (client *Client) Instances() ([]Instance, error) {
 	if err := client.director.RunAuthenticatedCommand(
 		output,
 		client.stderr,
+		false,
 		"--deployment",
 		concourseDeploymentName,
 		"instances",

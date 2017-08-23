@@ -1,6 +1,7 @@
 package director
 
 import (
+	"errors"
 	"fmt"
 	"io"
 
@@ -14,7 +15,10 @@ const boshInitLogLevel = boshlog.LevelWarn
 var defaultBoshArgs = []string{"--non-interactive", "--tty", "--no-color"}
 
 // RunAuthenticatedCommand runs a command against the bosh director, after authenticating
-func (client *Client) RunAuthenticatedCommand(stdout, stderr io.Writer, args ...string) error {
+func (client *Client) RunAuthenticatedCommand(stdout, stderr io.Writer, detach bool, args ...string) error {
+	if detach {
+		return errors.New("detach mode not yet implemented")
+	}
 	args = append([]string{
 		"--environment",
 		fmt.Sprintf("https://%s", client.creds.Host),
