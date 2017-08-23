@@ -135,7 +135,9 @@ func (client *Client) Cleanup() error {
 }
 
 func (client *Client) login() error {
-	attempts := 100
+	attempts := 50
+
+	client.stdout.Write([]byte("Waiting for Concourse ATC to start... \n"))
 
 	for i := 0; i < attempts; i++ {
 		cmd := exec.Command(
