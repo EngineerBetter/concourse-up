@@ -20,8 +20,6 @@ username=$(echo "$config" | jq -r '.config.concourse_username')
 password=$(echo "$config" | jq -r '.config.concourse_password')
 echo "$config" | jq -r '.config.concourse_ca_cert' > generated-ca-cert.pem
 
-sleep 60
-
 fly --target system-test login \
   --ca-cert generated-ca-cert.pem \
   --concourse-url "https://$domain" \
