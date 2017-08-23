@@ -275,7 +275,7 @@ jobs:
         params:
           channel: "#integrations"
           text: |
-            <!channel> Concourse Up alt region system test failure!
+            <!channel> Concourse Up self update system test failure!
     - task: system-test
       image: image
       file: concourse-up/ci/tasks/system-test.yml
