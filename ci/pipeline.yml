@@ -229,7 +229,6 @@ jobs:
           file: build/concourse-up-darwin-amd64
 
 - name: system-test
-  serial: true
   plan:
   - aggregate:
     - get: version

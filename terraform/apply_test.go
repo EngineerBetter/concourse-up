@@ -28,8 +28,8 @@ provider "aws" {
   region = "eu-west-1"
 }
 
-resource "aws_iam_user" "example-user-2" {
-  name = "example-2"
+resource "aws_iam_user" "example-user-4" {
+  name = "example-4"
 }
 
 output "director_public_ip" {
@@ -81,7 +81,7 @@ output "director_subnet_id" {
 
 		metadata, err := c.Output()
 		Expect(err).ToNot(HaveOccurred())
-		Expect(metadata.DirectorPublicIP.Value).To(Equal("example"))
+		Expect(metadata.AWS.DirectorPublicIP.Value).To(Equal("example"))
 
 		err = c.Destroy()
 		Expect(err).ToNot(HaveOccurred())

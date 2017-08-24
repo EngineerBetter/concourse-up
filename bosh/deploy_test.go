@@ -71,21 +71,23 @@ var _ = Describe("Deploy", func() {
 		Expect(err).ToNot(HaveOccurred())
 
 		terraformMetadata := &terraform.Metadata{
-			DirectorPublicIP:         terraform.MetadataStringValue{Value: "99.99.99.99"},
-			DirectorKeyPair:          terraform.MetadataStringValue{Value: "-- KEY --"},
-			DirectorSecurityGroupID:  terraform.MetadataStringValue{Value: "sg-123"},
-			VMsSecurityGroupID:       terraform.MetadataStringValue{Value: "sg-456"},
-			PublicSubnetID:           terraform.MetadataStringValue{Value: "sn-public-123"},
-			PrivateSubnetID:          terraform.MetadataStringValue{Value: "sn-private-123"},
-			BoshDBPort:               terraform.MetadataStringValue{Value: "5432"},
-			BoshDBAddress:            terraform.MetadataStringValue{Value: "rds.aws.com"},
-			BoshUserAccessKeyID:      terraform.MetadataStringValue{Value: "abc123"},
-			BoshSecretAccessKey:      terraform.MetadataStringValue{Value: "abc123"},
-			BlobstoreBucket:          terraform.MetadataStringValue{Value: "blobs.aws.com"},
-			BlobstoreUserAccessKeyID: terraform.MetadataStringValue{Value: "abc123"},
-			BlobstoreSecretAccessKey: terraform.MetadataStringValue{Value: "abc123"},
-			ELBSecurityGroupID:       terraform.MetadataStringValue{Value: "sg-789"},
-			ELBName:                  terraform.MetadataStringValue{Value: "elb-123"},
+			AWS: &terraform.AWSMetadata{
+				DirectorPublicIP:         terraform.MetadataStringValue{Value: "99.99.99.99"},
+				DirectorKeyPair:          terraform.MetadataStringValue{Value: "-- KEY --"},
+				DirectorSecurityGroupID:  terraform.MetadataStringValue{Value: "sg-123"},
+				VMsSecurityGroupID:       terraform.MetadataStringValue{Value: "sg-456"},
+				PublicSubnetID:           terraform.MetadataStringValue{Value: "sn-public-123"},
+				PrivateSubnetID:          terraform.MetadataStringValue{Value: "sn-private-123"},
+				BoshDBPort:               terraform.MetadataStringValue{Value: "5432"},
+				BoshDBAddress:            terraform.MetadataStringValue{Value: "rds.aws.com"},
+				BoshUserAccessKeyID:      terraform.MetadataStringValue{Value: "abc123"},
+				BoshSecretAccessKey:      terraform.MetadataStringValue{Value: "abc123"},
+				BlobstoreBucket:          terraform.MetadataStringValue{Value: "blobs.aws.com"},
+				BlobstoreUserAccessKeyID: terraform.MetadataStringValue{Value: "abc123"},
+				BlobstoreSecretAccessKey: terraform.MetadataStringValue{Value: "abc123"},
+				ELBSecurityGroupID:       terraform.MetadataStringValue{Value: "sg-789"},
+				ELBName:                  terraform.MetadataStringValue{Value: "elb-123"},
+			},
 		}
 		exampleConfig := &config.Config{
 			PublicKey:        "example-public-key",

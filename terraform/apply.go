@@ -64,8 +64,10 @@ func (client *Client) Output() (*Metadata, error) {
 		return nil, err
 	}
 
-	metadata := Metadata{}
-	if err := json.NewDecoder(stdoutBuffer).Decode(&metadata); err != nil {
+	metadata := Metadata{
+		AWS: &AWSMetadata{},
+	}
+	if err := json.NewDecoder(stdoutBuffer).Decode(metadata.AWS); err != nil {
 		return nil, err
 	}
 

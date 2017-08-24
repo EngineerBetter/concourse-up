@@ -67,24 +67,26 @@ var _ = Describe("Client", func() {
 		}
 
 		terraformMetadata = &terraform.Metadata{
-			DirectorPublicIP:         terraform.MetadataStringValue{Value: "99.99.99.99"},
-			DirectorKeyPair:          terraform.MetadataStringValue{Value: "-- KEY --"},
-			DirectorSecurityGroupID:  terraform.MetadataStringValue{Value: "sg-123"},
-			VMsSecurityGroupID:       terraform.MetadataStringValue{Value: "sg-456"},
-			PublicSubnetID:           terraform.MetadataStringValue{Value: "sn-public-123"},
-			PrivateSubnetID:          terraform.MetadataStringValue{Value: "sn-private-123"},
-			NatGatewayIP:             terraform.MetadataStringValue{Value: "88.88.88.88"},
-			BoshDBPort:               terraform.MetadataStringValue{Value: "5432"},
-			BoshDBAddress:            terraform.MetadataStringValue{Value: "rds.aws.com"},
-			BoshUserAccessKeyID:      terraform.MetadataStringValue{Value: "abc123"},
-			BoshSecretAccessKey:      terraform.MetadataStringValue{Value: "abc123"},
-			BlobstoreBucket:          terraform.MetadataStringValue{Value: "blobs.aws.com"},
-			BlobstoreUserAccessKeyID: terraform.MetadataStringValue{Value: "abc123"},
-			BlobstoreSecretAccessKey: terraform.MetadataStringValue{Value: "abc123"},
-			ELBSecurityGroupID:       terraform.MetadataStringValue{Value: "sg-789"},
-			ELBName:                  terraform.MetadataStringValue{Value: "elb-123"},
-			ELBDNSName:               terraform.MetadataStringValue{Value: "elb.aws.com"},
-			VPCID:                    terraform.MetadataStringValue{Value: "vpc-112233"},
+			AWS: &terraform.AWSMetadata{
+				DirectorPublicIP:         terraform.MetadataStringValue{Value: "99.99.99.99"},
+				DirectorKeyPair:          terraform.MetadataStringValue{Value: "-- KEY --"},
+				DirectorSecurityGroupID:  terraform.MetadataStringValue{Value: "sg-123"},
+				VMsSecurityGroupID:       terraform.MetadataStringValue{Value: "sg-456"},
+				PublicSubnetID:           terraform.MetadataStringValue{Value: "sn-public-123"},
+				PrivateSubnetID:          terraform.MetadataStringValue{Value: "sn-private-123"},
+				NatGatewayIP:             terraform.MetadataStringValue{Value: "88.88.88.88"},
+				BoshDBPort:               terraform.MetadataStringValue{Value: "5432"},
+				BoshDBAddress:            terraform.MetadataStringValue{Value: "rds.aws.com"},
+				BoshUserAccessKeyID:      terraform.MetadataStringValue{Value: "abc123"},
+				BoshSecretAccessKey:      terraform.MetadataStringValue{Value: "abc123"},
+				BlobstoreBucket:          terraform.MetadataStringValue{Value: "blobs.aws.com"},
+				BlobstoreUserAccessKeyID: terraform.MetadataStringValue{Value: "abc123"},
+				BlobstoreSecretAccessKey: terraform.MetadataStringValue{Value: "abc123"},
+				ELBSecurityGroupID:       terraform.MetadataStringValue{Value: "sg-789"},
+				ELBName:                  terraform.MetadataStringValue{Value: "elb-123"},
+				ELBDNSName:               terraform.MetadataStringValue{Value: "elb.aws.com"},
+				VPCID:                    terraform.MetadataStringValue{Value: "vpc-112233"},
+			},
 		}
 		deleteBoshDirectorError = nil
 		actions = []string{}
@@ -412,9 +414,10 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 
 		Context("When a metadata field is missing", func() {
 			It("Returns an error", func() {
-				terraformMetadata.DirectorKeyPair = terraform.MetadataStringValue{Value: ""}
+				terraformMetadata.AWS.DirectorKeyPair = terraform.MetadataStringValue{Value: ""}
 				client := buildClient()
 				err := client.Deploy()
+				Expect(err).To(HaveOccurred())
 				Expect(err.Error()).To(ContainSubstring("director_key_pair"))
 				Expect(err.Error()).To(ContainSubstring("non zero value required"))
 			})

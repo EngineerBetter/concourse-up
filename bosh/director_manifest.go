@@ -38,7 +38,7 @@ var DirectorStemcellVersion = "COMPILE_TIME_VARIABLE_bosh_directorStemcellVersio
 
 // GenerateBoshInitManifest generates a manifest for the bosh director on AWS
 func generateBoshInitManifest(conf *config.Config, metadata *terraform.Metadata, privateKeyPath string) ([]byte, error) {
-	dbPort, err := strconv.Atoi(metadata.BoshDBPort.Value)
+	dbPort, err := strconv.Atoi(metadata.AWS.BoshDBPort.Value)
 	if err != nil {
 		return nil, err
 	}
@@ -48,11 +48,11 @@ func generateBoshInitManifest(conf *config.Config, metadata *terraform.Metadata,
 		AdminUserName:             conf.DirectorUsername,
 		AdminUserPassword:         conf.DirectorPassword,
 		AvailabilityZone:          conf.AvailabilityZone,
-		BlobstoreBucket:           metadata.BlobstoreBucket.Value,
-		BoshAWSAccessKeyID:        metadata.BoshUserAccessKeyID.Value,
-		BoshAWSSecretAccessKey:    metadata.BoshSecretAccessKey.Value,
-		BoshSecurityGroupID:       metadata.DirectorSecurityGroupID.Value,
-		DBHost:                    metadata.BoshDBAddress.Value,
+		BlobstoreBucket:           metadata.AWS.BlobstoreBucket.Value,
+		BoshAWSAccessKeyID:        metadata.AWS.BoshUserAccessKeyID.Value,
+		BoshAWSSecretAccessKey:    metadata.AWS.BoshSecretAccessKey.Value,
+		BoshSecurityGroupID:       metadata.AWS.DirectorSecurityGroupID.Value,
+		DBHost:                    metadata.AWS.BoshDBAddress.Value,
 		DBName:                    conf.RDSDefaultDatabaseName,
 		DBPassword:                conf.RDSPassword,
 		DBPort:                    dbPort,
@@ -66,20 +66,20 @@ func generateBoshInitManifest(conf *config.Config, metadata *terraform.Metadata,
 		DirectorReleaseSHA1:       DirectorReleaseSHA1,
 		DirectorReleaseURL:        DirectorReleaseURL,
 		DirectorReleaseVersion:    DirectorReleaseVersion,
-		DirectorSubnetID:          metadata.PublicSubnetID.Value,
+		DirectorSubnetID:          metadata.AWS.PublicSubnetID.Value,
 		HMUserPassword:            conf.DirectorHMUserPassword,
-		KeyPairName:               metadata.DirectorKeyPair.Value,
+		KeyPairName:               metadata.AWS.DirectorKeyPair.Value,
 		MbusPassword:              conf.DirectorMbusPassword,
 		NATSPassword:              conf.DirectorNATSPassword,
 		PrivateKeyPath:            privateKeyPath,
-		PublicIP:                  metadata.DirectorPublicIP.Value,
+		PublicIP:                  metadata.AWS.DirectorPublicIP.Value,
 		RegistryPassword:          conf.DirectorRegistryPassword,
-		S3AWSAccessKeyID:          metadata.BlobstoreUserAccessKeyID.Value,
-		S3AWSSecretAccessKey:      metadata.BlobstoreSecretAccessKey.Value,
+		S3AWSAccessKeyID:          metadata.AWS.BlobstoreUserAccessKeyID.Value,
+		S3AWSSecretAccessKey:      metadata.AWS.BlobstoreSecretAccessKey.Value,
 		StemcellSHA1:              DirectorStemcellSHA1,
 		StemcellURL:               DirectorStemcellURL,
 		StemcellVersion:           DirectorStemcellVersion,
-		VMsSecurityGroupID:        metadata.VMsSecurityGroupID.Value,
+		VMsSecurityGroupID:        metadata.AWS.VMsSecurityGroupID.Value,
 	}
 
 	return util.RenderTemplate(awsDirectorManifestTemplate, templateParams)
