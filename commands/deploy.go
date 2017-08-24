@@ -64,6 +64,13 @@ var deployFlags = []cli.Flag{
 		Hidden:      true,
 		Destination: &deployArgs.DetachBoshDeployment,
 	},
+	cli.BoolFlag{
+		Name:        "pause-self-update",
+		Usage:       "(optional) Keeps the self-update job paused",
+		EnvVar:      "DETACH_BOSH_DEPLOYMENT",
+		Hidden:      true,
+		Destination: &deployArgs.PauseSelfUpdate,
+	},
 }
 
 var deploy = cli.Command{

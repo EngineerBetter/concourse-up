@@ -14,6 +14,7 @@ type DeployArgs struct {
 	WorkerCount          int
 	WorkerSize           string
 	DetachBoshDeployment bool
+	PauseSelfUpdate      bool
 }
 
 // WorkerSizes are the permitted concourse worker sizes
