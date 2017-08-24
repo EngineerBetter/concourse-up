@@ -39,10 +39,9 @@ config=$(./cup-new info --region eu-west-2 --json $deployment)
 domain=$(echo "$config" | jq -r '.config.domain')
 username=$(echo "$config" | jq -r '.config.concourse_username')
 password=$(echo "$config" | jq -r '.config.concourse_password')
-echo "$config" | jq -r '.config.concourse_ca_cert' > generated-ca-cert.pem
 
 fly --target system-test login \
-  --ca-cert generated-ca-cert.pem \
+  --ca-cert out/$deployment.crt \
   --concourse-url "https://$domain" \
   --username "$username" \
   --password "$password"
