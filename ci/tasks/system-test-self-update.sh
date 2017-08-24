@@ -12,11 +12,11 @@ chmod +x ./cup-old
 
 echo "DEPLOY PREVIOUS VERSION"
 
-./cup-old deploy $deployment
+./cup-old deploy --region eu-west-2 $deployment
 
 sleep 60
 
-config=$(./cup-old info --json $deployment)
+config=$(./cup-old info --region eu-west-2 --json $deployment)
 domain=$(echo "$config" | jq -r '.config.domain')
 username=$(echo "$config" | jq -r '.config.concourse_username')
 password=$(echo "$config" | jq -r '.config.concourse_password')
@@ -35,4 +35,4 @@ set +x
 
 echo "DESTROY DEPLOYMENT"
 
-./cup-old --non-interactive destroy $deployment
+./cup-old --non-interactive destroy --region eu-west-2 $deployment
