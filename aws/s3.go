@@ -3,6 +3,9 @@ package aws
 import (
 	"bytes"
 	"io/ioutil"
+	"os"
+
+	"github.com/aws/aws-sdk-go/aws/credentials"
 
 	"time"
 
@@ -34,7 +37,10 @@ const (
 
 // DeleteVersionedBucket deletes and empties a versioned bucket
 func DeleteVersionedBucket(name, region string) error {
-	sess, err := session.NewSession(aws.NewConfig().WithCredentialsChainVerboseErrors(true))
+	sess, err := session.NewSession(&aws.Config{
+		Region:      aws.String(region),
+		Credentials: credentials.NewStaticCredentials(os.Getenv("AWS_ACCESS_KEY_ID"), os.Getenv("AWS_SECRET_ACCESS_KEY"), ""),
+	})
 	if err != nil {
 		return err
 	}

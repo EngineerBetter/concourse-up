@@ -1,22 +1,17 @@
 package director
 
 import (
-	"errors"
+	"bufio"
 	"fmt"
 	"io"
 	"os/exec"
+	"strings"
 )
 
 var defaultBoshArgs = []string{"--non-interactive", "--tty", "--no-color"}
 
 // RunAuthenticatedCommand runs a command against the bosh director, after authenticating
 func (client *Client) RunAuthenticatedCommand(stdout, stderr io.Writer, detach bool, args ...string) error {
-	if detach {
-		return errors.New("detach mode not yet implemented")
-	}
-	if err := client.ensureBinaryDownloaded(); err != nil {
-		return err
-	}
 	args = append([]string{
 		"--environment",
 		fmt.Sprintf("https://%s", client.creds.Host),
@@ -27,6 +22,10 @@ func (client *Client) RunAuthenticatedCommand(stdout, stderr io.Writer, detach b
 		"--client-secret",
 		client.creds.Password,
 	}, args...)
+
+	if detach {
+		return client.runDetachingCommand(stdout, stderr, args...)
+	}
 
 	return client.RunCommand(stdout, stderr, args...)
 }
@@ -44,4 +43,37 @@ func (client *Client) RunCommand(stdout, stderr io.Writer, args ...string) error
 	cmd.Stdout = stdout
 	cmd.Stderr = stderr
 	return cmd.Run()
+}
+
+func (client *Client) runDetachingCommand(stdout, stderr io.Writer, args ...string) error {
+	if err := client.ensureBinaryDownloaded(); err != nil {
+		return err
+	}
+
+	args = append(defaultBoshArgs, args...)
+
+	cmd := exec.Command(client.tempDir.Path("bosh-cli"), args...)
+	cmd.Stderr = stderr
+
+	cmdReader, err := cmd.StdoutPipe()
+	if err != nil {
+		return err
+	}
+
+	scanner := bufio.NewScanner(cmdReader)
+
+	if err := cmd.Start(); err != nil {
+		return err
+	}
+
+	for scanner.Scan() {
+		text := scanner.Text()
+		stdout.Write([]byte(fmt.Sprintf("%s\n", text)))
+		if strings.HasPrefix(text, "Task") {
+			stdout.Write([]byte("Task started, detaching output\n"))
+			return nil
+		}
+	}
+
+	return fmt.Errorf("Didn't detect successful task start in BOSH comand: bosh-cli %s", strings.Join(args, " "))
 }

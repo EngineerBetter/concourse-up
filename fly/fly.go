@@ -2,6 +2,7 @@ package fly
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -12,6 +13,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/EngineerBetter/concourse-up/config"
 	"github.com/EngineerBetter/concourse-up/util"
 )
 
@@ -27,7 +29,7 @@ var WindowsBinaryURL = "COMPILE_TIME_VARIABLE_fly_windows_binary_url"
 // IClient represents an interface for a client
 type IClient interface {
 	CanConnect() (bool, error)
-	SetDefaultPipeline() error
+	SetDefaultPipeline(deployArgs *config.DeployArgs, config *config.Config) error
 	Cleanup() error
 }
 
@@ -121,7 +123,7 @@ func (client *Client) CanConnect() (bool, error) {
 	if err != nil {
 		return false, err
 	}
-
+	fmt.Println(string(stderrBytes))
 	if strings.Contains(string(stderrBytes), "could not reach the Concourse server") {
 		return false, nil
 	}
@@ -135,13 +137,13 @@ func (client *Client) CanConnect() (bool, error) {
 }
 
 // SetDefaultPipeline sets the default pipeline against a given concourse
-func (client *Client) SetDefaultPipeline() error {
+func (client *Client) SetDefaultPipeline(deployArgs *config.DeployArgs, config *config.Config) error {
 	if err := client.login(); err != nil {
 		return err
 	}
 
 	pipelinePath := client.tempDir.Path("default-pipeline.yml")
-	pipelineName := "hello-world"
+	pipelineName := "concourse-up-self-update"
 
 	fileHandler, err := os.Create(pipelinePath)
 	if err != nil {
@@ -149,7 +151,19 @@ func (client *Client) SetDefaultPipeline() error {
 	}
 	defer fileHandler.Close()
 
-	if _, err := fileHandler.WriteString(defaultPipeline); err != nil {
+	params, err := client.buildDefaultPipelineParams(deployArgs, config)
+	if err != nil {
+		return err
+	}
+
+	pipelineConfig, err := util.RenderTemplate(defaultPipelineTemplate, params)
+	if err != nil {
+		return err
+	}
+
+	fmt.Println(string(pipelineConfig))
+
+	if _, err := fileHandler.Write(pipelineConfig); err != nil {
 		return err
 	}
 
@@ -217,17 +231,92 @@ func getFlyURL() (string, error) {
 	return "", fmt.Errorf("unknown os: `%s`", os)
 }
 
-const defaultPipeline = `
+func (client *Client) buildDefaultPipelineParams(deployArgs *config.DeployArgs, config *config.Config) (*defaultPipelineParams, error) {
+	awsAccessKeyID := os.Getenv("AWS_ACCESS_KEY_ID")
+	if awsAccessKeyID == "" {
+		return nil, errors.New("env var AWS_ACCESS_KEY_ID not found")
+	}
+
+	awsSecretAccessKey := os.Getenv("AWS_SECRET_ACCESS_KEY")
+	if awsSecretAccessKey == "" {
+		return nil, errors.New("env var AWS_SECRET_ACCESS_KEY not found")
+	}
+
+	return &defaultPipelineParams{
+		FlagAWSRegion:      deployArgs.AWSRegion,
+		FlagDomain:         deployArgs.Domain,
+		FlagTLSCert:        deployArgs.TLSCert,
+		FlagTLSKey:         deployArgs.TLSKey,
+		FlagWorkers:        deployArgs.WorkerCount,
+		FlagWorkerSize:     deployArgs.WorkerSize,
+		Deployment:         strings.TrimPrefix(config.Deployment, "concourse-up-"),
+		AWSAccessKeyID:     awsAccessKeyID,
+		AWSSecretAccessKey: awsSecretAccessKey,
+	}, nil
+}
+
+type defaultPipelineParams struct {
+	FlagAWSRegion      string
+	FlagDomain         string
+	FlagTLSCert        string
+	FlagTLSKey         string
+	FlagWorkers        int
+	FlagWorkerSize     string
+	Deployment         string
+	AWSAccessKeyID     string
+	AWSSecretAccessKey string
+	AWSDefaultRegion   string
+}
+
+// Indent is a helper function to indent the field a given number of spaces
+func (params defaultPipelineParams) Indent(countStr, field string) string {
+	return util.Indent(countStr, field)
+}
+
+const defaultPipelineTemplate = `
+---
+resources:
+- name: concourse-up-release
+  type: github-release
+  source:
+    user: engineerbetter
+    repository: concourse-up
+    pre_release: true
+
 jobs:
-- name: hello-world
+- name: self-update
   plan:
-  - task: say-hello
+  - get: concourse-up-release
+    trigger: true
+  - task: update
+    params:
+      AWS_REGION: "<% .FlagAWSRegion %>"
+      DOMAIN: "<% .FlagDomain %>"
+      TLS_CERT: |-
+        <% .Indent "8" .FlagTLSCert %>
+      TLS_KEY: |-
+        <% .Indent "8" .FlagTLSKey %>
+      WORKERS: "<% .FlagWorkers %>"
+      WORKER_SIZE: "<% .FlagWorkerSize %>"
+      DEPLOYMENT: "<% .Deployment %>"
+      AWS_ACCESS_KEY_ID: "<% .AWSAccessKeyID %>"
+      AWS_SECRET_ACCESS_KEY: "<% .AWSSecretAccessKey %>"
     config:
       platform: linux
       image_resource:
         type: docker-image
-        source: {repository: ubuntu}
+        source:
+          repository: engineerbetter/cup-image
+      inputs:
+      - name: concourse-up-release
       run:
-        path: echo
-        args: ["Hello, world!"]
+        path: bash
+        args:
+        - -c
+        - |
+          set -eux
+
+          cd concourse-up-release
+          chmod +x concourse-up-linux-amd64
+          ./concourse-up-linux-amd64 deploy --detach-bosh-deployment $DEPLOYMENT
 `

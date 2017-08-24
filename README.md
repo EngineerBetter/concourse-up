@@ -36,9 +36,7 @@ providing you with a single command for getting your Concourse up and keeping it
 
 ## Prerequisites
 
-- An authenticated AWS environment. This can be done by doing one of:
-  - Installing the [AWS CLI](http://docs.aws.amazon.com/cli/latest/userguide/installing.html) and running `aws configure`
-  - Exporting the following [environment variables](http://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html#cli-environment) before running `concourse-up`
+- Export the following [environment variables](http://docs.aws.amazon.com/cli/latest/userguide/cli-environment.html) before running `concourse-up`:
     - `AWS_ACCESS_KEY_ID`
     - `AWS_SECRET_ACCESS_KEY`
 - [Terraform](https://www.terraform.io/intro/getting-started/install.html) 0.9.3 or newer

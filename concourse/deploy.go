@@ -66,7 +66,7 @@ func (client *Client) deployBoshAndPipeline(config *config.Config, metadata *ter
 		return err
 	}
 
-	if err := flyClient.SetDefaultPipeline(); err != nil {
+	if err := flyClient.SetDefaultPipeline(client.deployArgs, config); err != nil {
 		return err
 	}
 
@@ -90,7 +90,7 @@ func (client *Client) updateBoshAndPipeline(config *config.Config, metadata *ter
 		return fmt.Errorf("In detach mode but it seems that concourse is not currently running")
 	}
 
-	if err = flyClient.SetDefaultPipeline(); err != nil {
+	if err = flyClient.SetDefaultPipeline(client.deployArgs, config); err != nil {
 		return err
 	}
 
@@ -98,7 +98,7 @@ func (client *Client) updateBoshAndPipeline(config *config.Config, metadata *ter
 		return err
 	}
 
-	_, err = client.stdout.Write([]byte("\nUPGRADE SUCCESSFUL\n\n"))
+	_, err = client.stdout.Write([]byte("\nUPGRADE RUNNING IN BACKGROUND\n\n"))
 
 	return err
 }
