@@ -159,7 +159,8 @@ By default, `concourse-up` deploys to the AWS eu-west-1 (Ireland) region, and us
 | Worker        | m4.xlarge (spot) |     1 |       40.15 |
 | RDS instance  | db.t2.small      |     1 |       26.28 |
 | Load balancer |         -        |     1 |       20.44 |
-| **Total**     |                  |       |      **155.59** |
+| NAT Gateway   |         -        |     1 |       35.04 |
+| **Total**     |                  |       |      **190.63** |
 
 ## What it does
 
