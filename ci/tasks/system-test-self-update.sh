@@ -54,8 +54,27 @@ set +x
 echo "TRIGGERING SELF-UPDATE"
 fly --target system-test trigger-job -j concourse-up-self-update/self-update
 
-echo "WAITING FOR SELF-UPDATE TO FINISH"
-sleep 60
+while true;
+do
+  builds="$(fly --target system-test builds)"
+  echo "$builds"
+
+  if [[ $builds != *"concourse-up-self-update/self-update"* ]] ; then
+    echo "could't find self-update job in builds:\n$builds"
+    exit 1
+  fi
+
+  if [[ $builds == *"succeeded"* ]] ; then
+    break
+  fi
+
+  if [[ $builds == *"failed"* ]] ; then
+    echo "build failed:\n$builds"
+    exit 1
+  fi
+
+  sleep 1;
+done
 
 echo "DESTROYING DEPLOYMENT"
 ./cup-new --non-interactive destroy --region eu-west-2 $deployment
