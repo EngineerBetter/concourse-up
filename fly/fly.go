@@ -145,6 +145,28 @@ func (client *Client) SetDefaultPipeline(deployArgs *config.DeployArgs, config *
 	pipelinePath := client.tempDir.Path("default-pipeline.yml")
 	pipelineName := "concourse-up-self-update"
 
+	if err := client.writePipelineConfig(pipelinePath, deployArgs, config); err != nil {
+		return err
+	}
+
+	if err := client.run("set-pipeline", "--pipeline", pipelineName, "--config", pipelinePath, "--non-interactive"); err != nil {
+		return err
+	}
+
+	if err := os.Remove(pipelinePath); err != nil {
+		return err
+	}
+
+	if !deployArgs.PauseSelfUpdate {
+		if err := client.run("unpause-pipeline", "--pipeline", pipelineName); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (client *Client) writePipelineConfig(pipelinePath string, deployArgs *config.DeployArgs, config *config.Config) error {
 	fileHandler, err := os.Create(pipelinePath)
 	if err != nil {
 		return err
@@ -161,28 +183,12 @@ func (client *Client) SetDefaultPipeline(deployArgs *config.DeployArgs, config *
 		return err
 	}
 
-	fmt.Println(string(pipelineConfig))
-
 	if _, err := fileHandler.Write(pipelineConfig); err != nil {
 		return err
 	}
 
 	if err := fileHandler.Sync(); err != nil {
 		return err
-	}
-
-	if err := client.run("set-pipeline", "--pipeline", pipelineName, "--config", pipelinePath, "--non-interactive"); err != nil {
-		return err
-	}
-
-	if err := os.Remove(pipelinePath); err != nil {
-		return err
-	}
-
-	if !deployArgs.PauseSelfUpdate {
-		if err := client.run("unpause-pipeline", "--pipeline", pipelineName); err != nil {
-			return err
-		}
 	}
 
 	return nil
