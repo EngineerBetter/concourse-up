@@ -52,6 +52,7 @@ fly --target system-test workers --details
 set +x
 
 echo "TRIGGERING SELF-UPDATE"
+fly --target system-test unpause-pipeline -p concourse-up-self-update
 fly --target system-test trigger-job -j concourse-up-self-update/self-update
 
 while true;

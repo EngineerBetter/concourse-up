@@ -179,9 +179,9 @@ func (client *Client) SetDefaultPipeline(deployArgs *config.DeployArgs, config *
 		return err
 	}
 
-	if err := client.run("unpause-pipeline", "--pipeline", pipelineName); err != nil {
-		return err
-	}
+	// if err := client.run("unpause-pipeline", "--pipeline", pipelineName); err != nil {
+	// 	return err
+	// }
 
 	return nil
 }
