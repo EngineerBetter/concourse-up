@@ -70,7 +70,7 @@ output "director_subnet_id" {
 		stdout := gbytes.NewBuffer()
 		stderr := gbytes.NewBuffer()
 
-		c, err := NewClient([]byte(config), stdout, stderr)
+		c, err := NewClient("aws", []byte(config), stdout, stderr)
 		Expect(err).ToNot(HaveOccurred())
 
 		defer c.Cleanup()

@@ -57,6 +57,14 @@ var deployFlags = []cli.Flag{
 		Value:       "xlarge",
 		Destination: &deployArgs.WorkerSize,
 	},
+	cli.StringFlag{
+		Name:        "iaas",
+		Usage:       "(optional) IAAS, can be AWS or GCP",
+		EnvVar:      "IAAS",
+		Value:       "aws",
+		Hidden:      true,
+		Destination: &deployArgs.IAAS,
+	},
 	cli.BoolFlag{
 		Name:        "detach-bosh-deployment",
 		Usage:       "(optional) Causes Concourse-up to exit as soon as the BOSH deployment starts. May only be used when upgrading an existing deplomnt",

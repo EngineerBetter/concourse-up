@@ -65,7 +65,7 @@ func (client *Client) buildTerraformClient(config *config.Config) (terraform.ICl
 		return nil, err
 	}
 
-	return client.terraformClientFactory(terraformFile, client.stdout, client.stderr)
+	return client.terraformClientFactory(config.IAAS, terraformFile, client.stdout, client.stderr)
 }
 
 func (client *Client) buildBoshClient(config *config.Config, metadata *terraform.Metadata) (bosh.IClient, error) {

@@ -23,16 +23,17 @@ type IClient interface {
 
 // Client wraps common terraform commands
 type Client struct {
+	iaas      string
 	configDir string
 	stdout    io.Writer
 	stderr    io.Writer
 }
 
 // ClientFactory is a function that builds a client interface
-type ClientFactory func(config []byte, stdout, stderr io.Writer) (IClient, error)
+type ClientFactory func(iaas string, config []byte, stdout, stderr io.Writer) (IClient, error)
 
 // NewClient is a concrete implementation of ClientFactory
-func NewClient(config []byte, stdout, stderr io.Writer) (IClient, error) {
+func NewClient(iaas string, config []byte, stdout, stderr io.Writer) (IClient, error) {
 	if err := checkTerraformOnPath(stderr, stderr); err != nil {
 		return nil, err
 	}
@@ -43,6 +44,7 @@ func NewClient(config []byte, stdout, stderr io.Writer) (IClient, error) {
 	}
 
 	return &Client{
+		iaas:      iaas,
 		configDir: configDir,
 		stdout:    stdout,
 		stderr:    stderr,

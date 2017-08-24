@@ -160,7 +160,7 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 			},
 		}
 
-		terraformClientFactory := func(config []byte, stdout, stderr io.Writer) (terraform.IClient, error) {
+		terraformClientFactory := func(iaas string, config []byte, stdout, stderr io.Writer) (terraform.IClient, error) {
 			return &FakeTerraformClient{
 				FakeApply: func() error {
 					actions = append(actions, "applying terraform")

@@ -10,6 +10,7 @@ import (
 
 // Config represents a concourse-up configuration file
 type Config struct {
+	IAAS                      string `json:"iaas"`
 	AvailabilityZone          string `json:"availability_zone"`
 	ConcourseCACert           string `json:"concourse_ca_cert"`
 	ConcourseCert             string `json:"concourse_cert"`
@@ -49,13 +50,14 @@ type Config struct {
 	TFStatePath               string `json:"tf_state_path"`
 }
 
-func generateDefaultConfig(project, deployment, configBucket, region string) ([]byte, error) {
+func generateDefaultConfig(iaas, project, deployment, configBucket, region string) ([]byte, error) {
 	privateKey, publicKey, err := util.GenerateSSHKeyPair()
 	if err != nil {
 		return nil, err
 	}
 
 	conf := Config{
+		IAAS:                     iaas,
 		ConcourseUsername:        "admin",
 		ConcoursePassword:        util.GeneratePassword(),
 		ConcourseWorkerCount:     1,

@@ -101,6 +101,7 @@ func (client *Client) Load() (*Config, error) {
 // LoadOrCreate loads an existing config file from S3, or creates a default if one doesn't already exist
 func (client *Client) LoadOrCreate(deployArgs *DeployArgs) (*Config, bool, error) {
 	defaultConfigBytes, err := generateDefaultConfig(
+		deployArgs.IAAS,
 		client.Project,
 		client.deployment(),
 		client.configBucket(),

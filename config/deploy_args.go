@@ -7,6 +7,7 @@ import (
 
 // DeployArgs are arguments passed to the deploy command
 type DeployArgs struct {
+	IAAS                 string
 	AWSRegion            string
 	Domain               string
 	TLSCert              string
