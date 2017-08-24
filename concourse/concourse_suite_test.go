@@ -16,13 +16,13 @@ func TestConcourse(t *testing.T) {
 }
 
 type FakeFlyClient struct {
-	FakeSetDefaultPipeline func() error
+	FakeSetDefaultPipeline func(deployAgs *config.DeployArgs, config *config.Config) error
 	FakeCleanup            func() error
 	FakeCanConnect         func() (bool, error)
 }
 
-func (client *FakeFlyClient) SetDefaultPipeline() error {
-	return client.FakeSetDefaultPipeline()
+func (client *FakeFlyClient) SetDefaultPipeline(deployArgs *config.DeployArgs, config *config.Config) error {
+	return client.FakeSetDefaultPipeline(deployArgs, config)
 }
 
 func (client *FakeFlyClient) Cleanup() error {

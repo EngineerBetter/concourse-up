@@ -30,7 +30,7 @@ providing you with a single command for getting your Concourse up and keeping it
 - Uses cost effective AWS spot instances where possible (BOSH will take care of the service)
 - Uses precompiled BOSH packages to minimise install time
 - Horizontal and vertical worker scaling
-- Workers reside behind a single, persistent public IP to simplify external security  
+- Workers reside behind a single, persistent public IP to simplify external security
 - Easy destroy and cleanup
 - Deploy to any AWS region
 
