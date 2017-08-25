@@ -43,8 +43,8 @@ var _ = Describe("Client", func() {
 
 			return "", "", errors.New("hosted zone not found")
 		},
-		FakeDeleteVMsInVPC: func(vpcID string, region string) error {
-			actions = append(actions, fmt.Sprintf("deleting vms in %s in region %s", vpcID, region))
+		FakeDeleteVMsInVPC: func(vpcID string) error {
+			actions = append(actions, fmt.Sprintf("deleting vms in %s", vpcID))
 			return nil
 		},
 	}
@@ -438,7 +438,7 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 			err := client.Destroy()
 			Expect(err).ToNot(HaveOccurred())
 
-			Expect(actions).To(ContainElement("deleting vms in vpc-112233 in region eu-west-1"))
+			Expect(actions).To(ContainElement("deleting vms in vpc-112233"))
 		})
 
 		It("Destroys the terraform infrastructure", func() {

@@ -53,7 +53,7 @@ var destroy = cli.Command{
 			}
 		}
 
-		awsClient := &aws.Client{}
+		awsClient := aws.New(destroyArgs.AWSRegion)
 
 		client := concourse.NewClient(
 			awsClient,
@@ -61,7 +61,7 @@ var destroy = cli.Command{
 			bosh.NewClient,
 			fly.New,
 			certs.Generate,
-			config.New(awsClient, name, deployArgs.AWSRegion),
+			config.New(awsClient, name),
 			nil,
 			os.Stdout,
 			os.Stderr,

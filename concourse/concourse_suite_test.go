@@ -16,43 +16,47 @@ func TestConcourse(t *testing.T) {
 }
 
 type FakeAWSClient struct {
-	FakeDeleteVMsInVPC                func(vpcID string, region string) error
-	FakeDeleteFile                    func(bucket, path, region string) error
-	FakeDeleteVersionedBucket         func(name, region string) error
-	FakeEnsureBucketExists            func(name, region string) error
-	FakeEnsureFileExists              func(bucket, path, region string, defaultContents []byte) ([]byte, bool, error)
+	FakeDeleteVMsInVPC                func(vpcID string) error
+	FakeDeleteFile                    func(bucket, path string) error
+	FakeDeleteVersionedBucket         func(name string) error
+	FakeEnsureBucketExists            func(name string) error
+	FakeEnsureFileExists              func(bucket, path string, defaultContents []byte) ([]byte, bool, error)
 	FakeFindLongestMatchingHostedZone func(subdomain string) (string, string, error)
-	FakeHasFile                       func(bucket, path, region string) (bool, error)
-	FakeLoadFile                      func(bucket, path, region string) ([]byte, error)
-	FakeWriteFile                     func(bucket, path, region string, contents []byte) error
+	FakeHasFile                       func(bucket, path string) (bool, error)
+	FakeLoadFile                      func(bucket, path string) ([]byte, error)
+	FakeWriteFile                     func(bucket, path string, contents []byte) error
+	FakeRegion                        func() string
 }
 
-func (client *FakeAWSClient) DeleteVMsInVPC(vpcID string, region string) error {
-	return client.FakeDeleteVMsInVPC(vpcID, region)
+func (client *FakeAWSClient) Region() string {
+	return client.FakeRegion()
 }
-func (client *FakeAWSClient) DeleteFile(bucket, path, region string) error {
-	return client.FakeDeleteFile(bucket, path, region)
+func (client *FakeAWSClient) DeleteVMsInVPC(vpcID string) error {
+	return client.FakeDeleteVMsInVPC(vpcID)
 }
-func (client *FakeAWSClient) DeleteVersionedBucket(name, region string) error {
-	return client.FakeDeleteVersionedBucket(name, region)
+func (client *FakeAWSClient) DeleteFile(bucket, path string) error {
+	return client.FakeDeleteFile(bucket, path)
 }
-func (client *FakeAWSClient) EnsureBucketExists(name, region string) error {
-	return client.FakeEnsureBucketExists(name, region)
+func (client *FakeAWSClient) DeleteVersionedBucket(name string) error {
+	return client.FakeDeleteVersionedBucket(name)
 }
-func (client *FakeAWSClient) EnsureFileExists(bucket, path, region string, defaultContents []byte) ([]byte, bool, error) {
-	return client.FakeEnsureFileExists(bucket, path, region, defaultContents)
+func (client *FakeAWSClient) EnsureBucketExists(name string) error {
+	return client.FakeEnsureBucketExists(name)
+}
+func (client *FakeAWSClient) EnsureFileExists(bucket, path string, defaultContents []byte) ([]byte, bool, error) {
+	return client.FakeEnsureFileExists(bucket, path, defaultContents)
 }
 func (client *FakeAWSClient) FindLongestMatchingHostedZone(subdomain string) (string, string, error) {
 	return client.FakeFindLongestMatchingHostedZone(subdomain)
 }
-func (client *FakeAWSClient) HasFile(bucket, path, region string) (bool, error) {
-	return client.FakeHasFile(bucket, path, region)
+func (client *FakeAWSClient) HasFile(bucket, path string) (bool, error) {
+	return client.FakeHasFile(bucket, path)
 }
-func (client *FakeAWSClient) LoadFile(bucket, path, region string) ([]byte, error) {
-	return client.FakeLoadFile(bucket, path, region)
+func (client *FakeAWSClient) LoadFile(bucket, path string) ([]byte, error) {
+	return client.FakeLoadFile(bucket, path)
 }
-func (client *FakeAWSClient) WriteFile(bucket, path, region string, contents []byte) error {
-	return client.FakeWriteFile(bucket, path, region, contents)
+func (client *FakeAWSClient) WriteFile(bucket, path string, contents []byte) error {
+	return client.FakeWriteFile(bucket, path, contents)
 }
 
 type FakeFlyClient struct {

@@ -47,15 +47,15 @@ output "director_subnet_id" {
 `
 
 	BeforeEach(func() {
-		awsClient = &aws.Client{}
+		awsClient = aws.New("eu-west-1")
 		bucket = fmt.Sprintf("concourse-up-integration-tests-%s", util.GeneratePassword())
 
-		err := awsClient.EnsureBucketExists(bucket, "eu-west-1")
+		err := awsClient.EnsureBucketExists(bucket)
 		Expect(err).ToNot(HaveOccurred())
 	})
 
 	AfterEach(func() {
-		err := awsClient.DeleteVersionedBucket(bucket, "eu-west-1")
+		err := awsClient.DeleteVersionedBucket(bucket)
 		Expect(err).ToNot(HaveOccurred())
 	})
 

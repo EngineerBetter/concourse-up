@@ -97,7 +97,7 @@ var deploy = cli.Command{
 			return err
 		}
 
-		awsClient := &aws.Client{}
+		awsClient := aws.New(deployArgs.AWSRegion)
 
 		client := concourse.NewClient(
 			awsClient,
@@ -105,7 +105,7 @@ var deploy = cli.Command{
 			bosh.NewClient,
 			fly.New,
 			certs.Generate,
-			config.New(awsClient, name, deployArgs.AWSRegion),
+			config.New(awsClient, name),
 			&deployArgs,
 			os.Stdout,
 			os.Stderr,

@@ -22,7 +22,7 @@ func (client *Client) Destroy() error {
 		return err
 	}
 
-	if err = client.awsClient.DeleteVMsInVPC(metadata.AWS.VPCID.Value, conf.Region); err != nil {
+	if err = client.awsClient.DeleteVMsInVPC(metadata.AWS.VPCID.Value); err != nil {
 		return err
 	}
 

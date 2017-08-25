@@ -24,17 +24,15 @@ type IClient interface {
 
 // Client is a client for loading the config file  from S3
 type Client struct {
-	aws      aws.IClient
-	project  string
-	s3Region string
+	aws     aws.IClient
+	project string
 }
 
 // New instantiates a new client
-func New(aws aws.IClient, project string, s3Region string) IClient {
+func New(aws aws.IClient, project string) IClient {
 	return &Client{
 		aws,
 		project,
-		s3Region,
 	}
 }
 
@@ -42,7 +40,6 @@ func New(aws aws.IClient, project string, s3Region string) IClient {
 func (client *Client) StoreAsset(filename string, contents []byte) error {
 	return client.aws.WriteFile(client.configBucket(),
 		filename,
-		client.s3Region,
 		contents,
 	)
 }
@@ -52,7 +49,6 @@ func (client *Client) LoadAsset(filename string) ([]byte, error) {
 	return client.aws.LoadFile(
 		client.configBucket(),
 		filename,
-		client.s3Region,
 	)
 }
 
@@ -61,7 +57,6 @@ func (client *Client) DeleteAsset(filename string) error {
 	return client.aws.DeleteFile(
 		client.configBucket(),
 		filename,
-		client.s3Region,
 	)
 }
 
@@ -70,7 +65,6 @@ func (client *Client) HasAsset(filename string) (bool, error) {
 	return client.aws.HasFile(
 		client.configBucket(),
 		filename,
-		client.s3Region,
 	)
 }
 
@@ -81,12 +75,12 @@ func (client *Client) Update(config *Config) error {
 		return err
 	}
 
-	return client.aws.WriteFile(client.configBucket(), configFilePath, client.s3Region, bytes)
+	return client.aws.WriteFile(client.configBucket(), configFilePath, bytes)
 }
 
 // DeleteAll deletes the entire configuration bucket
 func (client *Client) DeleteAll(config *Config) error {
-	return client.aws.DeleteVersionedBucket(config.ConfigBucket, client.s3Region)
+	return client.aws.DeleteVersionedBucket(config.ConfigBucket)
 }
 
 // Load loads an existing config file from S3
@@ -94,7 +88,6 @@ func (client *Client) Load() (*Config, error) {
 	configBytes, err := client.aws.LoadFile(
 		client.configBucket(),
 		configFilePath,
-		client.s3Region,
 	)
 	if err != nil {
 		return nil, err
@@ -121,14 +114,13 @@ func (client *Client) LoadOrCreate(deployArgs *DeployArgs) (*Config, bool, error
 		return nil, false, err
 	}
 
-	if err = client.aws.EnsureBucketExists(client.configBucket(), client.s3Region); err != nil {
+	if err = client.aws.EnsureBucketExists(client.configBucket()); err != nil {
 		return nil, false, err
 	}
 
 	configBytes, createdNewFile, err := client.aws.EnsureFileExists(
 		client.configBucket(),
 		configFilePath,
-		client.s3Region,
 		defaultConfigBytes,
 	)
 	if err != nil {
@@ -148,5 +140,5 @@ func (client *Client) deployment() string {
 }
 
 func (client *Client) configBucket() string {
-	return fmt.Sprintf("%s-%s-config", client.deployment(), client.s3Region)
+	return fmt.Sprintf("%s-%s-config", client.deployment(), client.aws.Region())
 }

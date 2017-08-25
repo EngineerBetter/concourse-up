@@ -12,30 +12,42 @@ import (
 
 // IClient represents actions taken against AWS
 type IClient interface {
-	DeleteFile(bucket, path, region string) error
-	DeleteVersionedBucket(name, region string) error
-	DeleteVMsInVPC(vpcID string, region string) error
-	EnsureBucketExists(name, region string) error
-	EnsureFileExists(bucket, path, region string, defaultContents []byte) ([]byte, bool, error)
+	DeleteFile(bucket, path string) error
+	DeleteVersionedBucket(name string) error
+	DeleteVMsInVPC(vpcID string) error
+	EnsureBucketExists(name string) error
+	EnsureFileExists(bucket, path string, defaultContents []byte) ([]byte, bool, error)
 	FindLongestMatchingHostedZone(subdomain string) (string, string, error)
-	HasFile(bucket, path, region string) (bool, error)
-	LoadFile(bucket, path, region string) ([]byte, error)
-	WriteFile(bucket, path, region string, contents []byte) error
+	HasFile(bucket, path string) (bool, error)
+	LoadFile(bucket, path string) ([]byte, error)
+	WriteFile(bucket, path string, contents []byte) error
+	Region() string
 }
 
 // Client is the concrete implementation of IClient on AWS
 type Client struct {
+	region string
+}
+
+// New returns a new AWS client
+func New(region string) IClient {
+	return &Client{region}
+}
+
+// Region returns the region to operate against
+func (client *Client) Region() string {
+	return client.region
 }
 
 // DeleteVMsInVPC deletes all the VMs in the given VPC
-func (client *Client) DeleteVMsInVPC(vpcID string, region string) error {
+func (client *Client) DeleteVMsInVPC(vpcID string) error {
 	sess, err := session.NewSession(aws.NewConfig().WithCredentialsChainVerboseErrors(true))
 	if err != nil {
 		return err
 	}
 
 	filterName := "vpc-id"
-	ec2Client := ec2.New(sess, &aws.Config{Region: &region})
+	ec2Client := ec2.New(sess, &aws.Config{Region: &client.region})
 
 	resp, err := ec2Client.DescribeInstances(&ec2.DescribeInstancesInput{
 		Filters: []*ec2.Filter{

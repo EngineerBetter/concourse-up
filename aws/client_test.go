@@ -10,7 +10,7 @@ import (
 var _ = Describe("Client#FindLongestMatchingHostedZone", func() {
 	Context("When the hosted zone exists", func() {
 		It("Returns the hosted zone details", func() {
-			zoneName, zoneID, err := (&Client{}).FindLongestMatchingHostedZone("integration-test.concourse-up.engineerbetter.com")
+			zoneName, zoneID, err := (New("eu-west-1")).FindLongestMatchingHostedZone("integration-test.concourse-up.engineerbetter.com")
 			Expect(err).ToNot(HaveOccurred())
 			Expect(zoneName).To(Equal("concourse-up.engineerbetter.com"))
 			Expect(zoneID).To(Equal("Z2NEMKRYH9QASG"))
@@ -19,7 +19,7 @@ var _ = Describe("Client#FindLongestMatchingHostedZone", func() {
 
 	Context("When the hosted zone does not exist", func() {
 		It("Returns a meaningful error", func() {
-			_, _, err := (&Client{}).FindLongestMatchingHostedZone("abc.google.com")
+			_, _, err := (New("eu-west-1")).FindLongestMatchingHostedZone("abc.google.com")
 			Expect(err).To(MatchError("No matching hosted zone found for domain abc.google.com"))
 		})
 	})

@@ -54,7 +54,7 @@ var info = cli.Command{
 		}
 		defer logFile.Close()
 
-		awsClient := &aws.Client{}
+		awsClient := aws.New(infoArgs.AWSRegion)
 
 		client := concourse.NewClient(
 			awsClient,
@@ -62,7 +62,7 @@ var info = cli.Command{
 			bosh.NewClient,
 			fly.New,
 			certs.Generate,
-			config.New(awsClient, name, deployArgs.AWSRegion),
+			config.New(awsClient, name),
 			nil,
 			os.Stdout,
 			os.Stderr,

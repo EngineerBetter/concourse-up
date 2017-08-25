@@ -36,16 +36,16 @@ const (
 )
 
 // DeleteVersionedBucket deletes and empties a versioned bucket
-func (client *Client) DeleteVersionedBucket(name, region string) error {
+func (client *Client) DeleteVersionedBucket(name string) error {
 	sess, err := session.NewSession(&aws.Config{
-		Region:      aws.String(region),
+		Region:      aws.String(client.region),
 		Credentials: credentials.NewStaticCredentials(os.Getenv("AWS_ACCESS_KEY_ID"), os.Getenv("AWS_SECRET_ACCESS_KEY"), ""),
 	})
 	if err != nil {
 		return err
 	}
 
-	s3Client := s3.New(sess, &aws.Config{Region: &region})
+	s3Client := s3.New(sess, &aws.Config{Region: &client.region})
 
 	// Delete all objects
 	objects := []*s3.Object{}
@@ -80,13 +80,13 @@ func (client *Client) DeleteVersionedBucket(name, region string) error {
 }
 
 // EnsureBucketExists checks if the named bucket exists and creates it if it doesn't
-func (client *Client) EnsureBucketExists(name, region string) error {
+func (client *Client) EnsureBucketExists(name string) error {
 	sess, err := session.NewSession(aws.NewConfig().WithCredentialsChainVerboseErrors(true))
 	if err != nil {
 		return err
 	}
 
-	s3Client := s3.New(sess, &aws.Config{Region: &region})
+	s3Client := s3.New(sess, &aws.Config{Region: &client.region})
 
 	_, err = s3Client.HeadBucket(&s3.HeadBucketInput{Bucket: &name})
 	if err == nil {
@@ -103,9 +103,9 @@ func (client *Client) EnsureBucketExists(name, region string) error {
 	}
 	// NOTE the location constraint should only be set if using a bucket OTHER than us-east-1
 	// http://docs.aws.amazon.com/AmazonS3/latest/API/RESTBucketPUT.html
-	if region != "us-east-1" {
+	if client.region != "us-east-1" {
 		bucketInput.CreateBucketConfiguration = &s3.CreateBucketConfiguration{
-			LocationConstraint: &region,
+			LocationConstraint: &client.region,
 		}
 	}
 
@@ -118,12 +118,12 @@ func (client *Client) EnsureBucketExists(name, region string) error {
 }
 
 // WriteFile writes the specified S3 object
-func (client *Client) WriteFile(bucket, path, region string, contents []byte) error {
+func (client *Client) WriteFile(bucket, path string, contents []byte) error {
 	sess, err := session.NewSession(aws.NewConfig().WithCredentialsChainVerboseErrors(true))
 	if err != nil {
 		return err
 	}
-	s3Client := s3.New(sess, &aws.Config{Region: &region})
+	s3Client := s3.New(sess, &aws.Config{Region: &client.region})
 
 	_, err = s3Client.PutObject(&s3.PutObjectInput{
 		Bucket: &bucket,
@@ -134,12 +134,12 @@ func (client *Client) WriteFile(bucket, path, region string, contents []byte) er
 }
 
 // HasFile returns true if the specified S3 object exists
-func (client *Client) HasFile(bucket, path, region string) (bool, error) {
+func (client *Client) HasFile(bucket, path string) (bool, error) {
 	sess, err := session.NewSession(aws.NewConfig().WithCredentialsChainVerboseErrors(true))
 	if err != nil {
 		return false, err
 	}
-	s3Client := s3.New(sess, &aws.Config{Region: &region})
+	s3Client := s3.New(sess, &aws.Config{Region: &client.region})
 
 	_, err = s3Client.HeadObject(&s3.HeadObjectInput{Bucket: &bucket, Key: &path})
 	if err != nil {
@@ -155,13 +155,13 @@ func (client *Client) HasFile(bucket, path, region string) (bool, error) {
 
 // EnsureFileExists checks for the named file in S3 and creates it if it doesn't
 // Second argument is true if new file was created
-func (client *Client) EnsureFileExists(bucket, path, region string, defaultContents []byte) ([]byte, bool, error) {
+func (client *Client) EnsureFileExists(bucket, path string, defaultContents []byte) ([]byte, bool, error) {
 	sess, err := session.NewSession(aws.NewConfig().WithCredentialsChainVerboseErrors(true))
 	if err != nil {
 		return nil, false, err
 	}
 
-	s3Client := s3.New(sess, &aws.Config{Region: &region})
+	s3Client := s3.New(sess, &aws.Config{Region: &client.region})
 
 	output, err := s3Client.GetObject(&s3.GetObjectInput{Bucket: &bucket, Key: &path})
 	if err == nil {
@@ -194,13 +194,13 @@ func (client *Client) EnsureFileExists(bucket, path, region string, defaultConte
 }
 
 // LoadFile loads a file from S3
-func (client *Client) LoadFile(bucket, path, region string) ([]byte, error) {
+func (client *Client) LoadFile(bucket, path string) ([]byte, error) {
 	sess, err := session.NewSession(aws.NewConfig().WithCredentialsChainVerboseErrors(true))
 	if err != nil {
 		return nil, err
 	}
 
-	s3Client := s3.New(sess, &aws.Config{Region: &region})
+	s3Client := s3.New(sess, &aws.Config{Region: &client.region})
 
 	output, err := s3Client.GetObject(&s3.GetObjectInput{Bucket: &bucket, Key: &path})
 	if err != nil {
@@ -211,13 +211,13 @@ func (client *Client) LoadFile(bucket, path, region string) ([]byte, error) {
 }
 
 // DeleteFile deletes a file from S3
-func (client *Client) DeleteFile(bucket, path, region string) error {
+func (client *Client) DeleteFile(bucket, path string) error {
 	sess, err := session.NewSession(aws.NewConfig().WithCredentialsChainVerboseErrors(true))
 	if err != nil {
 		return err
 	}
 
-	s3Client := s3.New(sess, &aws.Config{Region: &region})
+	s3Client := s3.New(sess, &aws.Config{Region: &client.region})
 	_, err = s3Client.DeleteObject(&s3.DeleteObjectInput{
 		Bucket: &bucket,
 		Key:    &path,
