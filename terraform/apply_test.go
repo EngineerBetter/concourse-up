@@ -20,7 +20,7 @@ var _ = Describe("Plan", func() {
 
 	BeforeEach(func() {
 		var err error
-		iaasClient, err = iaas.NewAWS("eu-west-1")
+		iaasClient, err = iaas.New("AWS", "eu-west-1")
 		Expect(err).ToNot(HaveOccurred())
 		bucket = fmt.Sprintf("concourse-up-integration-tests-%s", util.GeneratePassword())
 

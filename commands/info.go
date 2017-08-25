@@ -40,7 +40,7 @@ var infoFlags = []cli.Flag{
 		EnvVar:      "IAAS",
 		Value:       "AWS",
 		Hidden:      true,
-		Destination: &deployArgs.IAAS,
+		Destination: &infoArgs.IAAS,
 	},
 }
 
@@ -62,7 +62,7 @@ var info = cli.Command{
 		}
 		defer logFile.Close()
 
-		awsClient, err := iaas.NewAWS(destroyArgs.AWSRegion)
+		awsClient, err := iaas.New(deployArgs.IAAS, destroyArgs.AWSRegion)
 		if err != nil {
 			return err
 		}

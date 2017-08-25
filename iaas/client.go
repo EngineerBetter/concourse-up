@@ -1,5 +1,7 @@
 package iaas
 
+import "fmt"
+
 // IClient represents actions taken against AWS
 type IClient interface {
 	DeleteFile(bucket, path string) error
@@ -13,4 +15,13 @@ type IClient interface {
 	WriteFile(bucket, path string, contents []byte) error
 	Region() string
 	IAAS() string
+}
+
+// New returns a new IAAS client for a particular IAAS and region
+func New(iaas string, region string) (IClient, error) {
+	if iaas == "AWS" {
+		return newAWS(region)
+	}
+
+	return nil, fmt.Errorf("IAAS not supported: %s", iaas)
 }

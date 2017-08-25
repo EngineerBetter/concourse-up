@@ -17,8 +17,7 @@ type AWSClient struct {
 	region string
 }
 
-// NewAWS returns a new AWS client
-func NewAWS(region string) (IClient, error) {
+func newAWS(region string) (IClient, error) {
 	if os.Getenv("AWS_ACCESS_KEY_ID") == "" {
 		return nil, errors.New("env var AWS_ACCESS_KEY_ID not found")
 	}

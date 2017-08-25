@@ -33,7 +33,7 @@ var destroyFlags = []cli.Flag{
 		EnvVar:      "IAAS",
 		Value:       "AWS",
 		Hidden:      true,
-		Destination: &deployArgs.IAAS,
+		Destination: &destroyArgs.IAAS,
 	},
 }
 
@@ -61,18 +61,18 @@ var destroy = cli.Command{
 			}
 		}
 
-		awsClient, err := iaas.NewAWS(destroyArgs.AWSRegion)
+		iaasClient, err := iaas.New(destroyArgs.IAAS, destroyArgs.AWSRegion)
 		if err != nil {
 			return err
 		}
 
 		client := concourse.NewClient(
-			awsClient,
+			iaasClient,
 			terraform.NewClient,
 			bosh.NewClient,
 			fly.New,
 			certs.Generate,
-			config.New(awsClient, name),
+			config.New(iaasClient, name),
 			nil,
 			os.Stdout,
 			os.Stderr,
