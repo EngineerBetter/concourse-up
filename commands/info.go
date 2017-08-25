@@ -62,7 +62,7 @@ var info = cli.Command{
 		}
 		defer logFile.Close()
 
-		awsClient, err := iaas.New(deployArgs.IAAS, destroyArgs.AWSRegion)
+		awsClient, err := iaas.New(infoArgs.IAAS, infoArgs.AWSRegion)
 		if err != nil {
 			return err
 		}
