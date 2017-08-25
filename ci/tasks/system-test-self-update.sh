@@ -35,6 +35,8 @@ certstrap sign "$custom_domain" --CA "$deployment"
   --tls-cert "$(cat out/$custom_domain.crt)" \
   --tls-key "$(cat out/$custom_domain.key)"
 
+sleep 60
+
 config=$(./cup-new info --region eu-west-2 --json $deployment)
 domain=$(echo "$config" | jq -r '.config.domain')
 username=$(echo "$config" | jq -r '.config.concourse_username')
@@ -51,30 +53,30 @@ fly --target system-test sync
 fly --target system-test workers --details
 set +x
 
-echo "TRIGGERING SELF-UPDATE"
-fly --target system-test trigger-job -j concourse-up-self-update/self-update
+# echo "TRIGGERING SELF-UPDATE"
+# fly --target system-test trigger-job -j concourse-up-self-update/self-update
 
-while true;
-do
-  builds="$(fly --target system-test builds)"
-  echo "$builds"
+# while true;
+# do
+#   builds="$(fly --target system-test builds)"
+#   echo "$builds"
 
-  if [[ $builds != *"concourse-up-self-update/self-update"* ]] ; then
-    echo "could't find self-update job in builds:\n$builds"
-    exit 1
-  fi
+#   if [[ $builds != *"concourse-up-self-update/self-update"* ]] ; then
+#     echo "could't find self-update job in builds:\n$builds"
+#     exit 1
+#   fi
 
-  if [[ $builds == *"succeeded"* ]] ; then
-    break
-  fi
+#   if [[ $builds == *"succeeded"* ]] ; then
+#     break
+#   fi
 
-  if [[ $builds == *"failed"* ]] ; then
-    echo "build failed:\n$builds"
-    exit 1
-  fi
+#   if [[ $builds == *"failed"* ]] ; then
+#     echo "build failed:\n$builds"
+#     exit 1
+#   fi
 
-  sleep 1;
-done
+#   sleep 1;
+# done
 
 echo "DESTROYING DEPLOYMENT"
 ./cup-new --non-interactive destroy --region eu-west-2 $deployment
