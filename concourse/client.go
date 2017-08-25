@@ -3,19 +3,19 @@ package concourse
 import (
 	"io"
 
-	"github.com/EngineerBetter/concourse-up/aws"
 	"github.com/EngineerBetter/concourse-up/bosh"
 	"github.com/EngineerBetter/concourse-up/certs"
 	"github.com/EngineerBetter/concourse-up/config"
 	"github.com/EngineerBetter/concourse-up/db"
 	"github.com/EngineerBetter/concourse-up/director"
 	"github.com/EngineerBetter/concourse-up/fly"
+	"github.com/EngineerBetter/concourse-up/iaas"
 	"github.com/EngineerBetter/concourse-up/terraform"
 )
 
 // Client is a concrete implementation of IClient interface
 type Client struct {
-	awsClient              aws.IClient
+	iaasClient             iaas.IClient
 	terraformClientFactory terraform.ClientFactory
 	boshClientFactory      bosh.ClientFactory
 	flyClientFactory       func(fly.Credentials, io.Writer, io.Writer) (fly.IClient, error)
@@ -35,7 +35,7 @@ type IClient interface {
 
 // NewClient returns a new Client
 func NewClient(
-	awsClient aws.IClient,
+	iaasClient iaas.IClient,
 	terraformClientFactory terraform.ClientFactory,
 	boshClientFactory bosh.ClientFactory,
 	flyClientFactory func(fly.Credentials, io.Writer, io.Writer) (fly.IClient, error),
@@ -44,7 +44,7 @@ func NewClient(
 	deployArgs *config.DeployArgs,
 	stdout, stderr io.Writer) *Client {
 	return &Client{
-		awsClient:              awsClient,
+		iaasClient:             iaasClient,
 		terraformClientFactory: terraformClientFactory,
 		boshClientFactory:      boshClientFactory,
 		flyClientFactory:       flyClientFactory,

@@ -3,8 +3,8 @@ package terraform_test
 import (
 	"fmt"
 
-	"github.com/EngineerBetter/concourse-up/aws"
 	"github.com/EngineerBetter/concourse-up/config"
+	"github.com/EngineerBetter/concourse-up/iaas"
 	. "github.com/EngineerBetter/concourse-up/terraform"
 	"github.com/EngineerBetter/concourse-up/util"
 
@@ -15,14 +15,14 @@ import (
 
 var _ = Describe("Plan", func() {
 	var bucket string
-	var awsClient aws.IClient
+	var iaasClient iaas.IClient
 	var conf *config.Config
 
 	BeforeEach(func() {
-		awsClient = aws.New("eu-west-1")
+		iaasClient = iaas.NewAWS("eu-west-1")
 		bucket = fmt.Sprintf("concourse-up-integration-tests-%s", util.GeneratePassword())
 
-		err := awsClient.EnsureBucketExists(bucket)
+		err := iaasClient.EnsureBucketExists(bucket)
 		Expect(err).ToNot(HaveOccurred())
 
 		conf = &config.Config{
@@ -74,7 +74,7 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 	})
 
 	AfterEach(func() {
-		err := awsClient.DeleteVersionedBucket(bucket)
+		err := iaasClient.DeleteVersionedBucket(bucket)
 		Expect(err).ToNot(HaveOccurred())
 	})
 

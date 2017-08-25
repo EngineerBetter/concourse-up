@@ -5,12 +5,12 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/EngineerBetter/concourse-up/aws"
 	"github.com/EngineerBetter/concourse-up/bosh"
 	"github.com/EngineerBetter/concourse-up/certs"
 	"github.com/EngineerBetter/concourse-up/concourse"
 	"github.com/EngineerBetter/concourse-up/config"
 	"github.com/EngineerBetter/concourse-up/fly"
+	"github.com/EngineerBetter/concourse-up/iaas"
 	"github.com/EngineerBetter/concourse-up/terraform"
 	"github.com/EngineerBetter/concourse-up/util"
 
@@ -53,7 +53,7 @@ var destroy = cli.Command{
 			}
 		}
 
-		awsClient := aws.New(destroyArgs.AWSRegion)
+		awsClient := iaas.NewAWS(destroyArgs.AWSRegion)
 
 		client := concourse.NewClient(
 			awsClient,

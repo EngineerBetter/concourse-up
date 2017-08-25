@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/EngineerBetter/concourse-up/aws"
+	"github.com/EngineerBetter/concourse-up/iaas"
 )
 
 const terraformStateFileName = "terraform.tfstate"
@@ -24,21 +24,21 @@ type IClient interface {
 
 // Client is a client for loading the config file  from S3
 type Client struct {
-	aws     aws.IClient
+	iaas    iaas.IClient
 	project string
 }
 
 // New instantiates a new client
-func New(aws aws.IClient, project string) IClient {
+func New(iaas iaas.IClient, project string) IClient {
 	return &Client{
-		aws,
+		iaas,
 		project,
 	}
 }
 
 // StoreAsset stores an associated configuration file
 func (client *Client) StoreAsset(filename string, contents []byte) error {
-	return client.aws.WriteFile(client.configBucket(),
+	return client.iaas.WriteFile(client.configBucket(),
 		filename,
 		contents,
 	)
@@ -46,7 +46,7 @@ func (client *Client) StoreAsset(filename string, contents []byte) error {
 
 // LoadAsset loads an associated configuration file
 func (client *Client) LoadAsset(filename string) ([]byte, error) {
-	return client.aws.LoadFile(
+	return client.iaas.LoadFile(
 		client.configBucket(),
 		filename,
 	)
@@ -54,7 +54,7 @@ func (client *Client) LoadAsset(filename string) ([]byte, error) {
 
 // DeleteAsset deletes an associated configuration file
 func (client *Client) DeleteAsset(filename string) error {
-	return client.aws.DeleteFile(
+	return client.iaas.DeleteFile(
 		client.configBucket(),
 		filename,
 	)
@@ -62,7 +62,7 @@ func (client *Client) DeleteAsset(filename string) error {
 
 // HasAsset returns true if an associated configuration file exists
 func (client *Client) HasAsset(filename string) (bool, error) {
-	return client.aws.HasFile(
+	return client.iaas.HasFile(
 		client.configBucket(),
 		filename,
 	)
@@ -75,17 +75,17 @@ func (client *Client) Update(config *Config) error {
 		return err
 	}
 
-	return client.aws.WriteFile(client.configBucket(), configFilePath, bytes)
+	return client.iaas.WriteFile(client.configBucket(), configFilePath, bytes)
 }
 
 // DeleteAll deletes the entire configuration bucket
 func (client *Client) DeleteAll(config *Config) error {
-	return client.aws.DeleteVersionedBucket(config.ConfigBucket)
+	return client.iaas.DeleteVersionedBucket(config.ConfigBucket)
 }
 
 // Load loads an existing config file from S3
 func (client *Client) Load() (*Config, error) {
-	configBytes, err := client.aws.LoadFile(
+	configBytes, err := client.iaas.LoadFile(
 		client.configBucket(),
 		configFilePath,
 	)
@@ -114,11 +114,11 @@ func (client *Client) LoadOrCreate(deployArgs *DeployArgs) (*Config, bool, error
 		return nil, false, err
 	}
 
-	if err = client.aws.EnsureBucketExists(client.configBucket()); err != nil {
+	if err = client.iaas.EnsureBucketExists(client.configBucket()); err != nil {
 		return nil, false, err
 	}
 
-	configBytes, createdNewFile, err := client.aws.EnsureFileExists(
+	configBytes, createdNewFile, err := client.iaas.EnsureFileExists(
 		client.configBucket(),
 		configFilePath,
 		defaultConfigBytes,
@@ -140,5 +140,5 @@ func (client *Client) deployment() string {
 }
 
 func (client *Client) configBucket() string {
-	return fmt.Sprintf("%s-%s-config", client.deployment(), client.aws.Region())
+	return fmt.Sprintf("%s-%s-config", client.deployment(), client.iaas.Region())
 }

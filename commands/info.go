@@ -5,12 +5,12 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/EngineerBetter/concourse-up/aws"
 	"github.com/EngineerBetter/concourse-up/bosh"
 	"github.com/EngineerBetter/concourse-up/certs"
 	"github.com/EngineerBetter/concourse-up/concourse"
 	"github.com/EngineerBetter/concourse-up/config"
 	"github.com/EngineerBetter/concourse-up/fly"
+	"github.com/EngineerBetter/concourse-up/iaas"
 	"github.com/EngineerBetter/concourse-up/terraform"
 
 	"encoding/json"
@@ -54,7 +54,7 @@ var info = cli.Command{
 		}
 		defer logFile.Close()
 
-		awsClient := aws.New(infoArgs.AWSRegion)
+		awsClient := iaas.NewAWS(infoArgs.AWSRegion)
 
 		client := concourse.NewClient(
 			awsClient,
