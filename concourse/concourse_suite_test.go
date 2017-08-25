@@ -28,6 +28,10 @@ type FakeAWSClient struct {
 	FakeRegion                        func() string
 }
 
+func (client *FakeAWSClient) IAAS() string {
+	return "AWS"
+}
+
 func (client *FakeAWSClient) Region() string {
 	return client.FakeRegion()
 }

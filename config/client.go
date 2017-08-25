@@ -98,6 +98,10 @@ func (client *Client) Load() (*Config, error) {
 		return nil, err
 	}
 
+	if conf.IAAS == "" {
+		conf.IAAS = client.iaas.IAAS()
+	}
+
 	return &conf, nil
 }
 

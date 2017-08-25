@@ -34,6 +34,14 @@ var infoFlags = []cli.Flag{
 		EnvVar:      "JSON",
 		Destination: &infoArgs.JSON,
 	},
+	cli.StringFlag{
+		Name:        "iaas",
+		Usage:       "(optional) IAAS, can be AWS or GCP",
+		EnvVar:      "IAAS",
+		Value:       "AWS",
+		Hidden:      true,
+		Destination: &deployArgs.IAAS,
+	},
 }
 
 var info = cli.Command{
