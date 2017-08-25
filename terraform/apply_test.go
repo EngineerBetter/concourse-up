@@ -19,10 +19,12 @@ var _ = Describe("Plan", func() {
 	var conf *config.Config
 
 	BeforeEach(func() {
-		iaasClient = iaas.NewAWS("eu-west-1")
+		var err error
+		iaasClient, err = iaas.NewAWS("eu-west-1")
+		Expect(err).ToNot(HaveOccurred())
 		bucket = fmt.Sprintf("concourse-up-integration-tests-%s", util.GeneratePassword())
 
-		err := iaasClient.EnsureBucketExists(bucket)
+		err = iaasClient.EnsureBucketExists(bucket)
 		Expect(err).ToNot(HaveOccurred())
 
 		conf = &config.Config{

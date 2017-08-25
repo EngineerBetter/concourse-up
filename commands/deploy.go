@@ -97,7 +97,10 @@ var deploy = cli.Command{
 			return err
 		}
 
-		awsClient := iaas.NewAWS(deployArgs.AWSRegion)
+		awsClient, err := iaas.NewAWS(deployArgs.AWSRegion)
+		if err != nil {
+			return err
+		}
 
 		client := concourse.NewClient(
 			awsClient,

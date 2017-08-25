@@ -1,7 +1,9 @@
 package iaas
 
 import (
+	"errors"
 	"fmt"
+	"os"
 	"strings"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -16,8 +18,16 @@ type AWSClient struct {
 }
 
 // NewAWS returns a new AWS client
-func NewAWS(region string) IClient {
-	return &AWSClient{region}
+func NewAWS(region string) (IClient, error) {
+	if os.Getenv("AWS_ACCESS_KEY_ID") == "" {
+		return nil, errors.New("env var AWS_ACCESS_KEY_ID not found")
+	}
+
+	if os.Getenv("AWS_SECRET_ACCESS_KEY") == "" {
+		return nil, errors.New("env var AWS_SECRET_ACCESS_KEY not found")
+	}
+
+	return &AWSClient{region}, nil
 }
 
 // Region returns the region to operate against

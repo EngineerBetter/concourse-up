@@ -61,7 +61,10 @@ var destroy = cli.Command{
 			}
 		}
 
-		awsClient := iaas.NewAWS(destroyArgs.AWSRegion)
+		awsClient, err := iaas.NewAWS(destroyArgs.AWSRegion)
+		if err != nil {
+			return err
+		}
 
 		client := concourse.NewClient(
 			awsClient,
