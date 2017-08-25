@@ -100,21 +100,20 @@ director_darwin_binary_url="https://s3.amazonaws.com/bosh-cli-artifacts/bosh-cli
 director_linux_binary_url="https://s3.amazonaws.com/bosh-cli-artifacts/bosh-cli-2.0.28-linux-amd64"
 director_windows_binary_url="https://s3.amazonaws.com/bosh-cli-artifacts/bosh-cli-2.0.28-windows-amd64.exe"
 
-terraform_version="0.10.2"
 terraform_darwin_binary_url="https://s3-$AWS_DEFAULT_REGION.amazonaws.com/$PUBLIC_ARTIFACTS_BUCKET/terraform_darwin_amd64-$concourse_release_version"
 terraform_linux_binary_url="https://s3-$AWS_DEFAULT_REGION.amazonaws.com/$PUBLIC_ARTIFACTS_BUCKET/terraform_linux_amd64-$concourse_release_version"
 terraform_windows_binary_url="https://s3-$AWS_DEFAULT_REGION.amazonaws.com/$PUBLIC_ARTIFACTS_BUCKET/terraform_windows_amd64-$concourse_release_version.exe"
 
-wget "https://releases.hashicorp.com/terraform/$terraform_version/terraform_$terraform_version_darwin_amd64.zip"
-unzip "terraform_$terraform_version_darwin_amd64.zip"
+wget "https://releases.hashicorp.com/terraform/0.10.2/terraform_0.10.2_darwin_amd64.zip"
+unzip "terraform_0.10.2_darwin_amd64.zip"
 aws s3 cp --acl public-read terraform "$terraform_darwin_binary_url"
 rm terraform
-wget "https://releases.hashicorp.com/terraform/$terraform_version/terraform_$terraform_version_linux_amd64.zip"
-unzip "terraform_$terraform_version_linux_amd64.zip"
+wget "https://releases.hashicorp.com/terraform/0.10.2/terraform_0.10.2_linux_amd64.zip"
+unzip "terraform_0.10.2_linux_amd64.zip"
 aws s3 cp --acl public-read terraform "$terraform_linux_binary_url"
 rm terraform
-wget "https://releases.hashicorp.com/terraform/$terraform_version/terraform_$terraform_version_windows_amd64.zip"
-unzip "terraform_$terraform_version_windows_amd64.zip"
+wget "https://releases.hashicorp.com/terraform/0.10.2/terraform_0.10.2_windows_amd64.zip"
+unzip "terraform_0.10.2_windows_amd64.zip"
 aws s3 cp --acl public-read terraform.exe "$terraform_windows_binary_url"
 rm terraform.exe
 
