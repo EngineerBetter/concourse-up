@@ -28,7 +28,6 @@ var _ = Describe("Plan", func() {
 		Expect(err).ToNot(HaveOccurred())
 
 		conf = &config.Config{
-			IAAS:                   "AWS",
 			ConfigBucket:           bucket,
 			AvailabilityZone:       "eu-west-1a",
 			RDSInstanceClass:       "t2.small",

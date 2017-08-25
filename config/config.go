@@ -10,7 +10,6 @@ import (
 
 // Config represents a concourse-up configuration file
 type Config struct {
-	IAAS                      string `json:"iaas"`
 	AvailabilityZone          string `json:"availability_zone"`
 	ConcourseCACert           string `json:"concourse_ca_cert"`
 	ConcourseCert             string `json:"concourse_cert"`
@@ -57,7 +56,6 @@ func generateDefaultConfig(iaas, project, deployment, configBucket, region strin
 	}
 
 	conf := Config{
-		IAAS:                     iaas,
 		ConcourseUsername:        "admin",
 		ConcoursePassword:        util.GeneratePassword(),
 		ConcourseWorkerCount:     1,
