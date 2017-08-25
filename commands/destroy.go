@@ -61,7 +61,7 @@ var destroy = cli.Command{
 			bosh.NewClient,
 			fly.New,
 			certs.Generate,
-			&config.Client{Project: name, S3Region: destroyArgs.AWSRegion},
+			config.New(awsClient, name, deployArgs.AWSRegion),
 			nil,
 			os.Stdout,
 			os.Stderr,

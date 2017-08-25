@@ -105,7 +105,7 @@ var deploy = cli.Command{
 			bosh.NewClient,
 			fly.New,
 			certs.Generate,
-			&config.Client{Project: name, S3Region: deployArgs.AWSRegion},
+			config.New(awsClient, name, deployArgs.AWSRegion),
 			&deployArgs,
 			os.Stdout,
 			os.Stderr,

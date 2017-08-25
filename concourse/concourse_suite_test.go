@@ -16,16 +16,43 @@ func TestConcourse(t *testing.T) {
 }
 
 type FakeAWSClient struct {
-	FakeFindLongestMatchingHostedZone func(subdomain string) (string, string, error)
 	FakeDeleteVMsInVPC                func(vpcID string, region string) error
-}
-
-func (client *FakeAWSClient) FindLongestMatchingHostedZone(subdomain string) (string, string, error) {
-	return client.FakeFindLongestMatchingHostedZone(subdomain)
+	FakeDeleteFile                    func(bucket, path, region string) error
+	FakeDeleteVersionedBucket         func(name, region string) error
+	FakeEnsureBucketExists            func(name, region string) error
+	FakeEnsureFileExists              func(bucket, path, region string, defaultContents []byte) ([]byte, bool, error)
+	FakeFindLongestMatchingHostedZone func(subdomain string) (string, string, error)
+	FakeHasFile                       func(bucket, path, region string) (bool, error)
+	FakeLoadFile                      func(bucket, path, region string) ([]byte, error)
+	FakeWriteFile                     func(bucket, path, region string, contents []byte) error
 }
 
 func (client *FakeAWSClient) DeleteVMsInVPC(vpcID string, region string) error {
 	return client.FakeDeleteVMsInVPC(vpcID, region)
+}
+func (client *FakeAWSClient) DeleteFile(bucket, path, region string) error {
+	return client.FakeDeleteFile(bucket, path, region)
+}
+func (client *FakeAWSClient) DeleteVersionedBucket(name, region string) error {
+	return client.FakeDeleteVersionedBucket(name, region)
+}
+func (client *FakeAWSClient) EnsureBucketExists(name, region string) error {
+	return client.FakeEnsureBucketExists(name, region)
+}
+func (client *FakeAWSClient) EnsureFileExists(bucket, path, region string, defaultContents []byte) ([]byte, bool, error) {
+	return client.FakeEnsureFileExists(bucket, path, region, defaultContents)
+}
+func (client *FakeAWSClient) FindLongestMatchingHostedZone(subdomain string) (string, string, error) {
+	return client.FakeFindLongestMatchingHostedZone(subdomain)
+}
+func (client *FakeAWSClient) HasFile(bucket, path, region string) (bool, error) {
+	return client.FakeHasFile(bucket, path, region)
+}
+func (client *FakeAWSClient) LoadFile(bucket, path, region string) ([]byte, error) {
+	return client.FakeLoadFile(bucket, path, region)
+}
+func (client *FakeAWSClient) WriteFile(bucket, path, region string, contents []byte) error {
+	return client.FakeWriteFile(bucket, path, region, contents)
 }
 
 type FakeFlyClient struct {

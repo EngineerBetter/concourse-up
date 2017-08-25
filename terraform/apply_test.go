@@ -14,6 +14,7 @@ import (
 
 var _ = Describe("Apply & Destroy", func() {
 	var bucket string
+	var awsClient aws.IClient
 
 	configTemplate := `
 terraform {
@@ -46,14 +47,15 @@ output "director_subnet_id" {
 `
 
 	BeforeEach(func() {
+		awsClient = &aws.Client{}
 		bucket = fmt.Sprintf("concourse-up-integration-tests-%s", util.GeneratePassword())
 
-		err := aws.EnsureBucketExists(bucket, "eu-west-1")
+		err := awsClient.EnsureBucketExists(bucket, "eu-west-1")
 		Expect(err).ToNot(HaveOccurred())
 	})
 
 	AfterEach(func() {
-		err := aws.DeleteVersionedBucket(bucket, "eu-west-1")
+		err := awsClient.DeleteVersionedBucket(bucket, "eu-west-1")
 		Expect(err).ToNot(HaveOccurred())
 	})
 

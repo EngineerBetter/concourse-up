@@ -12,8 +12,15 @@ import (
 
 // IClient represents actions taken against AWS
 type IClient interface {
+	DeleteFile(bucket, path, region string) error
+	DeleteVersionedBucket(name, region string) error
 	DeleteVMsInVPC(vpcID string, region string) error
+	EnsureBucketExists(name, region string) error
+	EnsureFileExists(bucket, path, region string, defaultContents []byte) ([]byte, bool, error)
 	FindLongestMatchingHostedZone(subdomain string) (string, string, error)
+	HasFile(bucket, path, region string) (bool, error)
+	LoadFile(bucket, path, region string) ([]byte, error)
+	WriteFile(bucket, path, region string, contents []byte) error
 }
 
 // Client is the concrete implementation of IClient on AWS
