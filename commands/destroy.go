@@ -53,13 +53,14 @@ var destroy = cli.Command{
 			}
 		}
 
+		awsClient := &aws.Client{}
+
 		client := concourse.NewClient(
+			awsClient,
 			terraform.NewClient,
 			bosh.NewClient,
 			fly.New,
-			aws.DeleteVMsInVPC,
 			certs.Generate,
-			aws.FindLongestMatchingHostedZone,
 			&config.Client{Project: name, S3Region: destroyArgs.AWSRegion},
 			nil,
 			os.Stdout,

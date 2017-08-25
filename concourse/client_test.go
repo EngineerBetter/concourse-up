@@ -28,24 +28,25 @@ var _ = Describe("Client", func() {
 	var args *config.DeployArgs
 	var exampleConfig *config.Config
 
-	hostedZoneFinder := func(subdomain string) (string, string, error) {
-		if subdomain == "ci.google.com" {
-			return "google.com", "ABC123", nil
-		}
-
-		return "", "", errors.New("hosted zone not found")
-	}
-
-	vpcEmptier := func(vpcID string, region string) error {
-		actions = append(actions, fmt.Sprintf("deleting vms in %s in region %s", vpcID, region))
-		return nil
-	}
-
 	certGenerator := func(caName string, ip ...string) (*certs.Certs, error) {
 		actions = append(actions, fmt.Sprintf("generating cert ca: %s, ca: %s", caName, ip))
 		return &certs.Certs{
 			CACert: []byte("----EXAMPLE CERT----"),
 		}, nil
+	}
+
+	awsClient := &FakeAWSClient{
+		FakeFindLongestMatchingHostedZone: func(subdomain string) (string, string, error) {
+			if subdomain == "ci.google.com" {
+				return "google.com", "ABC123", nil
+			}
+
+			return "", "", errors.New("hosted zone not found")
+		},
+		FakeDeleteVMsInVPC: func(vpcID string, region string) error {
+			actions = append(actions, fmt.Sprintf("deleting vms in %s in region %s", vpcID, region))
+			return nil
+		},
 	}
 
 	fakeFlyClient := &FakeFlyClient{
@@ -207,14 +208,13 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 
 		buildClient = func() concourse.IClient {
 			return concourse.NewClient(
+				awsClient,
 				terraformClientFactory,
 				boshClientFactory,
 				func(fly.Credentials, io.Writer, io.Writer) (fly.IClient, error) {
 					return fakeFlyClient, nil
 				},
-				vpcEmptier,
 				certGenerator,
-				hostedZoneFinder,
 				configClient,
 				args,
 				stdout,

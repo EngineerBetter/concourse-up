@@ -54,13 +54,14 @@ var info = cli.Command{
 		}
 		defer logFile.Close()
 
+		awsClient := &aws.Client{}
+
 		client := concourse.NewClient(
+			awsClient,
 			terraform.NewClient,
 			bosh.NewClient,
 			fly.New,
-			aws.DeleteVMsInVPC,
 			certs.Generate,
-			aws.FindLongestMatchingHostedZone,
 			&config.Client{Project: name, S3Region: infoArgs.AWSRegion},
 			nil,
 			os.Stdout,

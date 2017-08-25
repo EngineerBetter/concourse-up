@@ -61,7 +61,7 @@ var deployFlags = []cli.Flag{
 		Name:        "iaas",
 		Usage:       "(optional) IAAS, can be AWS or GCP",
 		EnvVar:      "IAAS",
-		Value:       "aws",
+		Value:       "AWS",
 		Hidden:      true,
 		Destination: &deployArgs.IAAS,
 	},
@@ -97,13 +97,14 @@ var deploy = cli.Command{
 			return err
 		}
 
+		awsClient := &aws.Client{}
+
 		client := concourse.NewClient(
+			awsClient,
 			terraform.NewClient,
 			bosh.NewClient,
 			fly.New,
-			aws.DeleteVMsInVPC,
 			certs.Generate,
-			aws.FindLongestMatchingHostedZone,
 			&config.Client{Project: name, S3Region: deployArgs.AWSRegion},
 			&deployArgs,
 			os.Stdout,

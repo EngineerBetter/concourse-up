@@ -3,6 +3,7 @@ package concourse
 import (
 	"io"
 
+	"github.com/EngineerBetter/concourse-up/aws"
 	"github.com/EngineerBetter/concourse-up/bosh"
 	"github.com/EngineerBetter/concourse-up/certs"
 	"github.com/EngineerBetter/concourse-up/config"
@@ -15,12 +16,11 @@ import (
 
 // Client is a concrete implementation of IClient interface
 type Client struct {
+	awsClient              aws.IClient
 	terraformClientFactory terraform.ClientFactory
 	boshClientFactory      bosh.ClientFactory
 	flyClientFactory       func(fly.Credentials, io.Writer, io.Writer) (fly.IClient, error)
-	vpcEmptier             func(vpcID string, region string) error
 	certGenerator          func(caName string, ip ...string) (*certs.Certs, error)
-	hostedZoneFinder       func(string) (string, string, error)
 	configClient           config.IClient
 	deployArgs             *config.DeployArgs
 	stdout                 io.Writer
@@ -36,22 +36,20 @@ type IClient interface {
 
 // NewClient returns a new Client
 func NewClient(
+	awsClient aws.IClient,
 	terraformClientFactory terraform.ClientFactory,
 	boshClientFactory bosh.ClientFactory,
 	flyClientFactory func(fly.Credentials, io.Writer, io.Writer) (fly.IClient, error),
-	vpcEmptier func(vpcID string, region string) error,
 	certGenerator func(caName string, ip ...string) (*certs.Certs, error),
-	hostedZoneFinder func(string) (string, string, error),
 	configClient config.IClient,
 	deployArgs *config.DeployArgs,
 	stdout, stderr io.Writer) *Client {
 	return &Client{
+		awsClient:              awsClient,
 		terraformClientFactory: terraformClientFactory,
 		boshClientFactory:      boshClientFactory,
 		flyClientFactory:       flyClientFactory,
-		vpcEmptier:             vpcEmptier,
 		configClient:           configClient,
-		hostedZoneFinder:       hostedZoneFinder,
 		certGenerator:          certGenerator,
 		deployArgs:             deployArgs,
 		stdout:                 stdout,

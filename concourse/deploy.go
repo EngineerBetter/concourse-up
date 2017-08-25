@@ -298,7 +298,7 @@ func (client *Client) setHostedZone(config *config.Config) error {
 		return nil
 	}
 
-	hostedZoneName, hostedZoneID, err := client.hostedZoneFinder(domain)
+	hostedZoneName, hostedZoneID, err := client.awsClient.FindLongestMatchingHostedZone(domain)
 	if err != nil {
 		return err
 	}

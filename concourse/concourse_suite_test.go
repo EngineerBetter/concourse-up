@@ -15,6 +15,19 @@ func TestConcourse(t *testing.T) {
 	RunSpecs(t, "Concourse Suite")
 }
 
+type FakeAWSClient struct {
+	FakeFindLongestMatchingHostedZone func(subdomain string) (string, string, error)
+	FakeDeleteVMsInVPC                func(vpcID string, region string) error
+}
+
+func (client *FakeAWSClient) FindLongestMatchingHostedZone(subdomain string) (string, string, error) {
+	return client.FakeFindLongestMatchingHostedZone(subdomain)
+}
+
+func (client *FakeAWSClient) DeleteVMsInVPC(vpcID string, region string) error {
+	return client.FakeDeleteVMsInVPC(vpcID, region)
+}
+
 type FakeFlyClient struct {
 	FakeSetDefaultPipeline func(deployAgs *config.DeployArgs, config *config.Config) error
 	FakeCleanup            func() error
