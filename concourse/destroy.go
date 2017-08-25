@@ -11,7 +11,7 @@ func (client *Client) Destroy() error {
 		return err
 	}
 
-	terraformClient, err := client.buildTerraformClient(conf)
+	terraformClient, err := client.terraformClientFactory(conf.IAAS, conf, client.stdout, client.stderr)
 	if err != nil {
 		return err
 	}

@@ -122,7 +122,7 @@ func (client *FakeConfigClient) HasAsset(filename string) (bool, error) {
 
 type FakeTerraformClient struct {
 	FakeOutput  func() (*terraform.Metadata, error)
-	FakeApply   func() error
+	FakeApply   func(dryrun bool) error
 	FakeDestroy func() error
 	FakeCleanup func() error
 }
@@ -131,8 +131,8 @@ func (client *FakeTerraformClient) Output() (*terraform.Metadata, error) {
 	return client.FakeOutput()
 }
 
-func (client *FakeTerraformClient) Apply() error {
-	return client.FakeApply()
+func (client *FakeTerraformClient) Apply(dryrun bool) error {
+	return client.FakeApply(dryrun)
 }
 
 func (client *FakeTerraformClient) Destroy() error {

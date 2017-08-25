@@ -214,13 +214,13 @@ func (client *Client) ensureConcourseCerts(domainUpdated bool, config *config.Co
 }
 
 func (client *Client) applyTerraform(config *config.Config) (*terraform.Metadata, error) {
-	terraformClient, err := client.buildTerraformClient(config)
+	terraformClient, err := client.terraformClientFactory(config.IAAS, config, client.stdout, client.stderr)
 	if err != nil {
 		return nil, err
 	}
 	defer terraformClient.Cleanup()
 
-	if err := terraformClient.Apply(); err != nil {
+	if err := terraformClient.Apply(false); err != nil {
 		return nil, err
 	}
 

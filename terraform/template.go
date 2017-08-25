@@ -1,7 +1,7 @@
 package terraform
 
-// Template is a terraform configuration template
-const Template = `
+// AWSTemplate is a terraform configuration template for AWS
+const AWSTemplate = `
 terraform {
 	backend "s3" {
 		bucket = "<% .ConfigBucket %>"

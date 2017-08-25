@@ -23,16 +23,16 @@ func (client *Client) FetchInfo() (*Info, error) {
 		return nil, err
 	}
 
-	terraformClient, err := client.buildTerraformClient(config)
+	terraformClient, err := client.terraformClientFactory(config.IAAS, config, client.stdout, client.stderr)
 	if err != nil {
 		return nil, err
 	}
+	defer terraformClient.Cleanup()
 
 	metadata, err := terraformClient.Output()
 	if err != nil {
 		return nil, err
 	}
-	defer terraformClient.Cleanup()
 
 	boshClient, err := client.buildBoshClient(config, metadata)
 	if err != nil {

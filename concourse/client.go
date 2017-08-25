@@ -11,7 +11,6 @@ import (
 	"github.com/EngineerBetter/concourse-up/director"
 	"github.com/EngineerBetter/concourse-up/fly"
 	"github.com/EngineerBetter/concourse-up/terraform"
-	"github.com/EngineerBetter/concourse-up/util"
 )
 
 // Client is a concrete implementation of IClient interface
@@ -55,15 +54,6 @@ func NewClient(
 		stdout:                 stdout,
 		stderr:                 stderr,
 	}
-}
-
-func (client *Client) buildTerraformClient(config *config.Config) (terraform.IClient, error) {
-	terraformFile, err := util.RenderTemplate(terraform.Template, config)
-	if err != nil {
-		return nil, err
-	}
-
-	return client.terraformClientFactory(config.IAAS, terraformFile, client.stdout, client.stderr)
 }
 
 func (client *Client) buildBoshClient(config *config.Config, metadata *terraform.Metadata) (bosh.IClient, error) {
