@@ -25,6 +25,7 @@ func (client *Client) Instances() ([]Instance, error) {
 		"instances",
 		"--json",
 	); err != nil {
+		// if there is an error, copy the stdout to the main stdout to help debugging
 		return nil, err
 	}
 

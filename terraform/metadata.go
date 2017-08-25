@@ -9,11 +9,6 @@ type MetadataStringValue struct {
 
 // Metadata represents output from terraform on AWS or GCP
 type Metadata struct {
-	AWS *AWSMetadata
-}
-
-// AWSMetadata represents the terraform output variables
-type AWSMetadata struct {
 	DirectorKeyPair         MetadataStringValue `json:"director_key_pair" valid:"required"`
 	DirectorPublicIP        MetadataStringValue `json:"director_public_ip" valid:"required"`
 	DirectorSecurityGroupID MetadataStringValue `json:"director_security_group_id" valid:"required"`
@@ -38,9 +33,6 @@ type AWSMetadata struct {
 
 // AssertValid returns an error if the struct contains any missing fields
 func (metadata *Metadata) AssertValid() error {
-	if metadata.AWS != nil {
-		_, err := govalidator.ValidateStruct(metadata.AWS)
-		return err
-	}
-	return nil
+	_, err := govalidator.ValidateStruct(metadata)
+	return err
 }

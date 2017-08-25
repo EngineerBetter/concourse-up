@@ -143,7 +143,7 @@ func (client *Client) checkPreDeployConfigRequiments(isDomainUpdated bool, confi
 
 	config.ConcourseWorkerCount = client.deployArgs.WorkerCount
 	config.ConcourseWorkerSize = client.deployArgs.WorkerSize
-	config.DirectorPublicIP = metadata.AWS.DirectorPublicIP.Value
+	config.DirectorPublicIP = metadata.DirectorPublicIP.Value
 
 	if err := client.configClient.Update(config); err != nil {
 		return nil, err
@@ -154,7 +154,7 @@ func (client *Client) checkPreDeployConfigRequiments(isDomainUpdated bool, confi
 
 func (client *Client) ensureDomain(config *config.Config, metadata *terraform.Metadata) (*config.Config, error) {
 	if config.Domain == "" {
-		config.Domain = metadata.AWS.ELBDNSName.Value
+		config.Domain = metadata.ELBDNSName.Value
 	}
 
 	return config, nil
@@ -167,7 +167,7 @@ func (client *Client) ensureDirectorCerts(config *config.Config, metadata *terra
 		return config, nil
 	}
 
-	ip := metadata.AWS.DirectorPublicIP.Value
+	ip := metadata.DirectorPublicIP.Value
 	_, err := client.stdout.Write(
 		[]byte(fmt.Sprintf("\nGENERATING BOSH DIRECTOR CERTIFICATE (%s, 10.0.0.6)\n", ip)))
 	if err != nil {

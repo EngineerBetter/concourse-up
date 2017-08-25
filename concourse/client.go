@@ -60,7 +60,7 @@ func (client *Client) buildBoshClient(config *config.Config, metadata *terraform
 	director, err := director.NewClient(director.Credentials{
 		Username: config.DirectorUsername,
 		Password: config.DirectorPassword,
-		Host:     metadata.AWS.DirectorPublicIP.Value,
+		Host:     metadata.DirectorPublicIP.Value,
 		CACert:   config.DirectorCACert,
 	})
 	if err != nil {
@@ -70,12 +70,12 @@ func (client *Client) buildBoshClient(config *config.Config, metadata *terraform
 	dbRunner, err := db.NewRunner(&db.Credentials{
 		Username:      config.RDSUsername,
 		Password:      config.RDSPassword,
-		Address:       metadata.AWS.BoshDBAddress.Value,
-		Port:          metadata.AWS.BoshDBPort.Value,
+		Address:       metadata.BoshDBAddress.Value,
+		Port:          metadata.BoshDBPort.Value,
 		DB:            config.RDSDefaultDatabaseName,
 		CACert:        db.RDSRootCert,
 		SSHPrivateKey: []byte(config.PrivateKey),
-		SSHPublicIP:   metadata.AWS.DirectorPublicIP.Value,
+		SSHPublicIP:   metadata.DirectorPublicIP.Value,
 	})
 
 	if err != nil {

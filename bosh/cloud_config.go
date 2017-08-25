@@ -18,11 +18,11 @@ type awsCloudConfigParams struct {
 func generateCloudConfig(conf *config.Config, metadata *terraform.Metadata) ([]byte, error) {
 	templateParams := awsCloudConfigParams{
 		AvailabilityZone:            conf.AvailabilityZone,
-		VMsSecurityGroupID:          metadata.AWS.VMsSecurityGroupID.Value,
-		LoadBalancerSecurityGroupID: metadata.AWS.ELBSecurityGroupID.Value,
-		LoadBalancerID:              metadata.AWS.ELBName.Value,
-		PublicSubnetID:              metadata.AWS.PublicSubnetID.Value,
-		PrivateSubnetID:             metadata.AWS.PrivateSubnetID.Value,
+		VMsSecurityGroupID:          metadata.VMsSecurityGroupID.Value,
+		LoadBalancerSecurityGroupID: metadata.ELBSecurityGroupID.Value,
+		LoadBalancerID:              metadata.ELBName.Value,
+		PublicSubnetID:              metadata.PublicSubnetID.Value,
+		PrivateSubnetID:             metadata.PrivateSubnetID.Value,
 	}
 
 	return util.RenderTemplate(awsCloudConfigtemplate, templateParams)

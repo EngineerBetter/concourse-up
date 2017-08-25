@@ -79,10 +79,12 @@ func NewClient(iaas string, config *config.Config, stdout, stderr io.Writer) (IC
 		stdout:    stdout,
 		stderr:    stderr,
 	}
-
+	devNull := bytes.NewBuffer(nil)
 	if err := client.terraform([]string{
 		"init",
-	}, client.stdout); err != nil {
+	}, devNull); err != nil {
+		// if there is an error dump stdout for debugging
+		io.Copy(stdout, devNull)
 		return nil, err
 	}
 	return client, nil
@@ -103,10 +105,8 @@ func (client *Client) Output() (*Metadata, error) {
 		return nil, err
 	}
 
-	metadata := Metadata{
-		AWS: &AWSMetadata{},
-	}
-	if err := json.NewDecoder(stdoutBuffer).Decode(metadata.AWS); err != nil {
+	metadata := Metadata{}
+	if err := json.NewDecoder(stdoutBuffer).Decode(&metadata); err != nil {
 		return nil, err
 	}
 
