@@ -220,7 +220,7 @@ func (client *Client) applyTerraform(config *config.Config) (*terraform.Metadata
 	}
 	defer terraformClient.Cleanup()
 
-	if err := terraformClient.Apply(false); err != nil {
+	if err = terraformClient.Apply(false); err != nil {
 		return nil, err
 	}
 
