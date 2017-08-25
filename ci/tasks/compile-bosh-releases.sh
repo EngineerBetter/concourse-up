@@ -106,15 +106,15 @@ terraform_windows_binary_url="https://s3-$AWS_DEFAULT_REGION.amazonaws.com/$PUBL
 
 wget "https://releases.hashicorp.com/terraform/0.10.2/terraform_0.10.2_darwin_amd64.zip"
 unzip "terraform_0.10.2_darwin_amd64.zip"
-aws s3 cp --acl public-read terraform "$terraform_darwin_binary_url"
+aws s3 cp --acl public-read ./terraform "s3://$PUBLIC_ARTIFACTS_BUCKET/terraform_darwin_amd64-$concourse_release_version"
 rm terraform
 wget "https://releases.hashicorp.com/terraform/0.10.2/terraform_0.10.2_linux_amd64.zip"
 unzip "terraform_0.10.2_linux_amd64.zip"
-aws s3 cp --acl public-read terraform "$terraform_linux_binary_url"
+aws s3 cp --acl public-read ./terraform "s3://$PUBLIC_ARTIFACTS_BUCKET/terraform_darwin_amd64-$concourse_release_version"
 rm terraform
 wget "https://releases.hashicorp.com/terraform/0.10.2/terraform_0.10.2_windows_amd64.zip"
 unzip "terraform_0.10.2_windows_amd64.zip"
-aws s3 cp --acl public-read terraform.exe "$terraform_windows_binary_url"
+aws s3 cp --acl public-read ./terraform.exe "s3://$PUBLIC_ARTIFACTS_BUCKET/terraform_darwin_amd64-$concourse_release_version.exe"
 rm terraform.exe
 
 echo "{
