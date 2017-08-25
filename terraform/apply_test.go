@@ -26,6 +26,7 @@ var _ = Describe("Plan", func() {
 		Expect(err).ToNot(HaveOccurred())
 
 		conf = &config.Config{
+			IAAS:                   "AWS",
 			ConfigBucket:           bucket,
 			AvailabilityZone:       "eu-west-1a",
 			RDSInstanceClass:       "t2.small",
@@ -81,7 +82,7 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 		stdout := gbytes.NewBuffer()
 		stderr := gbytes.NewBuffer()
 
-		c, err := NewClient("aws", conf, stdout, stderr)
+		c, err := NewClient(conf, stdout, stderr)
 		Expect(err).ToNot(HaveOccurred())
 		defer c.Cleanup()
 
