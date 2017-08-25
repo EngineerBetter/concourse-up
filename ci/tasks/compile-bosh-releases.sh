@@ -110,11 +110,11 @@ aws s3 cp --acl public-read ./terraform "s3://$PUBLIC_ARTIFACTS_BUCKET/terraform
 rm terraform
 wget "https://releases.hashicorp.com/terraform/0.10.2/terraform_0.10.2_linux_amd64.zip"
 unzip "terraform_0.10.2_linux_amd64.zip"
-aws s3 cp --acl public-read ./terraform "s3://$PUBLIC_ARTIFACTS_BUCKET/terraform_darwin_amd64-$concourse_release_version"
+aws s3 cp --acl public-read ./terraform "s3://$PUBLIC_ARTIFACTS_BUCKET/terraform_linux_amd64-$concourse_release_version"
 rm terraform
 wget "https://releases.hashicorp.com/terraform/0.10.2/terraform_0.10.2_windows_amd64.zip"
 unzip "terraform_0.10.2_windows_amd64.zip"
-aws s3 cp --acl public-read ./terraform.exe "s3://$PUBLIC_ARTIFACTS_BUCKET/terraform_darwin_amd64-$concourse_release_version.exe"
+aws s3 cp --acl public-read ./terraform.exe "s3://$PUBLIC_ARTIFACTS_BUCKET/terraform_windows_amd64-$concourse_release_version.exe"
 rm terraform.exe
 
 echo "{
