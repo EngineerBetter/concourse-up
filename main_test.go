@@ -56,6 +56,9 @@ var _ = Describe("concourse-up", func() {
 			fmt.Sprintf("-X github.com/EngineerBetter/concourse-up/director.DarwinBinaryURL=%s", compilationVars["director_darwin_binary_url"]),
 			fmt.Sprintf("-X github.com/EngineerBetter/concourse-up/director.LinuxBinaryURL=%s", compilationVars["director_linux_binary_url"]),
 			fmt.Sprintf("-X github.com/EngineerBetter/concourse-up/director.WindowsBinaryURL=%s", compilationVars["director_windows_binary_url"]),
+			fmt.Sprintf("-X github.com/EngineerBetter/concourse-up/terraform.DarwinBinaryURL=%s", compilationVars["terraform_darwin_binary_url"]),
+			fmt.Sprintf("-X github.com/EngineerBetter/concourse-up/terraform.LinuxBinaryURL=%s", compilationVars["terraform_linux_binary_url"]),
+			fmt.Sprintf("-X github.com/EngineerBetter/concourse-up/terraform.WindowsBinaryURL=%s", compilationVars["terraform_windows_binary_url"]),
 		}
 
 		cliPath, err = Build("github.com/EngineerBetter/concourse-up", "-ldflags", strings.Join(ldFlags, " "))
@@ -88,7 +91,7 @@ var _ = Describe("concourse-up", func() {
 			Expect(err).ToNot(HaveOccurred(), "Error running CLI: "+cliPath)
 
 			Eventually(session).Should(Exit(1))
-			Expect(session.Err).To(Say("Compile-time variable director.WindowsBinaryURL not set, please build with: `go build -ldflags \"-X github.com/EngineerBetter/concourse-up/director.WindowsBinaryURL=SOME_VALUE\"`"))
+			Expect(session.Err).To(Say("Compile-time variable terraform.WindowsBinaryURL not set, please build with: `go build -ldflags \"-X github.com/EngineerBetter/concourse-up/terraform.WindowsBinaryURL=SOME_VALUE\"`"))
 		})
 	})
 })

@@ -123,7 +123,7 @@ func (client *Client) CanConnect() (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	fmt.Println(string(stderrBytes))
+
 	if strings.Contains(string(stderrBytes), "could not reach the Concourse server") {
 		return false, nil
 	}

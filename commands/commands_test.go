@@ -55,6 +55,9 @@ var _ = Describe("commands", func() {
 			fmt.Sprintf("-X github.com/EngineerBetter/concourse-up/director.DarwinBinaryURL=%s", compilationVars["director_darwin_binary_url"]),
 			fmt.Sprintf("-X github.com/EngineerBetter/concourse-up/director.LinuxBinaryURL=%s", compilationVars["director_linux_binary_url"]),
 			fmt.Sprintf("-X github.com/EngineerBetter/concourse-up/director.WindowsBinaryURL=%s", compilationVars["director_windows_binary_url"]),
+			fmt.Sprintf("-X github.com/EngineerBetter/concourse-up/terraform.DarwinBinaryURL=%s", compilationVars["terraform_darwin_binary_url"]),
+			fmt.Sprintf("-X github.com/EngineerBetter/concourse-up/terraform.LinuxBinaryURL=%s", compilationVars["terraform_linux_binary_url"]),
+			fmt.Sprintf("-X github.com/EngineerBetter/concourse-up/terraform.WindowsBinaryURL=%s", compilationVars["terraform_windows_binary_url"]),
 		}
 
 		cliPath, err = Build("github.com/EngineerBetter/concourse-up", "-ldflags", strings.Join(ldflags, " "))

@@ -27,6 +27,9 @@ fly_windows_binary_url=$(jq -r .fly_windows_binary_url compilation-vars.json)
 director_darwin_binary_url=$(jq -r .director_darwin_binary_url compilation-vars.json)
 director_linux_binary_url=$(jq -r .director_linux_binary_url compilation-vars.json)
 director_windows_binary_url=$(jq -r .director_windows_binary_url compilation-vars.json)
+terraform_darwin_binary_url=$(jq -r .terraform_darwin_binary_url compilation-vars.json)
+terraform_linux_binary_url=$(jq -r .terraform_linux_binary_url compilation-vars.json)
+terraform_windows_binary_url=$(jq -r .terraform_windows_binary_url compilation-vars.json)
 
 go build -ldflags "
   -X github.com/EngineerBetter/concourse-up/bosh.ConcourseStemcellURL=$concourse_stemcell_url
@@ -53,6 +56,9 @@ go build -ldflags "
   -X github.com/EngineerBetter/concourse-up/director.DarwinBinaryURL=$director_darwin_binary_url
   -X github.com/EngineerBetter/concourse-up/director.LinuxBinaryURL=$director_linux_binary_url
   -X github.com/EngineerBetter/concourse-up/director.WindowsBinaryURL=$director_windows_binary_url
+  -X github.com/EngineerBetter/concourse-up/terraform.DarwinBinaryURL=$terraform_darwin_binary_url
+  -X github.com/EngineerBetter/concourse-up/terraform.LinuxBinaryURL=$terraform_linux_binary_url
+  -X github.com/EngineerBetter/concourse-up/terraform.WindowsBinaryURL=$terraform_windows_binary_url
   -X main.ConcourseUpVersion=$version
 " -o concourse-up
 

@@ -10,6 +10,7 @@ import (
 	"github.com/EngineerBetter/concourse-up/commands"
 	"github.com/EngineerBetter/concourse-up/director"
 	"github.com/EngineerBetter/concourse-up/fly"
+	"github.com/EngineerBetter/concourse-up/terraform"
 
 	"gopkg.in/urfave/cli.v1"
 )
@@ -62,6 +63,9 @@ func checkCompileTimeArgs() error {
 		"director.DarwinBinaryURL":       director.DarwinBinaryURL,
 		"director.LinuxBinaryURL":        director.LinuxBinaryURL,
 		"director.WindowsBinaryURL":      director.WindowsBinaryURL,
+		"terraform.DarwinBinaryURL":      terraform.DarwinBinaryURL,
+		"terraform.LinuxBinaryURL":       terraform.LinuxBinaryURL,
+		"terraform.WindowsBinaryURL":     terraform.WindowsBinaryURL,
 	}
 
 	if ConcourseUpVersion == "" || strings.HasPrefix(ConcourseUpVersion, "COMPILE_TIME_VARIABLE") {

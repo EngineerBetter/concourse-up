@@ -22,5 +22,8 @@
   "fly_windows_binary_url": "https://s3-eu-west-1.amazonaws.com/concourse-up-public-artifacts/fly_windows_amd64-3.4.0.exe",
   "director_darwin_binary_url": "https://s3.amazonaws.com/bosh-cli-artifacts/bosh-cli-2.0.28-darwin-amd64",
   "director_linux_binary_url": "https://s3.amazonaws.com/bosh-cli-artifacts/bosh-cli-2.0.28-linux-amd64",
-  "director_windows_binary_url": "https://s3.amazonaws.com/bosh-cli-artifacts/bosh-cli-2.0.28-windows-amd64.exe"
+  "director_windows_binary_url": "https://s3.amazonaws.com/bosh-cli-artifacts/bosh-cli-2.0.28-windows-amd64.exe",
+  "terraform_darwin_binary_url": "https://s3-eu-west-1.amazonaws.com/concourse-up-public-artifacts/terraform_darwin_amd64-3.4.0",
+  "terraform_linux_binary_url": "https://s3-eu-west-1.amazonaws.com/concourse-up-public-artifacts/terraform_linux_amd64-3.4.0",
+  "terraform_windows_binary_url": "https://s3-eu-west-1.amazonaws.com/concourse-up-public-artifacts/terraform_windows_amd64-3.4.0.exe"
 }

@@ -5,13 +5,25 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"io/ioutil"
+	"net/http"
 	"os"
+	"runtime"
 
 	"github.com/EngineerBetter/concourse-up/config"
 	"github.com/EngineerBetter/concourse-up/util"
 )
 
 const appName string = "concourse-up"
+
+// DarwinBinaryURL is a compile-time variable set with -ldflags
+var DarwinBinaryURL = "COMPILE_TIME_VARIABLE_terraform_darwin_binary_url"
+
+// LinuxBinaryURL is a compile-time variable set with -ldflags
+var LinuxBinaryURL = "COMPILE_TIME_VARIABLE_terraform_linux_binary_url"
+
+// WindowsBinaryURL is a compile-time variable set with -ldflags
+var WindowsBinaryURL = "COMPILE_TIME_VARIABLE_terraform_windows_binary_url"
 
 // IClient is an interface for the terraform Client
 type IClient interface {
@@ -25,6 +37,7 @@ type IClient interface {
 type Client struct {
 	iaas      string
 	configDir string
+	tempDir   *util.TempDir
 	stdout    io.Writer
 	stderr    io.Writer
 }
@@ -38,25 +51,68 @@ func NewClient(iaas string, config *config.Config, stdout, stderr io.Writer) (IC
 		return nil, fmt.Errorf("IAAS not supported: %s", iaas)
 	}
 
+	tempDir, err := util.NewTempDir()
+	if err != nil {
+		return nil, err
+	}
+
+	fileHandler, err := os.Create(tempDir.Path("terraform"))
+	if err != nil {
+		return nil, err
+	}
+	defer fileHandler.Close()
+
+	url, err := getTerraformURL()
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := http.Get(url)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	if _, err := io.Copy(fileHandler, resp.Body); err != nil {
+		return nil, err
+	}
+
+	if err := fileHandler.Sync(); err != nil {
+		return nil, err
+	}
+
+	if err := os.Chmod(fileHandler.Name(), 0700); err != nil {
+		return nil, err
+	}
+
 	terraformFile, err := util.RenderTemplate(AWSTemplate, config)
 	if err != nil {
 		return nil, err
 	}
 
-	if err := checkTerraformOnPath(stderr, stderr); err != nil {
+	configDir := tempDir.Path("config")
+	if err := os.Mkdir(configDir, 0777); err != nil {
 		return nil, err
 	}
 
-	configDir, err := initConfig(terraformFile, stderr, stderr)
-	if err != nil {
+	configPath := tempDir.Path("config/main.tf")
+	if err := ioutil.WriteFile(configPath, terraformFile, 0777); err != nil {
 		return nil, err
 	}
 
-	return &Client{
+	client := &Client{
+		tempDir:   tempDir,
 		configDir: configDir,
 		stdout:    stdout,
 		stderr:    stderr,
-	}, nil
+	}
+
+	if err := client.terraform([]string{
+		"init",
+	}, client.stdout); err != nil {
+		return nil, err
+	}
+	return client, nil
 }
 
 // Cleanup cleans up the temporary directory used by terraform
@@ -67,10 +123,10 @@ func (client *Client) Cleanup() error {
 // Output fetches the terraform output/metadata
 func (client *Client) Output() (*Metadata, error) {
 	stdoutBuffer := bytes.NewBuffer(nil)
-	if err := terraform([]string{
+	if err := client.terraform([]string{
 		"output",
 		"-json",
-	}, client.configDir, stdoutBuffer, client.stderr); err != nil {
+	}, stdoutBuffer); err != nil {
 		return nil, err
 	}
 
@@ -82,4 +138,16 @@ func (client *Client) Output() (*Metadata, error) {
 	}
 
 	return &metadata, nil
+}
+
+func getTerraformURL() (string, error) {
+	os := runtime.GOOS
+	if os == "darwin" {
+		return DarwinBinaryURL, nil
+	} else if os == "linux" {
+		return LinuxBinaryURL, nil
+	} else if os == "windows" {
+		return WindowsBinaryURL, nil
+	}
+	return "", fmt.Errorf("unknown os: `%s`", os)
 }
