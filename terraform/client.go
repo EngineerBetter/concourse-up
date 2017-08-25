@@ -3,6 +3,7 @@ package terraform
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io"
 	"os"
 
@@ -29,10 +30,14 @@ type Client struct {
 }
 
 // ClientFactory is a function that builds a client interface
-type ClientFactory func(config *config.Config, stdout, stderr io.Writer) (IClient, error)
+type ClientFactory func(iaas string, config *config.Config, stdout, stderr io.Writer) (IClient, error)
 
 // NewClient is a concrete implementation of ClientFactory
-func NewClient(config *config.Config, stdout, stderr io.Writer) (IClient, error) {
+func NewClient(iaas string, config *config.Config, stdout, stderr io.Writer) (IClient, error) {
+	if iaas != "AWS" {
+		return nil, fmt.Errorf("IAAS not supported: %s", iaas)
+	}
+
 	terraformFile, err := util.RenderTemplate(AWSTemplate, config)
 	if err != nil {
 		return nil, err

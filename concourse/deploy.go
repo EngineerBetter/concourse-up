@@ -214,7 +214,7 @@ func (client *Client) ensureConcourseCerts(domainUpdated bool, config *config.Co
 }
 
 func (client *Client) applyTerraform(config *config.Config) (*terraform.Metadata, error) {
-	terraformClient, err := client.terraformClientFactory(config, client.stdout, client.stderr)
+	terraformClient, err := client.terraformClientFactory(client.iaasClient.IAAS(), config, client.stdout, client.stderr)
 	if err != nil {
 		return nil, err
 	}

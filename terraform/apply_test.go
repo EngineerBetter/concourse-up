@@ -83,7 +83,7 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 		stdout := gbytes.NewBuffer()
 		stderr := gbytes.NewBuffer()
 
-		c, err := NewClient(conf, stdout, stderr)
+		c, err := NewClient("AWS", conf, stdout, stderr)
 		Expect(err).ToNot(HaveOccurred())
 		defer c.Cleanup()
 
