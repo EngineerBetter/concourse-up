@@ -30,15 +30,6 @@ RUN go get github.com/onsi/ginkgo/ginkgo \
 
 RUN gometalinter.v1 --install
 
-RUN wget https://releases.hashicorp.com/terraform/0.10.0/terraform_0.10.0_linux_amd64.zip \
-    && unzip terraform_0.10.0_linux_amd64.zip \
-    && chmod +x terraform \
-    && mv terraform /usr/bin/terraform
-
-RUN wget https://s3.amazonaws.com/bosh-cli-artifacts/bosh-cli-2.0.28-linux-amd64 \
-    && mv bosh-cli-2.0.28-linux-amd64 /usr/bin/bosh-cli \
-    && chmod +x /usr/bin/bosh-cli
-
 RUN wget https://github.com/stedolan/jq/releases/download/jq-1.5/jq-linux64 \
     && mv jq-linux64 /usr/bin/jq \
     && chmod +x /usr/bin/jq
