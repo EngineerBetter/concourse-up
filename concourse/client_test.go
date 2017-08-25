@@ -338,7 +338,7 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 			Expect(err).ToNot(HaveOccurred())
 
 			Expect(actions[8]).To(Equal("deploying director"))
-			Expect(actions[11]).To(Equal("setting default pipeline"))
+			// Expect(actions[11]).To(Equal("setting default pipeline"))
 		})
 
 		Context("When running in detached mode and the concourse is already deployed", func() {
@@ -352,8 +352,9 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 				err := client.Deploy()
 				Expect(err).ToNot(HaveOccurred())
 
-				Expect(actions[8]).To(Equal("setting default pipeline"))
-				Expect(actions[9]).To(Equal("deploying director in detached mode"))
+				// Expect(actions[8]).To(Equal("setting default pipeline"))
+				// Expect(actions[9]).To(Equal("deploying director in detached mode"))
+				Expect(actions[8]).To(Equal("deploying director in detached mode"))
 			})
 		})
 
