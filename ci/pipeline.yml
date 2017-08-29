@@ -109,7 +109,7 @@ resources:
 - name: influxdb-release
   type: bosh-io-release
   source:
-    repository: influxdb-boshrelease
+    repository: vito/influxdb-boshrelease
 
 - name: grafana-release
   type: bosh-io-release
