@@ -317,21 +317,21 @@ resource "aws_security_group" "director" {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = ["${var.source_access_ip}/32"]
+    cidr_blocks = ["${var.source_access_ip}/32", "${aws_nat_gateway.default.public_ip}"]
   }
 
   ingress {
     from_port   = 6868
     to_port     = 6868
     protocol    = "tcp"
-    cidr_blocks = ["${var.source_access_ip}/32"]
+    cidr_blocks = ["${var.source_access_ip}/32", "${aws_nat_gateway.default.public_ip}"]
   }
 
   ingress {
     from_port   = 25555
     to_port     = 25555
     protocol    = "tcp"
-    cidr_blocks = ["${var.source_access_ip}/32"]
+    cidr_blocks = ["${var.source_access_ip}/32", "${aws_nat_gateway.default.public_ip}"]
   }
 
   ingress {
