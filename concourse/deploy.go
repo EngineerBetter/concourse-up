@@ -52,7 +52,7 @@ func (client *Client) Deploy() error {
 	}
 	defer flyClient.Cleanup()
 
-	if client.deployArgs.DetachBoshDeployment {
+	if client.deployArgs.SelfUpdate {
 		return client.updateBoshAndPipeline(config, metadata, flyClient)
 	}
 
@@ -66,9 +66,9 @@ func (client *Client) deployBoshAndPipeline(config *config.Config, metadata *ter
 		return err
 	}
 
-	// if err := flyClient.SetDefaultPipeline(client.deployArgs, config); err != nil {
-	// 	return err
-	// }
+	if err := flyClient.SetDefaultPipeline(client.deployArgs, config); err != nil {
+		return err
+	}
 
 	if err := writeDeploySuccessMessage(config, metadata, client.stdout); err != nil {
 		return err
@@ -90,9 +90,9 @@ func (client *Client) updateBoshAndPipeline(config *config.Config, metadata *ter
 		return fmt.Errorf("In detach mode but it seems that concourse is not currently running")
 	}
 
-	// if err = flyClient.SetDefaultPipeline(client.deployArgs, config); err != nil {
-	// 	return err
-	// }
+	if err = flyClient.SetDefaultPipeline(client.deployArgs, config); err != nil {
+		return err
+	}
 
 	if err = client.deployBosh(config, metadata, true); err != nil {
 		return err
@@ -114,8 +114,11 @@ func (client *Client) checkPreTerraformConfigRequirements(config *config.Config)
 
 	config.Region = region
 
-	if err := client.setUserIP(config); err != nil {
-		return nil, err
+	// When in self-update mode do not override the user IP, since we already have access to the worker
+	if !client.deployArgs.SelfUpdate {
+		if err := client.setUserIP(config); err != nil {
+			return nil, err
+		}
 	}
 
 	if err := client.setHostedZone(config); err != nil {

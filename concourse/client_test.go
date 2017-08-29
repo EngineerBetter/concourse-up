@@ -186,7 +186,7 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 			return &FakeBoshClient{
 				FakeDeploy: func(stateFileBytes []byte, detach bool) ([]byte, error) {
 					if detach {
-						actions = append(actions, "deploying director in detached mode")
+						actions = append(actions, "deploying director in self-update mode")
 					} else {
 						actions = append(actions, "deploying director")
 					}
@@ -337,23 +337,20 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 			Expect(err).ToNot(HaveOccurred())
 
 			Expect(actions[8]).To(Equal("deploying director"))
-			// Expect(actions[11]).To(Equal("setting default pipeline"))
 		})
 
-		Context("When running in detached mode and the concourse is already deployed", func() {
+		Context("When running in self-update mode and the concourse is already deployed", func() {
 			It("Sets the default pipeline, before deploying the bosh director", func() {
 				fakeFlyClient.FakeCanConnect = func() (bool, error) {
 					return true, nil
 				}
-				args.DetachBoshDeployment = true
+				args.SelfUpdate = true
 
 				client := buildClient()
 				err := client.Deploy()
 				Expect(err).ToNot(HaveOccurred())
 
-				// Expect(actions[8]).To(Equal("setting default pipeline"))
-				// Expect(actions[9]).To(Equal("deploying director in detached mode"))
-				Expect(actions[8]).To(Equal("deploying director in detached mode"))
+				Expect(actions[8]).To(Equal("deploying director in self-update mode"))
 			})
 		})
 

@@ -53,8 +53,8 @@ fly --target system-test sync
 fly --target system-test workers --details
 set +x
 
-# echo "TRIGGERING SELF-UPDATE"
-# fly --target system-test trigger-job -j concourse-up-self-update/self-update
+echo "TRIGGERING SELF-UPDATE"
+fly --target system-test trigger-job -j concourse-up-self-update/self-update
 
 # while true;
 # do
