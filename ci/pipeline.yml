@@ -247,8 +247,6 @@ jobs:
       passed: [build]
     - get: image
       passed: [build]
-    - get: previous-release
-      resource: release
   - aggregate:
     - task: system-test-alt-region
       image: image
