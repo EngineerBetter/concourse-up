@@ -8,6 +8,9 @@ inputs:
 - name: director-stemcell
 - name: director-bosh-release
 - name: director-bosh-cpi-release
+- name: riemann-release
+- name: grafana-release
+- name: influxdb-release
 
 outputs:
 - name: compilation-vars
