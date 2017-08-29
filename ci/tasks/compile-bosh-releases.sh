@@ -97,6 +97,18 @@ $bosh \
   --deployment concourse-empty \
   export-release "bosh/$director_bosh_release_version" "ubuntu-trusty/$concourse_stemcell_version"
 
+$bosh \
+  --deployment concourse-empty \
+  export-release "riemann/$riemann_release_version" "ubuntu-trusty/$concourse_stemcell_version"
+
+$bosh \
+  --deployment concourse-empty \
+  export-release "grafana/$grafana_release_version" "ubuntu-trusty/$concourse_stemcell_version"
+
+$bosh \
+  --deployment concourse-empty \
+  export-release "influxdb/$influxdb_release_version" "ubuntu-trusty/$concourse_stemcell_version"
+
 compiled_concourse_release=$(ls concourse-$concourse_release_version-ubuntu-trusty-$concourse_stemcell_version-*.tgz)
 compiled_garden_release=$(ls garden-runc-$garden_release_version-ubuntu-trusty-$concourse_stemcell_version-*.tgz)
 compiled_director_bosh_release=$(ls bosh-$director_bosh_release_version-ubuntu-trusty-$concourse_stemcell_version-*.tgz)
