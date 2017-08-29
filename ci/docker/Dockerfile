@@ -38,5 +38,9 @@ RUN wget https://github.com/concourse/concourse/releases/download/v3.4.0/fly_lin
     && mv fly_linux_amd64 /usr/bin/fly \
     && chmod +x /usr/bin/fly
 
+RUN wget https://s3.amazonaws.com/bosh-cli-artifacts/bosh-cli-2.0.28-linux-amd64 \
+    && mv bosh-cli-2.0.28-linux-amd64 /usr/bin/bosh-cli \
+    && chmod +x /usr/bin/bosh-cli
+
 COPY verify_image.sh /tmp/verify_image.sh
 RUN /tmp/verify_image.sh && rm /tmp/verify_image.sh
