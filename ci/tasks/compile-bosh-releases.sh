@@ -22,6 +22,18 @@ director_bosh_cpi_release_version=$(cat director-bosh-cpi-release/version)
 director_bosh_cpi_release_url=$(cat director-bosh-cpi-release/url)
 director_bosh_cpi_release_sha1=$(cat director-bosh-cpi-release/sha1)
 
+riemann_release_version=$(cat riemann-release/version)
+riemann_release_url=$(cat riemann-release/url)
+riemann_release_sha1=$(cat riemann-release/sha1)
+
+grafana_release_version=$(cat grafana-release/version)
+grafana_release_url=$(cat grafana-release/url)
+grafana_release_sha1=$(cat grafana-release/sha1)
+
+influxdb_release_version=$(cat influxdb-release/version)
+influxdb_release_url=$(cat influxdb-release/url)
+influxdb_release_sha1=$(cat influxdb-release/sha1)
+
 director_bosh_release_version=$(cat director-bosh-release/version)
 concourse_release_version=$(ls concourse-bosh-release/concourse-*.tgz | awk -F"-" '{ print $4 }' | awk -F".tgz" '{ print $1 }')
 garden_release_version=$(ls concourse-bosh-release/garden-runc-*.tgz | awk -F"-" '{ print $5 }' | awk -F".tgz" '{ print $1 }')
@@ -30,6 +42,10 @@ $bosh upload-stemcell "concourse-stemcell/stemcell.tgz"
 $bosh upload-release "concourse-bosh-release/garden-runc-$garden_release_version.tgz"
 $bosh upload-release "concourse-bosh-release/concourse-$concourse_release_version.tgz"
 $bosh upload-release "director-bosh-release/release.tgz"
+$bosh upload-release "director-bosh-cpi-release/release.tgz"
+$bosh upload-release "riemann-release/release.tgz"
+$bosh upload-release "grafana-release/release.tgz"
+$bosh upload-release "influxdb-release/release.tgz"
 
 echo "---
 name: concourse-empty
@@ -41,6 +57,14 @@ releases:
   version: \"$garden_release_version\"
 - name: bosh
   version: \"$director_bosh_release_version\"
+- name: bosh-aws-cpi
+  version: \"$director_bosh_cpi_release_version\"
+- name: riemann
+  version: \"$riemann_release_version\"
+- name: grafana
+  version: \"$grafana_release_version\"
+- name: influxdb
+  version: \"$influxdb_release_version\"
 
 stemcells:
 - alias: trusty
@@ -76,10 +100,16 @@ $bosh \
 compiled_concourse_release=$(ls concourse-$concourse_release_version-ubuntu-trusty-$concourse_stemcell_version-*.tgz)
 compiled_garden_release=$(ls garden-runc-$garden_release_version-ubuntu-trusty-$concourse_stemcell_version-*.tgz)
 compiled_director_bosh_release=$(ls bosh-$director_bosh_release_version-ubuntu-trusty-$concourse_stemcell_version-*.tgz)
+compiled_riemann_release=$(ls riemann-$riemann_release_version-ubuntu-trusty-$concourse_stemcell_version-*.tgz)
+compiled_grafana_release=$(ls grafana-$grafana_release_version-ubuntu-trusty-$concourse_stemcell_version-*.tgz)
+compiled_influxdb_release=$(ls influxdb-$influxdb_release_version-ubuntu-trusty-$concourse_stemcell_version-*.tgz)
 
 aws s3 cp --acl public-read "$compiled_concourse_release" "s3://$PUBLIC_ARTIFACTS_BUCKET/$compiled_concourse_release"
 aws s3 cp --acl public-read "$compiled_garden_release" "s3://$PUBLIC_ARTIFACTS_BUCKET/$compiled_garden_release"
 aws s3 cp --acl public-read "$compiled_director_bosh_release" "s3://$PUBLIC_ARTIFACTS_BUCKET/$compiled_director_bosh_release"
+aws s3 cp --acl public-read "$compiled_riemann_release" "s3://$PUBLIC_ARTIFACTS_BUCKET/$compiled_riemann_release"
+aws s3 cp --acl public-read "$compiled_grafana_release" "s3://$PUBLIC_ARTIFACTS_BUCKET/$compiled_grafana_release"
+aws s3 cp --acl public-read "$compiled_influxdb_release" "s3://$PUBLIC_ARTIFACTS_BUCKET/$compiled_influxdb_release"
 
 aws s3 cp --acl public-read "concourse-bosh-release/fly_darwin_amd64" "s3://$PUBLIC_ARTIFACTS_BUCKET/fly_darwin_amd64-$concourse_release_version"
 aws s3 cp --acl public-read "concourse-bosh-release/fly_linux_amd64" "s3://$PUBLIC_ARTIFACTS_BUCKET/fly_linux_amd64-$concourse_release_version"
@@ -91,6 +121,12 @@ concourse_release_sha1=$(sha1sum "$compiled_concourse_release" | awk '{ print $1
 concourse_release_url="https://s3-$AWS_DEFAULT_REGION.amazonaws.com/$PUBLIC_ARTIFACTS_BUCKET/$compiled_concourse_release"
 garden_release_url="https://s3-$AWS_DEFAULT_REGION.amazonaws.com/$PUBLIC_ARTIFACTS_BUCKET/$compiled_garden_release"
 garden_release_sha1=$(sha1sum "$compiled_garden_release" | awk '{ print $1 }')
+riemann_release_sha1=$(sha1sum "$compiled_riemann_release" | awk '{ print $1 }')
+riemann_release_url="https://s3-$AWS_DEFAULT_REGION.amazonaws.com/$PUBLIC_ARTIFACTS_BUCKET/$compiled_riemann_release"
+grafana_release_sha1=$(sha1sum "$compiled_grafana_release" | awk '{ print $1 }')
+grafana_release_url="https://s3-$AWS_DEFAULT_REGION.amazonaws.com/$PUBLIC_ARTIFACTS_BUCKET/$compiled_grafana_release"
+influxdb_release_sha1=$(sha1sum "$compiled_influxdb_release" | awk '{ print $1 }')
+influxdb_release_url="https://s3-$AWS_DEFAULT_REGION.amazonaws.com/$PUBLIC_ARTIFACTS_BUCKET/$compiled_influxdb_release"
 
 fly_darwin_binary_url="https://s3-$AWS_DEFAULT_REGION.amazonaws.com/$PUBLIC_ARTIFACTS_BUCKET/fly_darwin_amd64-$concourse_release_version"
 fly_linux_binary_url="https://s3-$AWS_DEFAULT_REGION.amazonaws.com/$PUBLIC_ARTIFACTS_BUCKET/fly_linux_amd64-$concourse_release_version"
@@ -136,6 +172,15 @@ echo "{
   \"garden_release_url\": \"$garden_release_url\",
   \"garden_release_sha1\": \"$garden_release_sha1\",
   \"garden_release_version\": \"$garden_release_version\",
+  \"riemann_release_url\": \"$riemann_release_url\",
+  \"riemann_release_sha1\": \"$riemann_release_sha1\",
+  \"riemann_release_version\": \"$riemann_release_version\",
+  \"grafana_release_url\": \"$grafana_release_url\",
+  \"grafana_release_sha1\": \"$grafana_release_sha1\",
+  \"grafana_release_version\": \"$grafana_release_version\",
+  \"influxdb_release_url\": \"$influxdb_release_url\",
+  \"influxdb_release_sha1\": \"$influxdb_release_sha1\",
+  \"influxdb_release_version\": \"$influxdb_release_version\",
   \"fly_darwin_binary_url\": \"$fly_darwin_binary_url\",
   \"fly_linux_binary_url\": \"$fly_linux_binary_url\",
   \"fly_windows_binary_url\": \"$fly_windows_binary_url\",
