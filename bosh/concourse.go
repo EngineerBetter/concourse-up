@@ -39,6 +39,33 @@ var GardenReleaseVersion = "COMPILE_TIME_VARIABLE_bosh_gardenReleaseVersion"
 // GardenReleaseSHA1 is a compile-time variable set with -ldflags
 var GardenReleaseSHA1 = "COMPILE_TIME_VARIABLE_bosh_gardenReleaseSHA1"
 
+// RiemannReleaseURL is a compile-time variable set with -ldflags
+var RiemannReleaseURL = "COMPILE_TIME_VARIABLE_bosh_riemannReleaseURL"
+
+// RiemannReleaseVersion is a compile-time variable set with -ldflags
+var RiemannReleaseVersion = "COMPILE_TIME_VARIABLE_bosh_riemannReleaseVersion"
+
+// RiemannReleaseSHA1 is a compile-time variable set with -ldflags
+var RiemannReleaseSHA1 = "COMPILE_TIME_VARIABLE_bosh_riemannReleaseSHA1"
+
+// GrafanaReleaseURL is a compile-time variable set with -ldflags
+var GrafanaReleaseURL = "COMPILE_TIME_VARIABLE_bosh_grafanaReleaseURL"
+
+// GrafanaReleaseVersion is a compile-time variable set with -ldflags
+var GrafanaReleaseVersion = "COMPILE_TIME_VARIABLE_bosh_grafanaReleaseVersion"
+
+// GrafanaReleaseSHA1 is a compile-time variable set with -ldflags
+var GrafanaReleaseSHA1 = "COMPILE_TIME_VARIABLE_bosh_grafanaReleaseSHA1"
+
+// InfluxDBReleaseURL is a compile-time variable set with -ldflags
+var InfluxDBReleaseURL = "COMPILE_TIME_VARIABLE_bosh_influxDBReleaseURL"
+
+// InfluxDBReleaseVersion is a compile-time variable set with -ldflags
+var InfluxDBReleaseVersion = "COMPILE_TIME_VARIABLE_bosh_influxDBReleaseVersion"
+
+// InfluxDBReleaseSHA1 is a compile-time variable set with -ldflags
+var InfluxDBReleaseSHA1 = "COMPILE_TIME_VARIABLE_bosh_influxDBReleaseSHA1"
+
 func (client *Client) uploadConcourseStemcell() error {
 	if err := client.director.RunAuthenticatedCommand(
 		client.stdout,
