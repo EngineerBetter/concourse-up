@@ -26,6 +26,8 @@ fly --target system-test login \
   --username "$username" \
   --password "$password"
 
+curl -k "https://$domain:3000"
+
 set -x
 fly --target system-test sync
 fly --target system-test workers --details
@@ -53,6 +55,8 @@ fly --target system-test-custom-domain login \
   --concourse-url https://$custom_domain \
   --username "$username" \
   --password "$password"
+
+curl -k "https://$custom_domain:3000"
 
 set -x
 fly --target system-test-custom-domain sync
@@ -98,6 +102,8 @@ fly --target system-test-custom-domain-with-cert login \
   --concourse-url https://$custom_domain \
   --username "$username" \
   --password "$password"
+
+curl -k "https://$custom_domain:3000"
 
 set -x
 fly --target system-test-custom-domain-with-cert sync

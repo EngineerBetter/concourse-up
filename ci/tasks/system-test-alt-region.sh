@@ -25,6 +25,8 @@ fly --target system-test login \
   --username "$username" \
   --password "$password"
 
+curl -k "https://$domain:3000"
+
 set -x
 fly --target system-test sync
 fly --target system-test workers --details
