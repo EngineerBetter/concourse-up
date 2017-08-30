@@ -11,12 +11,14 @@ import (
 	"github.com/EngineerBetter/concourse-up/director"
 	"github.com/EngineerBetter/concourse-up/fly"
 	"github.com/EngineerBetter/concourse-up/terraform"
+	"github.com/fatih/color"
 
 	"gopkg.in/urfave/cli.v1"
 )
 
 // ConcourseUpVersion is a compile-time variable set with -ldflags
 var ConcourseUpVersion = "COMPILE_TIME_VARIABLE_main_concourseUpVersion"
+var blue = color.New(color.FgCyan, color.Bold).SprintfFunc()
 
 func main() {
 	app := cli.NewApp()
@@ -25,6 +27,13 @@ func main() {
 	app.Version = ConcourseUpVersion
 	app.Commands = commands.Commands
 	app.Flags = commands.GlobalFlags
+	cli.AppHelpTemplate = fmt.Sprintf(`%s
+
+See 'concourse-up help <command>' to read about a specific command.
+
+Built by %s, the UK Cloud Foundry specialists %s
+
+`, cli.AppHelpTemplate, blue("EngineerBetter"), blue("http://engineerbetter.com"))
 
 	if err := checkCompileTimeArgs(); err != nil {
 		fmt.Fprintln(os.Stderr, err)
