@@ -293,6 +293,7 @@ resources:
 
 jobs:
 - name: self-update
+  serial: true
   plan:
   - get: concourse-up-release
     trigger: true
