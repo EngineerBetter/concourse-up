@@ -86,7 +86,7 @@ func generateDefaultConfig(iaas, project, deployment, configBucket, region strin
 		Project:                  project,
 		PublicKey:                strings.TrimSpace(string(publicKey)),
 		RDSDefaultDatabaseName:   "bosh",
-		RDSInstanceClass:         "db.t2.small",
+		RDSInstanceClass:         "db.t2.micro",
 		RDSPassword:              util.GeneratePassword(),
 		RDSUsername:              "admin" + util.GeneratePassword(),
 		Region:                   region,
