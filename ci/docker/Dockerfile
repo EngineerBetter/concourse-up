@@ -34,7 +34,7 @@ RUN wget https://github.com/stedolan/jq/releases/download/jq-1.5/jq-linux64 \
     && mv jq-linux64 /usr/bin/jq \
     && chmod +x /usr/bin/jq
 
-RUN wget https://github.com/concourse/concourse/releases/download/v3.4.0/fly_linux_amd64 \
+RUN wget https://github.com/concourse/concourse/releases/download/v3.4.1/fly_linux_amd64 \
     && mv fly_linux_amd64 /usr/bin/fly \
     && chmod +x /usr/bin/fly
 
