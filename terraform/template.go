@@ -259,6 +259,13 @@ resource "aws_elb" "concourse" {
   }
 
   listener {
+    instance_port      = 3000
+    instance_protocol  = "tcp"
+    lb_port            = 3000
+    lb_protocol        = "tcp"
+  }
+
+  listener {
     instance_port     = 2222
     instance_protocol = "tcp"
     lb_port           = 2222
@@ -450,6 +457,13 @@ resource "aws_security_group" "elb" {
   ingress {
     from_port   = 443
     to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    from_port   = 3000
+    to_port     = 3000
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }

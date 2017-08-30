@@ -1,7 +1,6 @@
 package config
 
 import (
-	"encoding/json"
 	"fmt"
 	"strings"
 
@@ -34,8 +33,12 @@ type Config struct {
 	DirectorUsername          string `json:"director_username"`
 	Domain                    string `json:"domain"`
 	EncryptionKey             string `json:"encryption_key"`
+	GrafanaPassword           string `json:"grafana_password"`
+	GrafanaUsername           string `json:"grafana_username"`
 	HostedZoneID              string `json:"hosted_zone_id"`
 	HostedZoneRecordPrefix    string `json:"hosted_zone_record_prefix"`
+	InfluxDBPassword          string `json:"influxdb_password"`
+	InfluxDBUsername          string `json:"influxdb_username"`
 	MultiAZRDS                bool   `json:"multi_az_rds"`
 	PrivateKey                string `json:"private_key"`
 	Project                   string `json:"project"`
@@ -49,40 +52,47 @@ type Config struct {
 	TFStatePath               string `json:"tf_state_path"`
 }
 
-func generateDefaultConfig(iaas, project, deployment, configBucket, region string) ([]byte, error) {
+func generateDefaultConfig(iaas, project, deployment, configBucket, region string) (*Config, error) {
 	privateKey, publicKey, err := util.GenerateSSHKeyPair()
 	if err != nil {
 		return nil, err
 	}
 
+	concourseUsername := "admin"
+	concoursePassword := util.GeneratePassword()
+
 	conf := Config{
-		ConcourseUsername:        "admin",
-		ConcoursePassword:        util.GeneratePassword(),
+		AvailabilityZone:         fmt.Sprintf("%sa", region),
+		ConcourseDBName:          "concourse_atc",
+		ConcoursePassword:        concoursePassword,
+		ConcourseUsername:        concourseUsername,
 		ConcourseWorkerCount:     1,
 		ConcourseWorkerSize:      "xlarge",
-		ConcourseDBName:          "concourse_atc",
-		PublicKey:                strings.TrimSpace(string(publicKey)),
-		PrivateKey:               strings.TrimSpace(string(privateKey)),
-		Deployment:               deployment,
 		ConfigBucket:             configBucket,
-		RDSDefaultDatabaseName:   "bosh",
-		SourceAccessIP:           "",
-		Project:                  project,
-		TFStatePath:              terraformStateFileName,
-		Region:                   region,
-		AvailabilityZone:         fmt.Sprintf("%sa", region),
-		DirectorUsername:         "admin",
-		DirectorPassword:         util.GeneratePassword(),
+		Deployment:               deployment,
 		DirectorHMUserPassword:   util.GeneratePassword(),
-		EncryptionKey:            util.GeneratePasswordWithLength(32),
 		DirectorMbusPassword:     util.GeneratePassword(),
 		DirectorNATSPassword:     util.GeneratePassword(),
+		DirectorPassword:         util.GeneratePassword(),
 		DirectorRegistryPassword: util.GeneratePassword(),
-		RDSInstanceClass:         "db.t2.small",
-		RDSUsername:              "admin" + util.GeneratePassword(),
-		RDSPassword:              util.GeneratePassword(),
+		DirectorUsername:         "admin",
+		EncryptionKey:            util.GeneratePasswordWithLength(32),
+		GrafanaPassword:          concoursePassword,
+		GrafanaUsername:          concourseUsername,
+		InfluxDBPassword:         util.GeneratePassword(),
+		InfluxDBUsername:         "admin",
 		MultiAZRDS:               false,
+		PrivateKey:               strings.TrimSpace(string(privateKey)),
+		Project:                  project,
+		PublicKey:                strings.TrimSpace(string(publicKey)),
+		RDSDefaultDatabaseName:   "bosh",
+		RDSInstanceClass:         "db.t2.small",
+		RDSPassword:              util.GeneratePassword(),
+		RDSUsername:              "admin" + util.GeneratePassword(),
+		Region:                   region,
+		SourceAccessIP:           "",
+		TFStatePath:              terraformStateFileName,
 	}
 
-	return json.MarshalIndent(&conf, "", "  ")
+	return &conf, nil
 }

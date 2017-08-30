@@ -122,8 +122,23 @@ func generateConcourseManifest(config *config.Config, metadata *terraform.Metada
 		GardenReleaseSHA1:       GardenReleaseSHA1,
 		GardenReleaseURL:        GardenReleaseURL,
 		GardenReleaseVersion:    GardenReleaseVersion,
+		GrafanaPassword:         config.GrafanaPassword,
+		GrafanaPort:             "3000",
+		GrafanaReleaseSHA1:      GrafanaReleaseSHA1,
+		GrafanaReleaseURL:       GrafanaReleaseURL,
+		GrafanaReleaseVersion:   GrafanaReleaseVersion,
+		GrafanaURL:              fmt.Sprintf("https://%s:3000", config.Domain),
+		GrafanaUsername:         config.GrafanaUsername,
+		InfluxDBPassword:        config.InfluxDBPassword,
+		InfluxDBReleaseSHA1:     InfluxDBReleaseSHA1,
+		InfluxDBReleaseURL:      InfluxDBReleaseURL,
+		InfluxDBReleaseVersion:  InfluxDBReleaseVersion,
+		InfluxDBUsername:        config.InfluxDBUsername,
 		Password:                config.ConcoursePassword,
 		Project:                 config.Project,
+		RiemannReleaseSHA1:      RiemannReleaseSHA1,
+		RiemannReleaseURL:       RiemannReleaseURL,
+		RiemannReleaseVersion:   RiemannReleaseVersion,
 		StemcellSHA1:            ConcourseStemcellSHA1,
 		StemcellURL:             ConcourseStemcellURL,
 		StemcellVersion:         ConcourseStemcellVersion,
@@ -153,8 +168,23 @@ type awsConcourseManifestParams struct {
 	GardenReleaseSHA1       string
 	GardenReleaseURL        string
 	GardenReleaseVersion    string
+	GrafanaPassword         string
+	GrafanaPort             string
+	GrafanaReleaseSHA1      string
+	GrafanaReleaseURL       string
+	GrafanaReleaseVersion   string
+	GrafanaURL              string
+	GrafanaUsername         string
+	InfluxDBPassword        string
+	InfluxDBReleaseSHA1     string
+	InfluxDBReleaseURL      string
+	InfluxDBReleaseVersion  string
+	InfluxDBUsername        string
 	Password                string
 	Project                 string
+	RiemannReleaseSHA1      string
+	RiemannReleaseURL       string
+	RiemannReleaseVersion   string
 	StemcellSHA1            string
 	StemcellURL             string
 	StemcellVersion         string
@@ -185,6 +215,21 @@ releases:
   sha1: "<% .GardenReleaseSHA1 %>"
   version: <% .GardenReleaseVersion %>
 
+- name: riemann
+  url: "<% .RiemannReleaseURL %>"
+  sha1: "<% .RiemannReleaseSHA1 %>"
+  version: <% .RiemannReleaseVersion %>
+
+- name: grafana
+  url: "<% .GrafanaReleaseURL %>"
+  sha1: "<% .GrafanaReleaseSHA1 %>"
+  version: <% .GrafanaReleaseVersion %>
+
+- name: influxdb
+  url: "<% .InfluxDBReleaseURL %>"
+  sha1: "<% .InfluxDBReleaseSHA1 %>"
+  version: <% .InfluxDBReleaseVersion %>
+
 stemcells:
 - alias: trusty
   os: ubuntu-trusty
@@ -197,13 +242,14 @@ tags:
 instance_groups:
 - name: web
   instances: 1
-  vm_type: concourse-medium
+  vm_type: concourse-web
   stemcell: trusty
   azs:
   - z1
   networks:
   - name: public
     default: [dns, gateway]
+    static_ips: [10.0.0.7]
   vm_extensions:
   - elb
   jobs:
@@ -217,9 +263,11 @@ instance_groups:
       basic_auth_password: <% .Password %>
       tls_cert: |-
         <% .Indent "8" .TLSCert %>
-
       tls_key: |-
         <% .Indent "8" .TLSKey %>
+      riemann:
+        host: 127.0.0.1
+        port: 5555
 
       postgresql:
         port: <% .DBPort %>
@@ -235,6 +283,52 @@ instance_groups:
   - name: tsa
     release: concourse
     properties: {}
+  - name: riemann
+    release: riemann
+    properties:
+      riemann:
+        influxdb:
+          host: 127.0.0.1
+          port: 8086
+          password: <% .InfluxDBUsername %>
+          username: <% .InfluxDBPassword %>
+          database: riemann
+  - name: influxdb
+    release: influxdb
+    properties:
+      influxdb:
+        database: riemann
+        user: <% .InfluxDBUsername %>
+        password: <% .InfluxDBPassword %>
+  - name: riemann-emitter
+    release: riemann
+    properties:
+      riemann_emitter:
+        host: 127.0.0.1
+        port: 5555
+  - name: grafana
+    release: grafana
+    properties:
+      grafana:
+        admin_username: <% .GrafanaUsername %>
+        admin_password: <% .GrafanaPassword %>
+        listen_port: <% .GrafanaPort %>
+        root_url: <% .GrafanaURL %>
+        datasource:
+          name: influxdb
+          url: http://127.0.0.1:8086
+          database_type: influxdb
+          user: <% .InfluxDBUsername %>
+          password: <% .InfluxDBPassword %>
+          database_name: riemann
+        ssl:
+          cert: |-
+            <% .Indent "12" .TLSCert %>
+          key: |-
+            <% .Indent "12" .TLSKey %>
+        dashboards:
+          - name: Concourse
+            content: '{"__inputs":[],"__requires":[{"type":"grafana","id":"grafana","name":"Grafana","version":"4.4.1"},{"type":"panel","id":"graph","name":"Graph","version":""},{"type":"datasource","id":"influxdb","name":"InfluxDB","version":"1.0.0"}],"annotations":{"list":[]},"editable":true,"gnetId":null,"graphTooltip":0,"hideControls":false,"id":null,"links":[],"refresh":"10s","rows":[{"collapse":false,"height":250,"panels":[{"aliasColors":{},"bars":false,"dashLength":10,"dashes":false,"datasource":"influxdb","editable":true,"error":false,"fill":1,"grid":{},"height":"","id":4,"legend":{"avg":false,"current":false,"max":false,"min":false,"show":false,"total":false,"values":false},"lines":true,"linewidth":2,"links":[],"nullPointMode":"connected","percentage":false,"pointradius":5,"points":false,"renderer":"flot","seriesOverrides":[],"spaceLength":10,"span":6,"stack":false,"steppedLine":false,"targets":[{"dsType":"influxdb","groupBy":[{"params":["$interval"],"type":"time"},{"params":["host"],"type":"tag"},{"params":["null"],"type":"fill"}],"measurement":"cpu","orderByTime":"ASC","policy":"default","refId":"A","resultFormat":"time_series","select":[[{"params":["value"],"type":"field"},{"params":[],"type":"mean"}]],"tags":[]}],"thresholds":[],"timeFrom":null,"timeShift":null,"title":"CPU","tooltip":{"msResolution":false,"shared":true,"sort":0,"value_type":"cumulative"},"type":"graph","xaxis":{"buckets":null,"mode":"time","name":null,"show":true,"values":[]},"yaxes":[{"format":"percentunit","label":null,"logBase":1,"max":1,"min":0,"show":true},{"format":"short","label":null,"logBase":1,"max":null,"min":null,"show":true}]},{"aliasColors":{},"bars":false,"dashLength":10,"dashes":false,"datasource":"influxdb","editable":true,"error":false,"fill":1,"grid":{},"id":2,"legend":{"alignAsTable":false,"avg":false,"current":false,"max":false,"min":false,"rightSide":false,"show":false,"total":false,"values":false},"lines":true,"linewidth":2,"links":[],"nullPointMode":"connected","percentage":false,"pointradius":5,"points":false,"renderer":"flot","seriesOverrides":[],"spaceLength":10,"span":6,"stack":false,"steppedLine":false,"targets":[{"dsType":"influxdb","groupBy":[{"params":["$interval"],"type":"time"},{"params":["host"],"type":"tag"},{"params":["null"],"type":"fill"}],"measurement":"disk /var/vcap/data","orderByTime":"ASC","policy":"default","query":"SELECT mean(\"value\") FROM \"disk /var/vcap/data\" WHERE $timeFilter GROUP BY time($interval), \"host\" fill(null)","rawQuery":true,"refId":"A","resultFormat":"time_series","select":[[{"params":["value"],"type":"field"},{"params":[],"type":"mean"}]],"tags":[]}],"thresholds":[],"timeFrom":null,"timeShift":null,"title":"Disk Usage","tooltip":{"msResolution":false,"shared":true,"sort":0,"value_type":"cumulative"},"type":"graph","xaxis":{"buckets":null,"mode":"time","name":null,"show":true,"values":[]},"yaxes":[{"format":"percentunit","label":null,"logBase":1,"max":1,"min":0,"show":true},{"format":"short","label":null,"logBase":1,"max":null,"min":null,"show":true}]}],"repeat":null,"repeatIteration":null,"repeatRowId":null,"showTitle":false,"title":"Row","titleSize":"h6"},{"collapse":false,"height":"250px","panels":[{"aliasColors":{},"bars":false,"dashLength":10,"dashes":false,"datasource":"influxdb","editable":true,"error":false,"fill":0,"grid":{},"height":"","id":1,"legend":{"avg":false,"current":false,"max":false,"min":false,"show":false,"total":false,"values":false},"lines":true,"linewidth":2,"links":[],"nullPointMode":"connected","percentage":false,"pointradius":3,"points":true,"renderer":"flot","seriesOverrides":[],"spaceLength":10,"span":6,"stack":false,"steppedLine":false,"targets":[{"dsType":"influxdb","fields":[{"func":"mean","name":"value"}],"groupBy":[{"params":["$interval"],"type":"time"},{"params":["job"],"type":"tag"}],"groupByTags":["job"],"measurement":"build finished","orderByTime":"ASC","policy":"default","query":"SELECT mean(value) FROM \"build finished\" WHERE $timeFilter GROUP BY time($interval), \"job\"","refId":"A","resultFormat":"time_series","select":[[{"params":["value"],"type":"field"},{"params":[],"type":"mean"}]],"tags":[]}],"thresholds":[],"timeFrom":null,"timeShift":null,"title":"Build Durations","tooltip":{"msResolution":false,"shared":false,"sort":0,"value_type":"cumulative"},"type":"graph","xaxis":{"buckets":null,"mode":"time","name":null,"show":true,"values":[]},"yaxes":[{"format":"ms","logBase":1,"max":null,"min":null,"show":true},{"format":"short","logBase":1,"max":null,"min":null,"show":true}]},{"aliasColors":{},"bars":false,"dashLength":10,"dashes":false,"datasource":"influxdb","fill":1,"id":5,"legend":{"avg":false,"current":false,"max":false,"min":false,"show":true,"total":false,"values":false},"lines":true,"linewidth":1,"links":[],"nullPointMode":"null","percentage":false,"pointradius":5,"points":false,"renderer":"flot","seriesOverrides":[],"spaceLength":10,"span":6,"stack":false,"steppedLine":false,"targets":[{"dsType":"influxdb","groupBy":[{"params":["worker"],"type":"tag"}],"measurement":"worker containers","orderByTime":"ASC","policy":"default","refId":"A","resultFormat":"time_series","select":[[{"params":["value"],"type":"field"}]],"tags":[]}],"thresholds":[],"timeFrom":null,"timeShift":null,"title":"Containers","tooltip":{"shared":true,"sort":0,"value_type":"individual"},"type":"graph","xaxis":{"buckets":null,"mode":"time","name":null,"show":true,"values":[]},"yaxes":[{"format":"short","label":null,"logBase":1,"max":null,"min":null,"show":true},{"format":"short","label":null,"logBase":1,"max":null,"min":null,"show":true}]}],"repeat":null,"repeatIteration":null,"repeatRowId":null,"showTitle":false,"title":"New row","titleSize":"h6"},{"collapse":false,"height":250,"panels":[],"repeat":null,"repeatIteration":null,"repeatRowId":null,"showTitle":false,"title":"Dashboard Row","titleSize":"h6"}],"schemaVersion":14,"style":"dark","tags":[],"templating":{"list":[]},"time":{"from":"now-1h","to":"now"},"timepicker":{"refresh_intervals":["5s","10s","30s","1m","5m","15m","30m","1h","2h","1d"],"time_options":["5m","15m","1h","6h","12h","24h","2d","7d","30d"]},"timezone":"browser","title":"Concourse","version":0}'
 
 - name: worker
   instances: <% .WorkerCount %>
@@ -258,6 +352,12 @@ instance_groups:
       garden:
         listen_network: tcp
         listen_address: 0.0.0.0:7777
+  - name: riemann-emitter
+    release: riemann
+    properties:
+      riemann_emitter:
+        host: 10.0.0.7
+        port: 5555
 
 update:
   canaries: 1

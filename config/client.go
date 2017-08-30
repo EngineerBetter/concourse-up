@@ -103,13 +103,18 @@ func (client *Client) Load() (*Config, error) {
 
 // LoadOrCreate loads an existing config file from S3, or creates a default if one doesn't already exist
 func (client *Client) LoadOrCreate(deployArgs *DeployArgs) (*Config, bool, error) {
-	defaultConfigBytes, err := generateDefaultConfig(
+	defaultConfig, err := generateDefaultConfig(
 		deployArgs.IAAS,
 		client.project,
 		client.deployment(),
 		client.configBucket(),
 		deployArgs.AWSRegion,
 	)
+	if err != nil {
+		return nil, false, err
+	}
+
+	defaultConfigBytes, err := json.Marshal(defaultConfig)
 	if err != nil {
 		return nil, false, err
 	}
@@ -130,6 +135,23 @@ func (client *Client) LoadOrCreate(deployArgs *DeployArgs) (*Config, bool, error
 	conf := Config{}
 	if err := json.Unmarshal(configBytes, &conf); err != nil {
 		return nil, false, err
+	}
+
+	// Ensure new fields are on legacy config files
+	if conf.InfluxDBUsername == "" {
+		conf.InfluxDBUsername = defaultConfig.InfluxDBUsername
+	}
+
+	if conf.InfluxDBPassword == "" {
+		conf.InfluxDBPassword = defaultConfig.InfluxDBUsername
+	}
+
+	if conf.GrafanaUsername == "" {
+		conf.GrafanaUsername = conf.ConcourseUsername
+	}
+
+	if conf.GrafanaPassword == "" {
+		conf.GrafanaPassword = conf.ConcoursePassword
 	}
 
 	return &conf, createdNewFile, nil

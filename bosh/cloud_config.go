@@ -35,6 +35,15 @@ azs:
     availability_zone: <% .AvailabilityZone %>
 
 vm_types:
+- name: concourse-web
+  cloud_properties:
+    instance_type: t2.medium
+    ephemeral_disk:
+      size: 20_000
+      type: gp2
+    security_groups:
+    - <% .VMsSecurityGroupID %>
+
 - name: concourse-medium
   cloud_properties:
     instance_type: t2.medium
@@ -98,6 +107,7 @@ networks:
     az: z1
     static:
     - 10.0.0.6
+    - 10.0.0.7
     reserved:
     - 10.0.0.1-10.0.0.5
     cloud_properties:
