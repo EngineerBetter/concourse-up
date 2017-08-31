@@ -129,12 +129,11 @@ func (client *Client) checkPreTerraformConfigRequirements(config *config.Config)
 }
 
 func (client *Client) checkPreDeployConfigRequiments(isDomainUpdated bool, config *config.Config, metadata *terraform.Metadata) (*config.Config, error) {
-	config, err := client.ensureDomain(config, metadata)
-	if err != nil {
-		return nil, err
+	if client.deployArgs.Domain == "" {
+		config.Domain = metadata.ATCPublicIP.Value
 	}
 
-	config, err = client.ensureDirectorCerts(config, metadata)
+	config, err := client.ensureDirectorCerts(config, metadata)
 	if err != nil {
 		return nil, err
 	}
@@ -150,14 +149,6 @@ func (client *Client) checkPreDeployConfigRequiments(isDomainUpdated bool, confi
 
 	if err := client.configClient.Update(config); err != nil {
 		return nil, err
-	}
-
-	return config, nil
-}
-
-func (client *Client) ensureDomain(config *config.Config, metadata *terraform.Metadata) (*config.Config, error) {
-	if client.deployArgs.Domain == "" {
-		config.Domain = metadata.ATCPublicIP.Value
 	}
 
 	return config, nil
@@ -297,8 +288,7 @@ func (client *Client) setUserIP(config *config.Config) error {
 
 func (client *Client) setHostedZone(config *config.Config) error {
 	domain := client.deployArgs.Domain
-	if domain == "" {
-		config.Domain = ""
+	if client.deployArgs.Domain == "" {
 		return nil
 	}
 
