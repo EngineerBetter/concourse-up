@@ -11,5 +11,7 @@ gometalinter.v1 \
   --exclude "_test\.go" \
   --disable=gotype \
   --disable=gas \
+  --disable=aligncheck \
+  --disable=errcheck \
   --deadline=500s \
   ./...
