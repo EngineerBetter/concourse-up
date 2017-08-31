@@ -33,7 +33,6 @@ type IClient interface {
 
 // Client wraps common terraform commands
 type Client struct {
-	iaas      string
 	configDir string
 	tempDir   *util.TempDir
 	stdout    io.Writer
