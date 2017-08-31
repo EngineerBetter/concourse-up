@@ -156,7 +156,7 @@ func (client *Client) checkPreDeployConfigRequiments(isDomainUpdated bool, confi
 }
 
 func (client *Client) ensureDomain(config *config.Config, metadata *terraform.Metadata) (*config.Config, error) {
-	if config.Domain == "" {
+	if client.deployArgs.Domain == "" {
 		config.Domain = metadata.ATCPublicIP.Value
 	}
 
