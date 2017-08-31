@@ -31,7 +31,7 @@ func main() {
 
 See 'concourse-up help <command>' to read about a specific command.
 
-Built by %s, the UK Cloud Foundry specialists %s
+Built by %s %s
 
 `, cli.AppHelpTemplate, blue("EngineerBetter"), blue("http://engineerbetter.com"))
 

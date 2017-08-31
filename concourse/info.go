@@ -7,6 +7,7 @@ import (
 	"github.com/EngineerBetter/concourse-up/bosh"
 	"github.com/EngineerBetter/concourse-up/config"
 	"github.com/EngineerBetter/concourse-up/terraform"
+	"github.com/fatih/color"
 )
 
 // Info represents the terraform output and concourse-up config files
@@ -15,6 +16,8 @@ type Info struct {
 	Config    *config.Config      `json:"config"`
 	Instances []bosh.Instance     `json:"instances"`
 }
+
+var blue = color.New(color.FgCyan, color.Bold).SprintfFunc()
 
 // FetchInfo fetches and builds the info
 func (client *Client) FetchInfo() (*Info, error) {
@@ -66,6 +69,8 @@ func (info *Info) String() string {
 	str += fmt.Sprintf("Concourse credentials:\n\tusername: %s\n\tpassword: %s\n\tURL:      https://%s\n\n", info.Config.ConcourseUsername, info.Config.ConcoursePassword, info.Config.Domain)
 	str += fmt.Sprintf("Grafana credentials:\n\tusername: %s\n\tpassword: %s\n\tURL:      https://%s:3000\n\n", info.Config.ConcourseUsername, info.Config.ConcoursePassword, info.Config.Domain)
 	str += fmt.Sprintf("Bosh credentials:\n\tusername: %s\n\tpassword: %s\n\tIP:       %s\n\tCA Cert:\n\t\t%s\n", info.Config.DirectorUsername, info.Config.DirectorPassword, info.Terraform.DirectorPublicIP.Value, boshCACert)
+
+	str += fmt.Sprintf("Built by %s %s\n", blue("EngineerBetter"), blue("http://engineerbetter.com"))
 
 	return str
 }
