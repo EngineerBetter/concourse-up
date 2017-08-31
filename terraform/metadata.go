@@ -11,9 +11,10 @@ type MetadataStringValue struct {
 type Metadata struct {
 	DirectorKeyPair         MetadataStringValue `json:"director_key_pair" valid:"required"`
 	DirectorPublicIP        MetadataStringValue `json:"director_public_ip" valid:"required"`
+	ATCPublicIP             MetadataStringValue `json:"atc_public_ip" valid:"required"`
 	DirectorSecurityGroupID MetadataStringValue `json:"director_security_group_id" valid:"required"`
 	VMsSecurityGroupID      MetadataStringValue `json:"vms_security_group_id" valid:"required"`
-	ELBSecurityGroupID      MetadataStringValue `json:"elb_security_group_id" valid:"required"`
+	ATCSecurityGroupID      MetadataStringValue `json:"atc_security_group_id" valid:"required"`
 	PublicSubnetID          MetadataStringValue `json:"public_subnet_id" valid:"required"`
 	PrivateSubnetID         MetadataStringValue `json:"private_subnet_id" valid:"required"`
 	VPCID                   MetadataStringValue `json:"vpc_id" valid:"required"`
@@ -26,8 +27,6 @@ type Metadata struct {
 	BoshSecretAccessKey      MetadataStringValue `json:"bosh_user_secret_access_key" valid:"required"`
 	BoshDBPort               MetadataStringValue `json:"bosh_db_port" valid:"required"`
 	BoshDBAddress            MetadataStringValue `json:"bosh_db_address" valid:"required"`
-	ELBName                  MetadataStringValue `json:"elb_name"`
-	ELBDNSName               MetadataStringValue `json:"elb_dns_name"`
 	SourceAccessIP           MetadataStringValue `json:"source_access_ip"`
 }
 

@@ -7,22 +7,20 @@ import (
 )
 
 type awsCloudConfigParams struct {
-	AvailabilityZone            string
-	VMsSecurityGroupID          string
-	LoadBalancerSecurityGroupID string
-	LoadBalancerID              string
-	PublicSubnetID              string
-	PrivateSubnetID             string
+	AvailabilityZone   string
+	VMsSecurityGroupID string
+	ATCSecurityGroupID string
+	PublicSubnetID     string
+	PrivateSubnetID    string
 }
 
 func generateCloudConfig(conf *config.Config, metadata *terraform.Metadata) ([]byte, error) {
 	templateParams := awsCloudConfigParams{
-		AvailabilityZone:            conf.AvailabilityZone,
-		VMsSecurityGroupID:          metadata.VMsSecurityGroupID.Value,
-		LoadBalancerSecurityGroupID: metadata.ELBSecurityGroupID.Value,
-		LoadBalancerID:              metadata.ELBName.Value,
-		PublicSubnetID:              metadata.PublicSubnetID.Value,
-		PrivateSubnetID:             metadata.PrivateSubnetID.Value,
+		AvailabilityZone:   conf.AvailabilityZone,
+		VMsSecurityGroupID: metadata.VMsSecurityGroupID.Value,
+		ATCSecurityGroupID: metadata.ATCSecurityGroupID.Value,
+		PublicSubnetID:     metadata.PublicSubnetID.Value,
+		PrivateSubnetID:    metadata.PrivateSubnetID.Value,
 	}
 
 	return util.RenderTemplate(awsCloudConfigtemplate, templateParams)
@@ -129,12 +127,11 @@ networks:
   type: vip
 
 vm_extensions:
-- name: elb
+- name: atc
   cloud_properties:
-    elbs:
-    - <% .LoadBalancerID %>
     security_groups:
     - <% .VMsSecurityGroupID %>
+    - <% .ATCSecurityGroupID %>
 
 compilation:
   workers: 5

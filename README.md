@@ -151,13 +151,14 @@ By default, `concourse-up` deploys to the AWS eu-west-1 (Ireland) region, and us
 
 | Component     | Size             | Count | Price (USD) |
 |---------------|------------------|-------|------------:|
-| BOSH director | t2.medium        |     1 |       34.31 |
-| Web Server    | t2.medium        |     1 |       34.31 |
-| Worker        | m4.xlarge (spot) |     1 |       40.15 |
-| RDS instance  | db.t2.small      |     1 |       26.28 |
-| Load balancer |         -        |     1 |       20.44 |
+| BOSH director | t2.micro         |     1 |        9.49 |
+| Web Server    | t2.micro         |     1 |        9.49 |
+| Worker        | m4.xlarge (spot) |     1 |       40.00 |
+| RDS instance  | db.t2.micro      |     1 |       13.14 |
 | NAT Gateway   |         -        |     1 |       35.04 |
-| **Total**     |                  |       |      **190.63** |
+| gp2 storage   | 20GB (bosh, web) |     2 |        4.40 |
+| gp2 storage   | 220GB (worker)   |     1 |       22.00 |
+| **Total**     |                  |       |  **133.56** |
 
 ## What it does
 
@@ -165,12 +166,11 @@ By default, `concourse-up` deploys to the AWS eu-west-1 (Ireland) region, and us
 
 It then uses Terraform to deploy the following infrastructure:
 
-- An elastic load balancer
 - A VPC, with public and private subnets and routing
 - A NAT gateway for outbound traffic from the private subnet
 - An S3 bucket which BOSH uses as a blobstore
 - An IAM user that can access the blobstore
-- An IAM user that can deploy EC2 instances and update load balancers
+- An IAM user that can deploy EC2 instances
 - An AWS keypair for BOSH to use when deploying VMs
 - An RDS instance (default: db.t2.small) for BOSH and Concourse to use
 - Concourse database is [encrypted](http://concourse.ci/encryption.html) by default
@@ -184,7 +184,7 @@ Once the terraform step is complete, `concourse-up` deploys a BOSH director on a
 
 - One t2.medium for the Concourse web server
 - One m4.xlarge [spot](https://aws.amazon.com/ec2/spot/) instance used as a Concourse worker
-- Access via a load balancer over HTTP and HTTPS using a user-provided certificate, or an auto-generated self-signed certificate if one isn't provided.
+- Access via over HTTP and HTTPS using a user-provided certificate, or an auto-generated self-signed certificate if one isn't provided.
 
 ## Using a dedicated AWS IAM account
 

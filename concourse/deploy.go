@@ -157,7 +157,7 @@ func (client *Client) checkPreDeployConfigRequiments(isDomainUpdated bool, confi
 
 func (client *Client) ensureDomain(config *config.Config, metadata *terraform.Metadata) (*config.Config, error) {
 	if config.Domain == "" {
-		config.Domain = metadata.ELBDNSName.Value
+		config.Domain = metadata.ATCPublicIP.Value
 	}
 
 	return config, nil
@@ -327,12 +327,13 @@ func writeDeploySuccessMessage(config *config.Config, metadata *terraform.Metada
 		flags = " --insecure"
 	}
 	_, err := stdout.Write([]byte(fmt.Sprintf(
-		"\nDEPLOY SUCCESSFUL. Log in with:\n\nfly --target %s login%s --concourse-url https://%s --username %s --password %s\n\n",
+		"\nDEPLOY SUCCESSFUL. Log in with:\n\nfly --target %s login%s --concourse-url https://%s --username %s --password %s\n\nMetrics available at https://%s:3000 using the same username and password\n\n",
 		config.Project,
 		flags,
 		config.Domain,
 		config.ConcourseUsername,
 		config.ConcoursePassword,
+		config.Domain,
 	)))
 
 	return err

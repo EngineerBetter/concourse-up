@@ -239,69 +239,21 @@ resource "aws_route_table_association" "private" {
   route_table_id = "${aws_route_table.private.id}"
 }
 
-resource "aws_elb" "concourse" {
-  name            = "${var.deployment}"
-  subnets         = ["${aws_subnet.public.id}"]
-  security_groups = ["${aws_security_group.elb.id}"]
-
-  listener {
-    instance_port      = 8080
-    instance_protocol  = "tcp"
-    lb_port            = 80
-    lb_protocol        = "tcp"
-  }
-
-  listener {
-    instance_port      = 4443
-    instance_protocol  = "tcp"
-    lb_port            = 443
-    lb_protocol        = "tcp"
-  }
-
-  listener {
-    instance_port      = 3000
-    instance_protocol  = "tcp"
-    lb_port            = 3000
-    lb_protocol        = "tcp"
-  }
-
-  listener {
-    instance_port     = 2222
-    instance_protocol = "tcp"
-    lb_port           = 2222
-    lb_protocol       = "tcp"
-  }
-
-  health_check {
-    healthy_threshold   = 2
-    unhealthy_threshold = 2
-    timeout             = 3
-    target              = "TCP:8080"
-    interval            = 30
-  }
-
-  tags {
-    Name = "${var.deployment}"
-    concourse-up-project = "${var.project}"
-    concourse-up-component = "bosh"
-  }
-}
-
 <%if .HostedZoneID %>
 resource "aws_route53_record" "concourse" {
   zone_id = "${var.hosted_zone_id}"
   name    = "${var.hosted_zone_record_prefix}"
+  ttl     = "60"
   type    = "A"
-
-  alias {
-    name                   = "${aws_elb.concourse.dns_name}"
-    zone_id                = "${aws_elb.concourse.zone_id}"
-    evaluate_target_health = true
-  }
+  records = ["${aws_eip.atc.public_ip}"]
 }
 <%end%>
 
 resource "aws_eip" "director" {
+  vpc = true
+}
+
+resource "aws_eip" "atc" {
   vpc = true
 }
 
@@ -429,13 +381,13 @@ resource "aws_security_group" "rds" {
   }
 }
 
-resource "aws_security_group" "elb" {
-  name        = "${var.deployment}-elb"
-  description = "Concourse UP ELB security group"
+resource "aws_security_group" "atc" {
+  name        = "${var.deployment}-atc"
+  description = "Concourse UP ATC security group"
   vpc_id      = "${aws_vpc.default.id}"
 
   tags {
-    Name = "${var.deployment}-elb"
+    Name = "${var.deployment}-atc"
     concourse-up-project = "${var.project}"
     concourse-up-component = "concourse"
   }
@@ -569,6 +521,10 @@ output "director_public_ip" {
   value = "${aws_eip.director.public_ip}"
 }
 
+output "atc_public_ip" {
+  value = "${aws_eip.atc.public_ip}"
+}
+
 output "director_security_group_id" {
   value = "${aws_security_group.director.id}"
 }
@@ -577,8 +533,8 @@ output "vms_security_group_id" {
   value = "${aws_security_group.vms.id}"
 }
 
-output "elb_security_group_id" {
-  value = "${aws_security_group.elb.id}"
+output "atc_security_group_id" {
+  value = "${aws_security_group.atc.id}"
 }
 
 output "nat_gateway_ip" {
@@ -619,13 +575,5 @@ output "bosh_db_port" {
 
 output "bosh_db_address" {
   value = "${aws_db_instance.default.address}"
-}
-
-output "elb_name" {
-  value = "${aws_elb.concourse.name}"
-}
-
-output "elb_dns_name" {
-  value = "${aws_elb.concourse.dns_name}"
 }
 `

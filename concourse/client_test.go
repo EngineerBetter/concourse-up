@@ -68,23 +68,22 @@ var _ = Describe("Client", func() {
 		}
 
 		terraformMetadata = &terraform.Metadata{
-			DirectorPublicIP:         terraform.MetadataStringValue{Value: "99.99.99.99"},
-			DirectorKeyPair:          terraform.MetadataStringValue{Value: "-- KEY --"},
-			DirectorSecurityGroupID:  terraform.MetadataStringValue{Value: "sg-123"},
-			VMsSecurityGroupID:       terraform.MetadataStringValue{Value: "sg-456"},
-			PublicSubnetID:           terraform.MetadataStringValue{Value: "sn-public-123"},
-			PrivateSubnetID:          terraform.MetadataStringValue{Value: "sn-private-123"},
-			NatGatewayIP:             terraform.MetadataStringValue{Value: "88.88.88.88"},
-			BoshDBPort:               terraform.MetadataStringValue{Value: "5432"},
-			BoshDBAddress:            terraform.MetadataStringValue{Value: "rds.aws.com"},
-			BoshUserAccessKeyID:      terraform.MetadataStringValue{Value: "abc123"},
-			BoshSecretAccessKey:      terraform.MetadataStringValue{Value: "abc123"},
+			ATCPublicIP:              terraform.MetadataStringValue{Value: "77.77.77.77"},
+			ATCSecurityGroupID:       terraform.MetadataStringValue{Value: "sg-999"},
 			BlobstoreBucket:          terraform.MetadataStringValue{Value: "blobs.aws.com"},
-			BlobstoreUserAccessKeyID: terraform.MetadataStringValue{Value: "abc123"},
 			BlobstoreSecretAccessKey: terraform.MetadataStringValue{Value: "abc123"},
-			ELBSecurityGroupID:       terraform.MetadataStringValue{Value: "sg-789"},
-			ELBName:                  terraform.MetadataStringValue{Value: "elb-123"},
-			ELBDNSName:               terraform.MetadataStringValue{Value: "elb.aws.com"},
+			BlobstoreUserAccessKeyID: terraform.MetadataStringValue{Value: "abc123"},
+			BoshDBAddress:            terraform.MetadataStringValue{Value: "rds.aws.com"},
+			BoshDBPort:               terraform.MetadataStringValue{Value: "5432"},
+			BoshSecretAccessKey:      terraform.MetadataStringValue{Value: "abc123"},
+			BoshUserAccessKeyID:      terraform.MetadataStringValue{Value: "abc123"},
+			DirectorKeyPair:          terraform.MetadataStringValue{Value: "-- KEY --"},
+			DirectorPublicIP:         terraform.MetadataStringValue{Value: "99.99.99.99"},
+			DirectorSecurityGroupID:  terraform.MetadataStringValue{Value: "sg-123"},
+			NatGatewayIP:             terraform.MetadataStringValue{Value: "88.88.88.88"},
+			PrivateSubnetID:          terraform.MetadataStringValue{Value: "sn-private-123"},
+			PublicSubnetID:           terraform.MetadataStringValue{Value: "sn-public-123"},
+			VMsSecurityGroupID:       terraform.MetadataStringValue{Value: "sg-456"},
 			VPCID:                    terraform.MetadataStringValue{Value: "vpc-112233"},
 		}
 
@@ -281,7 +280,7 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 			err := client.Deploy()
 			Expect(err).ToNot(HaveOccurred())
 
-			Expect(actions).To(ContainElement("generating cert ca: concourse-up-happymeal, ca: [elb.aws.com]"))
+			Expect(actions).To(ContainElement("generating cert ca: concourse-up-happymeal, ca: [77.77.77.77]"))
 		})
 
 		It("Sets the director public IP on the config", func() {
@@ -383,7 +382,7 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 			err := client.Deploy()
 			Expect(err).ToNot(HaveOccurred())
 			Eventually(stdout).Should(gbytes.Say("DEPLOY SUCCESSFUL"))
-			Eventually(stdout).Should(gbytes.Say("fly --target happymeal login --insecure --concourse-url https://elb.aws.com --username admin --password s3cret"))
+			Eventually(stdout).Should(gbytes.Say("fly --target happymeal login --insecure --concourse-url https://77.77.77.77 --username admin --password s3cret"))
 		})
 
 		Context("When a custom cert is provided", func() {

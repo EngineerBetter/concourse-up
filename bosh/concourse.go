@@ -105,6 +105,7 @@ func (client *Client) deployConcourse(detach bool) error {
 func generateConcourseManifest(config *config.Config, metadata *terraform.Metadata) ([]byte, error) {
 	templateParams := awsConcourseManifestParams{
 		AllowSelfSignedCerts:    "true",
+		ATCPublicIP:             metadata.ATCPublicIP.Value,
 		ConcourseReleaseSHA1:    ConcourseReleaseSHA1,
 		ConcourseReleaseURL:     ConcourseReleaseURL,
 		ConcourseReleaseVersion: ConcourseReleaseVersion,
@@ -151,6 +152,7 @@ func generateConcourseManifest(config *config.Config, metadata *terraform.Metada
 
 type awsConcourseManifestParams struct {
 	AllowSelfSignedCerts    string
+	ATCPublicIP             string
 	ConcourseReleaseSHA1    string
 	ConcourseReleaseURL     string
 	ConcourseReleaseVersion string
@@ -246,12 +248,16 @@ instance_groups:
   - name: public
     default: [dns, gateway]
     static_ips: [10.0.0.7]
+  - name: vip
+    static_ips: [<% .ATCPublicIP %>]
   vm_extensions:
-  - elb
+  - atc
   jobs:
   - name: atc
     release: concourse
     properties:
+      bind_port: 80
+      tls_bind_port: 443
       allow_self_signed_certificates: <% .AllowSelfSignedCerts %>
       external_url: <% .URL %>
       encryption_key: <% .EncryptionKey %>
