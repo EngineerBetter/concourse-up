@@ -70,11 +70,7 @@ func (client *Client) createEnv(stateFileBytes []byte) ([]byte, error) {
 	}
 
 	stateFileBytes, err = ioutil.ReadFile(stateFilePath)
-	if err != nil {
-		return stateFileBytes, err
-	}
-
-	return stateFileBytes, nil
+	return stateFileBytes, err
 }
 
 func (client *Client) updateCloudConfig() error {

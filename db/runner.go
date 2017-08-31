@@ -30,7 +30,7 @@ type Runner func(sql string) error
 
 // NewRunner returns a new SQL runner
 func NewRunner(creds *Credentials) (Runner, error) {
-	key, err := ssh.ParsePrivateKey([]byte(creds.SSHPrivateKey))
+	key, err := ssh.ParsePrivateKey(creds.SSHPrivateKey)
 	if err != nil {
 		return nil, err
 	}

@@ -72,11 +72,7 @@ func (client *AWSClient) DeleteVersionedBucket(name string) error {
 	time.Sleep(time.Second)
 
 	_, err = s3Client.DeleteBucket(&s3.DeleteBucketInput{Bucket: &name})
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return err
 }
 
 // EnsureBucketExists checks if the named bucket exists and creates it if it doesn't
@@ -110,10 +106,6 @@ func (client *AWSClient) EnsureBucketExists(name string) error {
 	}
 
 	_, err = s3Client.CreateBucket(bucketInput)
-	if err != nil {
-		return err
-	}
-
 	return err
 }
 

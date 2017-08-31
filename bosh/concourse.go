@@ -67,17 +67,13 @@ var InfluxDBReleaseVersion = "COMPILE_TIME_VARIABLE_bosh_influxDBReleaseVersion"
 var InfluxDBReleaseSHA1 = "COMPILE_TIME_VARIABLE_bosh_influxDBReleaseSHA1"
 
 func (client *Client) uploadConcourseStemcell() error {
-	if err := client.director.RunAuthenticatedCommand(
+	return client.director.RunAuthenticatedCommand(
 		client.stdout,
 		client.stderr,
 		false,
 		"upload-stemcell",
 		ConcourseStemcellURL,
-	); err != nil {
-		return err
-	}
-
-	return nil
+	)
 }
 
 func (client *Client) deployConcourse(detach bool) error {

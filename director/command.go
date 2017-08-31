@@ -68,7 +68,9 @@ func (client *Client) runDetachingCommand(stdout, stderr io.Writer, args ...stri
 
 	for scanner.Scan() {
 		text := scanner.Text()
-		stdout.Write([]byte(fmt.Sprintf("%s\n", text)))
+		if err := stdout.Write([]byte(fmt.Sprintf("%s\n", text))); err != nil {
+			return err
+		}
 		if strings.HasPrefix(text, "Task") {
 			stdout.Write([]byte("Task started, detaching output\n"))
 			return nil
