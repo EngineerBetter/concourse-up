@@ -298,6 +298,7 @@ func (client *Client) setUserIP(config *config.Config) error {
 func (client *Client) setHostedZone(config *config.Config) error {
 	domain := client.deployArgs.Domain
 	if domain == "" {
+		config.Domain = ""
 		return nil
 	}
 
