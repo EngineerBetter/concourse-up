@@ -1,10 +1,7 @@
 {
 	"ImportPath": "github.com/EngineerBetter/concourse-up",
-	"GoVersion": "go1.8.1",
+	"GoVersion": "go1.8",
 	"GodepVersion": "v79",
-	"Packages": [
-		"./..."
-	],
 	"Deps": [
 		{
 			"ImportPath": "github.com/asaskevich/govalidator",
@@ -87,11 +84,6 @@
 			"Rev": "1a651d9028d1203f4a0ba9fee91b207536cd4ca2"
 		},
 		{
-			"ImportPath": "github.com/aws/aws-sdk-go/awstesting/unit",
-			"Comment": "v1.4.19",
-			"Rev": "1a651d9028d1203f4a0ba9fee91b207536cd4ca2"
-		},
-		{
 			"ImportPath": "github.com/aws/aws-sdk-go/private/endpoints",
 			"Comment": "v1.4.19",
 			"Rev": "1a651d9028d1203f4a0ba9fee91b207536cd4ca2"
@@ -157,11 +149,6 @@
 			"Rev": "1a651d9028d1203f4a0ba9fee91b207536cd4ca2"
 		},
 		{
-			"ImportPath": "github.com/davecgh/go-spew/spew",
-			"Comment": "v1.1.0-6-gadab964",
-			"Rev": "adab96458c51a58dc1783b3335dcce5461522e75"
-		},
-		{
 			"ImportPath": "github.com/fatih/color",
 			"Comment": "v1.4.1",
 			"Rev": "9131ab34cf20d2f6d83fdc67168a5430d1c7dc23"
@@ -193,7 +180,8 @@
 		},
 		{
 			"ImportPath": "github.com/mattn/go-isatty",
-			"Rev": "56b76bdf51f7708750eac80fa38b952bb9f32639"
+			"Comment": "v0.0.2",
+			"Rev": "fc9e8d8ef48496124e79ae0df75490096eccf6fe"
 		},
 		{
 			"ImportPath": "github.com/onsi/ginkgo",
@@ -351,19 +339,9 @@
 			"Rev": "e85f63af4302dc0e4277c6008ecf803f1d80e4f0"
 		},
 		{
-			"ImportPath": "github.com/pmezard/go-difflib/difflib",
-			"Comment": "v1.0.0",
-			"Rev": "792786c7400a136282c1664665ae0a8db921c6c2"
-		},
-		{
 			"ImportPath": "github.com/square/certstrap/pkix",
 			"Comment": "v1.0.1-11-g0e00d5c",
 			"Rev": "0e00d5cdccc15ac51ff04e35767d69534f3666a3"
-		},
-		{
-			"ImportPath": "github.com/stretchr/testify/assert",
-			"Comment": "v1.1.4-71-g890a5c3",
-			"Rev": "890a5c3458b43e6104ff5da8dfa139d013d77544"
 		},
 		{
 			"ImportPath": "golang.org/x/crypto/curve25519",
