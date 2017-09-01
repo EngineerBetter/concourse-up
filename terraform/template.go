@@ -273,13 +273,6 @@ resource "aws_security_group" "director" {
   }
 
   ingress {
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
-    cidr_blocks = ["${var.source_access_ip}/32", "${aws_nat_gateway.default.public_ip}/32"]
-  }
-
-  ingress {
     from_port   = 6868
     to_port     = 6868
     protocol    = "tcp"
@@ -312,12 +305,6 @@ resource "aws_security_group" "vms" {
     concourse-up-component = "bosh"
   }
 
-  ingress {
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
-    cidr_blocks = ["${var.source_access_ip}/32"]
-  }
 
   ingress {
     from_port   = 0
