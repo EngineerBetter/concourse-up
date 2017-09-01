@@ -72,13 +72,6 @@ var deployFlags = []cli.Flag{
 		Hidden:      true,
 		Destination: &deployArgs.SelfUpdate,
 	},
-	cli.BoolFlag{
-		Name:        "pause-self-update",
-		Usage:       "(optional) Keeps the self-update job paused",
-		EnvVar:      "PAUSE_SELF_UPDATE",
-		Hidden:      true,
-		Destination: &deployArgs.PauseSelfUpdate,
-	},
 }
 
 var deploy = cli.Command{

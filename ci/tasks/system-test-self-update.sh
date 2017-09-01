@@ -55,6 +55,8 @@ fly --target system-test sync
 fly --target system-test workers --details
 set +x
 
+fly --target system-test unpause-pipeline -p concourse-up-self-update
+
 # give self-update time to start
 sleep 120
 

@@ -157,16 +157,6 @@ func (client *Client) SetDefaultPipeline(deployArgs *config.DeployArgs, config *
 		return err
 	}
 
-	if deployArgs.PauseSelfUpdate {
-		if err := client.run("pause-pipeline", "--pipeline", pipelineName); err != nil {
-			return err
-		}
-	} else {
-		if err := client.run("unpause-pipeline", "--pipeline", pipelineName); err != nil {
-			return err
-		}
-	}
-
 	return nil
 }
 

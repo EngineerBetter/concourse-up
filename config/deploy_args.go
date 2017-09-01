@@ -7,15 +7,14 @@ import (
 
 // DeployArgs are arguments passed to the deploy command
 type DeployArgs struct {
-	IAAS            string
-	AWSRegion       string
-	Domain          string
-	TLSCert         string
-	TLSKey          string
-	WorkerCount     int
-	WorkerSize      string
-	SelfUpdate      bool
-	PauseSelfUpdate bool
+	IAAS        string
+	AWSRegion   string
+	Domain      string
+	TLSCert     string
+	TLSKey      string
+	WorkerCount int
+	WorkerSize  string
+	SelfUpdate  bool
 }
 
 // WorkerSizes are the permitted concourse worker sizes
