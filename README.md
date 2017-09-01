@@ -33,6 +33,10 @@ providing you with a single command for getting your Concourse up and keeping it
 - Workers reside behind a single, persistent public IP to simplify external security
 - Easy destroy and cleanup
 - Deploy to any AWS region
+- View build metrics by accessing your Concourse URL on port 3000 using the same username and password as your Concourse admin username
+- NAT gateway for outbound traffic
+- DB encrption
+- Self-update pipeline (paused by default)
 
 ## Prerequisites
 
