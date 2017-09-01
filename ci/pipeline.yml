@@ -74,6 +74,14 @@ resources:
     repository: concourse-up
     access_token: {{github_access_token}}
 
+- name: release-drafts
+  type: github-release
+  source:
+    user: engineerbetter
+    repository: concourse-up
+    access_token: {{github_access_token}}
+    drafts: true
+
 - name: concourse-bosh-release
   type: github-release
   source:
@@ -394,7 +402,7 @@ jobs:
   - task: write-release-vars
     image: image
     file: concourse-up/ci/tasks/write-release-vars.yml
-  - put: release
+  - put: release-drafts
     params:
       name: release-vars/name
       commitish: release-vars/commit
@@ -434,7 +442,7 @@ jobs:
   - task: write-release-vars
     image: image
     file: concourse-up/ci/tasks/write-release-vars.yml
-  - put: release
+  - put: release-drafts
     params:
       name: release-vars/name
       commitish: release-vars/commit
@@ -474,7 +482,7 @@ jobs:
   - task: write-release-vars
     image: image
     file: concourse-up/ci/tasks/write-release-vars.yml
-  - put: release
+  - put: release-drafts
     params:
       name: release-vars/name
       commitish: release-vars/commit
