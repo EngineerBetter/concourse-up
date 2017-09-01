@@ -293,20 +293,6 @@ resource "aws_security_group" "director" {
     cidr_blocks = ["${var.source_access_ip}/32", "${aws_nat_gateway.default.public_ip}/32"]
   }
 
-  ingress {
-    from_port = 0
-    to_port   = 65535
-    protocol  = "tcp"
-    self      = true
-  }
-
-  ingress {
-    from_port = 0
-    to_port   = 65535
-    protocol  = "udp"
-    self      = true
-  }
-
   egress {
     from_port   = 0
     to_port     = 0
