@@ -61,7 +61,7 @@ $ concourse-up deploy ci
 
 DEPLOY SUCCESSFUL. Log in with:
 
-fly --target ci login --concourse-url http://ci-concourse-up-1420669447.eu-west-1.elb.amazonaws.com --username admin --password abc123def456
+fly --target ci login --concourse-url http://52.53.54.55 --username admin --password abc123def456
 
 ```
 
