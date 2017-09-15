@@ -184,9 +184,9 @@ It then uses Terraform to deploy the following infrastructure:
 - A security group to allow access to the RDS database from BOSH and it's VMs
 
 
-Once the terraform step is complete, `concourse-up` deploys a BOSH director on an t2.medium instance, and then uses that to deploy a Concourse with the following settings:
+Once the terraform step is complete, `concourse-up` deploys a BOSH director on an t2.micro instance, and then uses that to deploy a Concourse with the following settings:
 
-- One t2.medium for the Concourse web server
+- One t2.micro for the Concourse web server
 - One m4.xlarge [spot](https://aws.amazon.com/ec2/spot/) instance used as a Concourse worker
 - Access via over HTTP and HTTPS using a user-provided certificate, or an auto-generated self-signed certificate if one isn't provided.
 
