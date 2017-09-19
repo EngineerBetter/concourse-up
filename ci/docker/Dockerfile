@@ -13,6 +13,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     python-pip \
     ruby \
     ruby-dev \
+    shellcheck \
     sqlite3 \
     unzip \
     vim \

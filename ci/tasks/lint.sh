@@ -15,3 +15,5 @@ gometalinter.v1 \
   --disable=errcheck \
   --deadline=500s \
   ./...
+
+shellcheck -e SC2046 $(find . -name '*.sh' | grep -v vendor)
