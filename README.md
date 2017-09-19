@@ -30,12 +30,13 @@ providing you with a single command for getting your Concourse up and keeping it
 - Uses cost effective AWS spot instances where possible (BOSH will take care of the service)
 - Uses precompiled BOSH packages to minimise install time
 - Horizontal and vertical worker scaling
+- Vertical database scaling
 - Workers reside behind a single, persistent public IP to simplify external security
 - Easy destroy and cleanup
 - Deploy to any AWS region
 - View build metrics by accessing your Concourse URL on port 3000 using the same username and password as your Concourse admin username
 - NAT gateway for outbound traffic
-- DB encrption
+- DB encryption
 - Self-update pipeline (paused by default)
 
 ## Prerequisites
@@ -143,6 +144,24 @@ $ concourse-up deploy \
   chimichanga
 ```
 
+## RDS Size Configuration
+
+You can change the size of the RDS instance shared by BOSH and the Concourse using the `--db-size` flag. eg:
+
+```
+$ concourse-up deploy --db-size medium chimichanga
+```
+
+Note that when changing the database size on an existing concourse-up deployment, the RDS instance will scaled by terraform resulting in approximately 3 minutes of downtime.
+
+The following table shows the allowed database sizes and the corresponding AWS RDS instance types
+
+| --db-size | AWS Instance type |
+|-----------|-------------------|
+| small     | db.t2.small       |
+| medium    | db.t2.medium      |
+| large     | db.m4.large       |
+
 ## Upgrading your Concourse
 
 Patch releases of `concourse-up` are compiled, tested and released automatically whenever a new stemcell or component release appears on [bosh.io](https://bosh.io).
@@ -158,11 +177,11 @@ By default, `concourse-up` deploys to the AWS eu-west-1 (Ireland) region, and us
 | BOSH director | t2.micro         |     1 |        9.49 |
 | Web Server    | t2.micro         |     1 |        9.49 |
 | Worker        | m4.xlarge (spot) |     1 |       40.00 |
-| RDS instance  | db.t2.micro      |     1 |       13.14 |
+| RDS instance  | db.t2.small      |     1 |       28.47 |
 | NAT Gateway   |         -        |     1 |       35.04 |
 | gp2 storage   | 20GB (bosh, web) |     2 |        4.40 |
 | gp2 storage   | 220GB (worker)   |     1 |       22.00 |
-| **Total**     |                  |       |  **133.56** |
+| **Total**     |                  |       |  **148.89** |
 
 ## What it does
 
