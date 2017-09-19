@@ -66,7 +66,7 @@ do
   echo "$builds"
 
   if [[ $builds != *"concourse-up-self-update/self-update"* ]] ; then
-    echo "could't find self-update job in builds:\n$builds"
+    printf "could't find self-update job in builds:\n%s" "$builds"
     exit 1
   fi
 
@@ -75,7 +75,7 @@ do
   fi
 
   if [[ $builds == *"failed"* ]] ; then
-    echo "build failed:\n$builds"
+    printf "build failed:\n%s" "$builds"
     exit 1
   fi
 

@@ -39,7 +39,7 @@ fly --target system-test sync
 fly --target system-test set-pipeline \
   --non-interactive \
   --pipeline hello \
-  --config "$(dirname $0)/hello.yml"
+  --config "$(dirname "$0")/hello.yml"
 
 fly --target system-test trigger-job \
   --job hello/hello \
