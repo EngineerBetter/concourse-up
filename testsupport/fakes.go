@@ -6,6 +6,7 @@ import (
 	"github.com/EngineerBetter/concourse-up/terraform"
 )
 
+// FakeAWSClient implements iaas.IClient for testing
 type FakeAWSClient struct {
 	FakeDeleteVMsInVPC                func(vpcID string) error
 	FakeDeleteFile                    func(bucket, path string) error
@@ -74,6 +75,7 @@ func (client *FakeAWSClient) WriteFile(bucket, path string, contents []byte) err
 	return client.FakeWriteFile(bucket, path, contents)
 }
 
+// FakeFlyClient implements fly.IClient for testing
 type FakeFlyClient struct {
 	FakeSetDefaultPipeline func(deployAgs *config.DeployArgs, config *config.Config) error
 	FakeCleanup            func() error
@@ -95,6 +97,7 @@ func (client *FakeFlyClient) CanConnect() (bool, error) {
 	return client.FakeCanConnect()
 }
 
+// FakeConfigClient implements config.IClient for testing
 type FakeConfigClient struct {
 	FakeLoad         func() (*config.Config, error)
 	FakeUpdate       func(*config.Config) error
@@ -146,6 +149,7 @@ func (client *FakeConfigClient) HasAsset(filename string) (bool, error) {
 	return client.FakeHasAsset(filename)
 }
 
+// FakeTerraformClient implements terraform.IClient for testing
 type FakeTerraformClient struct {
 	FakeOutput  func() (*terraform.Metadata, error)
 	FakeApply   func(dryrun bool) error
@@ -173,6 +177,7 @@ func (client *FakeTerraformClient) Cleanup() error {
 	return client.FakeCleanup()
 }
 
+// FakeBoshClient implements bosh.IClient for testing
 type FakeBoshClient struct {
 	FakeDeploy    func([]byte, bool) ([]byte, error)
 	FakeDelete    func([]byte) ([]byte, error)
