@@ -41,6 +41,9 @@ fly --target system-test set-pipeline \
   --pipeline hello \
   --config "$(dirname "$0")/hello.yml"
 
+fly --target system-test unpause-pipeline \
+    --pipeline hello
+
 fly --target system-test trigger-job \
   --job hello/hello \
   --watch
