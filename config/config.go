@@ -90,7 +90,6 @@ func generateDefaultConfig(iaas, project, deployment, configBucket, region, rdsI
 		RDSPassword:              util.GeneratePassword(),
 		RDSUsername:              "admin" + util.GeneratePassword(),
 		Region:                   region,
-		SourceAccessIP:           "",
 		TFStatePath:              terraformStateFileName,
 	}
 
