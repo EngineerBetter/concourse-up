@@ -72,6 +72,13 @@ var deployFlags = []cli.Flag{
 		Hidden:      true,
 		Destination: &deployArgs.SelfUpdate,
 	},
+	cli.StringFlag{
+		Name:        "db-size",
+		Usage:       "(optional) Size of Concourse RDS instance. Can be small, medium or large",
+		EnvVar:      "DB_SIZE",
+		Value:       "small",
+		Destination: &deployArgs.DBSize,
+	},
 }
 
 var deploy = cli.Command{
@@ -86,6 +93,7 @@ var deploy = cli.Command{
 			return errors.New("Usage is `concourse-up deploy <name>`")
 		}
 
+		deployArgs.DBSizeIsSet = c.IsSet("db-size")
 		if err := deployArgs.Validate(); err != nil {
 			return err
 		}

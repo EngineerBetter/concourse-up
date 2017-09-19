@@ -52,7 +52,7 @@ type Config struct {
 	TFStatePath               string `json:"tf_state_path"`
 }
 
-func generateDefaultConfig(iaas, project, deployment, configBucket, region string) (*Config, error) {
+func generateDefaultConfig(iaas, project, deployment, configBucket, region, rdsInstanceClass string) (*Config, error) {
 	privateKey, publicKey, err := util.GenerateSSHKeyPair()
 	if err != nil {
 		return nil, err
@@ -86,7 +86,7 @@ func generateDefaultConfig(iaas, project, deployment, configBucket, region strin
 		Project:                  project,
 		PublicKey:                strings.TrimSpace(string(publicKey)),
 		RDSDefaultDatabaseName:   "bosh",
-		RDSInstanceClass:         "db.t2.micro",
+		RDSInstanceClass:         rdsInstanceClass,
 		RDSPassword:              util.GeneratePassword(),
 		RDSUsername:              "admin" + util.GeneratePassword(),
 		Region:                   region,

@@ -89,6 +89,7 @@ var _ = Describe("commands", func() {
 				Expect(session.Out).To(Say("--domain value"))
 				Expect(session.Out).To(Say("--tls-cert value"))
 				Expect(session.Out).To(Say("--tls-key value"))
+				Expect(session.Out).To(Say("--db-size value"))
 			})
 		})
 
@@ -149,6 +150,16 @@ var _ = Describe("commands", func() {
 				Expect(err).ToNot(HaveOccurred())
 				Eventually(session).Should(Exit(1))
 				Eventually(session.Err).Should(Say("unknown worker size"))
+			})
+		})
+
+		Context("When an invalid db size is provided", func() {
+			It("Should show a meaningful error", func() {
+				command := exec.Command(cliPath, "deploy", "abc", "--db-size", "huge")
+				session, err := Start(command, GinkgoWriter, GinkgoWriter)
+				Expect(err).ToNot(HaveOccurred())
+				Eventually(session).Should(Exit(1))
+				Eventually(session.Err).Should(Say("unknown DB size"))
 			})
 		})
 	})

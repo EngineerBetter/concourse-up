@@ -13,6 +13,7 @@ import (
 	"github.com/EngineerBetter/concourse-up/director"
 	"github.com/EngineerBetter/concourse-up/fly"
 	"github.com/EngineerBetter/concourse-up/terraform"
+	"github.com/EngineerBetter/concourse-up/testsupport"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/onsi/gomega/gbytes"
@@ -35,7 +36,7 @@ var _ = Describe("Client", func() {
 		}, nil
 	}
 
-	awsClient := &FakeAWSClient{
+	awsClient := &testsupport.FakeAWSClient{
 		FakeFindLongestMatchingHostedZone: func(subdomain string) (string, string, error) {
 			if subdomain == "ci.google.com" {
 				return "google.com", "ABC123", nil
@@ -49,7 +50,7 @@ var _ = Describe("Client", func() {
 		},
 	}
 
-	fakeFlyClient := &FakeFlyClient{
+	fakeFlyClient := &testsupport.FakeFlyClient{
 		FakeSetDefaultPipeline: func(deployArgs *config.DeployArgs, config *config.Config) error {
 			actions = append(actions, "setting default pipeline")
 			return nil
@@ -64,7 +65,9 @@ var _ = Describe("Client", func() {
 
 	BeforeEach(func() {
 		args = &config.DeployArgs{
-			AWSRegion: "eu-west-1",
+			AWSRegion:   "eu-west-1",
+			DBSize:      "small",
+			DBSizeIsSet: false,
 		}
 
 		terraformMetadata = &terraform.Metadata{
@@ -128,8 +131,10 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 			RDSPassword:       "s3cret",
 			ConcoursePassword: "s3cret",
 			ConcourseUsername: "admin",
+			RDSInstanceClass:  "db.t2.medium",
 		}
-		configClient := &FakeConfigClient{
+
+		configClient := &testsupport.FakeConfigClient{
 			FakeLoadOrCreate: func(deployArgs *config.DeployArgs) (*config.Config, bool, error) {
 				actions = append(actions, "loading or creating config file")
 				return exampleConfig, false, nil
@@ -160,10 +165,10 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 		}
 
 		terraformClientFactory := func(iaas string, config *config.Config, stdout, stderr io.Writer) (terraform.IClient, error) {
-			return &FakeTerraformClient{
+			return &testsupport.FakeTerraformClient{
 				FakeApply: func(dryrun bool) error {
 					Expect(dryrun).To(BeFalse())
-					actions = append(actions, "applying terraform")
+					actions = append(actions, fmt.Sprintf("applying terraform, db size: %s", config.RDSInstanceClass))
 					return nil
 				},
 				FakeDestroy: func() error {
@@ -182,7 +187,7 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 		}
 
 		boshClientFactory := func(config *config.Config, metadata *terraform.Metadata, director director.IClient, dbRunner db.Runner, stdout, stderr io.Writer) bosh.IClient {
-			return &FakeBoshClient{
+			return &testsupport.FakeBoshClient{
 				FakeDeploy: func(stateFileBytes []byte, detach bool) ([]byte, error) {
 					if detach {
 						actions = append(actions, "deploying director in self-update mode")
@@ -256,7 +261,7 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 			err := client.Deploy()
 			Expect(err).ToNot(HaveOccurred())
 
-			Expect(actions).To(ContainElement("applying terraform"))
+			Expect(actions).To(ContainElement("applying terraform, db size: db.t2.medium"))
 		})
 
 		It("Cleans up the correct terraform client", func() {
@@ -299,7 +304,32 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 				err := client.Deploy()
 				Expect(err).To(MatchError("found previous deployment in eu-west-1. Refusing to deploy to eu-central-1 as changing regions for existing deployments is not supported"))
 			})
+		})
 
+		Context("When a custom DB instance size is provided", func() {
+			It("Deploys that instance type to TF", func() {
+				args.DBSize = "large"
+				args.DBSizeIsSet = true
+
+				client := buildClient()
+				err := client.Deploy()
+				Expect(err).ToNot(HaveOccurred())
+
+				Expect(actions).To(ContainElement("applying terraform, db size: db.m4.large"))
+			})
+		})
+
+		Context("When a custom DB instance size is not provided", func() {
+			It("Does not override the existing DB size", func() {
+				args.DBSize = "small"
+				args.DBSizeIsSet = false
+
+				client := buildClient()
+				err := client.Deploy()
+				Expect(err).ToNot(HaveOccurred())
+
+				Expect(actions).To(ContainElement("applying terraform, db size: db.t2.medium"))
+			})
 		})
 
 		Context("When a custom domain is required", func() {

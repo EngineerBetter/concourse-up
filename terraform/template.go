@@ -507,6 +507,7 @@ resource "aws_db_subnet_group" "default" {
 
 resource "aws_db_instance" "default" {
   allocated_storage      = 10
+  apply_immediately      = true
   port                   = 5432
   engine                 = "postgres"
   instance_class         = "${var.rds_instance_class}"

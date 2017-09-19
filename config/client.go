@@ -29,7 +29,7 @@ type Client struct {
 }
 
 // New instantiates a new client
-func New(iaas iaas.IClient, project string) IClient {
+func New(iaas iaas.IClient, project string) *Client {
 	return &Client{
 		iaas,
 		project,
@@ -109,6 +109,7 @@ func (client *Client) LoadOrCreate(deployArgs *DeployArgs) (*Config, bool, error
 		client.deployment(),
 		client.configBucket(),
 		deployArgs.AWSRegion,
+		DBSizes[deployArgs.DBSize],
 	)
 	if err != nil {
 		return nil, false, err
@@ -137,7 +138,7 @@ func (client *Client) LoadOrCreate(deployArgs *DeployArgs) (*Config, bool, error
 		return nil, false, err
 	}
 
-	// Ensure new fields are on legacy config files
+	// Ensure new fields are set on legacy config files
 	if conf.InfluxDBUsername == "" {
 		conf.InfluxDBUsername = defaultConfig.InfluxDBUsername
 	}

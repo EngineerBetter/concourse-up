@@ -103,29 +103,34 @@ func (client *Client) updateBoshAndPipeline(config *config.Config, metadata *ter
 	return err
 }
 
-func (client *Client) checkPreTerraformConfigRequirements(config *config.Config) (*config.Config, error) {
+func (client *Client) checkPreTerraformConfigRequirements(conf *config.Config) (*config.Config, error) {
 	region := client.deployArgs.AWSRegion
 
-	if config.Region != "" {
-		if config.Region != region {
-			return nil, fmt.Errorf("found previous deployment in %s. Refusing to deploy to %s as changing regions for existing deployments is not supported", config.Region, region)
+	if conf.Region != "" {
+		if conf.Region != region {
+			return nil, fmt.Errorf("found previous deployment in %s. Refusing to deploy to %s as changing regions for existing deployments is not supported", conf.Region, region)
 		}
 	}
 
-	config.Region = region
+	conf.Region = region
+
+	// If the RDS instance size has manually set, override the existing size in the config
+	if client.deployArgs.DBSizeIsSet {
+		conf.RDSInstanceClass = config.DBSizes[client.deployArgs.DBSize]
+	}
 
 	// When in self-update mode do not override the user IP, since we already have access to the worker
 	if !client.deployArgs.SelfUpdate {
-		if err := client.setUserIP(config); err != nil {
+		if err := client.setUserIP(conf); err != nil {
 			return nil, err
 		}
 	}
 
-	if err := client.setHostedZone(config); err != nil {
+	if err := client.setHostedZone(conf); err != nil {
 		return nil, err
 	}
 
-	return config, nil
+	return conf, nil
 }
 
 func (client *Client) checkPreDeployConfigRequiments(isDomainUpdated bool, config *config.Config, metadata *terraform.Metadata) (*config.Config, error) {
