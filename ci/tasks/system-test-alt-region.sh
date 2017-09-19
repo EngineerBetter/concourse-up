@@ -27,10 +27,19 @@ fly --target system-test login \
 
 curl -k "https://$domain:3000"
 
-set -x
 fly --target system-test sync
-fly --target system-test workers --details
-set +x
+
+fly --target system-test set-pipeline \
+  --non-interactive \
+  --pipeline hello \
+  --config "$(dirname "$0")/hello.yml"
+
+fly --target system-test unpause-pipeline \
+    --pipeline hello
+
+fly --target system-test trigger-job \
+  --job hello/hello \
+  --watch
 
 echo "DESTROY CUSTOM-REGION DEPLOYMENT"
 
