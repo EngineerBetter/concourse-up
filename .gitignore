@@ -1,4 +1,5 @@
 ci/credentials/*
+/tmp
 .vscode
 terraform.combined.log
 concourse-up-*.yml
