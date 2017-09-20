@@ -108,12 +108,12 @@ $bosh \
   --deployment concourse-empty \
   export-release "influxdb/$influxdb_release_version" "ubuntu-trusty/$concourse_stemcell_version"
 
-compiled_concourse_release=$(ls "concourse-$concourse_release_version-ubuntu-trusty-$concourse_stemcell_version-*.tgz")
-compiled_garden_release=$(ls "garden-runc-$garden_release_version-ubuntu-trusty-$concourse_stemcell_version-*.tgz")
-compiled_director_bosh_release=$(ls "bosh-$director_bosh_release_version-ubuntu-trusty-$concourse_stemcell_version-*.tgz")
-compiled_riemann_release=$(ls "riemann-$riemann_release_version-ubuntu-trusty-$concourse_stemcell_version-*.tgz")
-compiled_grafana_release=$(ls "grafana-$grafana_release_version-ubuntu-trusty-$concourse_stemcell_version-*.tgz")
-compiled_influxdb_release=$(ls "influxdb-$influxdb_release_version-ubuntu-trusty-$concourse_stemcell_version-*.tgz")
+compiled_concourse_release=$(echo concourse-"$concourse_release_version"-ubuntu-trusty-"$concourse_stemcell_version"-*.tgz)
+compiled_garden_release=$(echo garden-runc-"$garden_release_version"-ubuntu-trusty-"$concourse_stemcell_version"-*.tgz)
+compiled_director_bosh_release=$(echo bosh-"$director_bosh_release_version"-ubuntu-trusty-"$concourse_stemcell_version"-*.tgz)
+compiled_riemann_release=$(echo riemann-"$riemann_release_version"-ubuntu-trusty-"$concourse_stemcell_version"-*.tgz)
+compiled_grafana_release=$(echo grafana-"$grafana_release_version"-ubuntu-trusty-"$concourse_stemcell_version"-*.tgz)
+compiled_influxdb_release=$(echo influxdb-"$influxdb_release_version"-ubuntu-trusty-"$concourse_stemcell_version"-*.tgz)
 
 aws s3 cp --acl public-read "$compiled_concourse_release" "s3://$PUBLIC_ARTIFACTS_BUCKET/$compiled_concourse_release"
 aws s3 cp --acl public-read "$compiled_garden_release" "s3://$PUBLIC_ARTIFACTS_BUCKET/$compiled_garden_release"
