@@ -2,9 +2,8 @@
 
 set -eu
 
-
 # delete any concourse versions that have pre-compiled packages
-rm concourse-bosh-release/concourse-*-*.tgz
+rm -f concourse-bosh-release/concourse-*-*.tgz
 
 echo "$BOSH_CA_CERT" > bosh_ca_cert.pem
 
@@ -35,8 +34,8 @@ influxdb_release_url=$(cat influxdb-release/url)
 influxdb_release_sha1=$(cat influxdb-release/sha1)
 
 director_bosh_release_version=$(cat director-bosh-release/version)
-concourse_release_version=$(find . -name "concourse-bosh-release/concourse-*.tgz" | awk -F"-" '{ print $4 }' | awk -F".tgz" '{ print $1 }')
-garden_release_version=$(find . -name "concourse-bosh-release/garden-runc-*.tgz" | awk -F"-" '{ print $5 }' | awk -F".tgz" '{ print $1 }')
+concourse_release_version=$(basename concourse-bosh-release/concourse-*.tgz .tgz | sed 's/^concourse-//')
+garden_release_version=$(basename concourse-bosh-release/garden-runc-*.tgz .tgz | sed 's/^garden-runc-//')
 
 $bosh upload-stemcell "concourse-stemcell/stemcell.tgz"
 $bosh upload-release "concourse-bosh-release/garden-runc-$garden_release_version.tgz"
