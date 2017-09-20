@@ -13,7 +13,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     python-pip \
     ruby \
     ruby-dev \
-    shellcheck \
     sqlite3 \
     unzip \
     vim \
@@ -42,6 +41,10 @@ RUN wget https://github.com/concourse/concourse/releases/download/v3.4.1/fly_lin
 RUN wget https://s3.amazonaws.com/bosh-cli-artifacts/bosh-cli-2.0.28-linux-amd64 \
     && mv bosh-cli-2.0.28-linux-amd64 /usr/bin/bosh-cli \
     && chmod +x /usr/bin/bosh-cli
+
+RUN wget http://ftp.uk.debian.org/debian/pool/main/s/shellcheck/shellcheck_0.4.6-1_amd64.deb \
+    && dpkg -i shellcheck_0.4.6-1_amd64.deb \
+    && rm shellcheck_0.4.6-1_amd64.deb
 
 COPY verify_image.sh /tmp/verify_image.sh
 RUN /tmp/verify_image.sh && rm /tmp/verify_image.sh
