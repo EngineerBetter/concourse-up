@@ -3,6 +3,7 @@
 # We can't test that concourse-up will update itself to a latest release without publishing a new release
 # Instead we will test that if we publish a non-existant release, the self-update will revert back to a known release
 
+[ "$VERBOSE" ] && { set -x; export BOSH_LOG_LEVEL=debug; }
 set -eu
 
 deployment="system-test-$RANDOM"

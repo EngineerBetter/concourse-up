@@ -1,5 +1,6 @@
 #!/bin/bash
 
+[ "$VERBOSE" ] && { set -x; export BOSH_LOG_LEVEL=debug; }
 set -eu
 
 deployment="system-test-$RANDOM"
