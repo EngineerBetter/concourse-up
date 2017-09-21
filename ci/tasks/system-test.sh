@@ -116,7 +116,7 @@ certstrap sign "$custom_domain" --CA "$deployment"
 sleep 60
 
 # Check RDS instance class is still db.m4.large
-rds_instance_class=$(aws --eu-west-1 rds describe-db-instances | jq -r ".DBInstances[] | select(.DBSubnetGroup.DBSubnetGroupName==\"concourse-up-$deployment\") | .DBInstanceClass")
+rds_instance_class=$(aws --region eu-west-1 rds describe-db-instances | jq -r ".DBInstances[] | select(.DBSubnetGroup.DBSubnetGroupName==\"concourse-up-$deployment\") | .DBInstanceClass")
 if [ "$rds_instance_class" != "db.m4.large" ]; then
   echo "Unexpected DB instance class: $rds_instance_class"
   exit 1
