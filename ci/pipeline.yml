@@ -311,6 +311,7 @@ jobs:
         AWS_ACCESS_KEY_ID: {{concourse_up_test_access_key_id}}
         AWS_SECRET_ACCESS_KEY: {{concourse_up_test_secret_key}}
         BINARY_PATH: binary-linux/concourse-up-linux-amd64
+        VERBOSE: "true"
       on_failure:
         put: slack-alert
         params:
