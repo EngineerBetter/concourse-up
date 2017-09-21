@@ -175,13 +175,13 @@ By default, `concourse-up` deploys to the AWS eu-west-1 (Ireland) region, and us
 | Component     | Size             | Count | Price (USD) |
 |---------------|------------------|-------|------------:|
 | BOSH director | t2.micro         |     1 |        9.49 |
-| Web Server    | t2.micro         |     1 |        9.49 |
+| Web Server    | t2.small         |     1 |       12.41 |
 | Worker        | m4.xlarge (spot) |     1 |       40.00 |
 | RDS instance  | db.t2.small      |     1 |       28.47 |
 | NAT Gateway   |         -        |     1 |       35.04 |
 | gp2 storage   | 20GB (bosh, web) |     2 |        4.40 |
 | gp2 storage   | 220GB (worker)   |     1 |       22.00 |
-| **Total**     |                  |       |  **148.89** |
+| **Total**     |                  |       |  **156.21** |
 
 ## What it does
 
@@ -205,7 +205,7 @@ It then uses Terraform to deploy the following infrastructure:
 
 Once the terraform step is complete, `concourse-up` deploys a BOSH director on an t2.micro instance, and then uses that to deploy a Concourse with the following settings:
 
-- One t2.micro for the Concourse web server
+- One t2.small for the Concourse web server
 - One m4.xlarge [spot](https://aws.amazon.com/ec2/spot/) instance used as a Concourse worker
 - Access via over HTTP and HTTPS using a user-provided certificate, or an auto-generated self-signed certificate if one isn't provided.
 

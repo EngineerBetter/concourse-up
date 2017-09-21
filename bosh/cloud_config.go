@@ -35,7 +35,7 @@ azs:
 vm_types:
 - name: concourse-web
   cloud_properties:
-    instance_type: t2.micro
+    instance_type: t2.small
     ephemeral_disk:
       size: 20_000
       type: gp2
