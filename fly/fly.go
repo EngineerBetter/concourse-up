@@ -29,7 +29,7 @@ var WindowsBinaryURL = "COMPILE_TIME_VARIABLE_fly_windows_binary_url"
 // IClient represents an interface for a client
 type IClient interface {
 	CanConnect() (bool, error)
-	SetDefaultPipeline(deployArgs *config.DeployArgs, config *config.Config) error
+	SetDefaultPipeline(deployArgs *config.DeployArgs, config *config.Config, allowFlyVersionDiscrepancy bool) error
 	Cleanup() error
 }
 
@@ -137,9 +137,15 @@ func (client *Client) CanConnect() (bool, error) {
 }
 
 // SetDefaultPipeline sets the default pipeline against a given concourse
-func (client *Client) SetDefaultPipeline(deployArgs *config.DeployArgs, config *config.Config) error {
+func (client *Client) SetDefaultPipeline(deployArgs *config.DeployArgs, config *config.Config, allowFlyVersionDiscrepancy bool) error {
 	if err := client.login(); err != nil {
 		return err
+	}
+
+	if allowFlyVersionDiscrepancy {
+		if err := client.sync(); err != nil {
+			return err
+		}
 	}
 
 	pipelinePath := client.tempDir.Path("default-pipeline.yml")
@@ -214,6 +220,10 @@ func (client *Client) login() error {
 	}
 
 	return fmt.Errorf("failed to log in to %s after %d seconds", client.creds.API, attempts*secondsBetweenAttempts)
+}
+
+func (client *Client) sync() error {
+	return client.run("sync")
 }
 
 func (client *Client) run(args ...string) error {

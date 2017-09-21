@@ -66,7 +66,7 @@ func (client *Client) deployBoshAndPipeline(config *config.Config, metadata *ter
 		return err
 	}
 
-	if err := flyClient.SetDefaultPipeline(client.deployArgs, config); err != nil {
+	if err := flyClient.SetDefaultPipeline(client.deployArgs, config, false); err != nil {
 		return err
 	}
 
@@ -90,7 +90,8 @@ func (client *Client) updateBoshAndPipeline(config *config.Config, metadata *ter
 		return fmt.Errorf("In detach mode but it seems that concourse is not currently running")
 	}
 
-	if err = flyClient.SetDefaultPipeline(client.deployArgs, config); err != nil {
+	// Allow a fly version discrepancy since we might be targetting an older Concourse
+	if err = flyClient.SetDefaultPipeline(client.deployArgs, config, true); err != nil {
 		return err
 	}
 
