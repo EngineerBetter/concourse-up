@@ -200,7 +200,11 @@ func (client *Client) ensureConcourseCerts(domainUpdated bool, config *config.Co
 		return config, nil
 	}
 
-	concourseCerts, err := client.certGenerator(config.Deployment, config.Domain)
+	sans := []string{config.Domain}
+	if config.Domain != metadata.ATCPublicIP.Value {
+		sans = append(sans, metadata.ATCPublicIP.Value)
+	}
+	concourseCerts, err := client.certGenerator(config.Deployment, sans...)
 	if err != nil {
 		return nil, err
 	}
