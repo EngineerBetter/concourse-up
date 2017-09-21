@@ -194,7 +194,8 @@ func (client *Client) Cleanup() error {
 }
 
 func (client *Client) login() error {
-	attempts := 100
+	attempts := 50
+	secondsBetweenAttempts := 4
 
 	if _, err := client.stdout.Write([]byte("Waiting for Concourse ATC to start... \n")); err != nil {
 		return err
@@ -209,10 +210,10 @@ func (client *Client) login() error {
 			return nil
 		}
 
-		time.Sleep(time.Second)
+		time.Sleep(time.Second * time.Duration(secondsBetweenAttempts))
 	}
 
-	return fmt.Errorf("failed to log in to %s after %d attempts", client.creds.API, attempts)
+	return fmt.Errorf("failed to log in to %s after %d seconds", client.creds.API, attempts*secondsBetweenAttempts)
 }
 
 func (client *Client) run(args ...string) error {
