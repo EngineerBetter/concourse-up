@@ -83,7 +83,7 @@ curl -k "https://$custom_domain:3000"
 fly --target system-test-custom-domain sync
 
 # Check that hello/hello job still exists and works
-fly --target system-test trigger-job \
+fly --target system-test-custom-domain trigger-job \
   --job hello/hello \
   --watch
 
@@ -138,7 +138,7 @@ curl -k "https://$custom_domain:3000"
 fly --target system-test-custom-domain-with-cert sync
 
 # Check that hello/hello job still exists and works
-fly --target system-test trigger-job \
+fly --target system-test-custom-domain-with-cert trigger-job \
   --job hello/hello \
   --watch
 
