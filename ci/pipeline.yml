@@ -243,7 +243,6 @@ jobs:
       - put: binary-linux
         params:
           file: build/concourse-up-linux-amd64
-          VERSION: TESTVERSION
     - do:
       - task: build-darwin
         image: image
@@ -255,7 +254,6 @@ jobs:
       - put: binary-darwin
         params:
           file: build/concourse-up-darwin-amd64
-          VERSION: TESTVERSION
 
 - name: system-test
   serial: true
@@ -374,14 +372,14 @@ jobs:
         GOOS: linux
         GOARCH: amd64
         OUTPUT_FILE: concourse-up-linux-amd64
-      file: concourse-up/ci/tasks/build.yml
+      file: concourse-up/ci/tasks/build_from_version_file.yml
     - task: build-darwin
       image: image
       params:
         GOOS: darwin
         GOARCH: amd64
         OUTPUT_FILE: concourse-up-darwin-amd64
-      file: concourse-up/ci/tasks/build.yml
+      file: concourse-up/ci/tasks/build_from_version_file.yml
   - task: write-release-vars
     image: image
     file: concourse-up/ci/tasks/write-release-vars.yml
