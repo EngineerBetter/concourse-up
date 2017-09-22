@@ -365,8 +365,8 @@ jobs:
       passed: [commit-compilation-vars]
     - get: version
       passed: [commit-compilation-vars]
-    params:
-      bump: patch
+      params:
+        bump: patch
   - aggregate: &build_binaries
     - task: build-linux
       image: image
