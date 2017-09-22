@@ -2,7 +2,7 @@
 
 set -eu
 
-build_dir=$PWD/build
+build_dir=$PWD/build-$GOOS
 mkdir -p build_dir
 
 if [ -e "version/version" ]; then
