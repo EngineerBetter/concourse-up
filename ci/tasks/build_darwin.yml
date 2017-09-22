@@ -1,0 +1,17 @@
+---
+platform: linux
+
+params:
+  GOOS: darwin
+  GOARCH:
+  OUTPUT_FILE:
+
+inputs:
+- name: concourse-up
+- name: compilation-vars
+
+outputs:
+- name: build-darwin
+
+run:
+  path: concourse-up/ci/tasks/build.sh
