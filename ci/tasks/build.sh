@@ -5,11 +5,12 @@ set -eu
 build_dir=$PWD/build
 mkdir -p build_dir
 
-if [ -z "$VERSION" ]; then
+version=$(cat version/version)
+set +u
+if [ "$VERSION" ]; then
 	version="$VERSION"
-else
-	version=$(cat version/version)
 fi
+set -u
 
 pushd compilation-vars
   concourse_stemcell_url=$(jq -r .concourse_stemcell_url compilation-vars.json)
