@@ -357,10 +357,6 @@ jobs:
       passed: [commit-compilation-vars]
     - get: concourse-up
       passed: [commit-compilation-vars]
-    - get: binary-linux
-      passed: [commit-compilation-vars]
-    - get: binary-darwin
-      passed: [commit-compilation-vars]
     - get: version
       passed: [commit-compilation-vars]
       params:
@@ -405,10 +401,6 @@ jobs:
   - aggregate:
     - get: compilation-vars
       passed: [commit-compilation-vars]
-    - get: binary-linux
-      passed: [commit-compilation-vars]
-    - get: binary-darwin
-      passed: [commit-compilation-vars]
     - get: version
       params:
         bump: patch
@@ -446,10 +438,6 @@ jobs:
   - aggregate:
     - get: compilation-vars
       passed: [commit-compilation-vars]
-    - get: binary-linux
-      passed: [commit-compilation-vars]
-    - get: binary-darwin
-      passed: [commit-compilation-vars]
     - get: version
       params:
         bump: minor
@@ -486,10 +474,6 @@ jobs:
   plan:
   - aggregate:
     - get: compilation-vars
-      passed: [commit-compilation-vars]
-    - get: binary-linux
-      passed: [commit-compilation-vars]
-    - get: binary-darwin
       passed: [commit-compilation-vars]
     - get: version
       params:
