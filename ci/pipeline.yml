@@ -173,8 +173,6 @@ jobs:
   serial: true
   plan:
   - get: version
-    params:
-      bump: patch
   - get: image
     passed: [build-image]
   - get: concourse-bosh-release
@@ -245,6 +243,7 @@ jobs:
       - put: binary-linux
         params:
           file: build/concourse-up-linux-amd64
+          VERSION: TESTVERSION
     - do:
       - task: build-darwin
         image: image
@@ -256,6 +255,7 @@ jobs:
       - put: binary-darwin
         params:
           file: build/concourse-up-darwin-amd64
+          VERSION: TESTVERSION
 
 - name: system-test
   serial: true
@@ -365,6 +365,23 @@ jobs:
       passed: [commit-compilation-vars]
     - get: version
       passed: [commit-compilation-vars]
+    params:
+      bump: patch
+  - aggregate: &build_binaries
+    - task: build-linux
+      image: image
+      params:
+        GOOS: linux
+        GOARCH: amd64
+        OUTPUT_FILE: concourse-up-linux-amd64
+      file: concourse-up/ci/tasks/build.yml
+    - task: build-darwin
+      image: image
+      params:
+        GOOS: darwin
+        GOARCH: amd64
+        OUTPUT_FILE: concourse-up-darwin-amd64
+      file: concourse-up/ci/tasks/build.yml
   - task: write-release-vars
     image: image
     file: concourse-up/ci/tasks/write-release-vars.yml
@@ -375,8 +392,8 @@ jobs:
       body: release-vars/body
       tag: version/version
       globs:
-      - binary-linux/concourse-up-linux-amd64
-      - binary-darwin/concourse-up-darwin-amd64
+      - build/concourse-up-linux-amd64
+      - build/concourse-up-darwin-amd64
   - put: slack-alert
     params:
       channel: "#integrations"
@@ -401,6 +418,7 @@ jobs:
       passed: [commit-compilation-vars]
     - get: concourse-up
       passed: [commit-compilation-vars]
+  - aggregate: *build_binaries
   - task: write-release-vars
     image: image
     file: concourse-up/ci/tasks/write-release-vars.yml
@@ -411,8 +429,8 @@ jobs:
       body: concourse-up/ci/release/body
       tag: version/version
       globs:
-      - binary-linux/concourse-up-linux-amd64
-      - binary-darwin/concourse-up-darwin-amd64
+      - build/concourse-up-linux-amd64
+      - build/concourse-up-darwin-amd64
   - put: version
     resource: version
     params:
@@ -441,6 +459,7 @@ jobs:
       passed: [commit-compilation-vars]
     - get: concourse-up
       passed: [commit-compilation-vars]
+  - aggregate: *build_binaries
   - task: write-release-vars
     image: image
     file: concourse-up/ci/tasks/write-release-vars.yml
@@ -451,8 +470,8 @@ jobs:
       body: concourse-up/ci/release/body
       tag: version/version
       globs:
-      - binary-linux/concourse-up-linux-amd64
-      - binary-darwin/concourse-up-darwin-amd64
+      - build/concourse-up-linux-amd64
+      - build/concourse-up-darwin-amd64
   - put: version
     resource: version
     params:
@@ -481,6 +500,7 @@ jobs:
       passed: [commit-compilation-vars]
     - get: concourse-up
       passed: [commit-compilation-vars]
+  - aggregate: *build_binaries
   - task: write-release-vars
     image: image
     file: concourse-up/ci/tasks/write-release-vars.yml
@@ -491,8 +511,8 @@ jobs:
       body: concourse-up/ci/release/body
       tag: version/version
       globs:
-      - binary-linux/concourse-up-linux-amd64
-      - binary-darwin/concourse-up-darwin-amd64
+      - build/concourse-up-linux-amd64
+      - build/concourse-up-darwin-amd64
   - put: version
     resource: version
     params:

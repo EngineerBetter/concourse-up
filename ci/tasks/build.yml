@@ -5,6 +5,7 @@ params:
   GOOS:
   GOARCH:
   OUTPUT_FILE:
+  VERSION:
 
 inputs:
 - name: concourse-up
