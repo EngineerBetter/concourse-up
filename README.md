@@ -19,12 +19,12 @@ $ AWS_ACCESS_KEY_ID=<access-key-id> \
 Concourse is easy to get started with, but as soon as you want your team to use it you've
 previously had to learn BOSH. Teams who just want great CI shouldn't need to think about this.
 The goal of `concourse-up` is to hide the complexity of [BOSH](https://bosh.io), while giving you all the benefits,
-providing you with a single command for getting your Concourse up and keeping it running. You can read more about the rationale for this tool in [this blog post](http://www.engineerbetter.com/2017/05/03/introducing-concourse-up.html).
+providing you with a single command for getting your Concourse up and keeping it running. You can read more about the rationale for this tool in [this blog post](http://www.engineerbetter.com/2017/05/03/introducing-concourse-up.html). Some newer features, including self-update, are described in [this blog post](http://www.engineerbetter.com/2017/09/18/perpetual-motion-software-updates.html).
 
 ## Features
 
 - Deploys the latest version of Concourse CI on AWS, without you having to know anything about BOSH
-- Idempotent deployment with either manual or automatic self-upgrade
+- Idempotent deployment with either manual upgrade or automatic self-upgrade
 - Supports https access by default using a user-provided certificate or auto-generating a self-signed one
 - Supports custom domains for your Concourse URL
 - Uses cost effective AWS spot instances where possible (BOSH will take care of the service)
