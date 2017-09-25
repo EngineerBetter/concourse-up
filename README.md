@@ -34,10 +34,9 @@ providing you with a single command for getting your Concourse up and keeping it
 - Workers reside behind a single, persistent public IP to simplify external security
 - Easy destroy and cleanup
 - Deploy to any AWS region
-- View build metrics by accessing your Concourse URL on port 3000 using the same username and password as your Concourse admin username
-- NAT gateway for outbound traffic
-- DB encryption
-- Self-update pipeline (paused by default)
+- Metrics infrastructure deployed by default (check http://your-concourse-url:3000)
+- DB encryption turned on by default
+- Self-update pipeline which will watch for new releases and upgrade your Concourse (paused by default)
 
 ## Prerequisites
 
@@ -162,11 +161,26 @@ The following table shows the allowed database sizes and the corresponding AWS R
 | medium    | db.t2.medium      |
 | large     | db.m4.large       |
 
-## Upgrading your Concourse
+## Self-update
+
+When Concourse-up deploys Concourse, it now adds a pipeline to the new Concourse called `concourse-up-self-update`. This pipeline continuously monitors our Github repo for new releases and updates Concourse in place whenever a new version of Concourse-up comes out.
+
+This pipeline is paused by default, so just unpause it in the UI to enable the feature.
+
+## Upgrading manually
 
 Patch releases of `concourse-up` are compiled, tested and released automatically whenever a new stemcell or component release appears on [bosh.io](https://bosh.io).
 
 To upgrade your Concourse, grab the [latest release](https://github.com/EngineerBetter/concourse-up/releases/latest) and run `concourse-up deploy <your-project-name>` again.
+
+## Metrics
+
+Concourse-up now automatically deploys Influxdb, Riemann, and Grafana on the web node. You can access Grafana on port 3000 of your regular concourse URL using the same username and password as your Concourse admin user. We put in a default dashboard that tracks
+
+-Build times
+-CPU usage
+-Containers
+-Disk usage
 
 ## Estimated Cost
 
