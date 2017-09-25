@@ -24,7 +24,7 @@ providing you with a single command for getting your Concourse up and keeping it
 ## Features
 
 - Deploys the latest version of Concourse CI on AWS, without you having to know anything about BOSH
-- Idempotent deployment and simple upgrade (get the latest release and just deploy again)
+- Idempotent deployment with either manual or automatic self-upgrade
 - Supports https access by default using a user-provided certificate or auto-generating a self-signed one
 - Supports custom domains for your Concourse URL
 - Uses cost effective AWS spot instances where possible (BOSH will take care of the service)
@@ -36,7 +36,6 @@ providing you with a single command for getting your Concourse up and keeping it
 - Deploy to any AWS region
 - Metrics infrastructure deployed by default (check http://your-concourse-url:3000)
 - DB encryption turned on by default
-- Self-update pipeline which will watch for new releases and upgrade your Concourse (paused by default)
 
 ## Prerequisites
 
