@@ -120,6 +120,10 @@ The following table shows the allowed worker sizes and the corresponding AWS ins
 | medium        | t2.medium         |
 | large         | m4.large          |
 | xlarge        | m4.xlarge         |
+| 2xlarge       | m4.2xlarge        |
+| 4xlarge       | m4.4xlarge        |
+| 10xlarge      | m4.10xlarge       |
+| 16xlarge      | m4.16xlarge       |
 
 
 ### Custom Domains

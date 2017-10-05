@@ -73,6 +73,50 @@ vm_types:
     security_groups:
     - <% .VMsSecurityGroupID %>
 
+- name: concourse-2xlarge
+  cloud_properties:
+    instance_type: m4.2xlarge
+    spot_bid_price: 0.53 # on-demand price: 0.444
+    spot_ondemand_fallback: true
+    ephemeral_disk:
+      size: 200_000
+      type: gp2
+    security_groups:
+    - <% .VMsSecurityGroupID %>
+
+- name: concourse-4xlarge
+  cloud_properties:
+    instance_type: m4.4xlarge
+    spot_bid_price: 1.07 # on-demand price: 0.888
+    spot_ondemand_fallback: true
+    ephemeral_disk:
+      size: 200_000
+      type: gp2
+    security_groups:
+    - <% .VMsSecurityGroupID %>
+
+- name: concourse-10xlarge
+  cloud_properties:
+    instance_type: m4.10xlarge
+    spot_bid_price: 2.67 # on-demand price: 2.22
+    spot_ondemand_fallback: true
+    ephemeral_disk:
+      size: 200_000
+      type: gp2
+    security_groups:
+    - <% .VMsSecurityGroupID %>
+
+- name: concourse-16xlarge
+  cloud_properties:
+    instance_type: m4.16xlarge
+    spot_bid_price: 4.26 # on-demand price: 3.55
+    spot_ondemand_fallback: true
+    ephemeral_disk:
+      size: 200_000
+      type: gp2
+    security_groups:
+    - <% .VMsSecurityGroupID %>
+
 - name: compilation
   cloud_properties:
     instance_type: m4.large
