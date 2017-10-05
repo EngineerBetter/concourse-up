@@ -146,7 +146,7 @@ resource_pools:
     url: <% .StemcellURL %>
     sha1: <% .StemcellSHA1 %>
   cloud_properties:
-    instance_type: t2.micro
+    instance_type: t2.small
     ephemeral_disk:
       size: 25_000
       type: gp2
