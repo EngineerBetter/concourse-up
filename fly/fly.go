@@ -27,9 +27,10 @@ var LinuxBinaryURL = "COMPILE_TIME_VARIABLE_fly_linux_binary_url"
 var WindowsBinaryURL = "COMPILE_TIME_VARIABLE_fly_windows_binary_url"
 
 // IClient represents an interface for a client
+//go:generate counterfeiter . IClient
 type IClient interface {
 	CanConnect() (bool, error)
-	SetDefaultPipeline(deployArgs *config.DeployArgs, config *config.Config, allowFlyVersionDiscrepancy bool) error
+	SetDefaultPipeline(*config.DeployArgs, *config.Config, bool) error
 	Cleanup() error
 }
 

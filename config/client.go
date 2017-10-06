@@ -11,9 +11,10 @@ const terraformStateFileName = "terraform.tfstate"
 const configFilePath = "config.json"
 
 // IClient is an interface for the config file client
+//go:generate counterfeiter . IClient
 type IClient interface {
 	Load() (*Config, error)
-	DeleteAll(config *Config) error
+	DeleteAll(*Config) error
 	LoadOrCreate(deployArgs *DeployArgs) (*Config, bool, error)
 	Update(*Config) error
 	StoreAsset(filename string, contents []byte) error

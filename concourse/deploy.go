@@ -302,7 +302,12 @@ func (client *Client) setHostedZone(config *config.Config) error {
 		return nil
 	}
 
-	hostedZoneName, hostedZoneID, err := client.iaasClient.FindLongestMatchingHostedZone(domain)
+	r53Client, err := client.iaasClient.NewRoute53Client()
+	if err != nil {
+		return err
+	}
+
+	hostedZoneName, hostedZoneID, err := client.iaasClient.FindLongestMatchingHostedZone(domain, r53Client)
 	if err != nil {
 		return err
 	}
