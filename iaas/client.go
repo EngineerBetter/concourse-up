@@ -1,15 +1,19 @@
 package iaas
 
-import "fmt"
+import (
+	"fmt"
+)
 
 // IClient represents actions taken against AWS
+//go:generate counterfeiter . IClient
 type IClient interface {
 	DeleteFile(bucket, path string) error
 	DeleteVersionedBucket(name string) error
 	DeleteVMsInVPC(vpcID string) error
 	EnsureBucketExists(name string) error
 	EnsureFileExists(bucket, path string, defaultContents []byte) ([]byte, bool, error)
-	FindLongestMatchingHostedZone(subdomain string) (string, string, error)
+	NewRoute53Client() (Route53, error)
+	FindLongestMatchingHostedZone(subDomain string, route53Client Route53) (string, string, error)
 	HasFile(bucket, path string) (bool, error)
 	LoadFile(bucket, path string) ([]byte, error)
 	WriteFile(bucket, path string, contents []byte) error
