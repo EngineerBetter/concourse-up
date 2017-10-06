@@ -82,15 +82,9 @@ func (client *AWSClient) DeleteVMsInVPC(vpcID string) error {
 }
 
 // FindLongestMatchingHostedZone finds the longest hosted zone that matches the given subdomain
-func (client *AWSClient) FindLongestMatchingHostedZone(subdomain string) (string, string, error) {
-	sess, err := session.NewSession(aws.NewConfig().WithCredentialsChainVerboseErrors(true))
-	if err != nil {
-		return "", "", err
-	}
-
-	r53Client := route53.New(sess)
+func (client *AWSClient) FindLongestMatchingHostedZone(subDomain string, r53Client Route53) (string, string, error) {
 	hostedZones := []*route53.HostedZone{}
-	err = r53Client.ListHostedZonesPages(&route53.ListHostedZonesInput{}, func(output *route53.ListHostedZonesOutput, _ bool) bool {
+	err := r53Client.ListHostedZonesPages(&route53.ListHostedZonesInput{}, func(output *route53.ListHostedZonesOutput, _ bool) bool {
 		hostedZones = append(hostedZones, output.HostedZones...)
 		return true
 	})
@@ -100,10 +94,11 @@ func (client *AWSClient) FindLongestMatchingHostedZone(subdomain string) (string
 
 	longestMatchingHostedZoneName := ""
 	longestMatchingHostedZoneID := ""
-	for _, hostedZone := range hostedZones {
-		domain := strings.TrimRight(*hostedZone.Name, ".")
-		id := *hostedZone.Id
-		if strings.HasSuffix(subdomain, domain) {
+	for i := 0; i < len(hostedZones); i++ {
+		domain := strings.TrimRight(*hostedZones[i].Name, ".")
+
+		id := *hostedZones[i].Id
+		if strings.HasSuffix(subDomain, domain) {
 			if len(domain) > len(longestMatchingHostedZoneName) {
 				longestMatchingHostedZoneName = domain
 				longestMatchingHostedZoneID = id
@@ -112,10 +107,19 @@ func (client *AWSClient) FindLongestMatchingHostedZone(subdomain string) (string
 	}
 
 	if longestMatchingHostedZoneName == "" {
-		return "", "", fmt.Errorf("No matching hosted zone found for domain %s", subdomain)
+		return "", "", fmt.Errorf("No matching hosted zone found for domain %s", subDomain)
 	}
 
 	longestMatchingHostedZoneID = strings.Replace(longestMatchingHostedZoneID, "/hostedzone/", "", -1)
 
 	return longestMatchingHostedZoneName, longestMatchingHostedZoneID, err
+}
+
+// NewRoute53Client returns a new Route53 client
+func (client *AWSClient) NewRoute53Client() (Route53, error) {
+	session, err := session.NewSession(aws.NewConfig().WithCredentialsChainVerboseErrors(true))
+	if err != nil {
+		return nil, err
+	}
+	return route53.New(session), nil
 }
