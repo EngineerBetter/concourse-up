@@ -70,22 +70,22 @@ type FakeIClient struct {
 		result2 bool
 		result3 error
 	}
-	NewR53ClientStub        func() (iaas.Route53, error)
-	newR53ClientMutex       sync.RWMutex
-	newR53ClientArgsForCall []struct{}
-	newR53ClientReturns     struct {
+	NewRoute53ClientStub        func() (iaas.Route53, error)
+	newRoute53ClientMutex       sync.RWMutex
+	newRoute53ClientArgsForCall []struct{}
+	newRoute53ClientReturns     struct {
 		result1 iaas.Route53
 		result2 error
 	}
-	newR53ClientReturnsOnCall map[int]struct {
+	newRoute53ClientReturnsOnCall map[int]struct {
 		result1 iaas.Route53
 		result2 error
 	}
-	FindLongestMatchingHostedZoneStub        func(subDomain string, r53Client iaas.Route53) (string, string, error)
+	FindLongestMatchingHostedZoneStub        func(subDomain string, route53Client iaas.Route53) (string, string, error)
 	findLongestMatchingHostedZoneMutex       sync.RWMutex
 	findLongestMatchingHostedZoneArgsForCall []struct {
-		subDomain string
-		r53Client iaas.Route53
+		subDomain     string
+		route53Client iaas.Route53
 	}
 	findLongestMatchingHostedZoneReturns struct {
 		result1 string
@@ -414,60 +414,60 @@ func (fake *FakeIClient) EnsureFileExistsReturnsOnCall(i int, result1 []byte, re
 	}{result1, result2, result3}
 }
 
-func (fake *FakeIClient) NewR53Client() (iaas.Route53, error) {
-	fake.newR53ClientMutex.Lock()
-	ret, specificReturn := fake.newR53ClientReturnsOnCall[len(fake.newR53ClientArgsForCall)]
-	fake.newR53ClientArgsForCall = append(fake.newR53ClientArgsForCall, struct{}{})
-	fake.recordInvocation("NewR53Client", []interface{}{})
-	fake.newR53ClientMutex.Unlock()
-	if fake.NewR53ClientStub != nil {
-		return fake.NewR53ClientStub()
+func (fake *FakeIClient) NewRoute53Client() (iaas.Route53, error) {
+	fake.newRoute53ClientMutex.Lock()
+	ret, specificReturn := fake.newRoute53ClientReturnsOnCall[len(fake.newRoute53ClientArgsForCall)]
+	fake.newRoute53ClientArgsForCall = append(fake.newRoute53ClientArgsForCall, struct{}{})
+	fake.recordInvocation("NewRoute53Client", []interface{}{})
+	fake.newRoute53ClientMutex.Unlock()
+	if fake.NewRoute53ClientStub != nil {
+		return fake.NewRoute53ClientStub()
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	return fake.newR53ClientReturns.result1, fake.newR53ClientReturns.result2
+	return fake.newRoute53ClientReturns.result1, fake.newRoute53ClientReturns.result2
 }
 
-func (fake *FakeIClient) NewR53ClientCallCount() int {
-	fake.newR53ClientMutex.RLock()
-	defer fake.newR53ClientMutex.RUnlock()
-	return len(fake.newR53ClientArgsForCall)
+func (fake *FakeIClient) NewRoute53ClientCallCount() int {
+	fake.newRoute53ClientMutex.RLock()
+	defer fake.newRoute53ClientMutex.RUnlock()
+	return len(fake.newRoute53ClientArgsForCall)
 }
 
-func (fake *FakeIClient) NewR53ClientReturns(result1 iaas.Route53, result2 error) {
-	fake.NewR53ClientStub = nil
-	fake.newR53ClientReturns = struct {
+func (fake *FakeIClient) NewRoute53ClientReturns(result1 iaas.Route53, result2 error) {
+	fake.NewRoute53ClientStub = nil
+	fake.newRoute53ClientReturns = struct {
 		result1 iaas.Route53
 		result2 error
 	}{result1, result2}
 }
 
-func (fake *FakeIClient) NewR53ClientReturnsOnCall(i int, result1 iaas.Route53, result2 error) {
-	fake.NewR53ClientStub = nil
-	if fake.newR53ClientReturnsOnCall == nil {
-		fake.newR53ClientReturnsOnCall = make(map[int]struct {
+func (fake *FakeIClient) NewRoute53ClientReturnsOnCall(i int, result1 iaas.Route53, result2 error) {
+	fake.NewRoute53ClientStub = nil
+	if fake.newRoute53ClientReturnsOnCall == nil {
+		fake.newRoute53ClientReturnsOnCall = make(map[int]struct {
 			result1 iaas.Route53
 			result2 error
 		})
 	}
-	fake.newR53ClientReturnsOnCall[i] = struct {
+	fake.newRoute53ClientReturnsOnCall[i] = struct {
 		result1 iaas.Route53
 		result2 error
 	}{result1, result2}
 }
 
-func (fake *FakeIClient) FindLongestMatchingHostedZone(subDomain string, r53Client iaas.Route53) (string, string, error) {
+func (fake *FakeIClient) FindLongestMatchingHostedZone(subDomain string, route53Client iaas.Route53) (string, string, error) {
 	fake.findLongestMatchingHostedZoneMutex.Lock()
 	ret, specificReturn := fake.findLongestMatchingHostedZoneReturnsOnCall[len(fake.findLongestMatchingHostedZoneArgsForCall)]
 	fake.findLongestMatchingHostedZoneArgsForCall = append(fake.findLongestMatchingHostedZoneArgsForCall, struct {
-		subDomain string
-		r53Client iaas.Route53
-	}{subDomain, r53Client})
-	fake.recordInvocation("FindLongestMatchingHostedZone", []interface{}{subDomain, r53Client})
+		subDomain     string
+		route53Client iaas.Route53
+	}{subDomain, route53Client})
+	fake.recordInvocation("FindLongestMatchingHostedZone", []interface{}{subDomain, route53Client})
 	fake.findLongestMatchingHostedZoneMutex.Unlock()
 	if fake.FindLongestMatchingHostedZoneStub != nil {
-		return fake.FindLongestMatchingHostedZoneStub(subDomain, r53Client)
+		return fake.FindLongestMatchingHostedZoneStub(subDomain, route53Client)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2, ret.result3
@@ -484,7 +484,7 @@ func (fake *FakeIClient) FindLongestMatchingHostedZoneCallCount() int {
 func (fake *FakeIClient) FindLongestMatchingHostedZoneArgsForCall(i int) (string, iaas.Route53) {
 	fake.findLongestMatchingHostedZoneMutex.RLock()
 	defer fake.findLongestMatchingHostedZoneMutex.RUnlock()
-	return fake.findLongestMatchingHostedZoneArgsForCall[i].subDomain, fake.findLongestMatchingHostedZoneArgsForCall[i].r53Client
+	return fake.findLongestMatchingHostedZoneArgsForCall[i].subDomain, fake.findLongestMatchingHostedZoneArgsForCall[i].route53Client
 }
 
 func (fake *FakeIClient) FindLongestMatchingHostedZoneReturns(result1 string, result2 string, result3 error) {
@@ -764,8 +764,8 @@ func (fake *FakeIClient) Invocations() map[string][][]interface{} {
 	defer fake.ensureBucketExistsMutex.RUnlock()
 	fake.ensureFileExistsMutex.RLock()
 	defer fake.ensureFileExistsMutex.RUnlock()
-	fake.newR53ClientMutex.RLock()
-	defer fake.newR53ClientMutex.RUnlock()
+	fake.newRoute53ClientMutex.RLock()
+	defer fake.newRoute53ClientMutex.RUnlock()
 	fake.findLongestMatchingHostedZoneMutex.RLock()
 	defer fake.findLongestMatchingHostedZoneMutex.RUnlock()
 	fake.hasFileMutex.RLock()
