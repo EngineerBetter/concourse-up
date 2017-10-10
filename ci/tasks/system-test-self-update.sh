@@ -72,7 +72,7 @@ sleep 120
 
 while true;
 do
-  builds="$(fly --target system-test builds)"
+  builds="$(fly --target system-test builds | grep -v hello)"
   echo "$builds"
 
   if [[ $builds != *"concourse-up-self-update/self-update"* ]] ; then
