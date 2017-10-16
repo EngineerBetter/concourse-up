@@ -83,9 +83,9 @@ func (client *Client) uploadConcourseReleases() error {
 			client.stderr,
 			false,
 			"upload-release",
-			release,
 			"--stemcell",
 			"ubuntu-trusty/"+ConcourseStemcellVersion,
+			release,
 		)
 		if err != nil {
 			return err
