@@ -153,6 +153,16 @@ var _ = Describe("commands", func() {
 			})
 		})
 
+		Context("When an invalid web size is provided", func() {
+			It("Should show a meaningful error", func() {
+				command := exec.Command(cliPath, "deploy", "abc", "--web-size", "tiny")
+				session, err := Start(command, GinkgoWriter, GinkgoWriter)
+				Expect(err).ToNot(HaveOccurred())
+				Eventually(session).Should(Exit(1))
+				Eventually(session.Err).Should(Say("unknown web node size"))
+			})
+		})
+
 		Context("When an invalid db size is provided", func() {
 			It("Should show a meaningful error", func() {
 				command := exec.Command(cliPath, "deploy", "abc", "--db-size", "huge")

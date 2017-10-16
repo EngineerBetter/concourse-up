@@ -15,8 +15,9 @@ type Config struct {
 	ConcourseDBName           string `json:"concourse_db_name"`
 	ConcourseKey              string `json:"concourse_key"`
 	ConcoursePassword         string `json:"concourse_password"`
-	ConcourseUsername         string `json:"concourse_username"`
 	ConcourseUserProvidedCert bool   `json:"concourse_user_provided_cert"`
+	ConcourseUsername         string `json:"concourse_username"`
+	ConcourseWebSize          string `json:"concourse_web_size"`
 	ConcourseWorkerCount      int    `json:"concourse_worker_count"`
 	ConcourseWorkerSize       string `json:"concourse_worker_size"`
 	ConfigBucket              string `json:"config_bucket"`
@@ -67,6 +68,7 @@ func generateDefaultConfig(iaas, project, deployment, configBucket, region, rdsI
 		ConcoursePassword:        concoursePassword,
 		ConcourseUsername:        concourseUsername,
 		ConcourseWorkerCount:     1,
+		ConcourseWebSize:         "small",
 		ConcourseWorkerSize:      "xlarge",
 		ConfigBucket:             configBucket,
 		Deployment:               deployment,

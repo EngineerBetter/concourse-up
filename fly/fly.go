@@ -258,29 +258,31 @@ func (client *Client) buildDefaultPipelineParams(deployArgs *config.DeployArgs, 
 	}
 
 	return &defaultPipelineParams{
+		AWSAccessKeyID:     awsAccessKeyID,
+		AWSSecretAccessKey: awsSecretAccessKey,
+		Deployment:         strings.TrimPrefix(config.Deployment, "concourse-up-"),
 		FlagAWSRegion:      deployArgs.AWSRegion,
 		FlagDomain:         deployArgs.Domain,
 		FlagTLSCert:        deployArgs.TLSCert,
 		FlagTLSKey:         deployArgs.TLSKey,
-		FlagWorkers:        deployArgs.WorkerCount,
+		FlagWebSize:        deployArgs.WebSize,
 		FlagWorkerSize:     deployArgs.WorkerSize,
-		Deployment:         strings.TrimPrefix(config.Deployment, "concourse-up-"),
-		AWSAccessKeyID:     awsAccessKeyID,
-		AWSSecretAccessKey: awsSecretAccessKey,
+		FlagWorkers:        deployArgs.WorkerCount,
 	}, nil
 }
 
 type defaultPipelineParams struct {
+	AWSAccessKeyID     string
+	AWSDefaultRegion   string
+	AWSSecretAccessKey string
+	Deployment         string
 	FlagAWSRegion      string
 	FlagDomain         string
 	FlagTLSCert        string
 	FlagTLSKey         string
-	FlagWorkers        int
+	FlagWebSize        string
 	FlagWorkerSize     string
-	Deployment         string
-	AWSAccessKeyID     string
-	AWSSecretAccessKey string
-	AWSDefaultRegion   string
+	FlagWorkers        int
 }
 
 // Indent is a helper function to indent the field a given number of spaces
@@ -314,6 +316,7 @@ jobs:
         <% .Indent "8" .FlagTLSKey %>
       WORKERS: "<% .FlagWorkers %>"
       WORKER_SIZE: "<% .FlagWorkerSize %>"
+      WEB_SIZE: "<% .FlagWebSize %>"
       DEPLOYMENT: "<% .Deployment %>"
       AWS_ACCESS_KEY_ID: "<% .AWSAccessKeyID %>"
       AWS_SECRET_ACCESS_KEY: "<% .AWSSecretAccessKey %>"

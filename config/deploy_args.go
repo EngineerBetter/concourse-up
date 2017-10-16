@@ -14,6 +14,7 @@ type DeployArgs struct {
 	TLSKey      string
 	WorkerCount int
 	WorkerSize  string
+	WebSize     string
 	SelfUpdate  bool
 	DBSize      string
 	// DBSizeIsSet is true if the user has manually specified the db-size (ie, it's not the default)
@@ -22,6 +23,9 @@ type DeployArgs struct {
 
 // WorkerSizes are the permitted concourse worker sizes
 var WorkerSizes = []string{"medium", "large", "xlarge", "2xlarge", "4xlarge", "10xlarge", "16xlarge"}
+
+// WebSizes are the permitted concourse web sizes
+var WebSizes = []string{"small", "medium", "large", "xlarge"}
 
 // DBSizes maps SML sizes to RDS instance classes
 var DBSizes = map[string]string{
@@ -37,6 +41,10 @@ func (args DeployArgs) Validate() error {
 	}
 
 	if err := args.validateWorkerFields(); err != nil {
+		return err
+	}
+
+	if err := args.validateWebFields(); err != nil {
 		return err
 	}
 
@@ -66,18 +74,21 @@ func (args DeployArgs) validateWorkerFields() error {
 		return errors.New("minimum of workers is 1")
 	}
 
-	knownSize := false
 	for _, size := range WorkerSizes {
-		if args.WorkerSize == size {
-			knownSize = true
+		if size == args.WorkerSize {
+			return nil
 		}
 	}
+	return fmt.Errorf("unknown worker size: `%s`. Valid sizes are: %v", args.WorkerSize, WorkerSizes)
+}
 
-	if !knownSize {
-		return fmt.Errorf("unknown worker size: `%s`. Valid sizes are: %v", args.WorkerSize, WorkerSizes)
+func (args DeployArgs) validateWebFields() error {
+	for _, size := range WebSizes {
+		if size == args.WebSize {
+			return nil
+		}
 	}
-
-	return nil
+	return fmt.Errorf("unknown web node size: `%s`. Valid sizes are: %v", args.WebSize, WebSizes)
 }
 
 func (args DeployArgs) validateDBFields() error {

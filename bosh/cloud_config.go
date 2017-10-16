@@ -33,9 +33,36 @@ azs:
     availability_zone: <% .AvailabilityZone %>
 
 vm_types:
-- name: concourse-web
+- name: concourse-web-small
   cloud_properties:
     instance_type: t2.small
+    ephemeral_disk:
+      size: 20_000
+      type: gp2
+    security_groups:
+    - <% .VMsSecurityGroupID %>
+
+- name: concourse-web-medium
+  cloud_properties:
+    instance_type: t2.medium
+    ephemeral_disk:
+      size: 20_000
+      type: gp2
+    security_groups:
+    - <% .VMsSecurityGroupID %>
+
+- name: concourse-web-large
+  cloud_properties:
+    instance_type: t2.large
+    ephemeral_disk:
+      size: 20_000
+      type: gp2
+    security_groups:
+    - <% .VMsSecurityGroupID %>
+
+- name: concourse-web-xlarge
+  cloud_properties:
+    instance_type: t2.xlarge
     ephemeral_disk:
       size: 20_000
       type: gp2

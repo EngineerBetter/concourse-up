@@ -151,6 +151,7 @@ func (client *Client) checkPreDeployConfigRequiments(isDomainUpdated bool, confi
 
 	config.ConcourseWorkerCount = client.deployArgs.WorkerCount
 	config.ConcourseWorkerSize = client.deployArgs.WorkerSize
+	config.ConcourseWebSize = client.deployArgs.WebSize
 	config.DirectorPublicIP = metadata.DirectorPublicIP.Value
 
 	if err := client.configClient.Update(config); err != nil {

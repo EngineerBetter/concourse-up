@@ -145,6 +145,7 @@ func generateConcourseManifest(config *config.Config, metadata *terraform.Metada
 		Username:                config.ConcourseUsername,
 		WorkerCount:             config.ConcourseWorkerCount,
 		WorkerSize:              config.ConcourseWorkerSize,
+		WebSize:                 config.ConcourseWebSize,
 	}
 
 	return util.RenderTemplate(awsConcourseManifestTemplate, templateParams)
@@ -190,6 +191,7 @@ type awsConcourseManifestParams struct {
 	TLSKey                  string
 	URL                     string
 	Username                string
+	WebSize                 string
 	WorkerCount             int
 	WorkerSize              string
 }
@@ -240,7 +242,7 @@ tags:
 instance_groups:
 - name: web
   instances: 1
-  vm_type: concourse-web
+  vm_type: concourse-web-<% .WebSize %>
   stemcell: trusty
   azs:
   - z1

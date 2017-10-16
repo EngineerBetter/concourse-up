@@ -58,6 +58,13 @@ var deployFlags = []cli.Flag{
 		Destination: &deployArgs.WorkerSize,
 	},
 	cli.StringFlag{
+		Name:        "web-size",
+		Usage:       "(optional) Size of Concourse web node. Can be small, medium, large, xlarge",
+		EnvVar:      "WEB_SIZE",
+		Value:       "small",
+		Destination: &deployArgs.WebSize,
+	},
+	cli.StringFlag{
 		Name:        "iaas",
 		Usage:       "(optional) IAAS, can be AWS or GCP",
 		EnvVar:      "IAAS",
