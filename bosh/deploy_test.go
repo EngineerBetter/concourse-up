@@ -167,6 +167,16 @@ var _ = Describe("Deploy", func() {
 		Expect(actions).To(ContainElement("Running authenticated bosh command: upload-stemcell COMPILE_TIME_VARIABLE_bosh_concourseStemcellURL (detach: false)"))
 	})
 
+	It("Uploads the each bosh release", func() {
+		_, err := client.Deploy(nil, false)
+		Expect(err).ToNot(HaveOccurred())
+		Expect(actions).To(ContainElement("Running authenticated bosh command: upload-release COMPILE_TIME_VARIABLE_bosh_concourseReleaseURL --stemcell ubuntu-trusty/COMPILE_TIME_VARIABLE_bosh_concourseStemcellVersion (detach: false)"))
+		Expect(actions).To(ContainElement("Running authenticated bosh command: upload-release COMPILE_TIME_VARIABLE_bosh_grafanaReleaseURL --stemcell ubuntu-trusty/COMPILE_TIME_VARIABLE_bosh_concourseStemcellVersion (detach: false)"))
+		Expect(actions).To(ContainElement("Running authenticated bosh command: upload-release COMPILE_TIME_VARIABLE_bosh_gardenReleaseURL --stemcell ubuntu-trusty/COMPILE_TIME_VARIABLE_bosh_concourseStemcellVersion (detach: false)"))
+		Expect(actions).To(ContainElement("Running authenticated bosh command: upload-release COMPILE_TIME_VARIABLE_bosh_influxDBReleaseURL --stemcell ubuntu-trusty/COMPILE_TIME_VARIABLE_bosh_concourseStemcellVersion (detach: false)"))
+		Expect(actions).To(ContainElement("Running authenticated bosh command: upload-release COMPILE_TIME_VARIABLE_bosh_riemannReleaseURL --stemcell ubuntu-trusty/COMPILE_TIME_VARIABLE_bosh_concourseStemcellVersion (detach: false)"))
+	})
+
 	It("Saves the concourse manifest", func() {
 		_, err := client.Deploy(nil, false)
 		Expect(err).ToNot(HaveOccurred())

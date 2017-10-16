@@ -76,6 +76,24 @@ func (client *Client) uploadConcourseStemcell() error {
 	)
 }
 
+func (client *Client) uploadConcourseReleases() error {
+	for _, release := range []string{ConcourseReleaseURL, GardenReleaseURL, GrafanaReleaseURL, RiemannReleaseURL, InfluxDBReleaseURL} {
+		err := client.director.RunAuthenticatedCommand(
+			client.stdout,
+			client.stderr,
+			false,
+			"upload-release",
+			release,
+			"--stemcell",
+			"ubuntu-trusty/"+ConcourseStemcellVersion,
+		)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 func (client *Client) deployConcourse(detach bool) error {
 	concourseManifestBytes, err := generateConcourseManifest(client.config, client.metadata)
 	if err != nil {
@@ -87,7 +105,7 @@ func (client *Client) deployConcourse(detach bool) error {
 		return err
 	}
 
-	if err = client.director.RunAuthenticatedCommand(
+	return client.director.RunAuthenticatedCommand(
 		client.stdout,
 		client.stderr,
 		detach,
@@ -95,11 +113,7 @@ func (client *Client) deployConcourse(detach bool) error {
 		concourseDeploymentName,
 		"deploy",
 		concourseManifestPath,
-	); err != nil {
-		return err
-	}
-
-	return nil
+	)
 }
 
 func generateConcourseManifest(config *config.Config, metadata *terraform.Metadata) ([]byte, error) {
@@ -107,7 +121,6 @@ func generateConcourseManifest(config *config.Config, metadata *terraform.Metada
 		AllowSelfSignedCerts:    "true",
 		ATCPublicIP:             metadata.ATCPublicIP.Value,
 		ConcourseReleaseSHA1:    ConcourseReleaseSHA1,
-		ConcourseReleaseURL:     ConcourseReleaseURL,
 		ConcourseReleaseVersion: ConcourseReleaseVersion,
 		DBCACert:                db.RDSRootCert,
 		DBHost:                  metadata.BoshDBAddress.Value,
@@ -117,24 +130,20 @@ func generateConcourseManifest(config *config.Config, metadata *terraform.Metada
 		DBUsername:              config.RDSUsername,
 		EncryptionKey:           config.EncryptionKey,
 		GardenReleaseSHA1:       GardenReleaseSHA1,
-		GardenReleaseURL:        GardenReleaseURL,
 		GardenReleaseVersion:    GardenReleaseVersion,
 		GrafanaPassword:         config.GrafanaPassword,
 		GrafanaPort:             "3000",
 		GrafanaReleaseSHA1:      GrafanaReleaseSHA1,
-		GrafanaReleaseURL:       GrafanaReleaseURL,
 		GrafanaReleaseVersion:   GrafanaReleaseVersion,
 		GrafanaURL:              fmt.Sprintf("https://%s:3000", config.Domain),
 		GrafanaUsername:         config.GrafanaUsername,
 		InfluxDBPassword:        config.InfluxDBPassword,
 		InfluxDBReleaseSHA1:     InfluxDBReleaseSHA1,
-		InfluxDBReleaseURL:      InfluxDBReleaseURL,
 		InfluxDBReleaseVersion:  InfluxDBReleaseVersion,
 		InfluxDBUsername:        config.InfluxDBUsername,
 		Password:                config.ConcoursePassword,
 		Project:                 config.Project,
 		RiemannReleaseSHA1:      RiemannReleaseSHA1,
-		RiemannReleaseURL:       RiemannReleaseURL,
 		RiemannReleaseVersion:   RiemannReleaseVersion,
 		StemcellSHA1:            ConcourseStemcellSHA1,
 		StemcellURL:             ConcourseStemcellURL,
@@ -152,10 +161,9 @@ func generateConcourseManifest(config *config.Config, metadata *terraform.Metada
 }
 
 type awsConcourseManifestParams struct {
-	AllowSelfSignedCerts    string
 	ATCPublicIP             string
+	AllowSelfSignedCerts    string
 	ConcourseReleaseSHA1    string
-	ConcourseReleaseURL     string
 	ConcourseReleaseVersion string
 	DBCACert                string
 	DBHost                  string
@@ -165,24 +173,20 @@ type awsConcourseManifestParams struct {
 	DBUsername              string
 	EncryptionKey           string
 	GardenReleaseSHA1       string
-	GardenReleaseURL        string
 	GardenReleaseVersion    string
 	GrafanaPassword         string
 	GrafanaPort             string
 	GrafanaReleaseSHA1      string
-	GrafanaReleaseURL       string
 	GrafanaReleaseVersion   string
 	GrafanaURL              string
 	GrafanaUsername         string
 	InfluxDBPassword        string
 	InfluxDBReleaseSHA1     string
-	InfluxDBReleaseURL      string
 	InfluxDBReleaseVersion  string
 	InfluxDBUsername        string
 	Password                string
 	Project                 string
 	RiemannReleaseSHA1      string
-	RiemannReleaseURL       string
 	RiemannReleaseVersion   string
 	StemcellSHA1            string
 	StemcellURL             string
@@ -206,27 +210,22 @@ name: concourse
 
 releases:
 - name: concourse
-  url: "<% .ConcourseReleaseURL %>"
   sha1: "<% .ConcourseReleaseSHA1 %>"
   version: <% .ConcourseReleaseVersion %>
 
 - name: garden-runc
-  url: "<% .GardenReleaseURL %>"
   sha1: "<% .GardenReleaseSHA1 %>"
   version: <% .GardenReleaseVersion %>
 
 - name: riemann
-  url: "<% .RiemannReleaseURL %>"
   sha1: "<% .RiemannReleaseSHA1 %>"
   version: <% .RiemannReleaseVersion %>
 
 - name: grafana
-  url: "<% .GrafanaReleaseURL %>"
   sha1: "<% .GrafanaReleaseSHA1 %>"
   version: <% .GrafanaReleaseVersion %>
 
 - name: influxdb
-  url: "<% .InfluxDBReleaseURL %>"
   sha1: "<% .InfluxDBReleaseSHA1 %>"
   version: <% .InfluxDBReleaseVersion %>
 

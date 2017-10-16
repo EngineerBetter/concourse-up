@@ -23,6 +23,10 @@ func (client *Client) Deploy(stateFileBytes []byte, detach bool) ([]byte, error)
 		return stateFileBytes, err
 	}
 
+	if err := client.uploadConcourseReleases(); err != nil {
+		return stateFileBytes, err
+	}
+
 	if err := client.createDefaultDatabases(); err != nil {
 		return stateFileBytes, err
 	}
