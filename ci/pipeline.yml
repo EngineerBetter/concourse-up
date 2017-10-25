@@ -67,6 +67,15 @@ resources:
     secret_access_key: {{concourse_ci_s3_secret_key}}
     region_name: eu-west-1
 
+- name: binary-windows
+  type: s3
+  source:
+    bucket: concourse-up-ci-artifacts
+    versioned_file: concourse-up-darwin-amd64
+    access_key_id: {{concourse_ci_s3_access_key}}
+    secret_access_key: {{concourse_ci_s3_secret_key}}
+    region_name: eu-west-1
+
 - name: release
   type: github-release
   source:
@@ -254,6 +263,17 @@ jobs:
       - put: binary-darwin
         params:
           file: build-darwin/concourse-up-darwin-amd64
+    - do:
+      - task: build-windows
+        image: image
+        params:
+          GOOS: windows
+          GOARCH: amd64
+          OUTPUT_FILE: concourse-up-windows-amd64.exe
+        file: concourse-up/ci/tasks/build_windows.yml
+      - put: binary-windows
+        params:
+          file: build-windows/concourse-up-windows-amd64.exe
 
 - name: system-test
   serial: true
@@ -374,6 +394,12 @@ jobs:
         GOARCH: amd64
         OUTPUT_FILE: concourse-up-darwin-amd64
       file: concourse-up/ci/tasks/build_darwin_from_version_file.yml
+    - task: build-windows
+      image: image
+      params:
+        GOARCH: amd64
+        OUTPUT_FILE: concourse-up-windows-amd64.exe
+      file: concourse-up/ci/tasks/build_windows_from_version_file.yml
   - task: write-release-vars
     image: image
     file: concourse-up/ci/tasks/write-release-vars.yml
@@ -386,6 +412,7 @@ jobs:
       globs:
       - build-linux/concourse-up-linux-amd64
       - build-darwin/concourse-up-darwin-amd64
+      - build-windows/concourse-up-windows-amd64.exe
   - put: slack-alert
     params:
       channel: "#integrations"
@@ -419,6 +446,7 @@ jobs:
       globs:
       - build-linux/concourse-up-linux-amd64
       - build-darwin/concourse-up-darwin-amd64
+      - build-windows/concourse-up-windows-amd64.exe
   - put: version
     resource: version
     params:
@@ -456,6 +484,7 @@ jobs:
       globs:
       - build-linux/concourse-up-linux-amd64
       - build-darwin/concourse-up-darwin-amd64
+      - build-windows/concourse-up-windows-amd64.exe
   - put: version
     resource: version
     params:
@@ -493,6 +522,7 @@ jobs:
       globs:
       - build-linux/concourse-up-linux-amd64
       - build-darwin/concourse-up-darwin-amd64
+      - build-windows/concourse-up-windows-amd64.exe
   - put: version
     resource: version
     params:
