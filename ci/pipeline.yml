@@ -290,6 +290,9 @@ jobs:
     - get: binary-darwin
       trigger: true
       passed: [build]
+    - get: binary-windows
+      trigger: true
+      passed: [build]
     - get: concourse-up
       trigger: true
       passed: [build]
@@ -350,6 +353,9 @@ jobs:
       trigger: true
       passed: [system-test]
     - get: binary-darwin
+      trigger: true
+      passed: [system-test]
+    - get: binary-windows
       trigger: true
       passed: [system-test]
     - get: concourse-up
