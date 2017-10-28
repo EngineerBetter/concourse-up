@@ -24,6 +24,7 @@ var LinuxBinaryURL = "COMPILE_TIME_VARIABLE_terraform_linux_binary_url"
 var WindowsBinaryURL = "COMPILE_TIME_VARIABLE_terraform_windows_binary_url"
 
 // IClient is an interface for the terraform Client
+//go:generate counterfeiter . IClient
 type IClient interface {
 	Output() (*Metadata, error)
 	Apply(dryrun bool) error

@@ -2,30 +2,28 @@ package config_test
 
 import (
 	. "github.com/EngineerBetter/concourse-up/config"
-	"github.com/EngineerBetter/concourse-up/testsupport"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/onsi/gomega/types"
+	"github.com/EngineerBetter/concourse-up/iaas/iaasfakes"
 )
 
 var _ = Describe("Client", func() {
-	var iaasClient *testsupport.FakeAWSClient
-	var client *Client
-	var deployArgs *DeployArgs
+	var (
+		iaasClient *iaasfakes.FakeIClient
+		client     *Client
+		deployArgs *DeployArgs
+	)
 
 	BeforeEach(func() {
-		iaasClient = &testsupport.FakeAWSClient{
-			FakeRegion: func() string {
-				return "eu-west-1"
-			},
-			FakeEnsureBucketExists: func(name string) error {
-				return nil
-			},
-			FakeEnsureFileExists: func(bucket, path string, defaultContents []byte) ([]byte, bool, error) {
-				return defaultContents, true, nil
-			},
+		iaasClient = new(iaasfakes.FakeIClient)
+		iaasClient.RegionReturns("eu-west-1")
+		iaasClient.EnsureBucketExistsReturns(nil)
+		iaasClient.EnsureFileExistsStub = func(bucket, path string, defaultContents []byte) ([]byte, bool, error) {
+			return defaultContents, true, nil
 		}
+
 		client = New(iaasClient, "test")
 
 		deployArgs = &DeployArgs{

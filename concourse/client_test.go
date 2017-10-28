@@ -6,28 +6,35 @@ import (
 	"io"
 
 	"github.com/EngineerBetter/concourse-up/bosh"
+	"github.com/EngineerBetter/concourse-up/bosh/boshfakes"
 	"github.com/EngineerBetter/concourse-up/certs"
 	"github.com/EngineerBetter/concourse-up/concourse"
 	"github.com/EngineerBetter/concourse-up/config"
+	"github.com/EngineerBetter/concourse-up/config/configfakes"
 	"github.com/EngineerBetter/concourse-up/db"
 	"github.com/EngineerBetter/concourse-up/director"
 	"github.com/EngineerBetter/concourse-up/fly"
+	"github.com/EngineerBetter/concourse-up/fly/flyfakes"
+	"github.com/EngineerBetter/concourse-up/iaas"
+	"github.com/EngineerBetter/concourse-up/iaas/iaasfakes"
 	"github.com/EngineerBetter/concourse-up/terraform"
-	"github.com/EngineerBetter/concourse-up/testsupport"
+	"github.com/EngineerBetter/concourse-up/terraform/terraformfakes"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/onsi/gomega/gbytes"
 )
 
 var _ = Describe("Client", func() {
-	var buildClient func() concourse.IClient
-	var actions []string
-	var stdout *gbytes.Buffer
-	var stderr *gbytes.Buffer
-	var deleteBoshDirectorError error
-	var terraformMetadata *terraform.Metadata
-	var args *config.DeployArgs
-	var exampleConfig *config.Config
+	var (
+		buildClient             func() concourse.IClient
+		actions                 []string
+		stdout                  *gbytes.Buffer
+		stderr                  *gbytes.Buffer
+		deleteBoshDirectorError error
+		terraformMetadata       *terraform.Metadata
+		args                    *config.DeployArgs
+		exampleConfig           *config.Config
+	)
 
 	certGenerator := func(caName string, ip ...string) (*certs.Certs, error) {
 		actions = append(actions, fmt.Sprintf("generating cert ca: %s, ca: %s", caName, ip))
@@ -36,32 +43,7 @@ var _ = Describe("Client", func() {
 		}, nil
 	}
 
-	awsClient := &testsupport.FakeAWSClient{
-		FakeFindLongestMatchingHostedZone: func(subdomain string) (string, string, error) {
-			if subdomain == "ci.google.com" {
-				return "google.com", "ABC123", nil
-			}
-
-			return "", "", errors.New("hosted zone not found")
-		},
-		FakeDeleteVMsInVPC: func(vpcID string) error {
-			actions = append(actions, fmt.Sprintf("deleting vms in %s", vpcID))
-			return nil
-		},
-	}
-
-	fakeFlyClient := &testsupport.FakeFlyClient{
-		FakeSetDefaultPipeline: func(deployArgs *config.DeployArgs, config *config.Config, allowFlyVersionDiscrepancy bool) error {
-			actions = append(actions, "setting default pipeline")
-			return nil
-		},
-		FakeCleanup: func() error {
-			return nil
-		},
-		FakeCanConnect: func() (bool, error) {
-			return false, nil
-		},
-	}
+	fakeFlyClient := mockFlyClient(&actions)
 
 	BeforeEach(func() {
 		args = &config.DeployArgs{
@@ -134,77 +116,12 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 			RDSInstanceClass:  "db.t2.medium",
 		}
 
-		configClient := &testsupport.FakeConfigClient{
-			FakeLoadOrCreate: func(deployArgs *config.DeployArgs) (*config.Config, bool, error) {
-				actions = append(actions, "loading or creating config file")
-				return exampleConfig, false, nil
-			},
-			FakeLoad: func() (*config.Config, error) {
-				actions = append(actions, "loading config file")
-				return exampleConfig, nil
-			},
-			FakeDeleteAsset: func(filename string) error {
-				actions = append(actions, fmt.Sprintf("deleting config asset: %s", filename))
-				return nil
-			},
-			FakeUpdate: func(config *config.Config) error {
-				actions = append(actions, "updating config file")
-				return nil
-			},
-			FakeStoreAsset: func(filename string, contents []byte) error {
-				actions = append(actions, fmt.Sprintf("storing config asset: %s", filename))
-				return nil
-			},
-			FakeHasAsset: func(filename string) (bool, error) {
-				return false, nil
-			},
-			FakeDeleteAll: func(config *config.Config) error {
-				actions = append(actions, "deleting config")
-				return nil
-			},
-		}
-
 		terraformClientFactory := func(iaas string, config *config.Config, stdout, stderr io.Writer) (terraform.IClient, error) {
-			return &testsupport.FakeTerraformClient{
-				FakeApply: func(dryrun bool) error {
-					Expect(dryrun).To(BeFalse())
-					actions = append(actions, fmt.Sprintf("applying terraform, db size: %s", config.RDSInstanceClass))
-					return nil
-				},
-				FakeDestroy: func() error {
-					actions = append(actions, "destroying terraform")
-					return nil
-				},
-				FakeOutput: func() (*terraform.Metadata, error) {
-					actions = append(actions, "fetching terraform metadata")
-					return terraformMetadata, nil
-				},
-				FakeCleanup: func() error {
-					actions = append(actions, "cleaning up terraform client")
-					return nil
-				},
-			}, nil
+			return mockTerraformClient(&actions, terraformMetadata, config), nil
 		}
 
 		boshClientFactory := func(config *config.Config, metadata *terraform.Metadata, director director.IClient, dbRunner db.Runner, stdout, stderr io.Writer) bosh.IClient {
-			return &testsupport.FakeBoshClient{
-				FakeDeploy: func(stateFileBytes []byte, detach bool) ([]byte, error) {
-					if detach {
-						actions = append(actions, "deploying director in self-update mode")
-					} else {
-						actions = append(actions, "deploying director")
-					}
-					return []byte{}, nil
-				},
-				FakeDelete: func([]byte) ([]byte, error) {
-					actions = append(actions, "deleting director")
-					return []byte{}, deleteBoshDirectorError
-				},
-				FakeCleanup: func() error {
-					actions = append(actions, "cleaning up bosh init")
-					return nil
-				},
-			}
+			return mockBoshClient(&actions, deleteBoshDirectorError)
 		}
 
 		stdout = gbytes.NewBuffer()
@@ -212,14 +129,14 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 
 		buildClient = func() concourse.IClient {
 			return concourse.NewClient(
-				awsClient,
+				mockAwsClient(&actions),
 				terraformClientFactory,
 				boshClientFactory,
 				func(fly.Credentials, io.Writer, io.Writer) (fly.IClient, error) {
 					return fakeFlyClient, nil
 				},
 				certGenerator,
-				configClient,
+				mockConfigClient(&actions, exampleConfig),
 				args,
 				stdout,
 				stderr,
@@ -370,7 +287,7 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 
 		Context("When running in self-update mode and the concourse is already deployed", func() {
 			It("Sets the default pipeline, before deploying the bosh director", func() {
-				fakeFlyClient.FakeCanConnect = func() (bool, error) {
+				fakeFlyClient.CanConnectStub = func() (bool, error) {
 					return true, nil
 				}
 				args.SelfUpdate = true
@@ -513,3 +430,102 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 		})
 	})
 })
+
+func mockAwsClient(actions *[]string) *iaasfakes.FakeIClient {
+	awsClient := new(iaasfakes.FakeIClient)
+	awsClient.FindLongestMatchingHostedZoneStub = func(subDomain string, r53Client iaas.Route53) (string, string, error) {
+		if subDomain == "ci.google.com" {
+			return "google.com", "ABC123", nil
+		}
+		return "", "", errors.New("hosted zone not found")
+	}
+	awsClient.DeleteVMsInVPCStub = func(vpcID string) error {
+		*actions = append(*actions, fmt.Sprintf("deleting vms in %s", vpcID))
+		return nil
+	}
+	return awsClient
+}
+
+func mockFlyClient(actions *[]string) *flyfakes.FakeIClient {
+	fakeFlyClient := new(flyfakes.FakeIClient)
+	fakeFlyClient.SetDefaultPipelineStub = func(deployArgs *config.DeployArgs, config *config.Config, allowFlyVersionDiscrepancy bool) error {
+		*actions = append(*actions, "setting default pipeline")
+		return nil
+	}
+	fakeFlyClient.CleanupReturns(nil)
+	fakeFlyClient.CanConnectReturns(false, nil)
+	return fakeFlyClient
+}
+
+func mockConfigClient(actions *[]string, exampleConfig *config.Config) *configfakes.FakeIClient {
+	configClient := new(configfakes.FakeIClient)
+	configClient.LoadOrCreateStub = func(deployArgs *config.DeployArgs) (*config.Config, bool, error) {
+		*actions = append(*actions, "loading or creating config file")
+		return exampleConfig, false, nil
+	}
+	configClient.LoadStub = func() (*config.Config, error) {
+		*actions = append(*actions, "loading config file")
+		return exampleConfig, nil
+	}
+	configClient.DeleteAssetStub = func(filename string) error {
+		*actions = append(*actions, fmt.Sprintf("deleting config asset: %s", filename))
+		return nil
+	}
+	configClient.UpdateStub = func(i *config.Config) error {
+		*actions = append(*actions, "updating config file")
+		return nil
+	}
+	configClient.StoreAssetStub = func(filename string, contents []byte) error {
+		*actions = append(*actions, fmt.Sprintf("storing config asset: %s", filename))
+		return nil
+	}
+	configClient.HasAssetReturns(false, nil)
+	configClient.DeleteAllStub = func(config *config.Config) error {
+		*actions = append(*actions, "deleting config")
+		return nil
+	}
+	return configClient
+}
+
+func mockTerraformClient(actions *[]string, terraformMetadata *terraform.Metadata, config *config.Config) *terraformfakes.FakeIClient {
+	terraformClientFactory := new(terraformfakes.FakeIClient)
+	terraformClientFactory.ApplyStub = func(dryrun bool) error {
+		Expect(dryrun).To(BeFalse())
+		*actions = append(*actions, fmt.Sprintf("applying terraform, db size: %s", config.RDSInstanceClass))
+		return nil
+	}
+	terraformClientFactory.DestroyStub = func() error {
+		*actions = append(*actions, "destroying terraform")
+		return nil
+	}
+	terraformClientFactory.OutputStub = func() (*terraform.Metadata, error) {
+		*actions = append(*actions, "fetching terraform metadata")
+		return terraformMetadata, nil
+	}
+	terraformClientFactory.CleanupStub = func() error {
+		*actions = append(*actions, "cleaning up terraform client")
+		return nil
+	}
+	return terraformClientFactory
+}
+
+func mockBoshClient(actions *[]string, deleteBoshDirectorError error) *boshfakes.FakeIClient {
+	boshClient := new(boshfakes.FakeIClient)
+	boshClient.DeployStub = func(bytes []byte, detach bool) ([]byte, error) {
+		if detach {
+			*actions = append(*actions, "deploying director in self-update mode")
+		} else {
+			*actions = append(*actions, "deploying director")
+		}
+		return []byte{}, nil
+	}
+	boshClient.DeleteStub = func(bytes []byte) ([]byte, error) {
+		*actions = append(*actions, "deleting director")
+		return []byte{}, deleteBoshDirectorError
+	}
+	boshClient.CleanupStub = func() error {
+		*actions = append(*actions, "cleaning up bosh init")
+		return nil
+	}
+	return boshClient
+}

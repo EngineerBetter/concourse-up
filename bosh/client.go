@@ -25,6 +25,7 @@ type Client struct {
 }
 
 // IClient is a client for performing bosh-init commands
+//go:generate counterfeiter . IClient
 type IClient interface {
 	Deploy([]byte, bool) ([]byte, error)
 	Delete([]byte) ([]byte, error)
