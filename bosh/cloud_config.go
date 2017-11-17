@@ -69,6 +69,15 @@ vm_types:
     security_groups:
     - <% .VMsSecurityGroupID %>
 
+- name: concourse-web-2xlarge
+  cloud_properties:
+    instance_type: t2.2xlarge
+    ephemeral_disk:
+      size: 20_000
+      type: gp2
+    security_groups:
+    - <% .VMsSecurityGroupID %>
+
 - name: concourse-medium
   cloud_properties:
     instance_type: t2.medium

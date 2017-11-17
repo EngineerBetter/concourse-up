@@ -59,7 +59,7 @@ var deployFlags = []cli.Flag{
 	},
 	cli.StringFlag{
 		Name:        "web-size",
-		Usage:       "(optional) Size of Concourse web node. Can be small, medium, large, xlarge",
+		Usage:       "(optional) Size of Concourse web node. Can be small, medium, large, xlarge, 2xlarge",
 		EnvVar:      "WEB_SIZE",
 		Value:       "small",
 		Destination: &deployArgs.WebSize,

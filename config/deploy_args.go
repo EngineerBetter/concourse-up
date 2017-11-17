@@ -25,7 +25,7 @@ type DeployArgs struct {
 var WorkerSizes = []string{"medium", "large", "xlarge", "2xlarge", "4xlarge", "10xlarge", "16xlarge"}
 
 // WebSizes are the permitted concourse web sizes
-var WebSizes = []string{"small", "medium", "large", "xlarge"}
+var WebSizes = []string{"small", "medium", "large", "xlarge", "2xlarge"}
 
 // DBSizes maps SML sizes to RDS instance classes
 var DBSizes = map[string]string{
