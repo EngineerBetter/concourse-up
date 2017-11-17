@@ -205,6 +205,20 @@ jobs:
       address: 127.0.0.1
       user: nats
       password: <% .NATSPassword %>
+      tls:
+        ca: ((nats_server_tls.ca))
+        client_ca:
+          certificate: ((nats_ca.certificate))
+          private_key: ((nats_ca.private_key))
+        server:
+          certificate: ((nats_server_tls.certificate))
+          private_key: ((nats_server_tls.private_key))
+        director:
+          certificate: ((nats_clients_director_tls.certificate))
+          private_key: ((nats_clients_director_tls.private_key))
+        health_monitor:
+          certificate: ((nats_clients_health_monitor_tls.certificate))
+          private_key: ((nats_clients_health_monitor_tls.private_key))
 
     postgres: &db
       host: <% .DBHost %>
@@ -292,4 +306,36 @@ cloud_provider:
       provider: local
       path: /var/vcap/micro_bosh/data/cache
     ntp: *ntp
+
+variables:
+- name: nats_ca
+  type: certificate
+  options:
+    is_ca: true
+    common_name: default.nats-ca.bosh-internal
+
+- name: nats_server_tls
+  type: certificate
+  options:
+    ca: nats_ca
+    common_name: default.nats.bosh-internal
+    alternative_names: [127.0.0.1]
+    extended_key_usage:
+    - server_auth
+
+- name: nats_clients_director_tls
+  type: certificate
+  options:
+    ca: nats_ca
+    common_name: default.director.bosh-internal
+    extended_key_usage:
+    - client_auth
+
+- name: nats_clients_health_monitor_tls
+  type: certificate
+  options:
+    ca: nats_ca
+    common_name: default.hm.bosh-internal
+    extended_key_usage:
+    - client_auth
 `
