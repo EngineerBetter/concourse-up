@@ -81,7 +81,7 @@ var deployFlags = []cli.Flag{
 	},
 	cli.StringFlag{
 		Name:        "db-size",
-		Usage:       "(optional) Size of Concourse RDS instance. Can be small, medium or large",
+		Usage:       "(optional) Size of Concourse RDS instance. Can be small, medium, large, xlarge, 2xlarge, or 4xlarge",
 		EnvVar:      "DB_SIZE",
 		Value:       "small",
 		Destination: &deployArgs.DBSize,

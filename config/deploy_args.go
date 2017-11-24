@@ -32,6 +32,9 @@ var DBSizes = map[string]string{
 	"small":  "db.t2.small",
 	"medium": "db.t2.medium",
 	"large":  "db.m4.large",
+	"xlarge": "db.m4.xlarge",
+	"2xlarge": "db.m4.2xlarge",
+	"4xlarge": "db.m4.4xlarge",
 }
 
 // Validate validates that flag interdependencies
