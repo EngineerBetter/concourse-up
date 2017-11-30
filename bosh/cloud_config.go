@@ -39,6 +39,7 @@ vm_types:
     ephemeral_disk:
       size: 20_000
       type: gp2
+      encrypted: true
     security_groups:
     - <% .VMsSecurityGroupID %>
 
@@ -48,6 +49,7 @@ vm_types:
     ephemeral_disk:
       size: 20_000
       type: gp2
+      encrypted: true
     security_groups:
     - <% .VMsSecurityGroupID %>
 
@@ -57,6 +59,7 @@ vm_types:
     ephemeral_disk:
       size: 20_000
       type: gp2
+      encrypted: true
     security_groups:
     - <% .VMsSecurityGroupID %>
 
@@ -66,6 +69,7 @@ vm_types:
     ephemeral_disk:
       size: 20_000
       type: gp2
+      encrypted: true
     security_groups:
     - <% .VMsSecurityGroupID %>
 
@@ -75,6 +79,7 @@ vm_types:
     ephemeral_disk:
       size: 20_000
       type: gp2
+      encrypted: true
     security_groups:
     - <% .VMsSecurityGroupID %>
 
@@ -84,6 +89,7 @@ vm_types:
     ephemeral_disk:
       size: 200_000
       type: gp2
+      encrypted: true
     security_groups:
     - <% .VMsSecurityGroupID %>
 
@@ -95,6 +101,7 @@ vm_types:
     ephemeral_disk:
       size: 200_000
       type: gp2
+      encrypted: true
     security_groups:
     - <% .VMsSecurityGroupID %>
 
@@ -106,6 +113,7 @@ vm_types:
     ephemeral_disk:
       size: 200_000
       type: gp2
+      encrypted: true
     security_groups:
     - <% .VMsSecurityGroupID %>
 
@@ -117,6 +125,7 @@ vm_types:
     ephemeral_disk:
       size: 200_000
       type: gp2
+      encrypted: true
     security_groups:
     - <% .VMsSecurityGroupID %>
 
@@ -128,6 +137,7 @@ vm_types:
     ephemeral_disk:
       size: 200_000
       type: gp2
+      encrypted: true
     security_groups:
     - <% .VMsSecurityGroupID %>
 
@@ -139,6 +149,7 @@ vm_types:
     ephemeral_disk:
       size: 200_000
       type: gp2
+      encrypted: true
     security_groups:
     - <% .VMsSecurityGroupID %>
 
@@ -150,6 +161,7 @@ vm_types:
     ephemeral_disk:
       size: 200_000
       type: gp2
+      encrypted: true
     security_groups:
     - <% .VMsSecurityGroupID %>
 
@@ -161,6 +173,7 @@ vm_types:
     ephemeral_disk:
       size: 5_000
       type: gp2
+      encrypted: true
     security_groups:
     - <% .VMsSecurityGroupID %>
 
@@ -169,10 +182,12 @@ disk_types:
   disk_size: 50_000
   cloud_properties:
     type: gp2
+    encrypted: true
 - name: large
   disk_size: 200_000
   cloud_properties:
     type: gp2
+    encrypted: true
 
 networks:
 - name: public
