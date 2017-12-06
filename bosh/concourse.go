@@ -257,6 +257,7 @@ instance_groups:
   - name: atc
     release: concourse
     properties:
+      token_signing_key: ((token_signing_key))
       bind_port: 80
       tls_bind_port: 443
       allow_self_signed_certificates: <% .AllowSelfSignedCerts %>
@@ -285,7 +286,10 @@ instance_groups:
 
   - name: tsa
     release: concourse
-    properties: {}
+    properties:
+      host_key: ((tsa_host_key))
+      token_signing_key: ((token_signing_key))
+      authorized_keys: [((worker_key.public_key))]
   - name: riemann
     release: riemann
     properties:
@@ -1130,7 +1134,8 @@ instance_groups:
   jobs:
   - name: groundcrew
     release: concourse
-    properties: {}
+    properties:
+      tsa: {worker_key: ((worker_key))}
   - name: baggageclaim
     release: concourse
     properties: {}
@@ -1152,4 +1157,12 @@ update:
   max_in_flight: 1
   serial: false
   canary_watch_time: 1000-60000
-  update_watch_time: 1000-60000`
+  update_watch_time: 1000-60000
+
+variables:
+- name: token_signing_key
+  type: rsa
+- name: tsa_host_key
+  type: ssh
+- name: worker_key
+  type: ssh`
