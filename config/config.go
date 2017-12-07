@@ -51,10 +51,33 @@ type Config struct {
 	Region                    string `json:"region"`
 	SourceAccessIP            string `json:"source_access_ip"`
 	TFStatePath               string `json:"tf_state_path"`
+	TokenPrivateKey           string `json:"token_private_key"`
+	TokenPublicKey            string `json:"token_public_key"`
+	TSAFingerprint            string `json:"tsa_fingerprint"`
+	TSAPrivateKey             string `json:"tsa_private_key"`
+	TSAPublicKey              string `json:"tsa_public_key"`
+	WorkerFingerprint         string `json:"worker_fingerprint"`
+	WorkerPrivateKey          string `json:"worker_private_key"`
+	WorkerPublicKey           string `json:"worker_public_key"`
 }
 
 func generateDefaultConfig(iaas, project, deployment, configBucket, region, rdsInstanceClass string) (*Config, error) {
-	privateKey, publicKey, err := util.GenerateSSHKeyPair()
+	privateKey, publicKey, _, err := util.GenerateSSHKeyPair()
+	if err != nil {
+		return nil, err
+	}
+
+	tsaPrivateKey, tsaPublicKey, tsaFingerprint, err := util.GenerateSSHKeyPair()
+	if err != nil {
+		return nil, err
+	}
+
+	workerPrivateKey, workerPublicKey, workerFingerprint, err := util.GenerateSSHKeyPair()
+	if err != nil {
+		return nil, err
+	}
+
+	tokenPrivateKey, tokenPublicKey, err := util.GenerateRSAKeyPair()
 	if err != nil {
 		return nil, err
 	}
@@ -93,6 +116,14 @@ func generateDefaultConfig(iaas, project, deployment, configBucket, region, rdsI
 		RDSUsername:              "admin" + util.GeneratePassword(),
 		Region:                   region,
 		TFStatePath:              terraformStateFileName,
+		TokenPrivateKey:          strings.TrimSpace(string(tokenPrivateKey)),
+		TokenPublicKey:           strings.TrimSpace(string(tokenPublicKey)),
+		TSAFingerprint:           strings.TrimSpace(tsaFingerprint),
+		TSAPrivateKey:            strings.TrimSpace(string(tsaPrivateKey)),
+		TSAPublicKey:             strings.TrimSpace(string(tsaPublicKey)),
+		WorkerFingerprint:        strings.TrimSpace(workerFingerprint),
+		WorkerPrivateKey:         strings.TrimSpace(string(workerPrivateKey)),
+		WorkerPublicKey:          strings.TrimSpace(string(workerPublicKey)),
 	}
 
 	return &conf, nil

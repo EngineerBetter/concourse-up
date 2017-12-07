@@ -150,11 +150,19 @@ func generateConcourseManifest(config *config.Config, metadata *terraform.Metada
 		StemcellVersion:         ConcourseStemcellVersion,
 		TLSCert:                 config.ConcourseCert,
 		TLSKey:                  config.ConcourseKey,
+		TokenPrivateKey:         config.TokenPrivateKey,
+		TokenPublicKey:          config.TokenPublicKey,
+		TSAFingerprint:          config.TSAFingerprint,
+		TSAPrivateKey:           config.TSAPrivateKey,
+		TSAPublicKey:            config.TSAPublicKey,
 		URL:                     fmt.Sprintf("https://%s", config.Domain),
 		Username:                config.ConcourseUsername,
 		WorkerCount:             config.ConcourseWorkerCount,
 		WorkerSize:              config.ConcourseWorkerSize,
 		WebSize:                 config.ConcourseWebSize,
+		WorkerFingerprint:       config.WorkerFingerprint,
+		WorkerPrivateKey:        config.WorkerPrivateKey,
+		WorkerPublicKey:         config.WorkerPublicKey,
 	}
 
 	return util.RenderTemplate(awsConcourseManifestTemplate, templateParams)
@@ -193,11 +201,19 @@ type awsConcourseManifestParams struct {
 	StemcellVersion         string
 	TLSCert                 string
 	TLSKey                  string
+	TokenPrivateKey         string
+	TokenPublicKey          string
+	TSAFingerprint          string
+	TSAPrivateKey           string
+	TSAPublicKey            string
 	URL                     string
 	Username                string
 	WebSize                 string
 	WorkerCount             int
 	WorkerSize              string
+	WorkerFingerprint       string
+	WorkerPrivateKey        string
+	WorkerPublicKey         string
 }
 
 // Indent is a helper function to indent the field a given number of spaces
@@ -257,7 +273,9 @@ instance_groups:
   - name: atc
     release: concourse
     properties:
-      token_signing_key: ((token_signing_key))
+      token_signing_key:
+        private_key: <% .TokenPrivateKey %>
+        public_key: <% .TokenPublicKey %>
       bind_port: 80
       tls_bind_port: 443
       allow_self_signed_certificates: <% .AllowSelfSignedCerts %>
@@ -287,9 +305,14 @@ instance_groups:
   - name: tsa
     release: concourse
     properties:
-      host_key: ((tsa_host_key))
-      token_signing_key: ((token_signing_key))
-      authorized_keys: [((worker_key.public_key))]
+      host_key:
+        private_key: <% .TSAPrivateKey %>
+        public_key: <% .TSAPublicKey %>
+        public_key_fingerprint: <% .TSAFingerprint %>
+      token_signing_key:
+        private_key: <% .TokenPrivateKey %>
+        public_key: <% .TokenPublicKey %>
+      authorized_keys: [<% .WorkerPublicKey %>]
   - name: riemann
     release: riemann
     properties:
@@ -1135,7 +1158,11 @@ instance_groups:
   - name: groundcrew
     release: concourse
     properties:
-      tsa: {worker_key: ((worker_key))}
+      tsa:
+        worker_key:
+          private_key: <% .WorkerPrivateKey %>
+          public_key: <% .WorkerPublicKey %>
+          public_key_fingerprint: <% .WorkerFingerprint %>
   - name: baggageclaim
     release: concourse
     properties: {}
@@ -1157,12 +1184,4 @@ update:
   max_in_flight: 1
   serial: false
   canary_watch_time: 1000-60000
-  update_watch_time: 1000-60000
-
-variables:
-- name: token_signing_key
-  type: rsa
-- name: tsa_host_key
-  type: ssh
-- name: worker_key
-  type: ssh`
+  update_watch_time: 1000-60000`
