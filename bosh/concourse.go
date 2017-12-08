@@ -320,7 +320,7 @@ instance_groups:
           <% .Indent "10" .TokenPublicKey %>
       authorized_keys:
       - |
-        <% .Indent "8" .WorkerPublicKey %>]
+        <% .Indent "8" .WorkerPublicKey %>
   - name: riemann
     release: riemann
     properties:
