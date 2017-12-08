@@ -274,8 +274,10 @@ instance_groups:
     release: concourse
     properties:
       token_signing_key:
-        private_key: <% .TokenPrivateKey %>
-        public_key: <% .TokenPublicKey %>
+        private_key: |-
+          <% .Indent "10" .TokenPrivateKey %>
+        public_key: |-
+          <% .Indent "10" .TokenPublicKey %>
       bind_port: 80
       tls_bind_port: 443
       allow_self_signed_certificates: <% .AllowSelfSignedCerts %>
@@ -306,13 +308,19 @@ instance_groups:
     release: concourse
     properties:
       host_key:
-        private_key: <% .TSAPrivateKey %>
-        public_key: <% .TSAPublicKey %>
+        private_key: |-
+          <% .Indent "10" .TSAPrivateKey %>
+        public_key: |-
+          <% .Indent "10" .TSAPublicKey %>
         public_key_fingerprint: <% .TSAFingerprint %>
       token_signing_key:
-        private_key: <% .TokenPrivateKey %>
-        public_key: <% .TokenPublicKey %>
-      authorized_keys: [<% .WorkerPublicKey %>]
+        private_key: |-
+          <% .Indent "10" .TokenPrivateKey %>
+        public_key: |-
+          <% .Indent "10" .TokenPublicKey %>
+      authorized_keys:
+      - |
+        <% .Indent "8" .WorkerPublicKey %>]
   - name: riemann
     release: riemann
     properties:
@@ -1160,8 +1168,10 @@ instance_groups:
     properties:
       tsa:
         worker_key:
-          private_key: <% .WorkerPrivateKey %>
-          public_key: <% .WorkerPublicKey %>
+          private_key: |-
+            <% .Indent "12" .WorkerPrivateKey %>
+          public_key: |-
+            <% .Indent "12" .WorkerPublicKey %>
           public_key_fingerprint: <% .WorkerFingerprint %>
   - name: baggageclaim
     release: concourse
