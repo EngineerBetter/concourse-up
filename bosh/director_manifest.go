@@ -202,7 +202,7 @@ jobs:
 
   properties:
     nats:
-      address: 127.0.0.1
+      address: 10.0.0.6
       user: nats
       password: <% .NATSPassword %>
       tls:
@@ -319,7 +319,7 @@ variables:
   options:
     ca: nats_ca
     common_name: default.nats.bosh-internal
-    alternative_names: [127.0.0.1]
+    alternative_names: [10.0.0.6]
     extended_key_usage:
     - server_auth
 
