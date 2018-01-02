@@ -22,7 +22,7 @@ echo "UPDATE TO NEW VERSION"
 
 sleep 60
 
-config=$(./cup-new info --region us-east-1 --json $deployment)
+config=$(./cup-new info --json $deployment)
 domain=$(echo "$config" | jq -r '.config.domain')
 username=$(echo "$config" | jq -r '.config.concourse_username')
 password=$(echo "$config" | jq -r '.config.concourse_password')
