@@ -179,7 +179,6 @@ jobs:
           <!channel> Concourse Up unit tests failure!
 
 - name: compile-releases
-  serial: true
   plan:
   - get: version
   - get: image
@@ -269,7 +268,7 @@ jobs:
           file: build-windows/concourse-up-windows-amd64.exe
 
 - name: system-test
-  serial: true
+  max_in_flight: 2
   plan:
   - aggregate:
     - get: version
