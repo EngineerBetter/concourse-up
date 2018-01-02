@@ -262,6 +262,10 @@ func (client *Client) deployBosh(config *config.Config, metadata *terraform.Meta
 	if err == nil {
 		err = err1
 	}
+	err1 = client.configClient.StoreAsset(bosh.CredsFilename, boshCredsBytes)
+	if err == nil {
+		err = err1
+	}
 	return err
 }
 
