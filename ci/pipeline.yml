@@ -290,6 +290,9 @@ jobs:
       passed: [build]
     - get: image
       passed: [build]
+    - get: release
+      params:
+        globs: [concourse-up-linux-amd64]
   - aggregate:
     - task: system-test-alt-region
       image: image
@@ -304,9 +307,9 @@ jobs:
           channel: "#integrations"
           text: |
             <!channel> Concourse Up alt region system test failure!
-    - task: system-test-self-update
+    - task: system-test-update
       image: image
-      file: concourse-up/ci/tasks/system-test-self-update.yml
+      file: concourse-up/ci/tasks/system-test-update.yml
       params:
         AWS_ACCESS_KEY_ID: {{concourse_up_test_access_key_id}}
         AWS_SECRET_ACCESS_KEY: {{concourse_up_test_secret_key}}
