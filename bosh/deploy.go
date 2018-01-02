@@ -2,6 +2,7 @@ package bosh
 
 import (
 	"io/ioutil"
+	"os"
 )
 
 const pemFilename = "director.pem"
@@ -9,54 +10,71 @@ const directorManifestFilename = "director.yml"
 
 // Deploy deploys a new Bosh director or converges an existing deployment
 // Returns new contents of bosh state file
-func (client *Client) Deploy(stateFileBytes []byte, detach bool) ([]byte, error) {
-	stateFileBytes, err := client.createEnv(stateFileBytes)
+func (client *Client) Deploy(state, creds []byte, detach bool) (newState, newCreds []byte, err error) {
+	state, creds, err = client.createEnv(state, creds)
 	if err != nil {
-		return stateFileBytes, err
+		return state, creds, err
 	}
 
 	if err := client.updateCloudConfig(); err != nil {
-		return stateFileBytes, err
+		return state, creds, err
 	}
 
 	if err := client.uploadConcourseStemcell(); err != nil {
-		return stateFileBytes, err
+		return state, creds, err
 	}
 
 	if err := client.uploadConcourseReleases(); err != nil {
-		return stateFileBytes, err
+		return state, creds, err
 	}
 
 	if err := client.createDefaultDatabases(); err != nil {
-		return stateFileBytes, err
+		return state, creds, err
 	}
 
 	if err := client.deployConcourse(detach); err != nil {
-		return stateFileBytes, err
+		return state, creds, err
 	}
 
-	return stateFileBytes, nil
+	return state, creds, err
 }
 
-func (client *Client) createEnv(stateFileBytes []byte) ([]byte, error) {
-	stateFilePath, err := client.saveStateFile(stateFileBytes)
+func touch(name string) error {
+	f, err := os.OpenFile(name, os.O_CREATE|os.O_RDONLY, 0666)
 	if err != nil {
-		return stateFileBytes, err
+		return err
+	}
+	return f.Close()
+}
+
+func (client *Client) createEnv(state, creds []byte) (newState, newCreds []byte, err error) {
+	stateFilePath, err := client.saveStateFile(state)
+	if err != nil {
+		return state, creds, err
+	}
+	credsFilePath, err := client.saveCredsFile(creds)
+	if err != nil {
+		return state, creds, err
 	}
 
 	_, err = client.director.SaveFileToWorkingDir(pemFilename, []byte(client.config.PrivateKey))
 	if err != nil {
-		return stateFileBytes, err
+		return state, creds, err
 	}
 
 	directorManifestBytes, err := generateBoshInitManifest(client.config, client.metadata, pemFilename)
 	if err != nil {
-		return stateFileBytes, err
+		return state, creds, err
 	}
 
 	directorManifestPath, err := client.director.SaveFileToWorkingDir(directorManifestFilename, directorManifestBytes)
 	if err != nil {
-		return stateFileBytes, err
+		return state, creds, err
+	}
+
+	err = touch(credsFilePath)
+	if err != nil {
+		return state, creds, err
 	}
 
 	if err := client.director.RunCommand(
@@ -66,15 +84,22 @@ func (client *Client) createEnv(stateFileBytes []byte) ([]byte, error) {
 		directorManifestPath,
 		"--state",
 		stateFilePath,
+		"--vars-store",
+		credsFilePath,
 	); err != nil {
 		// Even if deploy does not work, try and save the state file
 		// This prevents issues with re-trying
-		stateFileBytes, _ = ioutil.ReadFile(stateFilePath)
-		return stateFileBytes, err
+		state, _ = ioutil.ReadFile(stateFilePath)
+		creds, _ = ioutil.ReadFile(credsFilePath)
+		return state, creds, err
 	}
 
-	stateFileBytes, err = ioutil.ReadFile(stateFilePath)
-	return stateFileBytes, err
+	state, err = ioutil.ReadFile(stateFilePath)
+	if err != nil {
+		return state, creds, err
+	}
+	creds, err = ioutil.ReadFile(credsFilePath)
+	return state, creds, err
 }
 
 func (client *Client) updateCloudConfig() error {
@@ -103,4 +128,12 @@ func (client *Client) saveStateFile(bytes []byte) (string, error) {
 	}
 
 	return client.director.SaveFileToWorkingDir(StateFilename, bytes)
+}
+
+func (client *Client) saveCredsFile(bytes []byte) (string, error) {
+	if bytes == nil {
+		return client.director.PathInWorkingDir(CredsFilename), nil
+	}
+
+	return client.director.SaveFileToWorkingDir(CredsFilename, bytes)
 }

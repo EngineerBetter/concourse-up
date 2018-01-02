@@ -179,15 +179,15 @@ func (client *FakeTerraformClient) Cleanup() error {
 
 // FakeBoshClient implements bosh.IClient for testing
 type FakeBoshClient struct {
-	FakeDeploy    func([]byte, bool) ([]byte, error)
+	FakeDeploy    func([]byte, []byte, bool) ([]byte, []byte, error)
 	FakeDelete    func([]byte) ([]byte, error)
 	FakeCleanup   func() error
 	FakeInstances func() ([]bosh.Instance, error)
 }
 
 // Deploy delegates to FakeDeploy which is dynamically set by the tests
-func (client *FakeBoshClient) Deploy(stateFileBytes []byte, detach bool) ([]byte, error) {
-	return client.FakeDeploy(stateFileBytes, detach)
+func (client *FakeBoshClient) Deploy(stateFileBytes, credsFileBytes []byte, detach bool) ([]byte, []byte, error) {
+	return client.FakeDeploy(stateFileBytes, credsFileBytes, detach)
 }
 
 // Delete delegates to FakeDelete which is dynamically set by the tests

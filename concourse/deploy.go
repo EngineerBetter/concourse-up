@@ -252,14 +252,17 @@ func (client *Client) deployBosh(config *config.Config, metadata *terraform.Meta
 	if err != nil {
 		return nil
 	}
-
-	boshStateBytes, err = boshClient.Deploy(boshStateBytes, detach)
+	boshCredsBytes, err := loadDirectorCreds(client.configClient)
 	if err != nil {
-		client.configClient.StoreAsset(bosh.StateFilename, boshStateBytes)
-		return err
+		return nil
 	}
 
-	return client.configClient.StoreAsset(bosh.StateFilename, boshStateBytes)
+	boshStateBytes, boshCredsBytes, err = boshClient.Deploy(boshStateBytes, boshCredsBytes, detach)
+	err1 := client.configClient.StoreAsset(bosh.StateFilename, boshStateBytes)
+	if err == nil {
+		err = err1
+	}
+	return err
 }
 
 func (client *Client) loadConfig() (*config.Config, error) {
@@ -358,4 +361,16 @@ func loadDirectorState(configClient config.IClient) ([]byte, error) {
 	}
 
 	return configClient.LoadAsset(bosh.StateFilename)
+}
+func loadDirectorCreds(configClient config.IClient) ([]byte, error) {
+	hasCreds, err := configClient.HasAsset(bosh.CredsFilename)
+	if err != nil {
+		return nil, err
+	}
+
+	if !hasCreds {
+		return nil, nil
+	}
+
+	return configClient.LoadAsset(bosh.CredsFilename)
 }

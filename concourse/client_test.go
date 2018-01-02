@@ -188,17 +188,17 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 
 		boshClientFactory := func(config *config.Config, metadata *terraform.Metadata, director director.IClient, dbRunner db.Runner, stdout, stderr io.Writer) bosh.IClient {
 			return &testsupport.FakeBoshClient{
-				FakeDeploy: func(stateFileBytes []byte, detach bool) ([]byte, error) {
+				FakeDeploy: func(stateFileBytes, credsFileBytes []byte, detach bool) ([]byte, []byte, error) {
 					if detach {
 						actions = append(actions, "deploying director in self-update mode")
 					} else {
 						actions = append(actions, "deploying director")
 					}
-					return []byte{}, nil
+					return nil, nil, nil
 				},
 				FakeDelete: func([]byte) ([]byte, error) {
 					actions = append(actions, "deleting director")
-					return []byte{}, deleteBoshDirectorError
+					return nil, deleteBoshDirectorError
 				},
 				FakeCleanup: func() error {
 					actions = append(actions, "cleaning up bosh init")

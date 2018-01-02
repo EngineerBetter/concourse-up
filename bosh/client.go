@@ -14,6 +14,9 @@ const cloudConfigFilename = "cloud-config.yml"
 // StateFilename is default name for bosh-init state file
 const StateFilename = "director-state.json"
 
+// CredsFilename is default name for bosh-init creds file
+const CredsFilename = "director-creds.yml"
+
 // Client is a concrete implementation of the IClient interface
 type Client struct {
 	config   *config.Config
@@ -26,7 +29,7 @@ type Client struct {
 
 // IClient is a client for performing bosh-init commands
 type IClient interface {
-	Deploy([]byte, bool) ([]byte, error)
+	Deploy([]byte, []byte, bool) ([]byte, []byte, error)
 	Delete([]byte) ([]byte, error)
 	Cleanup() error
 	Instances() ([]Instance, error)
