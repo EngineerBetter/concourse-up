@@ -3,7 +3,9 @@ package config
 import (
 	"fmt"
 	"strings"
+	"time"
 
+	"github.com/EngineerBetter/concourse-up/terraform"
 	"github.com/EngineerBetter/concourse-up/util"
 )
 
@@ -59,9 +61,15 @@ type Config struct {
 	WorkerFingerprint         string `json:"worker_fingerprint"`
 	WorkerPrivateKey          string `json:"worker_private_key"`
 	WorkerPublicKey           string `json:"worker_public_key"`
+	CredhubEncryptionPassword string `json:"credhub_encryption_password"`
+	UAAAdmin                  string `json:"uaa_admin"`
+	UAALogin                  string `json:"uaa_login"`
+	UAAUsersAdmin             string `json:"uaa_users_admin"`
+	UAAJWTPrivateKey          string `json:"uaa_jwt_private_key"`
+	UAAJWTPublicKey           string `json:"uaa_jwt_public_key"`
 }
 
-func generateDefaultConfig(iaas, project, deployment, configBucket, region, rdsInstanceClass string) (*Config, error) {
+func generateDefaultConfig(metadata *terraform.Metadata, iaas, project, deployment, configBucket, region, rdsInstanceClass string) (*Config, error) {
 	privateKey, publicKey, _, err := util.GenerateSSHKeyPair()
 	if err != nil {
 		return nil, err
@@ -82,48 +90,74 @@ func generateDefaultConfig(iaas, project, deployment, configBucket, region, rdsI
 		return nil, err
 	}
 
+	uaaJWTPrivateKey, uaaJWTPublicKey, err := util.GenerateRSAKeyPair()
+	if err != nil {
+		return nil, err
+	}
+
+	caCert, caKey, err := util.GenerateCertificate(3*52*7*24*time.Hour, "acme co", nil, nil, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	uaaCert, uaaKey, err := util.GenerateCertificate(3*52*7*24*time.Hour, "acme co", []string{"127.0.0.1", metadata.ATCPublicIP}, caCert, caKey)
+	if err != nil {
+		return nil, err
+	}
+
+	credhubCert, credhubKey, err := util.GenerateCertificate(3*52*7*24*time.Hour, "acme co", []string{"127.0.0.1", metadata.ATCPublicIP}, caCert, caKey)
+	if err != nil {
+		return nil, err
+	}
+
 	concourseUsername := "admin"
 	concoursePassword := util.GeneratePassword()
 
 	conf := Config{
-		AvailabilityZone:         fmt.Sprintf("%sa", region),
-		ConcourseDBName:          "concourse_atc",
-		ConcoursePassword:        concoursePassword,
-		ConcourseUsername:        concourseUsername,
-		ConcourseWorkerCount:     1,
-		ConcourseWebSize:         "small",
-		ConcourseWorkerSize:      "xlarge",
-		ConfigBucket:             configBucket,
-		Deployment:               deployment,
-		DirectorHMUserPassword:   util.GeneratePassword(),
-		DirectorMbusPassword:     util.GeneratePassword(),
-		DirectorNATSPassword:     util.GeneratePassword(),
-		DirectorPassword:         util.GeneratePassword(),
-		DirectorRegistryPassword: util.GeneratePassword(),
-		DirectorUsername:         "admin",
-		EncryptionKey:            util.GeneratePasswordWithLength(32),
-		GrafanaPassword:          concoursePassword,
-		GrafanaUsername:          concourseUsername,
-		InfluxDBPassword:         util.GeneratePassword(),
-		InfluxDBUsername:         "admin",
-		MultiAZRDS:               false,
-		PrivateKey:               strings.TrimSpace(string(privateKey)),
-		Project:                  project,
-		PublicKey:                strings.TrimSpace(string(publicKey)),
-		RDSDefaultDatabaseName:   "bosh",
-		RDSInstanceClass:         rdsInstanceClass,
-		RDSPassword:              util.GeneratePassword(),
-		RDSUsername:              "admin" + util.GeneratePassword(),
-		Region:                   region,
-		TFStatePath:              terraformStateFileName,
-		TokenPrivateKey:          strings.TrimSpace(string(tokenPrivateKey)),
-		TokenPublicKey:           strings.TrimSpace(string(tokenPublicKey)),
-		TSAFingerprint:           strings.TrimSpace(tsaFingerprint),
-		TSAPrivateKey:            strings.TrimSpace(string(tsaPrivateKey)),
-		TSAPublicKey:             strings.TrimSpace(string(tsaPublicKey)),
-		WorkerFingerprint:        strings.TrimSpace(workerFingerprint),
-		WorkerPrivateKey:         strings.TrimSpace(string(workerPrivateKey)),
-		WorkerPublicKey:          strings.TrimSpace(string(workerPublicKey)),
+		AvailabilityZone:          fmt.Sprintf("%sa", region),
+		ConcourseDBName:           "concourse_atc",
+		ConcoursePassword:         concoursePassword,
+		ConcourseUsername:         concourseUsername,
+		ConcourseWorkerCount:      1,
+		ConcourseWebSize:          "small",
+		ConcourseWorkerSize:       "xlarge",
+		ConfigBucket:              configBucket,
+		Deployment:                deployment,
+		DirectorHMUserPassword:    util.GeneratePassword(),
+		DirectorMbusPassword:      util.GeneratePassword(),
+		DirectorNATSPassword:      util.GeneratePassword(),
+		DirectorPassword:          util.GeneratePassword(),
+		DirectorRegistryPassword:  util.GeneratePassword(),
+		DirectorUsername:          "admin",
+		EncryptionKey:             util.GeneratePasswordWithLength(32),
+		GrafanaPassword:           concoursePassword,
+		GrafanaUsername:           concourseUsername,
+		InfluxDBPassword:          util.GeneratePassword(),
+		InfluxDBUsername:          "admin",
+		MultiAZRDS:                false,
+		PrivateKey:                strings.TrimSpace(string(privateKey)),
+		Project:                   project,
+		PublicKey:                 strings.TrimSpace(string(publicKey)),
+		RDSDefaultDatabaseName:    "bosh",
+		RDSInstanceClass:          rdsInstanceClass,
+		RDSPassword:               util.GeneratePassword(),
+		RDSUsername:               "admin" + util.GeneratePassword(),
+		Region:                    region,
+		TFStatePath:               terraformStateFileName,
+		TokenPrivateKey:           strings.TrimSpace(string(tokenPrivateKey)),
+		TokenPublicKey:            strings.TrimSpace(string(tokenPublicKey)),
+		TSAFingerprint:            strings.TrimSpace(tsaFingerprint),
+		TSAPrivateKey:             strings.TrimSpace(string(tsaPrivateKey)),
+		TSAPublicKey:              strings.TrimSpace(string(tsaPublicKey)),
+		WorkerFingerprint:         strings.TrimSpace(workerFingerprint),
+		WorkerPrivateKey:          strings.TrimSpace(string(workerPrivateKey)),
+		WorkerPublicKey:           strings.TrimSpace(string(workerPublicKey)),
+		CredhubEncryptionPassword: util.GeneratePasswordWithLength(40),
+		UAAAdmin:                  util.GeneratePassword(),
+		UAALogin:                  util.GeneratePassword(),
+		UAAUsersAdmin:             util.GeneratePassword(),
+		UAAJWTPrivateKey:          strings.TrimSpace(string(uaaJWTPrivateKey)),
+		UAAJWTPublicKey:           strings.TrimSpace(string(uaaJWTPublicKey)),
 	}
 
 	return &conf, nil

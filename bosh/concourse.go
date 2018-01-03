@@ -68,6 +68,24 @@ var InfluxDBReleaseVersion = "COMPILE_TIME_VARIABLE_bosh_influxDBReleaseVersion"
 // InfluxDBReleaseSHA1 is a compile-time variable set with -ldflags
 var InfluxDBReleaseSHA1 = "COMPILE_TIME_VARIABLE_bosh_influxDBReleaseSHA1"
 
+// CredhubReleaseURL is a compile-time variable set with -ldflags
+var CredhubReleaseURL = "COMPILE_TIME_VARIABLE_bosh_CredhubReleaseURL"
+
+// CredhubReleaseVersion is a compile-time variable set with -ldflags
+var CredhubReleaseVersion = "COMPILE_TIME_VARIABLE_bosh_CredhubReleaseVersion"
+
+// CredhubReleaseSHA1 is a compile-time variable set with -ldflags
+var CredhubReleaseSHA1 = "COMPILE_TIME_VARIABLE_bosh_CredhubReleaseSHA1"
+
+// UAAReleaseURL is a compile-time variable set with -ldflags
+var UAAReleaseURL = "COMPILE_TIME_VARIABLE_bosh_UAAReleaseURL"
+
+// UAAReleaseVersion is a compile-time variable set with -ldflags
+var UAAReleaseVersion = "COMPILE_TIME_VARIABLE_bosh_UAAReleaseVersion"
+
+// UAAReleaseSHA1 is a compile-time variable set with -ldflags
+var UAAReleaseSHA1 = "COMPILE_TIME_VARIABLE_bosh_UAAReleaseSHA1"
+
 func (client *Client) uploadConcourseStemcell() error {
 	return client.director.RunAuthenticatedCommand(
 		client.stdout,
@@ -79,7 +97,7 @@ func (client *Client) uploadConcourseStemcell() error {
 }
 
 func (client *Client) uploadConcourseReleases() error {
-	for _, release := range []string{ConcourseReleaseURL, GardenReleaseURL, GrafanaReleaseURL, RiemannReleaseURL, InfluxDBReleaseURL} {
+	for _, release := range []string{ConcourseReleaseURL, GardenReleaseURL, GrafanaReleaseURL, RiemannReleaseURL, InfluxDBReleaseURL, UAAReleaseURL, CredhubReleaseURL} {
 		err := client.director.RunAuthenticatedCommand(
 			client.stdout,
 			client.stderr,
@@ -155,6 +173,10 @@ func generateConcourseManifest(config *config.Config, metadata *terraform.Metada
 		InfluxDBReleaseSHA1:     InfluxDBReleaseSHA1,
 		InfluxDBReleaseVersion:  InfluxDBReleaseVersion,
 		InfluxDBUsername:        config.InfluxDBUsername,
+		CredhubReleaseSHA1:      CredhubReleaseSHA1,
+		CredhubReleaseVersion:   CredhubReleaseVersion,
+		UAAReleaseSHA1:          UAAReleaseSHA1,
+		UAAReleaseVersion:       UAAReleaseVersion,
 		Password:                config.ConcoursePassword,
 		Project:                 config.Project,
 		RiemannReleaseSHA1:      RiemannReleaseSHA1,
@@ -206,6 +228,10 @@ type awsConcourseManifestParams struct {
 	InfluxDBReleaseSHA1     string
 	InfluxDBReleaseVersion  string
 	InfluxDBUsername        string
+	CredhubReleaseSHA1      string
+	CredhubReleaseVersion   string
+	UAAReleaseSHA1          string
+	UAAReleaseVersion       string
 	Password                string
 	Project                 string
 	RiemannReleaseSHA1      string
@@ -259,6 +285,14 @@ releases:
   sha1: "<% .InfluxDBReleaseSHA1 %>"
   version: <% .InfluxDBReleaseVersion %>
 
+- name: credhub
+sha1: "<% .CredhubReleaseSHA1 %>"
+version: <% .CredhubReleaseVersion %>
+
+- name: uaa
+sha1: "<% .UAAReleaseSHA1 %>"
+version: <% .UAAReleaseVersion %>
+
 stemcells:
 - alias: trusty
   os: ubuntu-trusty
@@ -267,6 +301,41 @@ stemcells:
 tags:
   concourse-up-project: <% .Project %>
   concourse-up-component: concourse
+
+variables:
+- name: credhub-encryption-password
+  type: password
+  options:
+    length: 40
+- name: credhub-ca
+  type: certificate
+  options:
+    is_ca: true
+    common_name: CredHub CA
+- name: credhub-tls
+  type: certificate
+  options:
+    ca: credhub-ca
+    common_name: <% .ATCPublicIP %>
+    alternative_names:
+    - 127.0.0.1
+- name: uaa-tls
+  type: certificate
+  options:
+    ca: credhub-ca
+    common_name: <% .ATCPublicIP %>
+    alternative_names:
+    - 127.0.0.1
+- name: uaa-jwt
+  type: rsa
+  options:
+    key_length: 4096
+- name: uaa-users-admin
+  type: password
+- name: uaa-admin
+  type: password
+- name: uaa-login
+  type: password
 
 instance_groups:
 - name: web
@@ -284,6 +353,89 @@ instance_groups:
   vm_extensions:
   - atc
   jobs:
+  - name: uaa
+  release: uaa
+  properties:
+    uaa:
+      url: &uaa-url https://127.0.0.1:8443
+      catalina_opts: -Djava.security.egd=file:/dev/./urandom -Xmx768m -XX:MaxMetaspaceSize=256m
+      scim:
+        users:
+        - name: admin
+          password: ((uaa-users-admin))
+          groups:
+            - scim.write
+            - scim.read
+            - bosh.admin
+            - credhub.read
+            - credhub.write
+      clients:
+        credhub_cli:
+          override: true
+          authorized-grant-types: password,refresh_token
+          scope: credhub.read,credhub.write
+          authorities: uaa.resource
+          access-token-validity: 30
+          refresh-token-validity: 3600
+          secret: ""
+      admin: {client_secret: ((uaa-admin))}
+      login: {client_secret: ((uaa-login))}
+      zones: {internal: {hostnames: []}}
+      sslCertificate: ((uaa-tls.certificate))
+      sslPrivateKey: ((uaa-tls.private_key))
+      jwt:
+        revocable: true
+        policy:
+          active_key_id: key-1
+          keys:
+            key-1:
+              signingKey: ((uaa-jwt.private_key))
+    uaadb:
+      address: <% .DBHost %>
+      port: <% .DBPort %>
+      db_scheme: postgresql
+      tls_enabled: true 
+      databases:
+      - tag: uaa
+        name: <% .DBName %>
+      roles:
+      - tag: admin
+        name: <% .DBUsername %>
+        password: <% .DBPassword %>
+    login:
+      saml:
+        serviceProviderCertificate: ((uaa-tls.certificate))
+        serviceProviderKey: ((uaa-tls.private_key))
+        serviceProviderKeyPassword: ""
+  - name: credhub
+    release: credhub
+    properties:
+      credhub:
+        tls: ((credhub-tls))
+        authentication:
+          uaa:
+            url: *uaa-url
+            verification_key: ((uaa-jwt.public_key))
+            ca_certs:
+            - ((uaa-tls.ca)) 
+        data_storage:
+          type: postgres
+          username: <% .DBUsername %>
+          password: <% .DBPassword %>
+          host: <% .DBHost %>
+          port: <% .DBPort %>
+          database: <% .DBName %>
+          require_tls: true
+          tls_ca: |-
+            <% .Indent "10" .DBCACert %>
+        encryption:
+          keys: 
+          - provider_name: int
+            encryption_password: ((credhub-encryption-password))
+            active: true
+          providers: 
+          - name: int
+            type: internal
   - name: atc
     release: concourse
     properties:
@@ -306,6 +458,12 @@ instance_groups:
       riemann:
         host: 127.0.0.1
         port: 5555
+      credhub:
+        tls:
+          ca_cert: credhub-tls.ca
+        url: https://127.0.0.1:8844
+        client_id: admin
+        client_secret: ((uaa-admin))
 
       postgresql:
         port: <% .DBPort %>

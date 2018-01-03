@@ -1,0 +1,17 @@
+jobs:
+- name: hello
+  plan:
+  - task: say-hello
+    config:
+      platform: linux
+      image_resource:
+        type: docker-image
+        source: {repository: ubuntu}
+      params:
+        PASSWORD: ((password))
+      run:
+        path: sh
+        args:
+        - -c
+        - |
+          [[ "$PASSWORD" = "c1oudc0w" ]]
