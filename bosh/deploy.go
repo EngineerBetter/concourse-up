@@ -32,7 +32,7 @@ func (client *Client) Deploy(state, creds []byte, detach bool) (newState, newCre
 		return state, creds, err
 	}
 
-	if err := client.deployConcourse(detach); err != nil {
+	if creds, err := client.deployConcourse(creds, detach); err != nil {
 		return state, creds, err
 	}
 

@@ -2,6 +2,7 @@ package bosh
 
 import (
 	"fmt"
+	"io/ioutil"
 
 	"github.com/EngineerBetter/concourse-up/config"
 	"github.com/EngineerBetter/concourse-up/db"
@@ -10,6 +11,7 @@ import (
 )
 
 const concourseManifestFilename = "concourse.yml"
+const credsFilename = "concourse-creds.yml"
 const concourseDeploymentName = "concourse"
 
 // ConcourseStemcellURL is a compile-time variable set with -ldflags
@@ -94,18 +96,23 @@ func (client *Client) uploadConcourseReleases() error {
 	return nil
 }
 
-func (client *Client) deployConcourse(detach bool) error {
+func (client *Client) deployConcourse(creds []byte, detach bool) (newCreds []byte, err error) {
 	concourseManifestBytes, err := generateConcourseManifest(client.config, client.metadata)
 	if err != nil {
-		return err
+		return
 	}
 
 	concourseManifestPath, err := client.director.SaveFileToWorkingDir(concourseManifestFilename, concourseManifestBytes)
 	if err != nil {
-		return err
+		return
 	}
 
-	return client.director.RunAuthenticatedCommand(
+	credsPath, err := client.director.SaveFileToWorkingDir(credsFilename, creds)
+	if err != nil {
+		return
+	}
+
+	err = client.director.RunAuthenticatedCommand(
 		client.stdout,
 		client.stderr,
 		detach,
@@ -113,7 +120,14 @@ func (client *Client) deployConcourse(detach bool) error {
 		concourseDeploymentName,
 		"deploy",
 		concourseManifestPath,
+		"--vars-store",
+		credsPath,
 	)
+	newCreds, err1 := ioutil.ReadFile(credsPath)
+	if err == nil {
+		err = err1
+	}
+	return
 }
 
 func generateConcourseManifest(config *config.Config, metadata *terraform.Metadata) ([]byte, error) {

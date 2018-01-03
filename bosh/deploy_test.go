@@ -192,7 +192,7 @@ var _ = Describe("Deploy", func() {
 	It("Deploys concourse", func() {
 		_, _, err := client.Deploy(nil, nil, false)
 		Expect(err).ToNot(HaveOccurred())
-		expectedCommand := fmt.Sprintf("Running authenticated bosh command: --deployment concourse deploy %s/concourse.yml (detach: false)", tempDir)
+		expectedCommand := fmt.Sprintf("Running authenticated bosh command: --deployment concourse deploy %s/concourse.yml --vars-store %s/concourse-creds.yml (detach: false)", tempDir, tempDir)
 		Expect(actions).To(ContainElement(expectedCommand))
 	})
 
