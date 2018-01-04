@@ -200,7 +200,6 @@ func generateConcourseManifest(config *config.Config, metadata *terraform.Metada
 		WorkerPrivateKey:        config.WorkerPrivateKey,
 		WorkerPublicKey:         config.WorkerPublicKey,
 	}
-
 	return util.RenderTemplate(awsConcourseManifestTemplate, templateParams)
 }
 
@@ -286,12 +285,12 @@ releases:
   version: <% .InfluxDBReleaseVersion %>
 
 - name: credhub
-sha1: "<% .CredhubReleaseSHA1 %>"
-version: <% .CredhubReleaseVersion %>
+  sha1: "<% .CredhubReleaseSHA1 %>"
+  version: <% .CredhubReleaseVersion %>
 
 - name: uaa
-sha1: "<% .UAAReleaseSHA1 %>"
-version: <% .UAAReleaseVersion %>
+  sha1: "<% .UAAReleaseSHA1 %>"
+  version: <% .UAAReleaseVersion %>
 
 stemcells:
 - alias: trusty
@@ -358,71 +357,71 @@ instance_groups:
   - atc
   jobs:
   - name: uaa
-  release: uaa
-  properties:
-    uaa:
-      url: &uaa-url https://127.0.0.1:8443
-      catalina_opts: -Djava.security.egd=file:/dev/./urandom -Xmx768m -XX:MaxMetaspaceSize=256m
-      scim:
-        users:
-        - name: admin
-          password: ((uaa-users-admin))
-          groups:
+    release: uaa
+    properties:
+      uaa:
+        url: &uaa-url https://127.0.0.1:8443
+        catalina_opts: -Djava.security.egd=file:/dev/./urandom -Xmx768m -XX:MaxMetaspaceSize=256m
+        scim:
+          users:
+          - name: admin
+            password: ((uaa-users-admin))
+            groups:
             - scim.write
             - scim.read
             - bosh.admin
             - credhub.read
             - credhub.write
-        - name: credhub-cli
+          - name: credhub-cli
             password: ((credhub_cli_password))
             groups:
             - credhub.read
             - credhub.write
-      clients:
-        credhub_cli:
-          override: true
-          authorized-grant-types: password,refresh_token
-          scope: credhub.read,credhub.write
-          authorities: uaa.resource
-          access-token-validity: 30
-          refresh-token-validity: 3600
-          secret: ""
-        atc_to_credhub
-          override: true
-          authorized-grant-types: client_credentials
-          scope: ""
-          authorities: credhub.read,credhub.write
-          access-token-validity: 3600
-          secret: ((uaa_clients_atc_to_credhub))
-      admin: {client_secret: ((uaa-admin))}
-      login: {client_secret: ((uaa-login))}
-      zones: {internal: {hostnames: []}}
-      sslCertificate: ((uaa-tls.certificate))
-      sslPrivateKey: ((uaa-tls.private_key))
-      jwt:
-        revocable: true
-        policy:
-          active_key_id: key-1
-          keys:
-            key-1:
-              signingKey: ((uaa-jwt.private_key))
-    uaadb:
-      address: <% .DBHost %>
-      port: <% .DBPort %>
-      db_scheme: postgresql
-      tls_enabled: true 
-      databases:
-      - tag: uaa
-        name: <% .DBName %>
-      roles:
-      - tag: admin
-        name: <% .DBUsername %>
-        password: <% .DBPassword %>
-    login:
-      saml:
-        serviceProviderCertificate: ((uaa-tls.certificate))
-        serviceProviderKey: ((uaa-tls.private_key))
-        serviceProviderKeyPassword: ""
+        clients:
+          credhub_cli:
+            override: true
+            authorized-grant-types: password,refresh_token
+            scope: credhub.read,credhub.write
+            authorities: uaa.resource
+            access-token-validity: 30
+            refresh-token-validity: 3600
+            secret: ""
+          atc_to_credhub:
+            override: true
+            authorized-grant-types: client_credentials
+            scope: ""
+            authorities: credhub.read,credhub.write
+            access-token-validity: 3600
+            secret: ((uaa_clients_atc_to_credhub))
+        admin: {client_secret: ((uaa-admin))}
+        login: {client_secret: ((uaa-login))}
+        zones: {internal: {hostnames: []}}
+        sslCertificate: ((uaa-tls.certificate))
+        sslPrivateKey: ((uaa-tls.private_key))
+        jwt:
+          revocable: true
+          policy:
+            active_key_id: key-1
+            keys:
+              key-1:
+                signingKey: ((uaa-jwt.private_key))
+      uaadb:
+        address: <% .DBHost %>
+        port: <% .DBPort %>
+        db_scheme: postgresql
+        tls_enabled: true 
+        databases:
+        - tag: uaa
+          name: uaa
+        roles:
+        - tag: admin
+          name: <% .DBUsername %>
+          password: <% .DBPassword %>
+      login:
+        saml:
+          serviceProviderCertificate: ((uaa-tls.certificate))
+          serviceProviderKey: ((uaa-tls.private_key))
+          serviceProviderKeyPassword: ""
   - name: credhub
     release: credhub
     properties:
@@ -440,16 +439,16 @@ instance_groups:
           password: <% .DBPassword %>
           host: <% .DBHost %>
           port: <% .DBPort %>
-          database: <% .DBName %>
+          database: credhub
           require_tls: true
           tls_ca: |-
-            <% .Indent "10" .DBCACert %>
+            <% .Indent "12" .DBCACert %>
         encryption:
-          keys: 
+          keys:
           - provider_name: int
             encryption_password: ((credhub-encryption-password))
             active: true
-          providers: 
+          providers:
           - name: int
             type: internal
   - name: atc
@@ -476,7 +475,9 @@ instance_groups:
         port: 5555
       credhub:
         tls:
-          ca_cert: credhub-tls.ca
+          ca_cert:
+            certificate: ((credhub-tls.ca))
+          insecure_skip_verify: true # Remove this line when the fix for https://github.com/concourse/concourse/issues/1873 is released
         url: https://127.0.0.1:8844
         client_id: atc_to_credhub
         client_secret: ((uaa_clients_atc_to_credhub))
@@ -1381,5 +1382,5 @@ update:
   canaries: 1
   max_in_flight: 1
   serial: false
-  canary_watch_time: 1000-60000
-  update_watch_time: 1000-60000`
+  canary_watch_time: 1000-300000
+  update_watch_time: 1000-300000`

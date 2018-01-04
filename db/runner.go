@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net"
+	"sync"
 	"time"
 
 	"github.com/lib/pq"
@@ -42,50 +43,46 @@ func NewRunner(creds *Credentials) (Runner, error) {
 		},
 	}
 
+	var once sync.Once
+	var db *sql.DB
 	return func(sqlStr string) error {
-		sshClient, err := ssh.Dial("tcp", fmt.Sprintf("%s:22", creds.SSHPublicIP), sshConfig)
-		if err != nil {
-			return err
-		}
-		defer sshClient.Close()
+		var err error
+		once.Do(func() {
+			sshClient, err := ssh.Dial("tcp", fmt.Sprintf("%s:22", creds.SSHPublicIP), sshConfig)
+			if err != nil {
+				return
+			}
 
-		caCertFile, err := ioutil.TempFile("", "concourse-up")
-		if err != nil {
-			return err
-		}
-		defer caCertFile.Close()
+			caCertFile, err := ioutil.TempFile("", "concourse-up")
+			if err != nil {
+				return
+			}
+			defer caCertFile.Close()
 
-		if _, err = caCertFile.WriteString(creds.CACert); err != nil {
-			return err
-		}
-		if err = caCertFile.Sync(); err != nil {
-			return err
-		}
+			if _, err = caCertFile.WriteString(creds.CACert); err != nil {
+				return
+			}
+			if err = caCertFile.Sync(); err != nil {
+				return
+			}
 
-		dialer := &sshDialer{client: sshClient}
+			dialer := &sshDialer{client: sshClient}
 
-		sql.Register("postgres+ssh", dialer)
+			sql.Register("postgres+ssh", dialer)
 
-		db, err := sql.Open("postgres+ssh", postgresArgs(creds, caCertFile.Name()))
-		if err != nil {
-			return err
-		}
-		defer db.Close()
-
+			db, err = sql.Open("postgres+ssh", postgresArgs(creds, caCertFile.Name()))
+			if err != nil {
+				return
+			}
+		})
 		rows, err := db.Query(sqlStr)
 		if err != nil {
 			return err
 		}
-
 		if err = rows.Err(); err != nil {
 			return err
 		}
-
-		if err = rows.Close(); err != nil {
-			return err
-		}
-
-		return nil
+		return rows.Close()
 	}, nil
 }
 

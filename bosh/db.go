@@ -7,13 +7,15 @@ import (
 )
 
 func (client *Client) createDefaultDatabases() error {
-	dbName := client.config.ConcourseDBName
+	dbNames := []string{client.config.ConcourseDBName, "uaa", "credhub"}
 
-	err := client.dbRunner(fmt.Sprintf("CREATE DATABASE %s;", dbName))
+	for _, dbName := range dbNames {
+		err := client.dbRunner(fmt.Sprintf("CREATE DATABASE %s;", dbName))
 
-	if err != nil && !strings.Contains(err.Error(),
-		fmt.Sprintf("pq: database \"%s\" already exists", dbName)) {
-		return err
+		if err != nil && !strings.Contains(err.Error(),
+			fmt.Sprintf("pq: database \"%s\" already exists", dbName)) {
+			return err
+		}
 	}
 	return nil
 }

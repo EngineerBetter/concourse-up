@@ -198,7 +198,7 @@ resource "aws_route_table" "private" {
 
   route {
     cidr_block = "0.0.0.0/0"
-    gateway_id = "${aws_nat_gateway.default.id}"
+    nat_gateway_id = "${aws_nat_gateway.default.id}"
   }
 
   tags {
@@ -389,6 +389,12 @@ resource "aws_security_group" "vms" {
     protocol    = "icmp"
     cidr_blocks = ["10.0.0.0/16"]
   }
+  ingress {
+    from_port = 22
+    to_port   = 22
+    self      = true
+    protocol  = "tcp"
+  }
 
   egress {
     from_port   = 0
@@ -452,6 +458,13 @@ resource "aws_security_group" "atc" {
   ingress {
     from_port   = 3000
     to_port     = 3000
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    from_port   = 8844
+    to_port     = 8844
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
