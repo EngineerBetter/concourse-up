@@ -24,6 +24,9 @@ var blue = color.New(color.FgCyan, color.Bold).SprintfFunc()
 
 func (client *Client) fetchSecrets() (map[string]string, error) {
 	credsBytes, err := client.configClient.LoadAsset(bosh.CredsFilename)
+	if err != nil {
+		return nil, err
+	}
 	type certificate struct {
 		CA          string `yaml:"ca"`
 		Certificate string `yaml:"certificate"`
