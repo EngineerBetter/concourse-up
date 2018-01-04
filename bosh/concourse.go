@@ -336,6 +336,10 @@ variables:
   type: password
 - name: uaa-login
   type: password
+- name: uaa_clients_atc_to_credhub
+  type: password
+- name: credhub_cli_password
+  type: password
 
 instance_groups:
 - name: web
@@ -369,6 +373,11 @@ instance_groups:
             - bosh.admin
             - credhub.read
             - credhub.write
+        - name: credhub-cli
+            password: ((credhub_cli_password))
+            groups:
+            - credhub.read
+            - credhub.write
       clients:
         credhub_cli:
           override: true
@@ -378,6 +387,13 @@ instance_groups:
           access-token-validity: 30
           refresh-token-validity: 3600
           secret: ""
+        atc_to_credhub
+          override: true
+          authorized-grant-types: client_credentials
+          scope: ""
+          authorities: credhub.read,credhub.write
+          access-token-validity: 3600
+          secret: ((uaa_clients_atc_to_credhub))
       admin: {client_secret: ((uaa-admin))}
       login: {client_secret: ((uaa-login))}
       zones: {internal: {hostnames: []}}
@@ -462,8 +478,8 @@ instance_groups:
         tls:
           ca_cert: credhub-tls.ca
         url: https://127.0.0.1:8844
-        client_id: admin
-        client_secret: ((uaa-admin))
+        client_id: atc_to_credhub
+        client_secret: ((uaa_clients_atc_to_credhub))
 
       postgresql:
         port: <% .DBPort %>
