@@ -18,10 +18,10 @@ config=$(./cup info --json $deployment)
 domain=$(echo "$config" | jq -r '.config.domain')
 username=$(echo "$config" | jq -r '.config.concourse_username')
 password=$(echo "$config" | jq -r '.config.concourse_password')
-credhub_user=$(echo "$config" | jq -r '.config.credhub_username')
-credhub_password=$(echo "$config" | jq -r '.config.credhub_password')
-credhub_ca_cert=$(echo "$config" | jq -r '.config.credhub_ca_cert')
-credhub_server=$(echo "$config" | jq -r '.config.credhub_server')
+credhub_user=$(echo "$config" | jq -r '.secrets.credhub_username')
+credhub_password=$(echo "$config" | jq -r '.secrets.credhub_password')
+credhub_ca_cert=$(echo "$config" | jq -r '.secrets.credhub_ca_cert')
+credhub_server="https://$(echo "$config" | jq -r '.terraform.atc_public_ip'):8844"
 echo "$config" | jq -r '.config.concourse_ca_cert' > generated-ca-cert.pem
 
 credhub login -u "$credhub_user" -p "$credhub_password" --ca-cert "$credhub_ca_cert" -s "$credhub_server"
