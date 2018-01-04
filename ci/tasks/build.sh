@@ -36,6 +36,12 @@ pushd compilation-vars
   influxdb_release_url=$(jq -r .influxdb_release_url compilation-vars.json)
   influxdb_release_version=$(jq -r .influxdb_release_version compilation-vars.json)
   influxdb_release_sha1=$(jq -r .influxdb_release_sha1 compilation-vars.json)
+  uaa_release_url=$(jq -r .uaa_release_url compilation-vars.json)
+  uaa_release_version=$(jq -r .uaa_release_version compilation-vars.json)
+  uaa_release_sha1=$(jq -r .uaa_release_sha1 compilation-vars.json)
+  credhub_release_url=$(jq -r .credhub_release_url compilation-vars.json)
+  credhub_release_version=$(jq -r .credhub_release_version compilation-vars.json)
+  credhub_release_sha1=$(jq -r .credhub_release_sha1 compilation-vars.json)
   garden_release_url=$(jq -r .garden_release_url compilation-vars.json)
   garden_release_version=$(jq -r .garden_release_version compilation-vars.json)
   garden_release_sha1=$(jq -r .garden_release_sha1 compilation-vars.json)
@@ -71,6 +77,12 @@ go build -ldflags "
   -X github.com/EngineerBetter/concourse-up/bosh.InfluxDBReleaseURL=$influxdb_release_url
   -X github.com/EngineerBetter/concourse-up/bosh.InfluxDBReleaseVersion=$influxdb_release_version
   -X github.com/EngineerBetter/concourse-up/bosh.InfluxDBReleaseSHA1=$influxdb_release_sha1
+  -X github.com/EngineerBetter/concourse-up/bosh.UAAReleaseURL=$uaa_release_url
+  -X github.com/EngineerBetter/concourse-up/bosh.UAAReleaseVersion=$uaa_release_version
+  -X github.com/EngineerBetter/concourse-up/bosh.UAAReleaseSHA1=$uaa_release_sha1
+  -X github.com/EngineerBetter/concourse-up/bosh.CredhubReleaseURL=$credhub_release_url
+  -X github.com/EngineerBetter/concourse-up/bosh.CredhubReleaseVersion=$credhub_release_version
+  -X github.com/EngineerBetter/concourse-up/bosh.CredhubReleaseSHA1=$credhub_release_sha1
   -X github.com/EngineerBetter/concourse-up/bosh.GardenReleaseURL=$garden_release_url
   -X github.com/EngineerBetter/concourse-up/bosh.GardenReleaseVersion=$garden_release_version
   -X github.com/EngineerBetter/concourse-up/bosh.GardenReleaseSHA1=$garden_release_sha1
@@ -92,10 +104,4 @@ go build -ldflags "
   -X github.com/EngineerBetter/concourse-up/terraform.DarwinBinaryURL=$terraform_darwin_binary_url
   -X github.com/EngineerBetter/concourse-up/terraform.LinuxBinaryURL=$terraform_linux_binary_url
   -X github.com/EngineerBetter/concourse-up/terraform.WindowsBinaryURL=$terraform_windows_binary_url
-  -X github.com/EngineerBetter/concourse-up/bosh.CredhubReleaseURL=https://bosh.io/d/github.com/pivotal-cf/credhub-release?v=1.6.5
-  -X github.com/EngineerBetter/concourse-up/bosh.CredhubReleaseVersion=1.6.5
-  -X github.com/EngineerBetter/concourse-up/bosh.CredhubReleaseSHA1=eda4e8873aa2dbfacb1857b175f761d2d0b64538
-  -X github.com/EngineerBetter/concourse-up/bosh.UAAReleaseURL=https://bosh.io/d/github.com/cloudfoundry/uaa-release?v=53.1
-  -X github.com/EngineerBetter/concourse-up/bosh.UAAReleaseVersion=53.1
-  -X github.com/EngineerBetter/concourse-up/bosh.UAAReleaseSHA1=b49b0caaf46d8f94d67979f9e46d9c22907bd451
 " -o "$build_dir/$OUTPUT_FILE"
