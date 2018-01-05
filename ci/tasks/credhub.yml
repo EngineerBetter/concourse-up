@@ -10,7 +10,7 @@ jobs:
       params:
         PASSWORD: ((password))
       run:
-        path: sh
+        path: bash
         args:
         - -c
         - |

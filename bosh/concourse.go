@@ -317,6 +317,7 @@ variables:
     ca: credhub-ca
     common_name: <% .ATCPublicIP %>
     alternative_names:
+    - <% .ATCPublicIP %>
     - 127.0.0.1
 - name: uaa-tls
   type: certificate
@@ -324,6 +325,7 @@ variables:
     ca: credhub-ca
     common_name: <% .ATCPublicIP %>
     alternative_names:
+    - <% .ATCPublicIP %>
     - 127.0.0.1
 - name: uaa-jwt
   type: rsa
@@ -360,7 +362,7 @@ instance_groups:
     release: uaa
     properties:
       uaa:
-        url: &uaa-url https://127.0.0.1:8443
+        url: &uaa-url https://<% .ATCPublicIP %>:8443
         catalina_opts: -Djava.security.egd=file:/dev/./urandom -Xmx768m -XX:MaxMetaspaceSize=256m
         scim:
           users:

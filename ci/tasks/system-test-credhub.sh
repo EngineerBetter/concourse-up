@@ -31,7 +31,7 @@ credhub_server="https://$(echo "$config" | jq -r '.terraform.atc_public_ip.value
 echo "$config" | jq -r '.config.concourse_ca_cert' > generated-ca-cert.pem
 
 credhub login -u "$credhub_user" -p "$credhub_password" --ca-cert "$credhub_ca_cert" -s "$credhub_server"
-credhub set -n /concourse/main/password -t password -v c1oudc0w
+credhub set -n /concourse/main/password -t password -w c1oudc0w
 
 fly --target system-test login \
   --ca-cert generated-ca-cert.pem \
