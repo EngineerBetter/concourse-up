@@ -10,7 +10,7 @@ deployment="system-test-$RANDOM"
 
 cleanup() {
   status=$?
-  ./cup --non-interactive destroy $deployment
+  ./cup-new --non-interactive destroy $deployment
   exit $status
 }
 trap cleanup EXIT
