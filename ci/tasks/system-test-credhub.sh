@@ -4,6 +4,11 @@
 set -eu
 
 deployment="system-test-$RANDOM"
+cleanup() {
+  ./cup --non-interactive destroy $deployment
+  exit 1
+}
+trap cleanup EXIT
 
 cp "$BINARY_PATH" ./cup
 chmod +x ./cup

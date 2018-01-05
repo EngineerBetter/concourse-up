@@ -8,6 +8,12 @@ set -eu
 
 deployment="system-test-$RANDOM"
 
+cleanup() {
+  ./cup --non-interactive destroy $deployment
+  exit 1
+}
+trap cleanup EXIT
+
 cp release/concourse-up-linux-amd64 ./cup-old
 cp "$BINARY_PATH" ./cup-new
 chmod +x ./cup-*
