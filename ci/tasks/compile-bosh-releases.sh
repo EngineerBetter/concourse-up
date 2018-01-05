@@ -34,14 +34,6 @@ influxdb_release_version=$(cat influxdb-release/version)
 influxdb_release_url=$(cat influxdb-release/url)
 influxdb_release_sha1=$(cat influxdb-release/sha1)
 
-uaa_release_version=$(cat uaa-release/version)
-uaa_release_url=$(cat uaa-release/url)
-uaa_release_sha1=$(cat uaa-release/sha1)
-
-credhub_release_version=$(cat credhub-release/version)
-credhub_release_url=$(cat credhub-release/url)
-credhub_release_sha1=$(cat credhub-release/sha1)
-
 director_bosh_release_version=$(cat director-bosh-release/version)
 concourse_release_version=$(basename concourse-bosh-release/concourse-*.tgz .tgz | sed 's/^concourse-//')
 garden_release_version=$(basename concourse-bosh-release/garden-runc-*.tgz .tgz | sed 's/^garden-runc-//')
@@ -54,8 +46,6 @@ $bosh upload-release "director-bosh-cpi-release/release.tgz"
 $bosh upload-release "riemann-release/release.tgz"
 $bosh upload-release "grafana-release/release.tgz"
 $bosh upload-release "influxdb-release/release.tgz"
-$bosh upload-release "uaa-release/release.tgz"
-$bosh upload-release "credhub-release/release.tgz"
 
 echo "---
 name: concourse-empty
@@ -75,10 +65,6 @@ releases:
   version: \"$grafana_release_version\"
 - name: influxdb
   version: \"$influxdb_release_version\"
-- name: uaa
-  version: \"$uaa_release_version\"
-- name: credhub
-  version: \"$credhub_release_version\"
 
 stemcells:
 - alias: trusty
@@ -123,22 +109,12 @@ $bosh \
   --deployment concourse-empty \
   export-release "influxdb/$influxdb_release_version" "ubuntu-trusty/$concourse_stemcell_version"
 
-$bosh \
-  --deployment concourse-empty \
-  export-release "uaa/$uaa_release_version" "ubuntu-trusty/$concourse_stemcell_version"
-
-$bosh \
-  --deployment concourse-empty \
-  export-release "credhub/$credhub_release_version" "ubuntu-trusty/$concourse_stemcell_version"
-
 compiled_concourse_release=$(echo concourse-"$concourse_release_version"-ubuntu-trusty-"$concourse_stemcell_version"-*.tgz)
 compiled_garden_release=$(echo garden-runc-"$garden_release_version"-ubuntu-trusty-"$concourse_stemcell_version"-*.tgz)
 compiled_director_bosh_release=$(echo bosh-"$director_bosh_release_version"-ubuntu-trusty-"$concourse_stemcell_version"-*.tgz)
 compiled_riemann_release=$(echo riemann-"$riemann_release_version"-ubuntu-trusty-"$concourse_stemcell_version"-*.tgz)
 compiled_grafana_release=$(echo grafana-"$grafana_release_version"-ubuntu-trusty-"$concourse_stemcell_version"-*.tgz)
 compiled_influxdb_release=$(echo influxdb-"$influxdb_release_version"-ubuntu-trusty-"$concourse_stemcell_version"-*.tgz)
-compiled_uaa_release=$(echo uaa-"$uaa_release_version"-ubuntu-trusty-"$concourse_stemcell_version"-*.tgz)
-compiled_credhub_release=$(echo credhub-"$credhub_release_version"-ubuntu-trusty-"$concourse_stemcell_version"-*.tgz)
 
 aws s3 cp --acl public-read "$compiled_concourse_release" "s3://$PUBLIC_ARTIFACTS_BUCKET/$compiled_concourse_release"
 aws s3 cp --acl public-read "$compiled_garden_release" "s3://$PUBLIC_ARTIFACTS_BUCKET/$compiled_garden_release"
@@ -146,8 +122,6 @@ aws s3 cp --acl public-read "$compiled_director_bosh_release" "s3://$PUBLIC_ARTI
 aws s3 cp --acl public-read "$compiled_riemann_release" "s3://$PUBLIC_ARTIFACTS_BUCKET/$compiled_riemann_release"
 aws s3 cp --acl public-read "$compiled_grafana_release" "s3://$PUBLIC_ARTIFACTS_BUCKET/$compiled_grafana_release"
 aws s3 cp --acl public-read "$compiled_influxdb_release" "s3://$PUBLIC_ARTIFACTS_BUCKET/$compiled_influxdb_release"
-aws s3 cp --acl public-read "$compiled_uaa_release" "s3://$PUBLIC_ARTIFACTS_BUCKET/$compiled_uaa_release"
-aws s3 cp --acl public-read "$compiled_credhub_release" "s3://$PUBLIC_ARTIFACTS_BUCKET/$compiled_credhub_release"
 
 aws s3 cp --acl public-read "concourse-bosh-release/fly_darwin_amd64" "s3://$PUBLIC_ARTIFACTS_BUCKET/fly_darwin_amd64-$concourse_release_version"
 aws s3 cp --acl public-read "concourse-bosh-release/fly_linux_amd64" "s3://$PUBLIC_ARTIFACTS_BUCKET/fly_linux_amd64-$concourse_release_version"
@@ -165,10 +139,6 @@ grafana_release_sha1=$(sha1sum "$compiled_grafana_release" | awk '{ print $1 }')
 grafana_release_url="https://s3-$AWS_DEFAULT_REGION.amazonaws.com/$PUBLIC_ARTIFACTS_BUCKET/$compiled_grafana_release"
 influxdb_release_sha1=$(sha1sum "$compiled_influxdb_release" | awk '{ print $1 }')
 influxdb_release_url="https://s3-$AWS_DEFAULT_REGION.amazonaws.com/$PUBLIC_ARTIFACTS_BUCKET/$compiled_influxdb_release"
-uaa_release_sha1=$(sha1sum "$compiled_uaa_release" | awk '{ print $1 }')
-uaa_release_url="https://s3-$AWS_DEFAULT_REGION.amazonaws.com/$PUBLIC_ARTIFACTS_BUCKET/$compiled_uaa_release"
-credhub_release_sha1=$(sha1sum "$compiled_credhub_release" | awk '{ print $1 }')
-credhub_release_url="https://s3-$AWS_DEFAULT_REGION.amazonaws.com/$PUBLIC_ARTIFACTS_BUCKET/$compiled_credhub_release"
 
 fly_darwin_binary_url="https://s3-$AWS_DEFAULT_REGION.amazonaws.com/$PUBLIC_ARTIFACTS_BUCKET/fly_darwin_amd64-$concourse_release_version"
 fly_linux_binary_url="https://s3-$AWS_DEFAULT_REGION.amazonaws.com/$PUBLIC_ARTIFACTS_BUCKET/fly_linux_amd64-$concourse_release_version"
@@ -226,12 +196,6 @@ echo "{
   \"influxdb_release_url\": \"$influxdb_release_url\",
   \"influxdb_release_sha1\": \"$influxdb_release_sha1\",
   \"influxdb_release_version\": \"$influxdb_release_version\",
-  \"uaa_release_url\": \"$uaa_release_url\",
-  \"uaa_release_sha1\": \"$uaa_release_sha1\",
-  \"uaa_release_version\": \"$uaa_release_version\",
-  \"credhub_release_url\": \"$credhub_release_url\",
-  \"credhub_release_sha1\": \"$credhub_release_sha1\",
-  \"credhub_release_version\": \"$credhub_release_version\",
   \"fly_darwin_binary_url\": \"$fly_darwin_binary_url\",
   \"fly_linux_binary_url\": \"$fly_linux_binary_url\",
   \"fly_windows_binary_url\": \"$fly_windows_binary_url\",

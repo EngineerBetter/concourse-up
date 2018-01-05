@@ -133,16 +133,6 @@ resources:
   source:
     repository: vito/grafana-boshrelease
 
-- name: uaa-release
-  type: bosh-io-release
-  source:
-    repository: cloudfoundry/uaa-release
-
-- name: credhub-release
-  type: bosh-io-release
-  source:
-    repository: pivotal-cf/credhub-release
-
 - name: slack-alert
   type: slack-notification
   source:
@@ -209,10 +199,6 @@ jobs:
   - get: influxdb-release
     trigger: true
   - get: director-bosh-cpi-release
-    trigger: true
-  - get: uaa-release
-    trigger: true
-  - get: credhub-release
     trigger: true
   - get: concourse-up
   - task: compile
