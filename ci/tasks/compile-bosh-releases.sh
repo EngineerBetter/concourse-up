@@ -1,6 +1,7 @@
 #!/bin/bash
 
 set -eu
+set -x
 
 # delete any concourse versions that have pre-compiled packages
 rm -f concourse-bosh-release/concourse-*-*.tgz
