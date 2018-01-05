@@ -10,6 +10,10 @@ import (
 // Config represents a concourse-up configuration file
 type Config struct {
 	AvailabilityZone          string `json:"availability_zone"`
+	CredhubURL                string `json:"credhub_url"`
+	CredhubUsername           string `json:"credhub_username"`
+	CredhubPassword           string `json:"credhub_password"`
+	CredhubCACert             string `json:"credhub_ca_cert"`
 	ConcourseCACert           string `json:"concourse_ca_cert"`
 	ConcourseCert             string `json:"concourse_cert"`
 	ConcourseDBName           string `json:"concourse_db_name"`

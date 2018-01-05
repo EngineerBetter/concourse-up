@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"strings"
 
-	"gopkg.in/yaml.v2"
-
 	"github.com/EngineerBetter/concourse-up/bosh"
 	"github.com/EngineerBetter/concourse-up/config"
 	"github.com/EngineerBetter/concourse-up/terraform"
@@ -16,37 +14,10 @@ import (
 type Info struct {
 	Terraform *terraform.Metadata `json:"terraform"`
 	Config    *config.Config      `json:"config"`
-	Secrets   map[string]string   `json:"secrets"`
 	Instances []bosh.Instance     `json:"instances"`
 }
 
 var blue = color.New(color.FgCyan, color.Bold).SprintfFunc()
-
-func (client *Client) fetchSecrets() (map[string]string, error) {
-	credsBytes, err := client.configClient.LoadAsset(bosh.CredsFilename)
-	if err != nil {
-		return nil, err
-	}
-	type certificate struct {
-		CA          string `yaml:"ca"`
-		Certificate string `yaml:"certificate"`
-		PrivateKey  string `yaml:"private_key"`
-	}
-	type creds struct {
-		CredhubCLIPassword string      `yaml:"credhub_cli_password"`
-		CredhubCert        certificate `yaml:"credhub-tls"`
-	}
-	var c creds
-	err = yaml.Unmarshal(credsBytes, &c)
-	if err != nil {
-		return nil, err
-	}
-	return map[string]string{
-		"credhub_password": c.CredhubCLIPassword,
-		"credhub_username": "credhub-cli",
-		"credhub_ca_cert":  c.CredhubCert.CA,
-	}, nil
-}
 
 // FetchInfo fetches and builds the info
 func (client *Client) FetchInfo() (*Info, error) {
@@ -77,15 +48,9 @@ func (client *Client) FetchInfo() (*Info, error) {
 		return nil, err
 	}
 
-	secrets, err := client.fetchSecrets()
-	if err != nil {
-		return nil, err
-	}
-
 	return &Info{
 		Terraform: metadata,
 		Config:    config,
-		Secrets:   secrets,
 		Instances: instances,
 	}, nil
 }

@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"io"
 
+	"gopkg.in/yaml.v2"
+
 	"strings"
 
 	"github.com/EngineerBetter/concourse-up/bosh"
@@ -53,10 +55,14 @@ func (client *Client) Deploy() error {
 	defer flyClient.Cleanup()
 
 	if client.deployArgs.SelfUpdate {
-		return client.updateBoshAndPipeline(config, metadata, flyClient)
+		err = client.updateBoshAndPipeline(config, metadata, flyClient)
+	} else {
+		err = client.deployBoshAndPipeline(config, metadata, flyClient)
 	}
-
-	return client.deployBoshAndPipeline(config, metadata, flyClient)
+	if err != nil {
+		return err
+	}
+	return client.configClient.Update(config)
 }
 
 func (client *Client) deployBoshAndPipeline(config *config.Config, metadata *terraform.Metadata, flyClient fly.IClient) error {
@@ -262,11 +268,27 @@ func (client *Client) deployBosh(config *config.Config, metadata *terraform.Meta
 	if err == nil {
 		err = err1
 	}
-	err1 = client.configClient.StoreAsset(bosh.CredsFilename, boshCredsBytes)
-	if err == nil {
-		err = err1
+	if err != nil {
+		return err
 	}
-	return err
+
+	type credhubCreds struct {
+		Password string `yaml:"credhub_cli_password"`
+		CACert   struct {
+			Cert string `yaml:"ca"`
+		} `yaml:"credhub-tls"`
+	}
+	var cc credhubCreds
+	err = yaml.Unmarshal(boshCredsBytes, &cc)
+	if err != nil {
+		return err
+	}
+	config.CredhubCACert = cc.CACert.Cert
+	config.CredhubPassword = cc.Password
+	config.CredhubURL = fmt.Sprintf("https://%s:8844/", metadata.ATCPublicIP)
+	config.CredhubUsername = "credhub-cli"
+
+	return nil
 }
 
 func (client *Client) loadConfig() (*config.Config, error) {
@@ -336,13 +358,23 @@ func writeDeploySuccessMessage(config *config.Config, metadata *terraform.Metada
 		flags = " --insecure"
 	}
 	_, err := stdout.Write([]byte(fmt.Sprintf(
-		"\nDEPLOY SUCCESSFUL. Log in with:\n\nfly --target %s login%s --concourse-url https://%s --username %s --password %s\n\nMetrics available at https://%s:3000 using the same username and password\n\n",
+		`DEPLOY SUCCESSFUL. Log in with:
+fly --target %s login%s --concourse-url https://%s --username %s --password %s
+
+Metrics available at https://%s:3000 using the same username and password
+
+Log into credhub with:
+credhub login -u %s -p %s -s %s --ca-cert %q`,
 		config.Project,
 		flags,
 		config.Domain,
 		config.ConcourseUsername,
 		config.ConcoursePassword,
 		config.Domain,
+		config.CredhubUsername,
+		config.CredhubPassword,
+		config.CredhubURL,
+		config.CredhubCACert,
 	)))
 
 	return err
