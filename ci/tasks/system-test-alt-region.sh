@@ -5,6 +5,14 @@ set -eu
 
 deployment="system-test-$RANDOM"
 
+cleanup() {
+  echo "DESTROY CUSTOM-REGION DEPLOYMENT"
+  ./cup --non-interactive destroy --region us-east-1 $deployment
+  exit 1
+}
+
+trap cleanup EXIT
+
 cp "$BINARY_PATH" ./cup
 chmod +x ./cup
 
@@ -42,6 +50,6 @@ fly --target system-test trigger-job \
   --job hello/hello \
   --watch
 
-echo "DESTROY CUSTOM-REGION DEPLOYMENT"
 
+echo "DESTROY CUSTOM-REGION DEPLOYMENT"
 ./cup --non-interactive destroy --region us-east-1 $deployment
