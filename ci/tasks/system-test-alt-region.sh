@@ -6,9 +6,9 @@ set -eu
 deployment="system-test-$RANDOM"
 
 cleanup() {
-  echo "DESTROY CUSTOM-REGION DEPLOYMENT"
+  status=$?
   ./cup --non-interactive destroy --region us-east-1 $deployment
-  exit 1
+  exit $status
 }
 
 trap cleanup EXIT
@@ -48,7 +48,3 @@ fly --target system-test unpause-pipeline \
 fly --target system-test trigger-job \
   --job hello/hello \
   --watch
-
-
-echo "DESTROY CUSTOM-REGION DEPLOYMENT"
-./cup --non-interactive destroy --region us-east-1 $deployment

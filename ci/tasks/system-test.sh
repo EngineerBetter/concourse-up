@@ -6,8 +6,9 @@ set -eu
 deployment="system-test-$RANDOM"
 
 cleanup() {
+  status=$?
   ./cup --non-interactive destroy $deployment
-  exit 1
+  exit $status
 }
 trap cleanup EXIT
 
@@ -148,7 +149,3 @@ fly --target system-test-custom-domain-with-cert sync
 fly --target system-test-custom-domain-with-cert trigger-job \
   --job hello/hello \
   --watch
-
-echo "DESTROY"
-
-./cup --non-interactive destroy $deployment
