@@ -69,7 +69,7 @@ func (info *Info) String() string {
 	}
 	str += "\n\n"
 	str += fmt.Sprintf("Concourse credentials:\n\tusername: %s\n\tpassword: %s\n\tURL:      https://%s\n\n", info.Config.ConcourseUsername, info.Config.ConcoursePassword, info.Config.Domain)
-	str += fmt.Sprintf("Credhub credentials:\n\tusername: %s\n\tpassword: %s\n\tURL:      https://%s\n\tCA Cert:\n\t\t%s\n", info.Config.CredhubUsername, info.Config.CredhubPassword, info.Config.CredhubURL, credhubCACert)
+	str += fmt.Sprintf("Credhub credentials:\n\tusername: %s\n\tpassword: %s\n\tURL:      %s\n\tCA Cert:\n\t\t%s\n", info.Config.CredhubUsername, info.Config.CredhubPassword, info.Config.CredhubURL, credhubCACert)
 	str += fmt.Sprintf("Grafana credentials:\n\tusername: %s\n\tpassword: %s\n\tURL:      https://%s:3000\n\n", info.Config.ConcourseUsername, info.Config.ConcoursePassword, info.Config.Domain)
 	str += fmt.Sprintf("Bosh credentials:\n\tusername: %s\n\tpassword: %s\n\tIP:       %s\n\tCA Cert:\n\t\t%s\n", info.Config.DirectorUsername, info.Config.DirectorPassword, info.Terraform.DirectorPublicIP.Value, boshCACert)
 
