@@ -11,6 +11,8 @@ inputs:
 - name: riemann-release
 - name: grafana-release
 - name: influxdb-release
+- name: uaa-release
+- name: credhub-release
 
 outputs:
 - name: compilation-vars
