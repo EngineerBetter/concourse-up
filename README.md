@@ -36,6 +36,7 @@ providing you with a single command for getting your Concourse up and keeping it
 - Deploy to any AWS region
 - Metrics infrastructure deployed by default (check http://your-concourse-url:3000)
 - DB encryption turned on by default
+- Uses credhub for secret management (see: <https://concourse.ci/creds.html>)
 
 ## Prerequisites
 
@@ -61,11 +62,13 @@ eg:
 $ concourse-up deploy ci
 
 ...
-
 DEPLOY SUCCESSFUL. Log in with:
+fly --target ci login --insecure --concourse-url https://52.18.43.185 --username admin --password abc123def456
 
-fly --target ci login --concourse-url http://52.53.54.55 --username admin --password abc123def456
+Metrics available at https://52.18.43.185:3000 using the same username and password
 
+Log into credhub with:
+credhub login -u credhub-cli -p foobar987 -s https://52.18.43.185:8844/ --ca-cert "..."
 ```
 
 A new deploy from scratch takes approximately 12 minutes.
