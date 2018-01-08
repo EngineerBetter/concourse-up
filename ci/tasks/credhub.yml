@@ -1,7 +1,7 @@
 jobs:
-- name: hello
+- name: credhub
   plan:
-  - task: say-hello
+  - task: check-password
     config:
       platform: linux
       image_resource:
