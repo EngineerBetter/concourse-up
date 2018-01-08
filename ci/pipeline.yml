@@ -20,14 +20,14 @@ resources:
     uri: git@github.com:EngineerBetter/concourse-up.git
     branch: master
     ignore_paths: [ci/docker/*, ci/pipeline.yml, README.md, compilation-vars.json]
-    private_key: {{github_private_key}}
+    private_key: ((github_private_key))
 
 - name: image
   type: docker-image
   source:
     repository: engineerbetter/cup-image
-    username: {{dockerhub_user}}
-    password: {{dockerhub_password}}
+    username: ((dockerhub_user))
+    password: ((dockerhub_password))
 
 - name: version
   type: semver
@@ -36,8 +36,8 @@ resources:
     driver: s3
     bucket: concourse-up-ci-artifacts
     key: version
-    access_key_id: {{concourse_ci_s3_access_key}}
-    secret_access_key: {{concourse_ci_s3_secret_key}}
+    access_key_id: ((concourse_ci_s3_access_key))
+    secret_access_key: ((concourse_ci_s3_secret_key))
     region_name: eu-west-1
 
 - name: compilation-vars
@@ -45,8 +45,8 @@ resources:
   source:
     bucket: concourse-up-ci-artifacts
     versioned_file: compilation-vars.json
-    access_key_id: {{concourse_ci_s3_access_key}}
-    secret_access_key: {{concourse_ci_s3_secret_key}}
+    access_key_id: ((concourse_ci_s3_access_key))
+    secret_access_key: ((concourse_ci_s3_secret_key))
     region_name: eu-west-1
 
 - name: binary-linux
@@ -54,8 +54,8 @@ resources:
   source:
     bucket: concourse-up-ci-artifacts
     versioned_file: concourse-up-linux-amd64
-    access_key_id: {{concourse_ci_s3_access_key}}
-    secret_access_key: {{concourse_ci_s3_secret_key}}
+    access_key_id: ((concourse_ci_s3_access_key))
+    secret_access_key: ((concourse_ci_s3_secret_key))
     region_name: eu-west-1
 
 - name: binary-darwin
@@ -63,8 +63,8 @@ resources:
   source:
     bucket: concourse-up-ci-artifacts
     versioned_file: concourse-up-darwin-amd64
-    access_key_id: {{concourse_ci_s3_access_key}}
-    secret_access_key: {{concourse_ci_s3_secret_key}}
+    access_key_id: ((concourse_ci_s3_access_key))
+    secret_access_key: ((concourse_ci_s3_secret_key))
     region_name: eu-west-1
 
 - name: binary-windows
@@ -72,8 +72,8 @@ resources:
   source:
     bucket: concourse-up-ci-artifacts
     versioned_file: concourse-up-darwin-amd64
-    access_key_id: {{concourse_ci_s3_access_key}}
-    secret_access_key: {{concourse_ci_s3_secret_key}}
+    access_key_id: ((concourse_ci_s3_access_key))
+    secret_access_key: ((concourse_ci_s3_secret_key))
     region_name: eu-west-1
 
 - name: release
@@ -81,14 +81,14 @@ resources:
   source:
     user: engineerbetter
     repository: concourse-up
-    access_token: {{github_access_token}}
+    access_token: ((github_access_token))
 
 - name: release-drafts
   type: github-release
   source:
     user: engineerbetter
     repository: concourse-up
-    access_token: {{github_access_token}}
+    access_token: ((github_access_token))
     drafts: true
 
 - name: concourse-bosh-release
@@ -96,7 +96,7 @@ resources:
   source:
     user: concourse
     repository: concourse
-    access_token: {{github_access_token}}
+    access_token: ((github_access_token))
 
 - name: concourse-stemcell
   type: bosh-io-stemcell
@@ -146,7 +146,7 @@ resources:
 - name: slack-alert
   type: slack-notification
   source:
-    url: {{slack_webhook}}
+    url: ((slack_webhook))
 
 jobs:
 - name: build-image
@@ -178,9 +178,9 @@ jobs:
     image: image
     file: concourse-up/ci/tasks/unit-test.yml
     params:
-      AWS_ACCESS_KEY_ID: {{concourse_up_test_access_key_id}}
-      AWS_SECRET_ACCESS_KEY: {{concourse_up_test_secret_key}}
-      AWS_DEFAULT_REGION: {{aws_default_region}}
+      AWS_ACCESS_KEY_ID: ((concourse_up_test_access_key_id))
+      AWS_SECRET_ACCESS_KEY: ((concourse_up_test_secret_key))
+      AWS_DEFAULT_REGION: ((aws_default_region))
     on_failure:
       put: slack-alert
       params:
@@ -218,13 +218,13 @@ jobs:
   - task: compile
     file: concourse-up/ci/tasks/compile-bosh-releases.yml
     params:
-      AWS_ACCESS_KEY_ID: {{concourse_up_test_access_key_id}}
-      AWS_SECRET_ACCESS_KEY: {{concourse_up_test_secret_key}}
-      AWS_DEFAULT_REGION: {{aws_default_region}}
-      BOSH_USERNAME: {{bosh_username}}
-      BOSH_PASSWORD: {{bosh_password}}
-      BOSH_TARGET: {{bosh_target}}
-      BOSH_CA_CERT: {{bosh_ca_cert}}
+      AWS_ACCESS_KEY_ID: ((concourse_up_test_access_key_id))
+      AWS_SECRET_ACCESS_KEY: ((concourse_up_test_secret_key))
+      AWS_DEFAULT_REGION: ((aws_default_region))
+      BOSH_USERNAME: ((bosh_username))
+      BOSH_PASSWORD: ((bosh_password))
+      BOSH_TARGET: ((bosh_target))
+      BOSH_CA_CERT: ((bosh_ca_cert))
       PUBLIC_ARTIFACTS_BUCKET: concourse-up-public-artifacts
   - put: compilation-vars
     params:
@@ -312,8 +312,8 @@ jobs:
       image: image
       file: concourse-up/ci/tasks/system-test-alt-region.yml
       params:
-        AWS_ACCESS_KEY_ID: {{concourse_up_test_access_key_id}}
-        AWS_SECRET_ACCESS_KEY: {{concourse_up_test_secret_key}}
+        AWS_ACCESS_KEY_ID: ((concourse_up_test_access_key_id))
+        AWS_SECRET_ACCESS_KEY: ((concourse_up_test_secret_key))
         BINARY_PATH: binary-linux/concourse-up-linux-amd64
       on_failure:
         put: slack-alert
@@ -325,8 +325,8 @@ jobs:
       image: image
       file: concourse-up/ci/tasks/system-test-update.yml
       params:
-        AWS_ACCESS_KEY_ID: {{concourse_up_test_access_key_id}}
-        AWS_SECRET_ACCESS_KEY: {{concourse_up_test_secret_key}}
+        AWS_ACCESS_KEY_ID: ((concourse_up_test_access_key_id))
+        AWS_SECRET_ACCESS_KEY: ((concourse_up_test_secret_key))
         BINARY_PATH: binary-linux/concourse-up-linux-amd64
       on_failure:
         put: slack-alert
@@ -338,8 +338,8 @@ jobs:
       image: image
       file: concourse-up/ci/tasks/system-test.yml
       params:
-        AWS_ACCESS_KEY_ID: {{concourse_up_test_access_key_id}}
-        AWS_SECRET_ACCESS_KEY: {{concourse_up_test_secret_key}}
+        AWS_ACCESS_KEY_ID: ((concourse_up_test_access_key_id))
+        AWS_SECRET_ACCESS_KEY: ((concourse_up_test_secret_key))
         BINARY_PATH: binary-linux/concourse-up-linux-amd64
       on_failure:
         put: slack-alert
@@ -350,8 +350,8 @@ jobs:
     - task: system-test-credhub
       file: concourse-up/ci/tasks/system-test-credhub.yml
       params:
-        AWS_ACCESS_KEY_ID: {{concourse_up_test_access_key_id}}
-        AWS_SECRET_ACCESS_KEY: {{concourse_up_test_secret_key}}
+        AWS_ACCESS_KEY_ID: ((concourse_up_test_access_key_id))
+        AWS_SECRET_ACCESS_KEY: ((concourse_up_test_secret_key))
         BINARY_PATH: binary-linux/concourse-up-linux-amd64
       on_failure:
         put: slack-alert
