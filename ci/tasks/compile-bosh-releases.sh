@@ -85,7 +85,7 @@ stemcells:
   os: ubuntu-trusty
   version: \"$concourse_stemcell_version\"
 
-jobs: []
+instance_groups: []
 
 update:
   canaries: 1
