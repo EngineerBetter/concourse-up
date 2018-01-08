@@ -58,7 +58,7 @@ $bosh upload-release "uaa-release/release.tgz"
 $bosh upload-release "credhub-release/release.tgz"
 
 echo "---
-name: concourse-empty
+name: cup-compilation-workspace
 
 releases:
 - name: concourse
@@ -92,43 +92,43 @@ update:
   max_in_flight: 1
   serial: false
   canary_watch_time: 1000-60000
-  update_watch_time: 1000-60000" > concourse-empty.yml
+  update_watch_time: 1000-60000" > cup-compilation-workspace.yml
 
 $bosh \
-  --deployment concourse-empty \
+  --deployment cup-compilation-workspace \
   deploy \
-  concourse-empty.yml
+  cup-compilation-workspace.yml
 
 $bosh \
-  --deployment concourse-empty \
+  --deployment cup-compilation-workspace \
   export-release "concourse/$concourse_release_version" "ubuntu-trusty/$concourse_stemcell_version"
 
 $bosh \
-  --deployment concourse-empty \
+  --deployment cup-compilation-workspace \
   export-release "garden-runc/$garden_release_version" "ubuntu-trusty/$concourse_stemcell_version"
 
 $bosh \
-  --deployment concourse-empty \
+  --deployment cup-compilation-workspace \
   export-release "bosh/$director_bosh_release_version" "ubuntu-trusty/$concourse_stemcell_version"
 
 $bosh \
-  --deployment concourse-empty \
+  --deployment cup-compilation-workspace \
   export-release "riemann/$riemann_release_version" "ubuntu-trusty/$concourse_stemcell_version"
 
 $bosh \
-  --deployment concourse-empty \
+  --deployment cup-compilation-workspace \
   export-release "grafana/$grafana_release_version" "ubuntu-trusty/$concourse_stemcell_version"
 
 $bosh \
-  --deployment concourse-empty \
+  --deployment cup-compilation-workspace \
   export-release "influxdb/$influxdb_release_version" "ubuntu-trusty/$concourse_stemcell_version"
 
 $bosh \
-  --deployment concourse-empty \
+  --deployment cup-compilation-workspace \
   export-release "uaa/$uaa_release_version" "ubuntu-trusty/$concourse_stemcell_version"
 
 $bosh \
-  --deployment concourse-empty \
+  --deployment cup-compilation-workspace \
   export-release "credhub/$credhub_release_version" "ubuntu-trusty/$concourse_stemcell_version"
 
 compiled_concourse_release=$(echo concourse-"$concourse_release_version"-ubuntu-trusty-"$concourse_stemcell_version"-*.tgz)
