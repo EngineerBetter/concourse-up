@@ -56,7 +56,9 @@ func (client *Client) FetchInfo() (*Info, error) {
 }
 
 func (info *Info) String() string {
-	boshCACert := strings.Join(strings.Split(info.Config.DirectorCACert, "\n"), "\n\t\t")
+	indenter := strings.NewReplacer("\n", "\n\t\t")
+	boshCACert := indenter.Replace(info.Config.DirectorCACert)
+	credhubCACert := indenter.Replace(info.Config.CredhubCACert)
 
 	str := "\n"
 	str += fmt.Sprintf("Deployment:\n\tIAAS:   aws\n\tRegion: %s\n\n", info.Config.Region)
@@ -67,6 +69,7 @@ func (info *Info) String() string {
 	}
 	str += "\n\n"
 	str += fmt.Sprintf("Concourse credentials:\n\tusername: %s\n\tpassword: %s\n\tURL:      https://%s\n\n", info.Config.ConcourseUsername, info.Config.ConcoursePassword, info.Config.Domain)
+	str += fmt.Sprintf("Credhub credentials:\n\tusername: %s\n\tpassword: %s\n\tURL:      https://%s\n\tCA Cert:\n\t\t%s\n", info.Config.CredhubUsername, info.Config.CredhubPassword, info.Config.CredhubURL, credhubCACert)
 	str += fmt.Sprintf("Grafana credentials:\n\tusername: %s\n\tpassword: %s\n\tURL:      https://%s:3000\n\n", info.Config.ConcourseUsername, info.Config.ConcoursePassword, info.Config.Domain)
 	str += fmt.Sprintf("Bosh credentials:\n\tusername: %s\n\tpassword: %s\n\tIP:       %s\n\tCA Cert:\n\t\t%s\n", info.Config.DirectorUsername, info.Config.DirectorPassword, info.Terraform.DirectorPublicIP.Value, boshCACert)
 
