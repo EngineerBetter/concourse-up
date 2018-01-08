@@ -8,7 +8,7 @@ rm -f concourse-bosh-release/concourse-*-*.tgz
 
 echo "$BOSH_CA_CERT" > bosh_ca_cert.pem
 
-bosh="bosh-cli --non-interactive --environment $BOSH_TARGET --client $BOSH_USERNAME --client-secret $BOSH_PASSWORD --ca-cert bosh_ca_cert.pem"
+bosh="bosh --non-interactive --environment $BOSH_TARGET --client $BOSH_USERNAME --client-secret $BOSH_PASSWORD --ca-cert bosh_ca_cert.pem"
 
 concourse_stemcell_version=$(cat concourse-stemcell/version)
 concourse_stemcell_url=$(cat concourse-stemcell/url)
