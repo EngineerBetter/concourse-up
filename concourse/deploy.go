@@ -268,6 +268,10 @@ func (client *Client) deployBosh(config *config.Config, metadata *terraform.Meta
 	if err == nil {
 		err = err1
 	}
+	err1 = client.configClient.StoreAsset(bosh.CredsFilename, boshCredsBytes)
+	if err == nil {
+		err = err1
+	}
 	if err != nil {
 		return err
 	}
@@ -285,7 +289,7 @@ func (client *Client) deployBosh(config *config.Config, metadata *terraform.Meta
 	}
 	config.CredhubCACert = cc.CACert.Cert
 	config.CredhubPassword = cc.Password
-	config.CredhubURL = fmt.Sprintf("https://%s:8844/", metadata.ATCPublicIP)
+	config.CredhubURL = fmt.Sprintf("https://%s:8844/", metadata.ATCPublicIP.Value)
 	config.CredhubUsername = "credhub-cli"
 
 	return nil
@@ -364,7 +368,8 @@ fly --target %s login%s --concourse-url https://%s --username %s --password %s
 Metrics available at https://%s:3000 using the same username and password
 
 Log into credhub with:
-credhub login -u %s -p %s -s %s --ca-cert %q`,
+credhub login -u %s -p %s -s %s --ca-cert %q
+`,
 		config.Project,
 		flags,
 		config.Domain,
