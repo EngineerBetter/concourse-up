@@ -1,8 +1,9 @@
 package concourse
 
 import (
-	"fmt"
+	"bytes"
 	"strings"
+	"text/template"
 
 	"github.com/EngineerBetter/concourse-up/bosh"
 	"github.com/EngineerBetter/concourse-up/config"
@@ -55,25 +56,57 @@ func (client *Client) FetchInfo() (*Info, error) {
 	}, nil
 }
 
+const infoTemplate = `Deployment:
+	IAAS:   aws
+	Region: {{.Config.Region}}
+
+Workers:
+	Count:              {{.Config.ConcourseWorkerCount}}
+	Size:               {{.Config.ConcourseWorkerSize}}
+	Outbound Public IP: {{.Terraform.NatGatewayIP.Value}}
+
+Instances:
+{{range .Instances}}
+	{{.Name}} {{.IP | replace "\n" ","}} {{.State}}
+{{end}}
+
+Concourse credentials:
+	username: {{.Config.ConcourseUsername}}
+	password: {{.Config.ConcoursePassword}}
+	URL:      https://{{.Config.Domain}}
+
+Credhub credentials:
+	username: {{.Config.CredhubUsername}}
+	password: {{.Config.CredhubPassword}}
+	URL:      {{.Config.CredhubURL}}
+	CA Cert:
+		{{ .Config.CredhubCACert | replace "\n" "\n\t\t"}}
+		
+Grafana credentials:
+	username: {{.Config.ConcourseUsername}}
+	password: {{.Config.ConcoursePassword}}
+	URL:      https://{{.Config.Domain}}:3000
+
+Bosh credentials:
+	username: {{.Config.DirectorUsername}}
+	password: {{.Config.DirectorPassword}}
+	IP:       {{.Terraform.DirectorPublicIP.Value}}
+	CA Cert:
+		{{ .Config.DirectorCACert | replace "\n" "\n\t\t"}}
+		
+Built by {{"EngineerBetter http://engineerbetter.com" | blue}}`
+
 func (info *Info) String() string {
-	indenter := strings.NewReplacer("\n", "\n\t\t")
-	boshCACert := indenter.Replace(info.Config.DirectorCACert)
-	credhubCACert := indenter.Replace(info.Config.CredhubCACert)
-
-	str := "\n"
-	str += fmt.Sprintf("Deployment:\n\tIAAS:   aws\n\tRegion: %s\n\n", info.Config.Region)
-	str += fmt.Sprintf("Workers:\n\tCount:              %d\n\tSize:               %s\n\tOutbound Public IP: %s\n\n", info.Config.ConcourseWorkerCount, info.Config.ConcourseWorkerSize, info.Terraform.NatGatewayIP.Value)
-	str += "Instances:"
-	for _, instance := range info.Instances {
-		str += fmt.Sprintf("\n\t%s\t%s\t%s", instance.Name, instance.IP, instance.State)
+	t := template.Must(template.New("info").Funcs(template.FuncMap{
+		"replace": func(old, new, s string) string {
+			return strings.Replace(s, old, new, -1)
+		},
+		"blue": color.New(color.FgCyan, color.Bold).Sprint,
+	}).Parse(infoTemplate))
+	var buf bytes.Buffer
+	err := t.Execute(&buf, info)
+	if err != nil {
+		panic(err)
 	}
-	str += "\n\n"
-	str += fmt.Sprintf("Concourse credentials:\n\tusername: %s\n\tpassword: %s\n\tURL:      https://%s\n\n", info.Config.ConcourseUsername, info.Config.ConcoursePassword, info.Config.Domain)
-	str += fmt.Sprintf("Credhub credentials:\n\tusername: %s\n\tpassword: %s\n\tURL:      %s\n\tCA Cert:\n\t\t%s\n", info.Config.CredhubUsername, info.Config.CredhubPassword, info.Config.CredhubURL, credhubCACert)
-	str += fmt.Sprintf("Grafana credentials:\n\tusername: %s\n\tpassword: %s\n\tURL:      https://%s:3000\n\n", info.Config.ConcourseUsername, info.Config.ConcoursePassword, info.Config.Domain)
-	str += fmt.Sprintf("Bosh credentials:\n\tusername: %s\n\tpassword: %s\n\tIP:       %s\n\tCA Cert:\n\t\t%s\n", info.Config.DirectorUsername, info.Config.DirectorPassword, info.Terraform.DirectorPublicIP.Value, boshCACert)
-
-	str += fmt.Sprintf("Built by %s %s\n", blue("EngineerBetter"), blue("http://engineerbetter.com"))
-
-	return str
+	return buf.String()
 }

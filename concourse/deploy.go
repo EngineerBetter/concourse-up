@@ -3,6 +3,7 @@ package concourse
 import (
 	"fmt"
 	"io"
+	"text/template"
 
 	"gopkg.in/yaml.v2"
 
@@ -356,33 +357,18 @@ func (client *Client) setHostedZone(config *config.Config) error {
 	return nil
 }
 
-func writeDeploySuccessMessage(config *config.Config, metadata *terraform.Metadata, stdout io.Writer) error {
-	flags := ""
-	if !config.ConcourseUserProvidedCert {
-		flags = " --insecure"
-	}
-	_, err := stdout.Write([]byte(fmt.Sprintf(
-		`DEPLOY SUCCESSFUL. Log in with:
-fly --target %s login%s --concourse-url https://%s --username %s --password %s
+const deployMsg = `DEPLOY SUCCESSFUL. Log in with:
+fly --target {{.Project}} login{{if not .ConcourseUserProvidedCert}} --insecure{{end}} --concourse-url https://{{.Domain}} --username {{.ConcourseUsername}} --password {{.ConcoursePassword}}
 
-Metrics available at https://%s:3000 using the same username and password
+Metrics available at https://{{.Domain}}:3000 using the same username and password
 
 Log into credhub with:
-credhub login -u %s -p %s -s %s --ca-cert %q
-`,
-		config.Project,
-		flags,
-		config.Domain,
-		config.ConcourseUsername,
-		config.ConcoursePassword,
-		config.Domain,
-		config.CredhubUsername,
-		config.CredhubPassword,
-		config.CredhubURL,
-		config.CredhubCACert,
-	)))
+credhub login -u {{.CredhubUsername}} -p {{.CredhubPassword}} -s {{.CredhubURL}} --ca-cert {{.CredhubCACert | printf "%q"}}
+`
 
-	return err
+func writeDeploySuccessMessage(config *config.Config, metadata *terraform.Metadata, stdout io.Writer) error {
+	t := template.Must(template.New("deploy").Parse(deployMsg))
+	return t.Execute(stdout, config)
 }
 
 func writeConfigLoadedSuccessMessage(stdout io.Writer) error {
