@@ -309,7 +309,6 @@ jobs:
         globs: [concourse-up-linux-amd64]
   - aggregate:
     - task: system-test-alt-region
-      image: image
       file: concourse-up/ci/tasks/system-test-alt-region.yml
       params:
         AWS_ACCESS_KEY_ID: ((concourse_up_test_access_key_id))
@@ -322,7 +321,6 @@ jobs:
           text: |
             <!channel> Concourse Up alt region system test failure!
     - task: system-test-update
-      image: image
       file: concourse-up/ci/tasks/system-test-update.yml
       params:
         AWS_ACCESS_KEY_ID: ((concourse_up_test_access_key_id))
@@ -335,7 +333,6 @@ jobs:
           text: |
             <!channel> Concourse Up self update system test failure!
     - task: system-test
-      image: image
       file: concourse-up/ci/tasks/system-test.yml
       params:
         AWS_ACCESS_KEY_ID: ((concourse_up_test_access_key_id))
