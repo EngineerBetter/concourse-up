@@ -3,8 +3,8 @@ package config_test
 import (
 	. "github.com/EngineerBetter/concourse-up/config"
 	"github.com/EngineerBetter/concourse-up/testsupport"
-
 	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/ginkgo/extensions/table"
 	. "github.com/onsi/gomega"
 	"github.com/onsi/gomega/types"
 )
@@ -35,8 +35,20 @@ var _ = Describe("Client", func() {
 			WorkerSize:  "xlarge",
 			DBSize:      "medium",
 			DBSizeIsSet: false,
+			RestrictIPs: "0.0.0.0",
 		}
 	})
+
+	DescribeTable("parseCDIRBlocks",
+		func(in, out string) {
+			b, err := ParseCIDRBlocks(in)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(b.String()).To(Equal(out))
+		},
+		Entry("Single IP", "8.8.8.8", `"8.8.8.8/32"`),
+		Entry("Single CIDR Block", "1.2.3.0/28", `"1.2.3.0/28"`),
+		Entry("IP and CIDR Block", "8.8.8.8,1.2.3.0/28", `"8.8.8.8/32", "1.2.3.0/28"`),
+	)
 
 	Describe("LoadOrCreate", func() {
 		Context("When the there is no existing config", func() {

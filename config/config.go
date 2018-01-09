@@ -63,9 +63,10 @@ type Config struct {
 	WorkerFingerprint         string `json:"worker_fingerprint"`
 	WorkerPrivateKey          string `json:"worker_private_key"`
 	WorkerPublicKey           string `json:"worker_public_key"`
+	RestrictIPs               string `json:"restrict_ips"`
 }
 
-func generateDefaultConfig(iaas, project, deployment, configBucket, region, rdsInstanceClass string) (*Config, error) {
+func generateDefaultConfig(iaas, project, deployment, configBucket, region string) (*Config, error) {
 	privateKey, publicKey, _, err := util.GenerateSSHKeyPair()
 	if err != nil {
 		return nil, err
@@ -115,7 +116,6 @@ func generateDefaultConfig(iaas, project, deployment, configBucket, region, rdsI
 		Project:                  project,
 		PublicKey:                strings.TrimSpace(string(publicKey)),
 		RDSDefaultDatabaseName:   "bosh",
-		RDSInstanceClass:         rdsInstanceClass,
 		RDSPassword:              util.GeneratePassword(),
 		RDSUsername:              "admin" + util.GeneratePassword(),
 		Region:                   region,
@@ -131,4 +131,10 @@ func generateDefaultConfig(iaas, project, deployment, configBucket, region, rdsI
 	}
 
 	return &conf, nil
+}
+
+func updateConfig(c *Config, rdsInstanceClass string, ingressAddresses cidrBlocks) error {
+	c.RDSInstanceClass = rdsInstanceClass
+	c.RestrictIPs = ingressAddresses.String()
+	return nil
 }

@@ -2,6 +2,9 @@
 	"ImportPath": "github.com/EngineerBetter/concourse-up",
 	"GoVersion": "go1.8",
 	"GodepVersion": "v79",
+	"Packages": [
+		"./..."
+	],
 	"Deps": [
 		{
 			"ImportPath": "github.com/asaskevich/govalidator",
@@ -190,6 +193,11 @@
 		},
 		{
 			"ImportPath": "github.com/onsi/ginkgo/config",
+			"Comment": "v1.2.0-90-gbb93381",
+			"Rev": "bb93381d543b0e5725244abe752214a110791d01"
+		},
+		{
+			"ImportPath": "github.com/onsi/ginkgo/extensions/table",
 			"Comment": "v1.2.0-90-gbb93381",
 			"Rev": "bb93381d543b0e5725244abe752214a110791d01"
 		},

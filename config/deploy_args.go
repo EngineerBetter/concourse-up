@@ -19,6 +19,7 @@ type DeployArgs struct {
 	DBSize      string
 	// DBSizeIsSet is true if the user has manually specified the db-size (ie, it's not the default)
 	DBSizeIsSet bool
+	RestrictIPs string
 }
 
 // WorkerSizes are the permitted concourse worker sizes
@@ -29,10 +30,10 @@ var WebSizes = []string{"small", "medium", "large", "xlarge", "2xlarge"}
 
 // DBSizes maps SML sizes to RDS instance classes
 var DBSizes = map[string]string{
-	"small":  "db.t2.small",
-	"medium": "db.t2.medium",
-	"large":  "db.m4.large",
-	"xlarge": "db.m4.xlarge",
+	"small":   "db.t2.small",
+	"medium":  "db.t2.medium",
+	"large":   "db.m4.large",
+	"xlarge":  "db.m4.xlarge",
 	"2xlarge": "db.m4.2xlarge",
 	"4xlarge": "db.m4.4xlarge",
 }

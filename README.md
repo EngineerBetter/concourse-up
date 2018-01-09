@@ -188,6 +188,12 @@ Concourse-up now automatically deploys Influxdb, Riemann, and Grafana on the web
 - Containers
 - Disk usage
 
+## Firewall
+
+Concourse-up normally allows incomming traffic from any address to reach your web node. You can use the `--restrict-ips` flag to add firewall rules to prevent this.
+For example to deploy Concourse-up and only allow traffic from your local machine, you could use the command `concourse-up deploy --restrict-ips $(dig +short myip.opendns.com @resolver1.opendns.com)`.
+`--restrict-ips` takes a comma seperated list of IP addresses or CIDR ranges.
+
 ## Estimated Cost
 
 By default, `concourse-up` deploys to the AWS eu-west-1 (Ireland) region, and uses spot instances for large and xlarge Concourse VMs. The estimated monthly cost is as follows:

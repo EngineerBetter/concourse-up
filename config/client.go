@@ -1,8 +1,11 @@
 package config
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
+	"net"
+	"strings"
 
 	"github.com/EngineerBetter/concourse-up/iaas"
 )
@@ -101,15 +104,49 @@ func (client *Client) Load() (*Config, error) {
 	return &conf, nil
 }
 
+type cidrBlocks []*net.IPNet
+
+func parseCIDRBlocks(s string) (cidrBlocks, error) {
+	var x cidrBlocks
+	for _, ip := range strings.Split(s, ",") {
+		ip = strings.TrimSpace(ip)
+		_, ipNet, err := net.ParseCIDR(ip)
+		if err != nil {
+			ipNet = &net.IPNet{
+				IP:   net.ParseIP(ip),
+				Mask: net.CIDRMask(32, 32),
+			}
+		}
+		if ipNet.IP == nil {
+			return nil, fmt.Errorf("could not parse %q as an IP address or CIDR range", ip)
+		}
+		x = append(x, ipNet)
+	}
+	return x, nil
+}
+
+func (b cidrBlocks) String() string {
+	var buf bytes.Buffer
+	for i, ipNet := range b {
+		if i > 0 {
+			fmt.Fprintf(&buf, ", %q", ipNet)
+		} else {
+
+			fmt.Fprintf(&buf, "%q", ipNet)
+		}
+	}
+	return buf.String()
+}
+
 // LoadOrCreate loads an existing config file from S3, or creates a default if one doesn't already exist
 func (client *Client) LoadOrCreate(deployArgs *DeployArgs) (*Config, bool, error) {
+
 	config, err := generateDefaultConfig(
 		deployArgs.IAAS,
 		client.project,
 		client.deployment(),
 		client.configBucket(),
 		deployArgs.AWSRegion,
-		DBSizes[deployArgs.DBSize],
 	)
 	if err != nil {
 		return nil, false, err
@@ -130,6 +167,13 @@ func (client *Client) LoadOrCreate(deployArgs *DeployArgs) (*Config, bool, error
 		return nil, false, err
 	}
 	if err := json.Unmarshal(configBytes, config); err != nil {
+		return nil, false, err
+	}
+	restrict, err := parseCIDRBlocks(deployArgs.RestrictIPs)
+	if err != nil {
+		return nil, false, err
+	}
+	if err := updateConfig(config, DBSizes[deployArgs.DBSize], restrict); err != nil {
 		return nil, false, err
 	}
 	return config, createdNewFile, nil

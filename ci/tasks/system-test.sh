@@ -95,7 +95,7 @@ fly --target system-test-custom-domain trigger-job \
   --job hello/hello \
   --watch
 
-echo "DEPLOY WITH USER PROVIDED CERT, 2 LARGE WORKERS"
+echo "DEPLOY WITH USER PROVIDED CERT, 2 LARGE WORKERS, FIREWALLED TO MY IP"
 
 custom_domain="$deployment-user.concourse-up.engineerbetter.com"
 
@@ -118,6 +118,7 @@ certstrap sign "$custom_domain" --CA "$deployment"
   --domain $custom_domain \
   --tls-cert "$(cat out/$custom_domain.crt)" \
   --tls-key "$(cat out/$custom_domain.key)" \
+  --restrict-ips $(dig +short myip.opendns.com @resolver1.opendns.com)
   --workers 2 \
   --worker-size large
 
