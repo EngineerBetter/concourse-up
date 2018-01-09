@@ -188,9 +188,13 @@ Concourse-up now automatically deploys Influxdb, Riemann, and Grafana on the web
 - Containers
 - Disk usage
 
+## Credential Management
+
+Concourse-up deploys the [credhub](https://github.com/cloudfoundry-incubator/credhub) service alongside Concourse and configures Concourse to use it. More detail on how credhub integrates with Concourse can be found [here](https://concourse.ci/creds.html). The credentials for credhub are output after a successful `$ concourse-up deploy $deployment`. Alternatively, you can get them for an existing deployment by running `$ concourse-up info $deployment`.
+
 ## Firewall
 
-Concourse-up normally allows incomming traffic from any address to reach your web node. You can use the `--restrict-ips` flag to add firewall rules to prevent this.
+Concourse-up normally allows incoming traffic from any address to reach your web node. You can use the `--restrict-ips` flag to add firewall rules to prevent this.
 For example to deploy Concourse-up and only allow traffic from your local machine, you could use the command `concourse-up deploy --restrict-ips $(dig +short myip.opendns.com @resolver1.opendns.com)`.
 `--restrict-ips` takes a comma seperated list of IP addresses or CIDR ranges.
 
