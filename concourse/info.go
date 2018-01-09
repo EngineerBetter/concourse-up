@@ -18,8 +18,6 @@ type Info struct {
 	Instances []bosh.Instance     `json:"instances"`
 }
 
-var blue = color.New(color.FgCyan, color.Bold).SprintfFunc()
-
 // FetchInfo fetches and builds the info
 func (client *Client) FetchInfo() (*Info, error) {
 	config, err := client.configClient.Load()

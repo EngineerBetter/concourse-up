@@ -155,7 +155,8 @@ func (client *Client) LoadOrCreate(deployArgs *DeployArgs) (*Config, bool, error
 	if err != nil {
 		return nil, false, err
 	}
-	if err = client.iaas.EnsureBucketExists(client.configBucket()); err != nil {
+	err = client.iaas.EnsureBucketExists(client.configBucket())
+	if err != nil {
 		return nil, false, err
 	}
 	configBytes, createdNewFile, err := client.iaas.EnsureFileExists(
@@ -166,14 +167,16 @@ func (client *Client) LoadOrCreate(deployArgs *DeployArgs) (*Config, bool, error
 	if err != nil {
 		return nil, false, err
 	}
-	if err := json.Unmarshal(configBytes, config); err != nil {
+	err = json.Unmarshal(configBytes, config)
+	if err != nil {
 		return nil, false, err
 	}
 	restrict, err := parseCIDRBlocks(deployArgs.RestrictIPs)
 	if err != nil {
 		return nil, false, err
 	}
-	if err := updateConfig(config, DBSizes[deployArgs.DBSize], restrict); err != nil {
+	err = updateConfig(config, DBSizes[deployArgs.DBSize], restrict)
+	if err != nil {
 		return nil, false, err
 	}
 	return config, createdNewFile, nil
