@@ -171,11 +171,11 @@ func (client *Client) LoadOrCreate(deployArgs *DeployArgs) (*Config, bool, error
 	if err != nil {
 		return nil, false, err
 	}
-	restrict, err := parseCIDRBlocks(deployArgs.RestrictIPs)
+	allow, err := parseCIDRBlocks(deployArgs.AllowIPs)
 	if err != nil {
 		return nil, false, err
 	}
-	err = updateConfig(config, DBSizes[deployArgs.DBSize], restrict)
+	err = updateConfig(config, DBSizes[deployArgs.DBSize], allow)
 	if err != nil {
 		return nil, false, err
 	}

@@ -63,7 +63,7 @@ type Config struct {
 	WorkerFingerprint         string `json:"worker_fingerprint"`
 	WorkerPrivateKey          string `json:"worker_private_key"`
 	WorkerPublicKey           string `json:"worker_public_key"`
-	RestrictIPs               string `json:"restrict_ips"`
+	AllowIPs                  string `json:"allow_ips"`
 }
 
 func generateDefaultConfig(iaas, project, deployment, configBucket, region string) (*Config, error) {
@@ -135,6 +135,6 @@ func generateDefaultConfig(iaas, project, deployment, configBucket, region strin
 
 func updateConfig(c *Config, rdsInstanceClass string, ingressAddresses cidrBlocks) error {
 	c.RDSInstanceClass = rdsInstanceClass
-	c.RestrictIPs = ingressAddresses.String()
+	c.AllowIPs = ingressAddresses.String()
 	return nil
 }

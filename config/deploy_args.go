@@ -19,7 +19,7 @@ type DeployArgs struct {
 	DBSize      string
 	// DBSizeIsSet is true if the user has manually specified the db-size (ie, it's not the default)
 	DBSizeIsSet bool
-	RestrictIPs string
+	AllowIPs    string
 }
 
 // WorkerSizes are the permitted concourse worker sizes

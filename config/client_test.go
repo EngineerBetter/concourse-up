@@ -35,7 +35,7 @@ var _ = Describe("Client", func() {
 			WorkerSize:  "xlarge",
 			DBSize:      "medium",
 			DBSizeIsSet: false,
-			RestrictIPs: "0.0.0.0",
+			AllowIPs:    "0.0.0.0",
 		}
 	})
 

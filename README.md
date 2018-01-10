@@ -194,9 +194,9 @@ Concourse-up deploys the [credhub](https://github.com/cloudfoundry-incubator/cre
 
 ## Firewall
 
-Concourse-up normally allows incoming traffic from any address to reach your web node. You can use the `--restrict-ips` flag to add firewall rules to prevent this.
-For example to deploy Concourse-up and only allow traffic from your local machine, you could use the command `concourse-up deploy --restrict-ips $(dig +short myip.opendns.com @resolver1.opendns.com)`.
-`--restrict-ips` takes a comma seperated list of IP addresses or CIDR ranges.
+Concourse-up normally allows incoming traffic from any address to reach your web node. You can use the `--allow-ips` flag to add firewall rules to prevent this.
+For example to deploy Concourse-up and only allow traffic from your local machine, you could use the command `concourse-up deploy --allow-ips $(dig +short myip.opendns.com @resolver1.opendns.com)`.
+`--allow-ips` takes a comma seperated list of IP addresses or CIDR ranges.
 
 ## Estimated Cost
 

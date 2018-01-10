@@ -87,11 +87,11 @@ var deployFlags = []cli.Flag{
 		Destination: &deployArgs.DBSize,
 	},
 	cli.StringFlag{
-		Name:        "restrict-ips",
-		Usage:       "(optional) Comma seperated list of IP addresses or CIDR ranges to restrict access too",
-		EnvVar:      "RESTRICT_IPS",
+		Name:        "allow-ips",
+		Usage:       "(optional) Comma seperated list of IP addresses or CIDR ranges to allow access too",
+		EnvVar:      "ALLOW_IPS",
 		Value:       "0.0.0.0/0",
-		Destination: &deployArgs.RestrictIPs,
+		Destination: &deployArgs.AllowIPs,
 	},
 }
 
