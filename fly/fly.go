@@ -26,6 +26,9 @@ var LinuxBinaryURL = "COMPILE_TIME_VARIABLE_fly_linux_binary_url"
 // WindowsBinaryURL is a compile-time variable set with -ldflags
 var WindowsBinaryURL = "COMPILE_TIME_VARIABLE_fly_windows_binary_url"
 
+// ConcourseUpVersion is a compile-time variable set with -ldflags
+var ConcourseUpVersion = "COMPILE_TIME_VARIABLE_fly_concourse_up_version"
+
 // IClient represents an interface for a client
 type IClient interface {
 	CanConnect() (bool, error)
@@ -163,7 +166,11 @@ func (client *Client) SetDefaultPipeline(deployArgs *config.DeployArgs, config *
 		return err
 	}
 
-	return nil
+	if err := client.run("pause-job", "--job", pipelineName+"/self-update"); err != nil {
+		return err
+	}
+
+	return client.run("unpause-pipeline", "--pipeline", pipelineName)
 }
 
 func (client *Client) writePipelineConfig(pipelinePath string, deployArgs *config.DeployArgs, config *config.Config) error {
@@ -268,6 +275,7 @@ func (client *Client) buildDefaultPipelineParams(deployArgs *config.DeployArgs, 
 		FlagWebSize:        deployArgs.WebSize,
 		FlagWorkerSize:     deployArgs.WorkerSize,
 		FlagWorkers:        deployArgs.WorkerCount,
+		ConcourseUpVersion: ConcourseUpVersion,
 	}, nil
 }
 
@@ -283,6 +291,7 @@ type defaultPipelineParams struct {
 	FlagWebSize        string
 	FlagWorkerSize     string
 	FlagWorkers        int
+	ConcourseUpVersion string
 }
 
 // Indent is a helper function to indent the field a given number of spaces
@@ -298,13 +307,58 @@ resources:
   source:
     user: engineerbetter
     repository: concourse-up
-    pre_release: true
+	pre_release: true
+- name: every-month
+  type: time
+  source: {interval: 730h}
 
 jobs:
 - name: self-update
+  serial_groups: [cup]
   serial: true
   plan:
   - get: concourse-up-release
+    trigger: true
+  - task: update
+    params:
+      AWS_REGION: "<% .FlagAWSRegion %>"
+      DOMAIN: "<% .FlagDomain %>"
+      TLS_CERT: |-
+        <% .Indent "8" .FlagTLSCert %>
+      TLS_KEY: |-
+        <% .Indent "8" .FlagTLSKey %>
+      WORKERS: "<% .FlagWorkers %>"
+      WORKER_SIZE: "<% .FlagWorkerSize %>"
+      WEB_SIZE: "<% .FlagWebSize %>"
+      DEPLOYMENT: "<% .Deployment %>"
+      AWS_ACCESS_KEY_ID: "<% .AWSAccessKeyID %>"
+      AWS_SECRET_ACCESS_KEY: "<% .AWSSecretAccessKey %>"
+      SELF_UPDATE: true
+    config:
+      platform: linux
+      image_resource:
+        type: docker-image
+        source:
+          repository: engineerbetter/cup-image
+      inputs:
+      - name: concourse-up-release
+      run:
+        path: bash
+        args:
+        - -c
+        - |
+          set -eux
+
+          cd concourse-up-release
+          chmod +x concourse-up-linux-amd64
+		  ./concourse-up-linux-amd64 deploy $DEPLOYMENT
+- name: renew-cert
+  serial_groups: [cup]
+  serial: true
+  plan:
+  - get: concourse-up-release
+	version: {tag: <% .ConcourseUpVersion %> }
+  - get: every-month
     trigger: true
   - task: update
     params:

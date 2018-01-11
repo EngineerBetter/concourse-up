@@ -1,9 +1,12 @@
 package concourse
 
 import (
+	"crypto/x509"
+	"encoding/pem"
 	"fmt"
 	"io"
 	"text/template"
+	"time"
 
 	"gopkg.in/yaml.v2"
 
@@ -194,6 +197,18 @@ func (client *Client) ensureDirectorCerts(config *config.Config, metadata *terra
 	return config, nil
 }
 
+func timeTillExpiry(cert string) time.Duration {
+	block, _ := pem.Decode([]byte(cert))
+	if block == nil {
+		return 0
+	}
+	c, err := x509.ParseCertificate(block.Bytes)
+	if err != nil {
+		return 0
+	}
+	return time.Until(c.NotAfter)
+}
+
 func (client *Client) ensureConcourseCerts(domainUpdated bool, config *config.Config, metadata *terraform.Metadata) (*config.Config, error) {
 	if client.deployArgs.TLSCert != "" {
 		config.ConcourseCert = client.deployArgs.TLSCert
@@ -205,7 +220,7 @@ func (client *Client) ensureConcourseCerts(domainUpdated bool, config *config.Co
 
 	// Skip concourse re-deploy if certs have already been set,
 	// unless domain has changed
-	if !(config.ConcourseCert == "" || domainUpdated) {
+	if config.ConcourseCert != "" && !domainUpdated && timeTillExpiry(config.ConcourseCert) > 28*24*time.Hour {
 		return config, nil
 	}
 

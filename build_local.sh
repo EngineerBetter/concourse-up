@@ -83,6 +83,7 @@ go build -ldflags "
   -X github.com/EngineerBetter/concourse-up/fly.DarwinBinaryURL=$fly_darwin_binary_url
   -X github.com/EngineerBetter/concourse-up/fly.LinuxBinaryURL=$fly_linux_binary_url
   -X github.com/EngineerBetter/concourse-up/fly.WindowsBinaryURL=$fly_windows_binary_url
+  -X github.com/EngineerBetter/concourse-up/fly.ConcourseUpVersion=$version
   -X github.com/EngineerBetter/concourse-up/director.DarwinBinaryURL=$director_darwin_binary_url
   -X github.com/EngineerBetter/concourse-up/director.LinuxBinaryURL=$director_linux_binary_url
   -X github.com/EngineerBetter/concourse-up/director.WindowsBinaryURL=$director_windows_binary_url

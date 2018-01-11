@@ -1,10 +1,19 @@
 package certs
 
 import (
+	"crypto"
+	"crypto/rand"
+	"crypto/rsa"
+	"fmt"
 	"net"
+	"os"
 	"strings"
+	"sync"
+	"time"
 
 	"github.com/square/certstrap/pkix"
+	"github.com/xenolf/lego/acme"
+	"github.com/xenolf/lego/providers/dns/route53"
 )
 
 // Certs contains certificates and keys
@@ -13,9 +22,94 @@ type Certs struct {
 	Key    []byte
 	Cert   []byte
 }
+type user struct {
+	k crypto.PrivateKey
+	r *acme.RegistrationResource
+	sync.Once
+}
+
+func (u *user) GetEmail() string {
+	return "nobody@example.com"
+}
+
+func (u *user) GetRegistration() *acme.RegistrationResource {
+	return u.r
+}
+
+func (u *user) GetPrivateKey() crypto.PrivateKey {
+	u.Do(func() {
+		var err error
+		u.k, err = rsa.GenerateKey(rand.Reader, 2048)
+		if err != nil {
+			panic(err)
+		}
+	})
+	return u.k
+}
+
+func hasIP(x []string) bool {
+	for _, v := range x {
+		if net.ParseIP(v) != nil {
+			return true
+		}
+	}
+	return false
+}
+
+type timeoutProvider struct {
+	acme.ChallengeProvider
+	timeout, interval time.Duration
+}
+
+func (t timeoutProvider) Timeout() (timeout, interval time.Duration) {
+	return t.timeout, t.interval
+}
+
+func acmeURL() string {
+	if u := os.Getenv("CONCOURSE_UP_ACME_URL"); u != "" {
+		return u
+	}
+	return "https://acme-v01.api.letsencrypt.org/directory"
+}
 
 // Generate generates certs for use in a bosh director manifest
 func Generate(caName string, ipOrDomains ...string) (*Certs, error) {
+	if hasIP(ipOrDomains) {
+		return generateSelfSigned(caName, ipOrDomains...)
+	}
+	u := &user{}
+	c, err := acme.NewClient(acmeURL(), u, acme.RSA2048)
+	if err != nil {
+		return nil, err
+	}
+	c.ExcludeChallenges([]acme.Challenge{acme.HTTP01, acme.TLSSNI01})
+	r53, err := route53.NewDNSProvider()
+	if err != nil {
+		return nil, err
+	}
+	c.SetChallengeProvider(acme.DNS01, timeoutProvider{
+		r53,
+		10 * time.Minute,
+		1 * time.Second,
+	})
+	u.r, err = c.Register()
+	if err != nil {
+		return nil, err
+	}
+	c.AgreeToTOS()
+	resp, errs := c.ObtainCertificate(ipOrDomains, true, nil, false)
+	if len(errs) != 0 {
+		return nil, fmt.Errorf("%v", errs)
+	}
+	return &Certs{
+		CACert: resp.IssuerCertificate,
+		Key:    resp.PrivateKey,
+		Cert:   resp.Certificate,
+	}, nil
+}
+
+// Generate generates certs for use in a bosh director manifest
+func generateSelfSigned(caName string, ipOrDomains ...string) (*Certs, error) {
 	caCert, caKey, err := generateCACert(caName)
 	if err != nil {
 		return nil, err
