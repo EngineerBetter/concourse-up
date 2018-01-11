@@ -49,4 +49,3 @@ commit:
 push:
 	@echo Pushing release $(VERSION) to master
 	git push --tags
-	git push

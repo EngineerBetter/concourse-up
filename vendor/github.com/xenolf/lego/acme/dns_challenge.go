@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/miekg/dns"
+	"golang.org/x/net/publicsuffix"
 )
 
 type preCheckDNSFunc func(fqdn, value string) (bool, error)
@@ -241,6 +242,10 @@ func FindZoneByFqdn(fqdn string, nameservers []string) (string, error) {
 	labelIndexes := dns.Split(fqdn)
 	for _, index := range labelIndexes {
 		domain := fqdn[index:]
+		// Give up if we have reached the TLD
+		if isTLD(domain) {
+			break
+		}
 
 		in, err := dnsQuery(domain, dns.TypeSOA, nameservers, true)
 		if err != nil {
@@ -255,13 +260,6 @@ func FindZoneByFqdn(fqdn string, nameservers []string) (string, error) {
 
 		// Check if we got a SOA RR in the answer section
 		if in.Rcode == dns.RcodeSuccess {
-
-			// CNAME records cannot/should not exist at the root of a zone.
-			// So we skip a domain when a CNAME is found.
-			if dnsMsgContainsCNAME(in) {
-				continue
-			}
-
 			for _, ans := range in.Answer {
 				if soa, ok := ans.(*dns.SOA); ok {
 					zone := soa.Hdr.Name
@@ -275,12 +273,10 @@ func FindZoneByFqdn(fqdn string, nameservers []string) (string, error) {
 	return "", fmt.Errorf("Could not find the start of authority")
 }
 
-// dnsMsgContainsCNAME checks for a CNAME answer in msg
-func dnsMsgContainsCNAME(msg *dns.Msg) bool {
-	for _, ans := range msg.Answer {
-		if _, ok := ans.(*dns.CNAME); ok {
-			return true
-		}
+func isTLD(domain string) bool {
+	publicsuffix, _ := publicsuffix.PublicSuffix(UnFqdn(domain))
+	if publicsuffix == UnFqdn(domain) {
+		return true
 	}
 	return false
 }
