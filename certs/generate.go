@@ -148,7 +148,7 @@ func generateSelfSigned(caName string, ipOrDomains ...string) (*Certs, error) {
 }
 
 func signCSR(csr *pkix.CertificateSigningRequest, caCert *pkix.Certificate, caCertKey *pkix.Key) (*pkix.Certificate, error) {
-	crtOut, err := pkix.CreateCertificateHost(caCert, caCertKey, csr, 2)
+	crtOut, err := pkix.CreateCertificateHost(caCert, caCertKey, csr, time.Now().Add(2*365*24*time.Hour))
 	if err != nil {
 		return nil, err
 	}
@@ -165,7 +165,7 @@ func generateCACert(caName string) (*pkix.Certificate, *pkix.Key, error) {
 	caCert, err := pkix.CreateCertificateAuthority(
 		key,
 		"",
-		10,
+		time.Now().Add(10*365*24*time.Hour),
 		"",
 		"",
 		"",
