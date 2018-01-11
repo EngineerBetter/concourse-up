@@ -307,7 +307,7 @@ resources:
   source:
     user: engineerbetter
     repository: concourse-up
-	pre_release: true
+    pre_release: true
 - name: every-month
   type: time
   source: {interval: 730h}
@@ -351,13 +351,13 @@ jobs:
 
           cd concourse-up-release
           chmod +x concourse-up-linux-amd64
-		  ./concourse-up-linux-amd64 deploy $DEPLOYMENT
+          ./concourse-up-linux-amd64 deploy $DEPLOYMENT
 - name: renew-cert
   serial_groups: [cup]
   serial: true
   plan:
   - get: concourse-up-release
-	version: {tag: <% .ConcourseUpVersion %> }
+    version: {tag: <% .ConcourseUpVersion %> }
   - get: every-month
     trigger: true
   - task: update
