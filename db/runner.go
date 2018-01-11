@@ -58,6 +58,7 @@ func NewRunner(creds *Credentials) (Runner, error) {
 		Auth: []ssh.AuthMethod{
 			ssh.PublicKeys(key),
 		},
+		HostKeyCallback: ssh.InsecureIgnoreHostKey(), //TODO: probably don't do this
 	}
 
 	var once sync.Once
