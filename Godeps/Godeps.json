@@ -187,6 +187,11 @@
 			"Rev": "fc9e8d8ef48496124e79ae0df75490096eccf6fe"
 		},
 		{
+			"ImportPath": "github.com/miekg/dns",
+			"Comment": "v1.0.3-2-gf5ac34d",
+			"Rev": "f5ac34d755eb6975958108413c7802a782ca16c8"
+		},
+		{
 			"ImportPath": "github.com/onsi/ginkgo",
 			"Comment": "v1.2.0-90-gbb93381",
 			"Rev": "bb93381d543b0e5725244abe752214a110791d01"
@@ -352,6 +357,16 @@
 			"Rev": "0e00d5cdccc15ac51ff04e35767d69534f3666a3"
 		},
 		{
+			"ImportPath": "github.com/xenolf/lego/acme",
+			"Comment": "v0.4.1-8-gb929aa5",
+			"Rev": "b929aa5aab5ad2e197bb3d74ef99fac61bfa47bc"
+		},
+		{
+			"ImportPath": "github.com/xenolf/lego/providers/dns/route53",
+			"Comment": "v0.4.1-8-gb929aa5",
+			"Rev": "b929aa5aab5ad2e197bb3d74ef99fac61bfa47bc"
+		},
+		{
 			"ImportPath": "golang.org/x/crypto/curve25519",
 			"Rev": "77014cf7f9bde4925afeed52b7bf676d5f5b4285"
 		},
@@ -364,12 +379,51 @@
 			"Rev": "77014cf7f9bde4925afeed52b7bf676d5f5b4285"
 		},
 		{
+			"ImportPath": "golang.org/x/crypto/ocsp",
+			"Rev": "77014cf7f9bde4925afeed52b7bf676d5f5b4285"
+		},
+		{
 			"ImportPath": "golang.org/x/crypto/ssh",
 			"Rev": "77014cf7f9bde4925afeed52b7bf676d5f5b4285"
 		},
 		{
+			"ImportPath": "golang.org/x/net/bpf",
+			"Rev": "ab555f366c4508dbe0802550b1b20c46c5c18aa0"
+		},
+		{
+			"ImportPath": "golang.org/x/net/internal/iana",
+			"Rev": "ab555f366c4508dbe0802550b1b20c46c5c18aa0"
+		},
+		{
+			"ImportPath": "golang.org/x/net/internal/socket",
+			"Rev": "ab555f366c4508dbe0802550b1b20c46c5c18aa0"
+		},
+		{
+			"ImportPath": "golang.org/x/net/ipv4",
+			"Rev": "ab555f366c4508dbe0802550b1b20c46c5c18aa0"
+		},
+		{
+			"ImportPath": "golang.org/x/net/ipv6",
+			"Rev": "ab555f366c4508dbe0802550b1b20c46c5c18aa0"
+		},
+		{
 			"ImportPath": "golang.org/x/sys/unix",
 			"Rev": "07c182904dbd53199946ba614a412c61d3c548f5"
+		},
+		{
+			"ImportPath": "gopkg.in/square/go-jose.v1",
+			"Comment": "v1.1.0",
+			"Rev": "aa2e30fdd1fe9dd3394119af66451ae790d50e0d"
+		},
+		{
+			"ImportPath": "gopkg.in/square/go-jose.v1/cipher",
+			"Comment": "v1.1.0",
+			"Rev": "aa2e30fdd1fe9dd3394119af66451ae790d50e0d"
+		},
+		{
+			"ImportPath": "gopkg.in/square/go-jose.v1/json",
+			"Comment": "v1.1.0",
+			"Rev": "aa2e30fdd1fe9dd3394119af66451ae790d50e0d"
 		},
 		{
 			"ImportPath": "gopkg.in/urfave/cli.v1",
