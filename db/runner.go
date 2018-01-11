@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net"
+	"os"
 	"sync"
 	"time"
 
@@ -29,6 +30,22 @@ type Credentials struct {
 // Runner is function that runs SQL over a jumpbox
 type Runner func(sql string) error
 
+func writeTempFile(dir, prefix string, data []byte) (name string, err error) {
+	f, err := ioutil.TempFile(dir, prefix)
+	if err != nil {
+		return "", err
+	}
+	name = f.Name()
+	_, err = f.Write(data)
+	if err1 := f.Close(); err == nil {
+		err = err1
+	}
+	if err != nil {
+		os.Remove(name)
+	}
+	return name, err
+}
+
 // NewRunner returns a new SQL runner
 func NewRunner(creds *Credentials) (Runner, error) {
 	key, err := ssh.ParsePrivateKey(creds.SSHPrivateKey)
@@ -48,33 +65,30 @@ func NewRunner(creds *Credentials) (Runner, error) {
 	return func(sqlStr string) error {
 		var err error
 		once.Do(func() {
-			sshClient, err := ssh.Dial("tcp", fmt.Sprintf("%s:22", creds.SSHPublicIP), sshConfig)
+			var sshClient *ssh.Client
+			sshClient, err = ssh.Dial("tcp", fmt.Sprintf("%s:22", creds.SSHPublicIP), sshConfig)
 			if err != nil {
 				return
 			}
 
-			caCertFile, err := ioutil.TempFile("", "concourse-up")
+			var caCertFileName string
+			caCertFileName, err = writeTempFile("", "concourse-up", []byte(creds.CACert))
 			if err != nil {
 				return
 			}
-			defer caCertFile.Close()
-
-			if _, err = caCertFile.WriteString(creds.CACert); err != nil {
-				return
-			}
-			if err = caCertFile.Sync(); err != nil {
-				return
-			}
-
+			defer os.Remove(caCertFileName)
 			dialer := &sshDialer{client: sshClient}
 
 			sql.Register("postgres+ssh", dialer)
 
-			db, err = sql.Open("postgres+ssh", postgresArgs(creds, caCertFile.Name()))
+			db, err = sql.Open("postgres+ssh", postgresArgs(creds, caCertFileName))
 			if err != nil {
 				return
 			}
 		})
+		if err != nil {
+			return err
+		}
 		rows, err := db.Query(sqlStr)
 		if err != nil {
 			return err
