@@ -77,15 +77,11 @@ func NewRunner(creds *Credentials) (Runner, error) {
 			if err != nil {
 				return
 			}
-			defer os.Remove(caCertFileName)
 			dialer := &sshDialer{client: sshClient}
 
 			sql.Register("postgres+ssh", dialer)
 
 			db, err = sql.Open("postgres+ssh", postgresArgs(creds, caCertFileName))
-			if err != nil {
-				return
-			}
 		})
 		if err != nil {
 			return err
