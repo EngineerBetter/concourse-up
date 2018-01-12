@@ -129,7 +129,7 @@ certstrap sign "$custom_domain" --CA "$deployment"
   --domain $custom_domain \
   --tls-cert "$(cat out/$custom_domain.crt)" \
   --tls-key "$(cat out/$custom_domain.key)" \
-  --allow-ips $(dig +short myip.opendns.com @resolver1.opendns.com) \
+  --allow-ips 0.0.0.0/0,$(dig +short myip.opendns.com @resolver1.opendns.com) \
   --workers 2 \
   --worker-size large
 
