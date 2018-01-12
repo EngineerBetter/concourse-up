@@ -1,9 +1,13 @@
 #!/bin/bash
 
+set -e
 [ "$VERBOSE" ] && { set -x; export BOSH_LOG_LEVEL=debug; export BOSH_LOG_PATH=bosh.log; }
-set -eu
+if [ -z "$SYSTEM_TEST_ID" ]; then
+  SYSTEM_TEST_ID=$RANDOM
+fi
+deployment="system-test-$SYSTEM_TEST_ID"
+set -u
 
-deployment="system-test-$RANDOM"
 
 cleanup() {
   status=$?
