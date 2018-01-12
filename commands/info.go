@@ -87,7 +87,11 @@ var info = cli.Command{
 		case infoArgs.JSON:
 			return json.NewEncoder(os.Stdout).Encode(info)
 		case infoArgs.Env:
-			_, err := os.Stdout.WriteString(info.Env())
+			env, err := info.Env()
+			if err != nil {
+				return err
+			}
+			_, err = os.Stdout.WriteString(env)
 			return err
 		default:
 			_, err := fmt.Fprint(os.Stdout, info)

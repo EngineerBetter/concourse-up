@@ -144,11 +144,13 @@ export CREDHUB_CLIENT=credhub_cli
 export CREDHUB_SECRET={{.Config.CredhubPassword}}
 `))
 
-func (info *Info) Env() string {
+// Env returns a string that is suitable for a shell to evaluate that sets environment
+// varibles which are used to log into bosh and credhub
+func (info *Info) Env() (string, error) {
 	var buf bytes.Buffer
 	err := envTemplate.Execute(&buf, info)
 	if err != nil {
-		panic(err)
+		return "", err
 	}
-	return buf.String()
+	return buf.String(), nil
 }
