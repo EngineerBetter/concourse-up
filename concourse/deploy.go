@@ -376,7 +376,7 @@ fly --target {{.Project}} login{{if not .ConcourseUserProvidedCert}} --insecure{
 Metrics available at https://{{.Domain}}:3000 using the same username and password
 
 Log into credhub with:
-credhub login -u {{.CredhubUsername}} -p {{.CredhubPassword}} -s {{.CredhubURL}} --ca-cert {{.CredhubCACert | printf "%q"}}
+eval "$(concourse-up info --eval --region {{.Region}})"
 `
 
 func writeDeploySuccessMessage(config *config.Config, metadata *terraform.Metadata, stdout io.Writer) error {

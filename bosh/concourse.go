@@ -382,12 +382,12 @@ instance_groups:
         clients:
           credhub_cli:
             override: true
-            authorized-grant-types: password,refresh_token
+            authorized-grant-types: password,refresh_token,client_credentials
             scope: credhub.read,credhub.write
-            authorities: uaa.resource
+            authorities: uaa.resource,credhub.read,credhub.write
             access-token-validity: 30
             refresh-token-validity: 3600
-            secret: ""
+            secret: ((credhub_cli_password))
           atc_to_credhub:
             override: true
             authorized-grant-types: client_credentials
@@ -411,7 +411,7 @@ instance_groups:
         address: <% .DBHost %>
         port: <% .DBPort %>
         db_scheme: postgresql
-        tls_enabled: true 
+        tls_enabled: true
         databases:
         - tag: uaa
           name: uaa
@@ -434,7 +434,7 @@ instance_groups:
             url: *uaa-url
             verification_key: ((uaa-jwt.public_key))
             ca_certs:
-            - ((uaa-tls.ca)) 
+            - ((uaa-tls.ca))
         data_storage:
           type: postgres
           username: <% .DBUsername %>

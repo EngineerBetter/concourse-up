@@ -34,6 +34,11 @@ var infoFlags = []cli.Flag{
 		EnvVar:      "JSON",
 		Destination: &infoArgs.JSON,
 	},
+	cli.BoolFlag{
+		Name:        "env",
+		Usage:       "(optional) Output environment variables",
+		Destination: &infoArgs.Env,
+	},
 	cli.StringFlag{
 		Name:        "iaas",
 		Usage:       "(optional) IAAS, can be AWS or GCP",
@@ -78,16 +83,15 @@ var info = cli.Command{
 			return err
 		}
 
-		if infoArgs.JSON {
-			bytes, err := json.MarshalIndent(info, "", "  ")
-			if err != nil {
-				return err
-			}
-			fmt.Println(string(bytes))
-		} else {
-			fmt.Println(info.String())
+		switch {
+		case infoArgs.JSON:
+			return json.NewEncoder(os.Stdout).Encode(info)
+		case infoArgs.Env:
+			_, err := os.Stdout.WriteString(info.Env())
+			return err
+		default:
+			_, err := fmt.Fprint(os.Stdout, info)
+			return err
 		}
-
-		return nil
 	},
 }

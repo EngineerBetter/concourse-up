@@ -2,6 +2,8 @@ package concourse
 
 import (
 	"bytes"
+	"io/ioutil"
+	"os"
 	"strings"
 	"text/template"
 
@@ -79,7 +81,7 @@ Credhub credentials:
 	URL:      {{.Config.CredhubURL}}
 	CA Cert:
 		{{ .Config.CredhubCACert | replace "\n" "\n\t\t"}}
-		
+
 Grafana credentials:
 	username: {{.Config.ConcourseUsername}}
 	password: {{.Config.ConcoursePassword}}
@@ -91,7 +93,7 @@ Bosh credentials:
 	IP:       {{.Terraform.DirectorPublicIP.Value}}
 	CA Cert:
 		{{ .Config.DirectorCACert | replace "\n" "\n\t\t"}}
-		
+
 Built by {{"EngineerBetter http://engineerbetter.com" | blue}}`
 
 func (info *Info) String() string {
@@ -103,6 +105,48 @@ func (info *Info) String() string {
 	}).Parse(infoTemplate))
 	var buf bytes.Buffer
 	err := t.Execute(&buf, info)
+	if err != nil {
+		panic(err)
+	}
+	return buf.String()
+}
+
+func writeTempFile(data string) (name string, err error) {
+	f, err := ioutil.TempFile("", "")
+	if err != nil {
+		return "", err
+	}
+	name = f.Name()
+	_, err = f.WriteString(data)
+	if err1 := f.Close(); err == nil {
+		err = err1
+	}
+	if err != nil {
+		os.Remove(name)
+	}
+	return name, err
+}
+
+var envTemplate = template.Must(template.New("env").Funcs(template.FuncMap{
+	"to_file": writeTempFile,
+}).Parse(`
+export BOSH_CA_CERT='{{.Config.DirectorCACert}}'
+export BOSH_ENVIRONMENT={{.Terraform.DirectorPublicIP.Value}}
+export BOSH_DEPLOYMENT=concourse
+export BOSH_CLIENT={{.Config.DirectorUsername}}
+export BOSH_CLIENT_SECRET={{.Config.DirectorPassword}}
+export BOSH_GW_USER=vcap
+export BOSH_GW_HOST={{.Terraform.DirectorPublicIP.Value}}
+export BOSH_GW_PRIVATE_KEY={{.Config.PrivateKey | to_file}}
+export CREDHUB_SERVER={{.Config.CredhubURL}}
+export CREDHUB_CA_CERT='{{.Config.CredhubCACert}}'
+export CREDHUB_CLIENT=credhub_cli
+export CREDHUB_SECRET={{.Config.CredhubPassword}}
+`))
+
+func (info *Info) Env() string {
+	var buf bytes.Buffer
+	err := envTemplate.Execute(&buf, info)
 	if err != nil {
 		panic(err)
 	}

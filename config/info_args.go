@@ -4,5 +4,6 @@ package config
 type InfoArgs struct {
 	AWSRegion string
 	JSON      bool
-	IAAS                 string
+	IAAS      string
+	Env       bool
 }
