@@ -11,7 +11,13 @@ cleanup() {
   exit $status
 }
 
-trap cleanup EXIT
+set +u
+if [ -z "$SKIP_TEARDOWN" ]; then
+  trap cleanup EXIT
+else
+  trap "echo Skipping teardown" EXIT
+fi
+set -u
 
 cp "$BINARY_PATH" ./cup
 chmod +x ./cup

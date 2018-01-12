@@ -13,7 +13,13 @@ cleanup() {
   ./cup-new --non-interactive destroy $deployment
   exit $status
 }
-trap cleanup EXIT
+set +u
+if [ -z "$SKIP_TEARDOWN" ]; then
+  trap cleanup EXIT
+else
+  trap "echo Skipping teardown" EXIT
+fi
+set -u
 
 cp release/concourse-up-linux-amd64 ./cup-old
 cp "$BINARY_PATH" ./cup-new
