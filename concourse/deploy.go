@@ -26,7 +26,7 @@ func (client *Client) Deploy() error {
 		return err
 	}
 
-	initialDomain := config.Domain
+	isDomainUpdated := client.deployArgs.Domain != config.Domain
 
 	config, err = client.checkPreTerraformConfigRequirements(config)
 	if err != nil {
@@ -37,8 +37,6 @@ func (client *Client) Deploy() error {
 	if err != nil {
 		return err
 	}
-
-	isDomainUpdated := initialDomain != config.Domain
 	config, err = client.checkPreDeployConfigRequiments(isDomainUpdated, config, metadata)
 	if err != nil {
 		return err
