@@ -56,12 +56,6 @@ var info = cli.Command{
 			return errors.New("Usage is `concourse-up info <name>`")
 		}
 
-		logFile, err := os.Create("terraform.combined.log")
-		if err != nil {
-			return err
-		}
-		defer logFile.Close()
-
 		awsClient, err := iaas.New(infoArgs.IAAS, infoArgs.AWSRegion)
 		if err != nil {
 			return err
