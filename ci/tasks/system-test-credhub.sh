@@ -34,6 +34,7 @@ password=$(echo "$config" | jq -r '.config.concourse_password')
 echo "$config" | jq -r '.config.concourse_ca_cert' > generated-ca-cert.pem
 
 eval "$(./cup info --env $deployment)"
+credhub api
 credhub set -n /concourse/main/password -t password -w c1oudc0w
 
 fly --target system-test login \
