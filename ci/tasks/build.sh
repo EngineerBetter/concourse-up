@@ -60,6 +60,7 @@ mkdir -p "$GOPATH/src/github.com/EngineerBetter/concourse-up"
 mv concourse-up/* "$GOPATH/src/github.com/EngineerBetter/concourse-up"
 cd "$GOPATH/src/github.com/EngineerBetter/concourse-up"
 
+go generate ./...
 go build -ldflags "
   -X main.ConcourseUpVersion=$version
   -X github.com/EngineerBetter/concourse-up/bosh.ConcourseStemcellURL=$concourse_stemcell_url

@@ -1,7 +1,3 @@
-package terraform
-
-// AWSTemplate is a terraform configuration template for AWS
-const AWSTemplate = `
 terraform {
 	backend "s3" {
 		bucket = "<% .ConfigBucket %>"
@@ -629,4 +625,3 @@ output "bosh_db_port" {
 output "bosh_db_address" {
   value = "${aws_db_instance.default.address}"
 }
-`

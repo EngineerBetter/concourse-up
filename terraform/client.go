@@ -23,6 +23,11 @@ var LinuxBinaryURL = "COMPILE_TIME_VARIABLE_terraform_linux_binary_url"
 // WindowsBinaryURL is a compile-time variable set with -ldflags
 var WindowsBinaryURL = "COMPILE_TIME_VARIABLE_terraform_windows_binary_url"
 
+//go:generate go-bindata -pkg $GOPACKAGE assets/
+
+// AWSTemplate is a terraform configuration template for AWS
+var AWSTemplate = string(MustAsset("assets/main.tf"))
+
 // IClient is an interface for the terraform Client
 type IClient interface {
 	Output() (*Metadata, error)

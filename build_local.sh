@@ -46,6 +46,7 @@ terraform_darwin_binary_url=$(jq -r .terraform_darwin_binary_url compilation-var
 terraform_linux_binary_url=$(jq -r .terraform_linux_binary_url compilation-vars.json)
 terraform_windows_binary_url=$(jq -r .terraform_windows_binary_url compilation-vars.json)
 
+go generate ./...
 go build -ldflags "
   -X github.com/EngineerBetter/concourse-up/bosh.ConcourseStemcellURL=$concourse_stemcell_url
   -X github.com/EngineerBetter/concourse-up/bosh.ConcourseStemcellVersion=$concourse_stemcell_version

@@ -7,3 +7,4 @@ concourse-up-*.pem
 concourse-up-*.json
 .idea
 /concourse-up
+bindata.go
