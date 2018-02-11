@@ -16,19 +16,19 @@ func (client *Client) Deploy(state, creds []byte, detach bool) (newState, newCre
 		return state, creds, err
 	}
 
-	if err := client.updateCloudConfig(); err != nil {
+	if err = client.updateCloudConfig(); err != nil {
 		return state, creds, err
 	}
 
-	if err := client.uploadConcourseStemcell(); err != nil {
+	if err = client.uploadConcourseStemcell(); err != nil {
 		return state, creds, err
 	}
 
-	if err := client.uploadConcourseReleases(); err != nil {
+	if err = client.uploadConcourseReleases(); err != nil {
 		return state, creds, err
 	}
 
-	if err := client.createDefaultDatabases(); err != nil {
+	if err = client.createDefaultDatabases(); err != nil {
 		return state, creds, err
 	}
 
