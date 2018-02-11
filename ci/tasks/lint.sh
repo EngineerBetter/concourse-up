@@ -6,7 +6,8 @@ mkdir -p "$GOPATH/src/github.com/EngineerBetter/concourse-up"
 mv concourse-up/* "$GOPATH/src/github.com/EngineerBetter/concourse-up"
 cd "$GOPATH/src/github.com/EngineerBetter/concourse-up"
 
-go generate ./...
+go get -u github.com/mattn/go-bindata/...
+go generate github.com/EngineerBetter/concourse-up/{bosh,terraform}
 gometalinter.v1 \
   --exclude vendor \
   --exclude "_test\.go" \

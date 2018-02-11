@@ -60,6 +60,7 @@ mkdir -p "$GOPATH/src/github.com/EngineerBetter/concourse-up"
 mv concourse-up/* "$GOPATH/src/github.com/EngineerBetter/concourse-up"
 cd "$GOPATH/src/github.com/EngineerBetter/concourse-up"
 
+go get -u github.com/mattn/go-bindata/...
 go generate github.com/EngineerBetter/concourse-up/{bosh,terraform}
 go build -ldflags "
   -X main.ConcourseUpVersion=$version
