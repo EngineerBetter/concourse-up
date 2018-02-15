@@ -93,6 +93,7 @@ resources:
 
 - name: concourse-bosh-release
   type: github-release
+  check_every: 24h
   source:
     user: concourse
     repository: concourse
