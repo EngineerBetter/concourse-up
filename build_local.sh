@@ -47,7 +47,8 @@ terraform_linux_binary_url=$(jq -r .terraform_linux_binary_url compilation-vars.
 terraform_windows_binary_url=$(jq -r .terraform_windows_binary_url compilation-vars.json)
 
 go get -u github.com/mattn/go-bindata/...
-go generate github.com/EngineerBetter/concourse-up/{bosh,terraform}
+go generate github.com/EngineerBetter/concourse-up/bosh
+go generate github.com/EngineerBetter/concourse-up/terraform
 go build -ldflags "
   -X github.com/EngineerBetter/concourse-up/bosh.ConcourseStemcellURL=$concourse_stemcell_url
   -X github.com/EngineerBetter/concourse-up/bosh.ConcourseStemcellVersion=$concourse_stemcell_version
