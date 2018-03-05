@@ -100,10 +100,9 @@ var _ = Describe("Deploy", func() {
 
 		db, mock, err := sqlmock.New()
 		Expect(err).ToNot(HaveOccurred())
-		q := mock.ExpectPrepare("CREATE DATABASE \\$1")
-		q.ExpectExec().WithArgs("concourse_atc").WillReturnResult(sqlmock.NewResult(0, 0))
-		q.ExpectExec().WithArgs("uaa").WillReturnResult(sqlmock.NewResult(0, 0))
-		q.ExpectExec().WithArgs("credhub").WillReturnResult(sqlmock.NewResult(0, 0))
+		mock.ExpectExec("CREATE DATABASE concourse_atc").WillReturnResult(sqlmock.NewResult(0, 0))
+		mock.ExpectExec("CREATE DATABASE uaa").WillReturnResult(sqlmock.NewResult(0, 0))
+		mock.ExpectExec("CREATE DATABASE credhub").WillReturnResult(sqlmock.NewResult(0, 0))
 		client = NewClient(
 			exampleConfig,
 			terraformMetadata,

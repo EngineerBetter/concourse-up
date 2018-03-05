@@ -97,10 +97,9 @@ var _ = Describe("Delete", func() {
 		}
 		db, mock, err := sqlmock.New()
 		Expect(err).ToNot(HaveOccurred())
-		q := mock.ExpectPrepare("CREATE DATABASE \\$1")
-		q.ExpectExec().WithArgs("concourse_atc").WillReturnError(errors.New(`pq: database "concourse_atc" already exists`))
-		q.ExpectExec().WithArgs("uaa").WillReturnError(errors.New(`pq: database "uaa" already exists`))
-		q.ExpectExec().WithArgs("credhub").WillReturnError(errors.New(`pq: database "credhub" already exists`))
+		mock.ExpectExec("CREATE DATABASE concourse_atc").WillReturnError(errors.New(`pq: database "concourse_atc" already exists`))
+		mock.ExpectExec("CREATE DATABASE uaa").WillReturnError(errors.New(`pq: database "uaa" already exists`))
+		mock.ExpectExec("CREATE DATABASE credhub").WillReturnError(errors.New(`pq: database "credhub" already exists`))
 
 		client = NewClient(
 			exampleConfig,
