@@ -5,7 +5,6 @@ import (
 	"io/ioutil"
 
 	"github.com/EngineerBetter/concourse-up/config"
-	"github.com/EngineerBetter/concourse-up/db"
 	"github.com/EngineerBetter/concourse-up/terraform"
 	"github.com/EngineerBetter/concourse-up/util"
 )
@@ -154,7 +153,6 @@ func generateConcourseManifest(config *config.Config, metadata *terraform.Metada
 		ATCPublicIP:             metadata.ATCPublicIP.Value,
 		ConcourseReleaseSHA1:    ConcourseReleaseSHA1,
 		ConcourseReleaseVersion: ConcourseReleaseVersion,
-		DBCACert:                db.RDSRootCert,
 		DBHost:                  metadata.BoshDBAddress.Value,
 		DBName:                  config.ConcourseDBName,
 		DBPassword:              config.RDSPassword,

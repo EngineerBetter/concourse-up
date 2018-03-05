@@ -1,6 +1,7 @@
 package concourse_test
 
 import (
+	"database/sql"
 	"errors"
 	"fmt"
 	"io"
@@ -9,7 +10,6 @@ import (
 	"github.com/EngineerBetter/concourse-up/certs"
 	"github.com/EngineerBetter/concourse-up/concourse"
 	"github.com/EngineerBetter/concourse-up/config"
-	"github.com/EngineerBetter/concourse-up/db"
 	"github.com/EngineerBetter/concourse-up/director"
 	"github.com/EngineerBetter/concourse-up/fly"
 	"github.com/EngineerBetter/concourse-up/terraform"
@@ -186,7 +186,7 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 			}, nil
 		}
 
-		boshClientFactory := func(config *config.Config, metadata *terraform.Metadata, director director.IClient, dbRunner db.Runner, stdout, stderr io.Writer) bosh.IClient {
+		boshClientFactory := func(config *config.Config, metadata *terraform.Metadata, director director.IClient, db *sql.DB, stdout, stderr io.Writer) bosh.IClient {
 			return &testsupport.FakeBoshClient{
 				FakeDeploy: func(stateFileBytes, credsFileBytes []byte, detach bool) ([]byte, []byte, error) {
 					if detach {

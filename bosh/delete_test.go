@@ -2,12 +2,14 @@ package bosh_test
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
 	"path/filepath"
 	"strings"
 
+	sqlmock "github.com/DATA-DOG/go-sqlmock"
 	. "github.com/EngineerBetter/concourse-up/bosh"
 	"github.com/EngineerBetter/concourse-up/config"
 	"github.com/EngineerBetter/concourse-up/terraform"
@@ -19,11 +21,6 @@ var _ = Describe("Delete", func() {
 	var actions []string
 	var tempDir string
 	var createEnvOutput string
-
-	fakeDBRunner := func(sql string) error {
-		actions = append(actions, fmt.Sprintf("Running SQL: %s", sql))
-		return nil
-	}
 
 	directorClient := &FakeDirectorClient{
 		FakeRunCommand: func(stdout, stderr io.Writer, args ...string) error {
@@ -98,12 +95,18 @@ var _ = Describe("Delete", func() {
 			RDSUsername:      "admin",
 			RDSPassword:      "s3cret",
 		}
+		db, mock, err := sqlmock.New()
+		Expect(err).ToNot(HaveOccurred())
+		q := mock.ExpectPrepare("CREATE DATABASE \\$1")
+		q.ExpectExec().WithArgs("concourse_atc").WillReturnError(errors.New(`pq: database "concourse_atc" already exists`))
+		q.ExpectExec().WithArgs("uaa").WillReturnError(errors.New(`pq: database "uaa" already exists`))
+		q.ExpectExec().WithArgs("credhub").WillReturnError(errors.New(`pq: database "credhub" already exists`))
 
 		client = NewClient(
 			exampleConfig,
 			terraformMetadata,
 			directorClient,
-			fakeDBRunner,
+			db,
 			bytes.NewBuffer(nil),
 			bytes.NewBuffer(nil),
 		)

@@ -2,6 +2,12 @@
 
 
 [[projects]]
+  name = "github.com/DATA-DOG/go-sqlmock"
+  packages = ["."]
+  revision = "d76b18b42f285b792bf985118980ce9eacea9d10"
+  version = "v1.3.0"
+
+[[projects]]
   name = "github.com/asaskevich/govalidator"
   packages = ["."]
   revision = "521b25f4b05fd26bec69d9dedeb8f9c9a83939a8"
@@ -87,7 +93,7 @@
 [[projects]]
   branch = "master"
   name = "golang.org/x/net"
-  packages = ["bpf","html","html/atom","html/charset","idna","internal/iana","internal/socket","ipv4","ipv6","publicsuffix"]
+  packages = ["bpf","html","html/atom","html/charset","idna","internal/iana","internal/socket","ipv4","ipv6","proxy","publicsuffix"]
   revision = "ab555f366c4508dbe0802550b1b20c46c5c18aa0"
 
 [[projects]]
@@ -123,6 +129,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "0e3cdc2860c12f266bfc7f0de8fa4b4c1195a43d36e32c6242d870115c8d4a94"
+  inputs-digest = "9648bd1cb33e78bb1f504dfc91622e57d023a1e9356b9b5d0f500c7f57bf2554"
   solver-name = "gps-cdcl"
   solver-version = 1

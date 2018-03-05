@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	sqlmock "github.com/DATA-DOG/go-sqlmock"
 	. "github.com/EngineerBetter/concourse-up/bosh"
 	"github.com/EngineerBetter/concourse-up/terraform"
 
@@ -21,11 +22,6 @@ var _ = Describe("Deploy", func() {
 	var actions []string
 	var tempDir string
 	var createEnvOutput string
-
-	fakeDBRunner := func(sql string) error {
-		actions = append(actions, fmt.Sprintf("Running SQL: %s", sql))
-		return nil
-	}
 
 	directorClient := &FakeDirectorClient{
 		FakeRunCommand: func(stdout, stderr io.Writer, args ...string) error {
@@ -102,11 +98,17 @@ var _ = Describe("Deploy", func() {
 			RDSPassword:      "s3cret",
 		}
 
+		db, mock, err := sqlmock.New()
+		Expect(err).ToNot(HaveOccurred())
+		q := mock.ExpectPrepare("CREATE DATABASE \\$1")
+		q.ExpectExec().WithArgs("concourse_atc").WillReturnResult(sqlmock.NewResult(0, 0))
+		q.ExpectExec().WithArgs("uaa").WillReturnResult(sqlmock.NewResult(0, 0))
+		q.ExpectExec().WithArgs("credhub").WillReturnResult(sqlmock.NewResult(0, 0))
 		client = NewClient(
 			exampleConfig,
 			terraformMetadata,
 			directorClient,
-			fakeDBRunner,
+			db,
 			bytes.NewBuffer(nil),
 			bytes.NewBuffer(nil),
 		)
@@ -181,12 +183,6 @@ var _ = Describe("Deploy", func() {
 		_, _, err := client.Deploy(nil, nil, false)
 		Expect(err).ToNot(HaveOccurred())
 		Expect(actions).To(ContainElement("Saving file to working dir: concourse.yml"))
-	})
-
-	It("Creates the default concourse DB", func() {
-		_, _, err := client.Deploy(nil, nil, false)
-		Expect(err).ToNot(HaveOccurred())
-		Expect(actions).To(ContainElement("Running SQL: CREATE DATABASE concourse_atc;"))
 	})
 
 	It("Deploys concourse", func() {

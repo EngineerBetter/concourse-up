@@ -1,7 +1,11 @@
 package concourse
 
 import (
+	"fmt"
 	"io"
+	"net"
+
+	"database/sql"
 
 	"github.com/EngineerBetter/concourse-up/bosh"
 	"github.com/EngineerBetter/concourse-up/certs"
@@ -11,6 +15,8 @@ import (
 	"github.com/EngineerBetter/concourse-up/fly"
 	"github.com/EngineerBetter/concourse-up/iaas"
 	"github.com/EngineerBetter/concourse-up/terraform"
+	"github.com/lib/pq"
+	"golang.org/x/crypto/ssh"
 )
 
 // Client is a concrete implementation of IClient interface
@@ -67,17 +73,26 @@ func (client *Client) buildBoshClient(config *config.Config, metadata *terraform
 		return nil, err
 	}
 
-	dbRunner, err := db.NewRunner(&db.Credentials{
-		Username:      config.RDSUsername,
-		Password:      config.RDSPassword,
-		Address:       metadata.BoshDBAddress.Value,
-		Port:          metadata.BoshDBPort.Value,
-		DB:            config.RDSDefaultDatabaseName,
-		CACert:        db.RDSRootCert,
-		SSHPrivateKey: []byte(config.PrivateKey),
-		SSHPublicIP:   metadata.DirectorPublicIP.Value,
-	})
-
+	key, err := ssh.ParsePrivateKey([]byte(config.PrivateKey))
+	if err != nil {
+		return nil, err
+	}
+	connector, err := db.NewSSHProxyConnector(
+		net.JoinHostPort(metadata.DirectorPublicIP.Value, "22"),
+		&ssh.ClientConfig{
+			User:            "vcap",
+			HostKeyCallback: ssh.InsecureIgnoreHostKey(),
+			Auth:            []ssh.AuthMethod{ssh.PublicKeys(key)},
+		},
+		&pq.Driver{},
+		fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=require",
+			config.RDSUsername,
+			config.RDSPassword,
+			metadata.BoshDBAddress.Value,
+			metadata.BoshDBPort.Value,
+			config.RDSDefaultDatabaseName,
+		),
+	)
 	if err != nil {
 		return nil, err
 	}
@@ -86,7 +101,7 @@ func (client *Client) buildBoshClient(config *config.Config, metadata *terraform
 		config,
 		metadata,
 		director,
-		dbRunner,
+		sql.OpenDB(connector),
 		client.stdout,
 		client.stderr,
 	), nil

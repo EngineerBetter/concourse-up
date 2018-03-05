@@ -1,10 +1,10 @@
 package bosh
 
 import (
+	"database/sql"
 	"io"
 
 	"github.com/EngineerBetter/concourse-up/config"
-	"github.com/EngineerBetter/concourse-up/db"
 	"github.com/EngineerBetter/concourse-up/director"
 	"github.com/EngineerBetter/concourse-up/terraform"
 )
@@ -22,7 +22,7 @@ type Client struct {
 	config   *config.Config
 	metadata *terraform.Metadata
 	director director.IClient
-	dbRunner db.Runner
+	db       *sql.DB
 	stdout   io.Writer
 	stderr   io.Writer
 }
@@ -36,15 +36,15 @@ type IClient interface {
 }
 
 // ClientFactory creates a new IClient
-type ClientFactory func(config *config.Config, metadata *terraform.Metadata, director director.IClient, dbRunner db.Runner, stdout, stderr io.Writer) IClient
+type ClientFactory func(config *config.Config, metadata *terraform.Metadata, director director.IClient, db *sql.DB, stdout, stderr io.Writer) IClient
 
 // NewClient creates a new Client
-func NewClient(config *config.Config, metadata *terraform.Metadata, director director.IClient, dbRunner db.Runner, stdout, stderr io.Writer) IClient {
+func NewClient(config *config.Config, metadata *terraform.Metadata, director director.IClient, db *sql.DB, stdout, stderr io.Writer) IClient {
 	return &Client{
 		config:   config,
 		metadata: metadata,
 		director: director,
-		dbRunner: dbRunner,
+		db:       db,
 		stdout:   stdout,
 		stderr:   stderr,
 	}
