@@ -4,6 +4,7 @@ import (
 	"strconv"
 
 	"github.com/EngineerBetter/concourse-up/config"
+	"github.com/EngineerBetter/concourse-up/db"
 
 	"github.com/EngineerBetter/concourse-up/terraform"
 	"github.com/EngineerBetter/concourse-up/util"
@@ -52,6 +53,7 @@ func generateBoshInitManifest(conf *config.Config, metadata *terraform.Metadata,
 		BoshAWSAccessKeyID:        metadata.BoshUserAccessKeyID.Value,
 		BoshAWSSecretAccessKey:    metadata.BoshSecretAccessKey.Value,
 		BoshSecurityGroupID:       metadata.DirectorSecurityGroupID.Value,
+		DBCACert:                  db.RDSRootCert,
 		DBHost:                    metadata.BoshDBAddress.Value,
 		DBName:                    conf.RDSDefaultDatabaseName,
 		DBPassword:                conf.RDSPassword,
