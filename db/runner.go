@@ -22,6 +22,10 @@ func (f connectorFunc) Driver() driver.Driver {
 	panic("not supported")
 }
 
+// NewSSHProxyConnector is used to proxy a database connection through a ssh jumpbox.
+// uri is the arguement that will be passed to sqlDriver.Open.
+// uri must be a valid URI.
+// The return value can be used by sql.OpenDB to obtain a *sql.DB
 func NewSSHProxyConnector(jumpboxAddr string, config *ssh.ClientConfig, sqlDriver driver.Driver, uri string) (driver.Connector, error) {
 	if jumpboxAddr == "99.99.99.99:22" {
 		// Under testing if this branch is taken, skip tunneling
