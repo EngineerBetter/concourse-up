@@ -15,6 +15,7 @@ import (
 	"golang.org/x/net/proxy"
 )
 
+// Opener will open new connections to a given database name.
 type Opener interface {
 	Open(name string) (*sql.DB, error)
 	Close() error
