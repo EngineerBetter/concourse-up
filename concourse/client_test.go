@@ -1,7 +1,6 @@
 package concourse_test
 
 import (
-	"database/sql"
 	"errors"
 	"fmt"
 	"io"
@@ -186,7 +185,7 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 			}, nil
 		}
 
-		boshClientFactory := func(config *config.Config, metadata *terraform.Metadata, director director.IClient, db *sql.DB, stdout, stderr io.Writer) bosh.IClient {
+		boshClientFactory := func(config *config.Config, metadata *terraform.Metadata, director director.IClient, stdout, stderr io.Writer) (bosh.IClient, error) {
 			return &testsupport.FakeBoshClient{
 				FakeDeploy: func(stateFileBytes, credsFileBytes []byte, detach bool) ([]byte, []byte, error) {
 					if detach {
@@ -204,7 +203,7 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 					actions = append(actions, "cleaning up bosh init")
 					return nil
 				},
-			}
+			}, nil
 		}
 
 		stdout = gbytes.NewBuffer()
