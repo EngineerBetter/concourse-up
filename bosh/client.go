@@ -43,22 +43,17 @@ type ClientFactory func(config *config.Config, metadata *terraform.Metadata, dir
 
 // NewClient creates a new Client
 func NewClient(config *config.Config, metadata *terraform.Metadata, director director.IClient, stdout, stderr io.Writer) (IClient, error) {
+	addr := net.JoinHostPort(metadata.DirectorPublicIP.Value, "22")
 	key, err := ssh.ParsePrivateKey([]byte(config.PrivateKey))
 	if err != nil {
 		return nil, err
 	}
-	dialer, err := ssh.Dial("tcp",
-		net.JoinHostPort(metadata.DirectorPublicIP.Value, "22"),
-		&ssh.ClientConfig{
-			User:            "vcap",
-			HostKeyCallback: ssh.InsecureIgnoreHostKey(),
-			Auth:            []ssh.AuthMethod{ssh.PublicKeys(key)},
-		},
-	)
-	if err != nil {
-		return nil, err
+	conf := &ssh.ClientConfig{
+		User:            "vcap",
+		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
+		Auth:            []ssh.AuthMethod{ssh.PublicKeys(key)},
 	}
-	db, err := newProxyOpener(dialer, &pq.Driver{},
+	db, err := newProxyOpener(addr, conf, &pq.Driver{},
 		fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=require",
 			config.RDSUsername,
 			config.RDSPassword,

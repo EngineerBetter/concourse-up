@@ -12,6 +12,7 @@ import (
 
 	"strings"
 
+	"golang.org/x/crypto/ssh"
 	"golang.org/x/net/proxy"
 )
 
@@ -48,7 +49,7 @@ func (p *proxyOpener) Close() error {
 	return p.l.Close()
 }
 
-func newProxyOpener(p proxy.Dialer, d driver.Driver, uri string) (Opener, error) {
+func newProxyOpener(jumpboxAddr string, config *ssh.ClientConfig, d driver.Driver, uri string) (Opener, error) {
 	u, err := url.Parse(uri)
 	if err != nil {
 		return nil, err
@@ -59,6 +60,10 @@ func newProxyOpener(p proxy.Dialer, d driver.Driver, uri string) (Opener, error)
 	}
 	var startOnce sync.Once
 	f := func() {
+		p, err := ssh.Dial("tcp", jumpboxAddr, config)
+		if err != nil {
+			return //TODO: handle
+		}
 		go func() {
 			for {
 				conn, err := l.Accept()
