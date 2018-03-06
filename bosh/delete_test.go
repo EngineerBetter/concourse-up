@@ -1,4 +1,4 @@
-package bosh_test
+package bosh
 
 import (
 	"bytes"
@@ -10,7 +10,6 @@ import (
 	"strings"
 
 	sqlmock "github.com/DATA-DOG/go-sqlmock"
-	. "github.com/EngineerBetter/concourse-up/bosh"
 	"github.com/EngineerBetter/concourse-up/config"
 	"github.com/EngineerBetter/concourse-up/terraform"
 	. "github.com/onsi/ginkgo"
@@ -83,32 +82,38 @@ var _ = Describe("Delete", func() {
 			VMsSecurityGroupID:       terraform.MetadataStringValue{Value: "sg-456"},
 		}
 		exampleConfig := &config.Config{
-			PublicKey:        "example-public-key",
-			PrivateKey:       "example-private-key",
-			Region:           "eu-west-1",
-			Deployment:       "concourse-up-happymeal",
-			Project:          "happymeal",
-			TFStatePath:      "example-path",
-			DirectorUsername: "admin",
-			DirectorPassword: "secret123",
-			ConcourseDBName:  "concourse_atc",
-			RDSUsername:      "admin",
-			RDSPassword:      "s3cret",
+			PublicKey:              "example-public-key",
+			PrivateKey:             "example-private-key",
+			Region:                 "eu-west-1",
+			Deployment:             "concourse-up-happymeal",
+			Project:                "happymeal",
+			TFStatePath:            "example-path",
+			DirectorUsername:       "admin",
+			DirectorPassword:       "secret123",
+			ConcourseDBName:        "concourse_atc",
+			RDSUsername:            "admin",
+			RDSPassword:            "s3cret",
+			RDSDefaultDatabaseName: "default",
 		}
+		dbOpener := make(fakeOpener)
 		db, mock, err := sqlmock.New()
 		Expect(err).ToNot(HaveOccurred())
 		mock.ExpectExec("CREATE DATABASE concourse_atc").WillReturnError(errors.New(`pq: database "concourse_atc" already exists`))
 		mock.ExpectExec("CREATE DATABASE uaa").WillReturnError(errors.New(`pq: database "uaa" already exists`))
 		mock.ExpectExec("CREATE DATABASE credhub").WillReturnError(errors.New(`pq: database "credhub" already exists`))
-
-		client = NewClient(
-			exampleConfig,
-			terraformMetadata,
-			directorClient,
-			db,
-			bytes.NewBuffer(nil),
-			bytes.NewBuffer(nil),
-		)
+		dbOpener[exampleConfig.RDSDefaultDatabaseName] = db
+		db, mock, err = sqlmock.New()
+		Expect(err).ToNot(HaveOccurred())
+		mock.ExpectExec("TRUNCATE").WillReturnResult(sqlmock.NewResult(0, 0))
+		dbOpener["credhub"] = db
+		client = &Client{
+			config:   exampleConfig,
+			metadata: terraformMetadata,
+			director: directorClient,
+			db:       dbOpener,
+			stdout:   new(bytes.Buffer),
+			stderr:   new(bytes.Buffer),
+		}
 	})
 
 	Context("When an initial director state exists", func() {

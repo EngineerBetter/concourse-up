@@ -1,4 +1,4 @@
-package bosh_test
+package bosh
 
 import (
 	"io"

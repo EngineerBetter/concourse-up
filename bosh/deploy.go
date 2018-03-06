@@ -33,6 +33,14 @@ func (client *Client) Deploy(state, creds []byte, detach bool) (newState, newCre
 	}
 
 	creds, err = client.deployConcourse(creds, detach)
+	if err != nil {
+		return state, creds, err
+	}
+
+	if err = client.stopCredhubAuditSpam(); err != nil {
+		return state, creds, err
+	}
+
 	return state, creds, err
 }
 
