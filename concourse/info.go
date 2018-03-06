@@ -94,7 +94,8 @@ Bosh credentials:
 	CA Cert:
 		{{ .Config.DirectorCACert | replace "\n" "\n\t\t"}}
 
-Built by {{"EngineerBetter http://engineerbetter.com" | blue}}`
+Built by {{"EngineerBetter http://engineerbetter.com" | blue}}
+`
 
 func (info *Info) String() string {
 	t := template.Must(template.New("info").Funcs(template.FuncMap{
