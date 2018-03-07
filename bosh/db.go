@@ -140,7 +140,7 @@ func (client *Client) stopCredhubAuditSpam() error {
 	_, err = db.Exec(`
 		TRUNCATE event_audit_record;
 		TRUNCATE request_audit_record;
-		CREATE OR REPLACE RULE dev_null_event_audit_record AS ON INSERT TO event_audit_record DO INSTEAD NOTHING;
-		CREATE OR REPLACE RULE dev_null_request_audit_record AS ON INSERT TO request_audit_record DO INSTEAD NOTHING;`)
+		CREATE OR REPLACE RULE dev_null_event_audit_record AS ON INSERT TO event_audit_record DO ALSO DELETE FROM event_audit_record WHERE event_audit_record.uuid = NEW.uuid;
+		CREATE OR REPLACE RULE dev_null_request_audit_record AS ON INSERT TO request_audit_record DO ALSO DELETE FROM request_audit_record WHERE request_audit_record.uuid = NEW.uuid;`)
 	return err
 }
