@@ -2,7 +2,7 @@
 
 ![](http://i.imgur.com/gZPuUW5.png)
 
-A tool for easily deploying [Concourse](https://concourse.ci) in a single command.
+A tool for easily deploying [Concourse](https://concourse-ci.org) in a single command.
 
 ![](https://ci.engineerbetter.com/api/v1/teams/main/pipelines/concourse-up/jobs/system-test/badge)
 
@@ -36,7 +36,7 @@ providing you with a single command for getting your Concourse up and keeping it
 - Deploy to any AWS region
 - Metrics infrastructure deployed by default (check http://your-concourse-url:3000)
 - DB encryption turned on by default
-- Uses credhub for secret management (see: <https://concourse.ci/creds.html>)
+- Uses credhub for secret management (see: <https://concourse-ci.org/creds.html>)
 
 ## Prerequisites
 
@@ -190,7 +190,7 @@ Concourse-up now automatically deploys Influxdb, Riemann, and Grafana on the web
 
 ## Credential Management
 
-Concourse-up deploys the [credhub](https://github.com/cloudfoundry-incubator/credhub) service alongside Concourse and configures Concourse to use it. More detail on how credhub integrates with Concourse can be found [here](https://concourse.ci/creds.html). You can log into credhub by running `$ concourse-up info --env --region $region $deployment`.
+Concourse-up deploys the [credhub](https://github.com/cloudfoundry-incubator/credhub) service alongside Concourse and configures Concourse to use it. More detail on how credhub integrates with Concourse can be found [here](https://concourse-ci.org/creds.html). You can log into credhub by running `$ concourse-up info --env --region $region $deployment`.
 
 ## Firewall
 
@@ -226,7 +226,7 @@ It then uses Terraform to deploy the following infrastructure:
 - An IAM user that can deploy EC2 instances
 - An AWS keypair for BOSH to use when deploying VMs
 - An RDS instance (default: db.t2.small) for BOSH and Concourse to use
-- Concourse database is [encrypted](http://concourse.ci/encryption.html) by default
+- Concourse database is [encrypted](http://concourse-ci.org/encryption.html) by default
 - A security group to allow access to the BOSH director from your local IP
 - A security group for BOSH-deployed VMs
 - A security group to allow access to the Concourse web server from the internet
