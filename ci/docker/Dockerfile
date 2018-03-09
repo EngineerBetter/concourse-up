@@ -4,6 +4,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     default-libmysqlclient-dev \
     libpq-dev \
     libsqlite3-dev \
+    libssl-dev \
     libxml2-dev \
     libxslt1-dev \
     python-dev \
