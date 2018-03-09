@@ -9,7 +9,7 @@ inputs:
 - name: concourse-up
 - name: binary-linux
 run:
-  path: concourse-up/ci/tasks/system-test-letsencrypt.sh
+  path: concourse-up/ci/tasks/system-test-autocert.sh
 params:
   AWS_ACCESS_KEY_ID:
   AWS_SECRET_ACCESS_KEY:
