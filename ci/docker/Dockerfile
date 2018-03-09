@@ -1,12 +1,18 @@
 FROM golang:1
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
-    python-setuptools \
+    libmysqlclient-dev \
+    libpq-dev \
+    libsqlite3-dev \
+    libxml2-dev \
+    libxslt1-dev \
     python-dev \
     python-pip \
+    python-setuptools \
     ruby \
     ruby-dev \
-    unzip
+    unzip \
+    zlib1g-dev
 
 RUN pip install --upgrade pip \
     && pip install --upgrade virtualenv \
