@@ -1,5 +1,10 @@
 ---
 resource_types:
+- name: pipeline
+  type: docker-image
+  source:
+    repository: concourse/concourse-pipeline-resource
+
 - name: slack-notification
   type: docker-image
   source:
@@ -7,6 +12,15 @@ resource_types:
     tag: latest
 
 resources:
+- name: this-pipeline
+  type: pipeline
+  source:
+    target: https://ci.engineerbetter.com
+    insecure: "true"
+    teams:
+    - name: main
+      username: admin
+      password: ((atc_main_password))
 - name: image-source
   type: git
   source:
@@ -159,6 +173,17 @@ jobs:
     params:
       build: image-source/ci/docker
 
+- name: set-pipeline
+  plan:
+  - get: concourse-up
+    trigger: true
+  - put: this-pipeline
+    params:
+      pipelines:
+      - name: concourse-up
+        team: main
+        config_file: concourse-up/ci/pipeline.yml
+
 - name: unit-tests
   plan:
   - aggregate:
@@ -166,6 +191,7 @@ jobs:
       passed: [build-image]
     - get: concourse-up
       trigger: true
+      passed: [set-pipeline]
   - task: lint
     image: image
     file: concourse-up/ci/tasks/lint.yml
