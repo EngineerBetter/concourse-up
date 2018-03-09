@@ -1,7 +1,7 @@
 FROM golang:1
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
-    libmysqlclient-dev \
+    default-libmysqlclient-dev \
     libpq-dev \
     libsqlite3-dev \
     libxml2-dev \
