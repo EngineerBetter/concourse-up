@@ -95,7 +95,7 @@ certstrap sign "$custom_domain" --CA "$deployment"
   --domain $custom_domain \
   --tls-cert "$(cat out/$custom_domain.crt)" \
   --tls-key "$(cat out/$custom_domain.key)" \
-  --allow-ips $(dig +short myip.opendns.com @resolver1.opendns.com) \
+  --allow-ips "$(dig +short myip.opendns.com @resolver1.opendns.com)" \
   --workers 2 \
   --worker-size large
 
@@ -128,42 +128,4 @@ fly --target system-test-custom-domain-with-cert trigger-job \
   --job hello/hello \
   --watch
 
-echo "DEPLOY WITH LETSENCRYPT STAGING CERT, AND CUSTOM DOMAIN, 1 4xLARGE WORKERS, AND LARGE DB, AND MEDIUM WEB NODE"
 
-custom_domain="$deployment-auto-2.concourse-up.engineerbetter.com"
-
-export CONCOURSE_UP_ACME_URL=https://acme-staging.api.letsencrypt.org/directory # Avoid rate limits when testing
-./cup deploy $deployment \
-  --domain $custom_domain \
-  --worker-size 4xlarge \
-  --web-size medium \
-  --db-size large
-
-sleep 60
-
-# Check RDS instance class is db.m4.large
-rds_instance_class=$(aws --region eu-west-1 rds describe-db-instances | jq -r ".DBInstances[] | select(.DBSubnetGroup.DBSubnetGroupName==\"concourse-up-$deployment\") | .DBInstanceClass")
-if [ "$rds_instance_class" != "db.m4.large" ]; then
-  echo "Unexpected DB instance class: $rds_instance_class"
-  exit 1
-fi
-
-config=$(./cup info --json $deployment)
-username=$(echo "$config" | jq -r '.config.concourse_username')
-password=$(echo "$config" | jq -r '.config.concourse_password')
-echo "$config" | jq -r '.config.concourse_ca_cert' > generated-ca-cert.pem
-
-fly --target system-test-custom-domain login \
-  --ca-cert generated-ca-cert.pem \
-  --concourse-url https://$custom_domain \
-  --username "$username" \
-  --password "$password"
-
-curl -k "https://$custom_domain:3000"
-
-fly --target system-test-custom-domain sync
-
-# Check that hello/hello job still exists and works
-fly --target system-test-custom-domain trigger-job \
-  --job hello/hello \
-  --watch
