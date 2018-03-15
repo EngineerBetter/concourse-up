@@ -245,7 +245,22 @@ If you'd like to run concourse-up with it's own IAM account, create a user with 
 
 ![](http://i.imgur.com/Q0mOUjv.png)
 
-## Tests
+## Project
+
+[Pivotal Tracker](https://www.pivotaltracker.com/n/projects/2011803)
+
+[CI Pipeline](https://ci.engineerbetter.com/teams/main/pipelines/concourse-up) (deployed with Concourse Up!)
+
+## Development
+
+### Pre-requisites
+
+To build and test you'll need:
+
+* Golang 1.10
+* to have installed `github.com/a-urth/go-bindata`
+
+### Tests
 
 Tests use the [Ginkgo](https://onsi.github.io/ginkgo/) Go testing framework. The tests require you to have set up AWS authentication locally.
 
@@ -256,12 +271,6 @@ $ go get github.com/onsi/ginkgo/ginkgo
 $ ginkgo -r
 ```
 
-## Building locally
+### Building locally
 
 `concourse-up` uses [golang compile-time variables](https://github.com/golang/go/wiki/GcToolchainTricks#including-build-information-in-the-executable) to set the release versions it uses. To build locally use the `build_local.sh` script, rather than running `go build`.
-
-## Project
-
-[Pivotal Tracker](https://www.pivotaltracker.com/n/projects/2011803)
-
-[CI Pipeline](https://ci.engineerbetter.com/teams/main/pipelines/concourse-up) (deployed with Concourse Up!)
