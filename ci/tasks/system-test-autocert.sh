@@ -65,10 +65,9 @@ idWw1VrejtwclobqNMVtG3EiPUIpJGpbMcJgbiLSmKkrvQtGng==
 -----END CERTIFICATE-----
 EOF
 SSL_CERT_FILE=$(pwd)/letsencrypt-staging.crt
-export SSL_CERT_FILE
 
 fly --target system-test-custom-domain login \
-  --ca-cert generated-ca-cert.pem \
+  --ca-cert "${SSL_CERT_FILE}" \
   --concourse-url https://$custom_domain \
   --username "$username" \
   --password "$password"
