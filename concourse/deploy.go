@@ -222,11 +222,8 @@ func (client *Client) ensureConcourseCerts(domainUpdated bool, config *config.Co
 		return config, nil
 	}
 
-	sans := []string{config.Domain}
-	if config.Domain != metadata.ATCPublicIP.Value {
-		sans = append(sans, metadata.ATCPublicIP.Value)
-	}
-	concourseCerts, err := client.certGenerator(config.Deployment, sans...)
+	// If no domain has been provided by the user, the value of config.Domain is set to the ATC's public IP in checkPreDeployConfigRequiments
+	concourseCerts, err := client.certGenerator(config.Deployment, config.Domain)
 	if err != nil {
 		return nil, err
 	}
