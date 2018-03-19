@@ -29,7 +29,7 @@ var _ = Describe("Client", func() {
 	var exampleConfig *config.Config
 
 	certGenerator := func(caName string, ip ...string) (*certs.Certs, error) {
-		actions = append(actions, fmt.Sprintf("generating cert ca: %s, ca: %s", caName, ip))
+		actions = append(actions, fmt.Sprintf("generating cert ca: %s, cn: %s", caName, ip))
 		return &certs.Certs{
 			CACert: []byte("----EXAMPLE CERT----"),
 		}, nil
@@ -276,7 +276,7 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 			err := client.Deploy()
 			Expect(err).ToNot(HaveOccurred())
 
-			Expect(actions).To(ContainElement("generating cert ca: concourse-up-happymeal, ca: [99.99.99.99 10.0.0.6]"))
+			Expect(actions).To(ContainElement("generating cert ca: concourse-up-happymeal, cn: [99.99.99.99 10.0.0.6]"))
 		})
 
 		It("Generates certificates for concourse", func() {
@@ -284,7 +284,7 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 			err := client.Deploy()
 			Expect(err).ToNot(HaveOccurred())
 
-			Expect(actions).To(ContainElement("generating cert ca: concourse-up-happymeal, ca: [77.77.77.77]"))
+			Expect(actions).To(ContainElement("generating cert ca: concourse-up-happymeal, cn: [77.77.77.77]"))
 		})
 
 		It("Sets the director public IP on the config", func() {
@@ -339,7 +339,7 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 				err := client.Deploy()
 				Expect(err).ToNot(HaveOccurred())
 
-				Expect(actions).To(ContainElement("generating cert ca: concourse-up-happymeal, ca: [ci.google.com]"))
+				Expect(actions).To(ContainElement("generating cert ca: concourse-up-happymeal, cn: [ci.google.com]"))
 			})
 		})
 
