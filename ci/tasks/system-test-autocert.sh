@@ -4,6 +4,9 @@
 set -eu
 set -x
 
+cp "$BINARY_PATH" ./cup
+chmod +x ./cup
+
 deployment="system-test-$RANDOM"
 cleanup() {
   status=$?
@@ -17,9 +20,6 @@ else
   trap "echo Skipping teardown" EXIT
 fi
 set -u
-
-cp "$BINARY_PATH" ./cup
-chmod +x ./cup
 
 echo "DEPLOY WITH LETSENCRYPT STAGING CERT, AND CUSTOM DOMAIN"
 
@@ -75,6 +75,14 @@ fly --target system-test-custom-domain login \
 curl -k "https://$custom_domain:3000"
 
 fly --target system-test-custom-domain sync
+
+fly --target system-test-custom-domain set-pipeline \
+  --non-interactive \
+  --pipeline hello \
+  --config "$(dirname "$0")/hello.yml"
+
+fly --target system-test-custom-domain unpause-pipeline \
+    --pipeline hello
 
 # Check that hello/hello job still exists and works
 fly --target system-test-custom-domain trigger-job \

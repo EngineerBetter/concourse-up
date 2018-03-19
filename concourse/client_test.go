@@ -332,14 +332,14 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 		})
 
 		Context("When a custom domain is required", func() {
-			It("Generates certificates for concourse", func() {
+			It("Generates certificates for that domain and not the public IP", func() {
 				args.Domain = "ci.google.com"
 
 				client := buildClient()
 				err := client.Deploy()
 				Expect(err).ToNot(HaveOccurred())
 
-				Expect(actions).To(ContainElement("generating cert ca: concourse-up-happymeal, ca: [ci.google.com 77.77.77.77]"))
+				Expect(actions).To(ContainElement("generating cert ca: concourse-up-happymeal, ca: [ci.google.com]"))
 			})
 		})
 
