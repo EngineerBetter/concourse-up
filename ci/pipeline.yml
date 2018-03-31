@@ -105,7 +105,7 @@ resources:
     access_token: ((github_access_token))
     drafts: true
 
-- name: concourse-bosh-release
+- name: concourse-github-release
   type: github-release
   check_every: 24h
   source:
@@ -122,6 +122,11 @@ resources:
   type: bosh-io-stemcell
   source:
     name: bosh-aws-xen-hvm-ubuntu-trusty-go_agent
+
+- name: concourse-bosh-release
+  type: bosh-io-release
+  source:
+    repository: concourse/concourse
 
 - name: director-bosh-release
   type: bosh-io-release
@@ -226,11 +231,13 @@ jobs:
   - get: version
   - get: image
     passed: [build-image]
-  - get: concourse-bosh-release
+  - get: concourse-github-release
     trigger: true
   - get: concourse-stemcell
     trigger: true
   - get: director-stemcell
+    trigger: true
+  - get: concourse-bosh-release
     trigger: true
   - get: director-bosh-release
     trigger: true

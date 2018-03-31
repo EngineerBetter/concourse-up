@@ -4,7 +4,7 @@ set -eu
 set -x
 
 # delete any concourse versions that have pre-compiled packages
-rm -f concourse-bosh-release/concourse-*-*.tgz
+rm -f concourse-github-release/concourse-*-*.tgz
 
 echo "$BOSH_CA_CERT" > bosh_ca_cert.pem
 
@@ -43,12 +43,12 @@ credhub_release_url=$(cat credhub-release/url)
 credhub_release_sha1=$(cat credhub-release/sha1)
 
 director_bosh_release_version=$(cat director-bosh-release/version)
-concourse_release_version=$(basename concourse-bosh-release/concourse-*.tgz .tgz | sed 's/^concourse-//')
-garden_release_version=$(basename garden-runc-release/garden-runc-*.tgz .tgz | sed 's/^garden-runc-//')
+concourse_release_version=$(cat concourse-bosh-release/version)
+garden_release_version=$(cat garden-runc-release/version)
 
 $bosh upload-stemcell "concourse-stemcell/stemcell.tgz"
 $bosh upload-release "garden-runc-release/release.tgz"
-$bosh upload-release "concourse-bosh-release/concourse-$concourse_release_version.tgz"
+$bosh upload-release "concourse-bosh-release/release.tgz"
 $bosh upload-release "director-bosh-release/release.tgz"
 $bosh upload-release "director-bosh-cpi-release/release.tgz"
 $bosh upload-release "riemann-release/release.tgz"
@@ -149,9 +149,9 @@ aws s3 cp --acl public-read "$compiled_influxdb_release" "s3://$PUBLIC_ARTIFACTS
 aws s3 cp --acl public-read "$compiled_uaa_release" "s3://$PUBLIC_ARTIFACTS_BUCKET/$compiled_uaa_release"
 aws s3 cp --acl public-read "$compiled_credhub_release" "s3://$PUBLIC_ARTIFACTS_BUCKET/$compiled_credhub_release"
 
-aws s3 cp --acl public-read "concourse-bosh-release/fly_darwin_amd64" "s3://$PUBLIC_ARTIFACTS_BUCKET/fly_darwin_amd64-$concourse_release_version"
-aws s3 cp --acl public-read "concourse-bosh-release/fly_linux_amd64" "s3://$PUBLIC_ARTIFACTS_BUCKET/fly_linux_amd64-$concourse_release_version"
-aws s3 cp --acl public-read "concourse-bosh-release/fly_windows_amd64.exe" "s3://$PUBLIC_ARTIFACTS_BUCKET/fly_windows_amd64-$concourse_release_version.exe"
+aws s3 cp --acl public-read "concourse-github-release/fly_darwin_amd64" "s3://$PUBLIC_ARTIFACTS_BUCKET/fly_darwin_amd64-$concourse_release_version"
+aws s3 cp --acl public-read "concourse-github-release/fly_linux_amd64" "s3://$PUBLIC_ARTIFACTS_BUCKET/fly_linux_amd64-$concourse_release_version"
+aws s3 cp --acl public-read "concourse-github-release/fly_windows_amd64.exe" "s3://$PUBLIC_ARTIFACTS_BUCKET/fly_windows_amd64-$concourse_release_version.exe"
 
 director_bosh_release_sha1=$(sha1sum "$compiled_director_bosh_release" | awk '{ print $1 }')
 director_bosh_release_url="https://s3-$AWS_DEFAULT_REGION.amazonaws.com/$PUBLIC_ARTIFACTS_BUCKET/$compiled_director_bosh_release"
