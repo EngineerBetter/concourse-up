@@ -158,6 +158,11 @@ resources:
   source:
     repository: pivotal-cf/credhub-release
 
+- name: garden-runc-release
+  type: bosh-io-release
+  source:
+    repository: cloudfoundry/garden-runc-release
+
 - name: slack-alert
   type: slack-notification
   source:
@@ -240,6 +245,8 @@ jobs:
   - get: uaa-release
     trigger: true
   - get: credhub-release
+    trigger: true
+  - get: garden-runc-release
     trigger: true
   - get: concourse-up
   - task: compile

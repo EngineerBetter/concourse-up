@@ -17,6 +17,7 @@ inputs:
 - name: influxdb-release
 - name: uaa-release
 - name: credhub-release
+- name: garden-runc-release
 
 outputs:
 - name: compilation-vars

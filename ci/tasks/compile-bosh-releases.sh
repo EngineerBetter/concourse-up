@@ -44,10 +44,10 @@ credhub_release_sha1=$(cat credhub-release/sha1)
 
 director_bosh_release_version=$(cat director-bosh-release/version)
 concourse_release_version=$(basename concourse-bosh-release/concourse-*.tgz .tgz | sed 's/^concourse-//')
-garden_release_version=$(basename concourse-bosh-release/garden-runc-*.tgz .tgz | sed 's/^garden-runc-//')
+garden_release_version=$(basename garden-runc-release/garden-runc-*.tgz .tgz | sed 's/^garden-runc-//')
 
 $bosh upload-stemcell "concourse-stemcell/stemcell.tgz"
-$bosh upload-release "concourse-bosh-release/garden-runc-$garden_release_version.tgz"
+$bosh upload-release "garden-runc-release/garden-runc-$garden_release_version.tgz"
 $bosh upload-release "concourse-bosh-release/concourse-$concourse_release_version.tgz"
 $bosh upload-release "director-bosh-release/release.tgz"
 $bosh upload-release "director-bosh-cpi-release/release.tgz"
