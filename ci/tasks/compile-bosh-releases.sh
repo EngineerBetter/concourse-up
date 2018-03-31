@@ -43,12 +43,12 @@ credhub_release_url=$(cat credhub-release/url)
 credhub_release_sha1=$(cat credhub-release/sha1)
 
 director_bosh_release_version=$(cat director-bosh-release/version)
-concourse_release_version=$(cat concourse-bosh-release/version)
+concourse_release_version=$(cat concourse-release/version)
 garden_release_version=$(cat garden-runc-release/version)
 
 $bosh upload-stemcell "concourse-stemcell/stemcell.tgz"
 $bosh upload-release "garden-runc-release/release.tgz"
-$bosh upload-release "concourse-bosh-release/release.tgz"
+$bosh upload-release "concourse-release/release.tgz"
 $bosh upload-release "director-bosh-release/release.tgz"
 $bosh upload-release "director-bosh-cpi-release/release.tgz"
 $bosh upload-release "riemann-release/release.tgz"

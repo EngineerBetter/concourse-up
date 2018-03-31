@@ -8,7 +8,7 @@ image_resource:
 inputs:
 - name: concourse-up
 - name: concourse-github-release
-- name: concourse-bosh-release
+- name: concourse-release
 - name: concourse-stemcell
 - name: director-stemcell
 - name: director-bosh-release
