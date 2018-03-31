@@ -122,7 +122,7 @@ resources:
   source:
     name: bosh-aws-xen-hvm-ubuntu-trusty-go_agent
 
-- name: concourse-bosh-release
+- name: concourse-release
   type: bosh-io-release
   source:
     repository: concourse/concourse
@@ -236,7 +236,7 @@ jobs:
     trigger: true
   - get: director-stemcell
     trigger: true
-  - get: concourse-bosh-release
+  - get: concourse-release
     trigger: true
   - get: director-bosh-release
     trigger: true
