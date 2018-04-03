@@ -1092,7 +1092,7 @@ instance_groups:
   - name: private
     default: [dns, gateway]
   jobs:
-  - name: groundcrew
+  - name: worker
     release: concourse
     properties:
       tsa:
