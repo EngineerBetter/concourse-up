@@ -380,6 +380,13 @@ resource "aws_security_group" "vms" {
   }
 
   ingress {
+    from_port   = 7799
+    to_port     = 7799
+    protocol    = "tcp"
+    cidr_blocks = ["10.0.0.0/16"]
+  }
+
+  ingress {
     from_port   = 0
     to_port     = 0
     protocol    = "icmp"
@@ -442,7 +449,7 @@ resource "aws_security_group" "atc" {
     to_port     = 80
     protocol    = "tcp"
     security_groups = ["${aws_security_group.vms.id}", "${aws_security_group.director.id}"]
-    cidr_blocks = [<% .AllowIPs %>]  
+    cidr_blocks = [<% .AllowIPs %>]
   }
 
   ingress {
