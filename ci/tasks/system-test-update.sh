@@ -33,7 +33,7 @@ echo "UPDATE TO NEW VERSION"
 
 ./cup-new deploy $deployment
 
-sleep 60
+sleep 80
 
 config=$(./cup-new info --json $deployment)
 domain=$(echo "$config" | jq -r '.config.domain')
