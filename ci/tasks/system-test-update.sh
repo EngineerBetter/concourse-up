@@ -33,7 +33,7 @@ echo "UPDATE TO NEW VERSION"
 
 ./cup-new deploy $deployment
 
-sleep 80
+sleep 60
 
 config=$(./cup-new info --json $deployment)
 domain=$(echo "$config" | jq -r '.config.domain')
@@ -58,6 +58,9 @@ fly --target system-test set-pipeline \
 
 fly --target system-test unpause-pipeline \
     --pipeline hello
+
+# Wait for workers to become available
+sleep 60
 
 fly --target system-test trigger-job \
   --job hello/hello \
