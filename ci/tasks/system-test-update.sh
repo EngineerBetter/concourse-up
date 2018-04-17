@@ -59,7 +59,7 @@ fly --target system-test set-pipeline \
 fly --target system-test unpause-pipeline \
     --pipeline hello
 
-# Wait for workers to become available
+echo "Waiting for workers to become available"
 sleep 60
 
 fly --target system-test trigger-job \
