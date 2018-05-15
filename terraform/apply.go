@@ -1,20 +1,16 @@
 package terraform
 
 import (
-	"fmt"
 	"io"
-	"os"
 	"os/exec"
 )
 
 // Apply takes a terraform config and applies it
 func (client *Client) Apply(dryrun bool) error {
-	fmt.Println("RUNNING TERRAFORM APPLY")
 	action := "apply"
 	if dryrun {
 		action = "plan"
 	}
-	os.Setenv("TF_LOG", "TRACE")
 	return client.terraform([]string{
 		action,
 		"-input=false",
