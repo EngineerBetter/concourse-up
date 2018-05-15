@@ -79,6 +79,8 @@ variables:
   type: password
 - name: credhub_cli_password
   type: password
+- name: uaa-passphrase
+  type: password
 
 instance_groups:
 - name: web
@@ -99,6 +101,11 @@ instance_groups:
   - name: uaa
     release: uaa
     properties:
+      encryption:
+        encryption_keys:
+          - label: 'uaa-passphrase'
+            passphrase: ((uaa-passphrase))
+        active_key_label: 'uaa-passphrase'
       uaa:
         url: &uaa-url https://<% .ATCPublicIP %>:8443
         catalina_opts: -Djava.security.egd=file:/dev/./urandom -Xmx768m -XX:MaxMetaspaceSize=256m
