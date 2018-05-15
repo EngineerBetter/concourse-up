@@ -362,6 +362,7 @@ jobs:
     #         <!channel> Concourse Up alt region system test failure!
     - task: system-test-update
       file: concourse-up/ci/tasks/system-test-update.yml
+      privileged: true
       params:
         AWS_ACCESS_KEY_ID: ((concourse_up_test_access_key_id))
         AWS_SECRET_ACCESS_KEY: ((concourse_up_test_secret_key))
