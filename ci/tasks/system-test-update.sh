@@ -29,6 +29,8 @@ echo "DEPLOY OLD VERSION"
 
 ./cup-old deploy $deployment
 
+# Wait for previous deployment to finish
+# Otherwise terraform state can get into an invalid state
 sleep 300
 
 echo "UPDATE TO NEW VERSION"
