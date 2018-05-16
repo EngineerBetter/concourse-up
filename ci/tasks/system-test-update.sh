@@ -31,7 +31,7 @@ echo "DEPLOY OLD VERSION"
 
 echo "UPDATE TO NEW VERSION"
 
-strace -tqv -s99999 -f -etrace=execve ./cup-new deploy $deployment
+./cup-new deploy $deployment
 
 sleep 60
 
