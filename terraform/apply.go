@@ -1,7 +1,6 @@
 package terraform
 
 import (
-	"fmt"
 	"io"
 	"os/exec"
 )
@@ -27,7 +26,6 @@ func (client *Client) Destroy() error {
 }
 
 func (client *Client) terraform(args []string, stdout io.Writer) error {
-	client.stderr.Write([]byte(fmt.Sprintf("running terraform with: %s\n", args)))
 	cmd := exec.Command(client.tempDir.Path("terraform"), args...)
 	cmd.Dir = client.configDir
 	cmd.Stdout = stdout
