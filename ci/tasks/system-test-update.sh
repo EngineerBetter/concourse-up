@@ -29,6 +29,8 @@ echo "DEPLOY OLD VERSION"
 
 ./cup-old deploy $deployment
 
+sleep 300
+
 echo "UPDATE TO NEW VERSION"
 
 ./cup-new deploy $deployment
