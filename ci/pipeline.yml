@@ -33,10 +33,11 @@ resources:
   source:
     uri: git@github.com:EngineerBetter/concourse-up.git
     branch: master
-    ignore_paths: [ci/docker/*, README.md, compilation-vars.json]
-    private_key: ((github_private_key))
     ignore_paths:
+    - ci/docker/*
+    - README.md
     - compilation-vars.json
+    private_key: ((github_private_key))
 
 - name: image
   type: docker-image
