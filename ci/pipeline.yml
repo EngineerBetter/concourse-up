@@ -23,6 +23,13 @@ resource_types:
   source:
     repository: concourse/concourse-pipeline-resource
 
+# Using an image based on this PR: https://github.com/concourse/github-release-resource/pull/72
+# Delete this when the PR gets merged
+- name: github-release
+  type: docker-image
+  source:
+    repository: engineerbetter/git-release-resource-72
+
 - name: slack-notification
   type: docker-image
   source:
