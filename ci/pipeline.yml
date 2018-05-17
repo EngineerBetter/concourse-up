@@ -2,8 +2,8 @@
 groups:
 - name: Main
   jobs:
-  - set-pipelines
-  - build-images
+  - set-pipeline
+  - build-image
   - unit-tests
   - compile-releases
   - build
