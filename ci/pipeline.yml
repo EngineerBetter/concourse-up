@@ -1,4 +1,22 @@
 ---
+groups:
+- name: Main
+  jobs:
+  - set-pipelines
+  - build-images
+  - unit-tests
+  - compile-releases
+  - build
+  - system-test
+  - commit-compilation-vars
+  - auto
+  - major
+  - minor
+  - patch
+- name: Cleanup
+  jobs:
+  - cleanup
+
 resource_types:
 - name: pipeline
   type: docker-image
@@ -175,6 +193,10 @@ resources:
   source:
     url: ((slack_webhook))
 
+- name: once-daily
+  type: time
+  source: {interval: 24h}
+
 jobs:
 - name: build-image
   public: false
@@ -325,6 +347,8 @@ jobs:
           file: build-windows/concourse-up-windows-amd64.exe
 
 - name: system-test
+  serial_groups:
+  - system-test
   serial: true
   plan:
   - aggregate:
@@ -616,3 +640,17 @@ jobs:
       text: |
         <!channel> Concourse Up $TEXT_FILE_CONTENT published to Github
       text_file: version/version
+
+- name: cleanup
+  serial: true
+  serial_groups:
+  - system-test
+  plan:
+  - get: concourse-up
+  - get: once-daily
+    trigger: true
+  - task: cleanup
+    file: concourse-up/ci/tasks/cleanup-tests.yml
+    params:
+      AWS_ACCESS_KEY_ID: ((concourse_up_test_access_key_id))
+      AWS_SECRET_ACCESS_KEY: ((concourse_up_test_secret_key))
