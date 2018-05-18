@@ -28,7 +28,7 @@ var _ = Describe("Client", func() {
 	var args *config.DeployArgs
 	var exampleConfig *config.Config
 
-	certGenerator := func(caName string, ip ...string) (*certs.Certs, error) {
+	certGenerator := func(c certs.AcmeClient, caName string, ip ...string) (*certs.Certs, error) {
 		actions = append(actions, fmt.Sprintf("generating cert ca: %s, cn: %s", caName, ip))
 		return &certs.Certs{
 			CACert: []byte("----EXAMPLE CERT----"),

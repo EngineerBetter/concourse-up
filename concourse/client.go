@@ -18,7 +18,7 @@ type Client struct {
 	terraformClientFactory terraform.ClientFactory
 	boshClientFactory      bosh.ClientFactory
 	flyClientFactory       func(fly.Credentials, io.Writer, io.Writer) (fly.IClient, error)
-	certGenerator          func(caName string, ip ...string) (*certs.Certs, error)
+	certGenerator          func(c certs.AcmeClient, caName string, ip ...string) (*certs.Certs, error)
 	configClient           config.IClient
 	deployArgs             *config.DeployArgs
 	stdout                 io.Writer
@@ -38,7 +38,7 @@ func NewClient(
 	terraformClientFactory terraform.ClientFactory,
 	boshClientFactory bosh.ClientFactory,
 	flyClientFactory func(fly.Credentials, io.Writer, io.Writer) (fly.IClient, error),
-	certGenerator func(caName string, ip ...string) (*certs.Certs, error),
+	certGenerator func(c certs.AcmeClient, caName string, ip ...string) (*certs.Certs, error),
 	configClient config.IClient,
 	deployArgs *config.DeployArgs,
 	stdout, stderr io.Writer) *Client {

@@ -6,7 +6,6 @@ import (
 	"crypto/rsa"
 	"fmt"
 	"net"
-	"os"
 	"strings"
 	"sync"
 	"time"
@@ -22,21 +21,21 @@ type Certs struct {
 	Key    []byte
 	Cert   []byte
 }
-type user struct {
+type User struct {
 	k crypto.PrivateKey
 	r *acme.RegistrationResource
 	sync.Once
 }
 
-func (u *user) GetEmail() string {
+func (u *User) GetEmail() string {
 	return "nobody@example.com"
 }
 
-func (u *user) GetRegistration() *acme.RegistrationResource {
+func (u *User) GetRegistration() *acme.RegistrationResource {
 	return u.r
 }
 
-func (u *user) GetPrivateKey() crypto.PrivateKey {
+func (u *User) GetPrivateKey() crypto.PrivateKey {
 	u.Do(func() {
 		var err error
 		u.k, err = rsa.GenerateKey(rand.Reader, 2048)
@@ -65,23 +64,21 @@ func (t timeoutProvider) Timeout() (timeout, interval time.Duration) {
 	return t.timeout, t.interval
 }
 
-func acmeURL() string {
-	if u := os.Getenv("CONCOURSE_UP_ACME_URL"); u != "" {
-		return u
-	}
-	return "https://acme-v01.api.letsencrypt.org/directory"
+type AcmeClient interface {
+	SetChallengeProvider(challenge acme.Challenge, p acme.ChallengeProvider) error
+	ExcludeChallenges(challenges []acme.Challenge)
+	Register() (*acme.RegistrationResource, error)
+	AgreeToTOS() error
+	ObtainCertificate(domains []string, bundle bool, privKey crypto.PrivateKey, mustStaple bool) (acme.CertificateResource, map[string]error)
 }
 
 // Generate generates certs for use in a bosh director manifest
-func Generate(caName string, ipOrDomains ...string) (*Certs, error) {
+func Generate(c AcmeClient, caName string, ipOrDomains ...string) (*Certs, error) {
 	if hasIP(ipOrDomains) {
 		return generateSelfSigned(caName, ipOrDomains...)
 	}
-	u := &user{}
-	c, err := acme.NewClient(acmeURL(), u, acme.RSA2048)
-	if err != nil {
-		return nil, err
-	}
+	u := &User{}
+
 	c.ExcludeChallenges([]acme.Challenge{acme.HTTP01, acme.TLSSNI01})
 	r53, err := route53.NewDNSProvider()
 	if err != nil {

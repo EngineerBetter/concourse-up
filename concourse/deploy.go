@@ -5,6 +5,7 @@ import (
 	"encoding/pem"
 	"fmt"
 	"io"
+	"os"
 	"text/template"
 	"time"
 
@@ -13,10 +14,12 @@ import (
 	"strings"
 
 	"github.com/EngineerBetter/concourse-up/bosh"
+	"github.com/EngineerBetter/concourse-up/certs"
 	"github.com/EngineerBetter/concourse-up/config"
 	"github.com/EngineerBetter/concourse-up/fly"
 	"github.com/EngineerBetter/concourse-up/terraform"
 	"github.com/EngineerBetter/concourse-up/util"
+	"github.com/xenolf/lego/acme"
 )
 
 // Deploy deploys a concourse instance
@@ -37,7 +40,16 @@ func (client *Client) Deploy() error {
 	if err != nil {
 		return err
 	}
-	config, err = client.checkPreDeployConfigRequiments(isDomainUpdated, config, metadata)
+
+	u := &certs.User{}
+
+	var c certs.AcmeClient
+	c, err = acme.NewClient(acmeURL(), u, acme.RSA2048)
+	if err != nil {
+		return err
+	}
+
+	config, err = client.checkPreDeployConfigRequiments(c, isDomainUpdated, config, metadata)
 	if err != nil {
 		return err
 	}
@@ -142,17 +154,17 @@ func (client *Client) checkPreTerraformConfigRequirements(conf *config.Config) (
 	return conf, nil
 }
 
-func (client *Client) checkPreDeployConfigRequiments(isDomainUpdated bool, config *config.Config, metadata *terraform.Metadata) (*config.Config, error) {
+func (client *Client) checkPreDeployConfigRequiments(c certs.AcmeClient, isDomainUpdated bool, config *config.Config, metadata *terraform.Metadata) (*config.Config, error) {
 	if client.deployArgs.Domain == "" {
 		config.Domain = metadata.ATCPublicIP.Value
 	}
 
-	config, err := client.ensureDirectorCerts(config, metadata)
+	config, err := client.ensureDirectorCerts(c, config, metadata)
 	if err != nil {
 		return nil, err
 	}
 
-	config, err = client.ensureConcourseCerts(isDomainUpdated, config, metadata)
+	config, err = client.ensureConcourseCerts(c, isDomainUpdated, config, metadata)
 	if err != nil {
 		return nil, err
 	}
@@ -169,7 +181,14 @@ func (client *Client) checkPreDeployConfigRequiments(isDomainUpdated bool, confi
 	return config, nil
 }
 
-func (client *Client) ensureDirectorCerts(config *config.Config, metadata *terraform.Metadata) (*config.Config, error) {
+func acmeURL() string {
+	if u := os.Getenv("CONCOURSE_UP_ACME_URL"); u != "" {
+		return u
+	}
+	return "https://acme-v01.api.letsencrypt.org/directory"
+}
+
+func (client *Client) ensureDirectorCerts(c certs.AcmeClient, config *config.Config, metadata *terraform.Metadata) (*config.Config, error) {
 	// If we already have director certificates, don't regenerate as changing them will
 	// force a bosh director re-deploy even if there are no other changes
 	if config.DirectorCACert != "" {
@@ -183,7 +202,7 @@ func (client *Client) ensureDirectorCerts(config *config.Config, metadata *terra
 		return nil, err
 	}
 
-	directorCerts, err := client.certGenerator(config.Deployment, ip, "10.0.0.6")
+	directorCerts, err := client.certGenerator(c, config.Deployment, ip, "10.0.0.6")
 	if err != nil {
 		return nil, err
 	}
@@ -207,7 +226,7 @@ func timeTillExpiry(cert string) time.Duration {
 	return time.Until(c.NotAfter)
 }
 
-func (client *Client) ensureConcourseCerts(domainUpdated bool, config *config.Config, metadata *terraform.Metadata) (*config.Config, error) {
+func (client *Client) ensureConcourseCerts(c certs.AcmeClient, domainUpdated bool, config *config.Config, metadata *terraform.Metadata) (*config.Config, error) {
 	if client.deployArgs.TLSCert != "" {
 		config.ConcourseCert = client.deployArgs.TLSCert
 		config.ConcourseKey = client.deployArgs.TLSKey
@@ -223,7 +242,7 @@ func (client *Client) ensureConcourseCerts(domainUpdated bool, config *config.Co
 	}
 
 	// If no domain has been provided by the user, the value of config.Domain is set to the ATC's public IP in checkPreDeployConfigRequiments
-	concourseCerts, err := client.certGenerator(config.Deployment, config.Domain)
+	concourseCerts, err := client.certGenerator(c, config.Deployment, config.Domain)
 	if err != nil {
 		return nil, err
 	}
