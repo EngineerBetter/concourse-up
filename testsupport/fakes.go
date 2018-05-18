@@ -1,9 +1,13 @@
 package testsupport
 
 import (
+	"crypto"
+	"errors"
+
 	"github.com/EngineerBetter/concourse-up/bosh"
 	"github.com/EngineerBetter/concourse-up/config"
 	"github.com/EngineerBetter/concourse-up/terraform"
+	"github.com/xenolf/lego/acme"
 )
 
 // FakeAWSClient implements iaas.IClient for testing
@@ -203,4 +207,41 @@ func (client *FakeBoshClient) Cleanup() error {
 // Instances delegates to FakeInstances which is dynamically set by the tests
 func (client *FakeBoshClient) Instances() ([]bosh.Instance, error) {
 	return client.FakeInstances()
+}
+
+// FakeAcmeClient implements certs.AcmeClient for testing
+type FakeAcmeClient struct {
+}
+
+// SetChallengeProvider returns nil
+func (c *FakeAcmeClient) SetChallengeProvider(challenge acme.Challenge, p acme.ChallengeProvider) error {
+	return nil
+}
+
+// ExcludeChallenges does nothing
+func (c *FakeAcmeClient) ExcludeChallenges(challenges []acme.Challenge) {
+}
+
+// Register returns nil
+func (c *FakeAcmeClient) Register() (*acme.RegistrationResource, error) {
+	return nil, nil
+}
+
+// AgreeToTOS returns nil
+func (c *FakeAcmeClient) AgreeToTOS() error {
+	return nil
+}
+
+// ObtainCertificate returns a fake certificate if domain is valid
+func (c *FakeAcmeClient) ObtainCertificate(domains []string, bundle bool, privKey crypto.PrivateKey, mustStaple bool) (acme.CertificateResource, map[string]error) {
+	if domains[0] == "google.com" {
+		errs := make(map[string]error)
+		errs["error"] = errors.New("this is an error")
+		return acme.CertificateResource{}, errs
+	}
+	return acme.CertificateResource{
+		PrivateKey:        []byte("BEGIN RSA PRIVATE KEY"),
+		Certificate:       []byte("BEGIN CERTIFICATE"),
+		IssuerCertificate: []byte("BEGIN CERTIFICATE"),
+	}, nil
 }
