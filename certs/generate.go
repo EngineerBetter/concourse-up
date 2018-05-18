@@ -21,6 +21,7 @@ type Certs struct {
 	Key    []byte
 	Cert   []byte
 }
+
 type User struct {
 	k crypto.PrivateKey
 	r *acme.RegistrationResource

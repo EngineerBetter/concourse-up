@@ -12,6 +12,7 @@ import (
 	"github.com/EngineerBetter/concourse-up/fly"
 	"github.com/EngineerBetter/concourse-up/iaas"
 	"github.com/EngineerBetter/concourse-up/terraform"
+	"github.com/EngineerBetter/concourse-up/util"
 
 	"encoding/json"
 
@@ -66,6 +67,11 @@ var info = cli.Command{
 			return err
 		}
 
+		acmeClient, err := certs.NewAcmeClient()
+		if err != nil {
+			return err
+		}
+
 		client := concourse.NewClient(
 			awsClient,
 			terraform.NewClient,
@@ -76,6 +82,8 @@ var info = cli.Command{
 			nil,
 			os.Stdout,
 			os.Stderr,
+			util.FindUserIP,
+			acmeClient,
 		)
 
 		info, err := client.FetchInfo()

@@ -19,18 +19,9 @@ func (c *Client) SetChallengeProvider(challenge acme.Challenge, p acme.Challenge
 	return nil
 }
 
-func (c *Client) SetHTTPAddress(iface string) error {
-	return nil
-}
-
-func (c *Client) SetTLSAddress(iface string) error {
-	return nil
-}
-
 func (c *Client) ExcludeChallenges(challenges []acme.Challenge) {
 }
 
-// Register the current account to the ACME server.
 func (c *Client) Register() (*acme.RegistrationResource, error) {
 	return nil, nil
 }

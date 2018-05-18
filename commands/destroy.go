@@ -66,6 +66,11 @@ var destroy = cli.Command{
 			return err
 		}
 
+		acmeClient, err := certs.NewAcmeClient()
+		if err != nil {
+			return err
+		}
+
 		client := concourse.NewClient(
 			iaasClient,
 			terraform.NewClient,
@@ -76,6 +81,8 @@ var destroy = cli.Command{
 			nil,
 			os.Stdout,
 			os.Stderr,
+			util.FindUserIP,
+			acmeClient,
 		)
 
 		return client.Destroy()

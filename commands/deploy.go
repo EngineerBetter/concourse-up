@@ -11,6 +11,7 @@ import (
 	"github.com/EngineerBetter/concourse-up/fly"
 	"github.com/EngineerBetter/concourse-up/iaas"
 	"github.com/EngineerBetter/concourse-up/terraform"
+	"github.com/EngineerBetter/concourse-up/util"
 
 	"gopkg.in/urfave/cli.v1"
 )
@@ -117,6 +118,11 @@ var deploy = cli.Command{
 			return err
 		}
 
+		acmeClient, err := certs.NewAcmeClient()
+		if err != nil {
+			return err
+		}
+
 		client := concourse.NewClient(
 			awsClient,
 			terraform.NewClient,
@@ -127,6 +133,8 @@ var deploy = cli.Command{
 			&deployArgs,
 			os.Stdout,
 			os.Stderr,
+			util.FindUserIP,
+			acmeClient,
 		)
 
 		return client.Deploy()

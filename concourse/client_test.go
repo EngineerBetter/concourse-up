@@ -1,6 +1,7 @@
 package concourse_test
 
 import (
+	"crypto"
 	"errors"
 	"fmt"
 	"io"
@@ -16,7 +17,38 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/onsi/gomega/gbytes"
+	"github.com/xenolf/lego/acme"
 )
+
+type AcmeClient struct {
+}
+
+func (c *AcmeClient) SetChallengeProvider(challenge acme.Challenge, p acme.ChallengeProvider) error {
+	return nil
+}
+
+func (c *AcmeClient) SetHTTPAddress(iface string) error {
+	return nil
+}
+
+func (c *AcmeClient) SetTLSAddress(iface string) error {
+	return nil
+}
+
+func (c *AcmeClient) ExcludeChallenges(challenges []acme.Challenge) {
+}
+
+func (c *AcmeClient) Register() (*acme.RegistrationResource, error) {
+	return nil, nil
+}
+
+func (c *AcmeClient) AgreeToTOS() error {
+	return nil
+}
+
+func (c *AcmeClient) ObtainCertificate(domains []string, bundle bool, privKey crypto.PrivateKey, mustStaple bool) (acme.CertificateResource, map[string]error) {
+	return acme.CertificateResource{}, nil
+}
 
 var _ = Describe("Client", func() {
 	var buildClient func() concourse.IClient
@@ -27,6 +59,7 @@ var _ = Describe("Client", func() {
 	var terraformMetadata *terraform.Metadata
 	var args *config.DeployArgs
 	var exampleConfig *config.Config
+	var ipChecker func() (string, error)
 
 	certGenerator := func(c certs.AcmeClient, caName string, ip ...string) (*certs.Certs, error) {
 		actions = append(actions, fmt.Sprintf("generating cert ca: %s, cn: %s", caName, ip))
@@ -206,6 +239,10 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 			}, nil
 		}
 
+		ipChecker = func() (string, error) {
+			return "192.0.2.0", nil
+		}
+
 		stdout = gbytes.NewBuffer()
 		stderr = gbytes.NewBuffer()
 
@@ -222,6 +259,8 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 				args,
 				stdout,
 				stderr,
+				ipChecker,
+				&AcmeClient{},
 			)
 		}
 	})
