@@ -22,21 +22,21 @@ type Certs struct {
 	Cert   []byte
 }
 
-type User struct {
+type user struct {
 	k crypto.PrivateKey
 	r *acme.RegistrationResource
 	sync.Once
 }
 
-func (u *User) GetEmail() string {
+func (u *user) GetEmail() string {
 	return "nobody@example.com"
 }
 
-func (u *User) GetRegistration() *acme.RegistrationResource {
+func (u *user) GetRegistration() *acme.RegistrationResource {
 	return u.r
 }
 
-func (u *User) GetPrivateKey() crypto.PrivateKey {
+func (u *user) GetPrivateKey() crypto.PrivateKey {
 	u.Do(func() {
 		var err error
 		u.k, err = rsa.GenerateKey(rand.Reader, 2048)
@@ -65,6 +65,7 @@ func (t timeoutProvider) Timeout() (timeout, interval time.Duration) {
 	return t.timeout, t.interval
 }
 
+// AcmeClient is an interface for an acme client
 type AcmeClient interface {
 	SetChallengeProvider(challenge acme.Challenge, p acme.ChallengeProvider) error
 	ExcludeChallenges(challenges []acme.Challenge)
@@ -78,7 +79,7 @@ func Generate(c AcmeClient, caName string, ipOrDomains ...string) (*Certs, error
 	if hasIP(ipOrDomains) {
 		return generateSelfSigned(caName, ipOrDomains...)
 	}
-	u := &User{}
+	u := &user{}
 
 	c.ExcludeChallenges([]acme.Challenge{acme.HTTP01, acme.TLSSNI01})
 	r53, err := route53.NewDNSProvider()

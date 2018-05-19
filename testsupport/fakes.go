@@ -7,6 +7,7 @@ import (
 	"github.com/EngineerBetter/concourse-up/bosh"
 	"github.com/EngineerBetter/concourse-up/config"
 	"github.com/EngineerBetter/concourse-up/terraform"
+	"github.com/aws/aws-sdk-go/service/route53"
 	"github.com/xenolf/lego/acme"
 )
 
@@ -17,7 +18,7 @@ type FakeAWSClient struct {
 	FakeDeleteVersionedBucket         func(name string) error
 	FakeEnsureBucketExists            func(name string) error
 	FakeEnsureFileExists              func(bucket, path string, defaultContents []byte) ([]byte, bool, error)
-	FakeFindLongestMatchingHostedZone func(subdomain string) (string, string, error)
+	FakeFindLongestMatchingHostedZone func(subdomain string, listHostedZones func() ([]*route53.HostedZone, error)) (string, string, error)
 	FakeHasFile                       func(bucket, path string) (bool, error)
 	FakeLoadFile                      func(bucket, path string) ([]byte, error)
 	FakeWriteFile                     func(bucket, path string, contents []byte) error
@@ -60,8 +61,8 @@ func (client *FakeAWSClient) EnsureFileExists(bucket, path string, defaultConten
 }
 
 // FindLongestMatchingHostedZone delegates to FakeFindLongestMatchingHostedZone which is dynamically set by the tests
-func (client *FakeAWSClient) FindLongestMatchingHostedZone(subdomain string) (string, string, error) {
-	return client.FakeFindLongestMatchingHostedZone(subdomain)
+func (client *FakeAWSClient) FindLongestMatchingHostedZone(subdomain string, listHostedZones func() ([]*route53.HostedZone, error)) (string, string, error) {
+	return client.FakeFindLongestMatchingHostedZone(subdomain, listHostedZones)
 }
 
 // HasFile delegates to FakeHasFile which is dynamically set by the tests

@@ -13,6 +13,7 @@ import (
 	"github.com/EngineerBetter/concourse-up/fly"
 	"github.com/EngineerBetter/concourse-up/terraform"
 	"github.com/EngineerBetter/concourse-up/testsupport"
+	"github.com/aws/aws-sdk-go/service/route53"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/onsi/gomega/gbytes"
@@ -37,7 +38,7 @@ var _ = Describe("Client", func() {
 	}
 
 	awsClient := &testsupport.FakeAWSClient{
-		FakeFindLongestMatchingHostedZone: func(subdomain string) (string, string, error) {
+		FakeFindLongestMatchingHostedZone: func(subdomain string, listHostedZones func() ([]*route53.HostedZone, error)) (string, string, error) {
 			if subdomain == "ci.google.com" {
 				return "google.com", "ABC123", nil
 			}

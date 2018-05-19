@@ -1,6 +1,10 @@
 package iaas
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/aws/aws-sdk-go/service/route53"
+)
 
 // IClient represents actions taken against AWS
 type IClient interface {
@@ -9,7 +13,7 @@ type IClient interface {
 	DeleteVMsInVPC(vpcID string) error
 	EnsureBucketExists(name string) error
 	EnsureFileExists(bucket, path string, defaultContents []byte) ([]byte, bool, error)
-	FindLongestMatchingHostedZone(subdomain string) (string, string, error)
+	FindLongestMatchingHostedZone(subdomain string, listHostedZones func() ([]*route53.HostedZone, error)) (string, string, error)
 	HasFile(bucket, path string) (bool, error)
 	LoadFile(bucket, path string) ([]byte, error)
 	WriteFile(bucket, path string, contents []byte) error

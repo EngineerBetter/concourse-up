@@ -8,7 +8,7 @@ import (
 
 // NewAcmeClient returns a new AcmeClient
 func NewAcmeClient() (AcmeClient, error) {
-	u := &User{}
+	u := &user{}
 
 	var c AcmeClient
 	c, err := acme.NewClient(acmeURL(), u, acme.RSA2048)

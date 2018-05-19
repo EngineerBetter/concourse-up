@@ -8,6 +8,8 @@ import (
 	"text/template"
 	"time"
 
+	"github.com/EngineerBetter/concourse-up/iaas"
+
 	"gopkg.in/yaml.v2"
 
 	"strings"
@@ -348,7 +350,7 @@ func (client *Client) setHostedZone(config *config.Config) error {
 		return nil
 	}
 
-	hostedZoneName, hostedZoneID, err := client.iaasClient.FindLongestMatchingHostedZone(domain)
+	hostedZoneName, hostedZoneID, err := client.iaasClient.FindLongestMatchingHostedZone(domain, iaas.ListHostedZones)
 	if err != nil {
 		return err
 	}

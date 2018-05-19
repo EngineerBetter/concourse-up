@@ -81,11 +81,11 @@ func (client *AWSClient) DeleteVMsInVPC(vpcID string) error {
 	return err
 }
 
-// FindLongestMatchingHostedZone finds the longest hosted zone that matches the given subdomain
-func (client *AWSClient) FindLongestMatchingHostedZone(subdomain string) (string, string, error) {
+// ListHostedZones returns a list of hosted zones
+func ListHostedZones() ([]*route53.HostedZone, error) {
 	sess, err := session.NewSession(aws.NewConfig().WithCredentialsChainVerboseErrors(true))
 	if err != nil {
-		return "", "", err
+		return nil, err
 	}
 
 	r53Client := route53.New(sess)
@@ -94,6 +94,16 @@ func (client *AWSClient) FindLongestMatchingHostedZone(subdomain string) (string
 		hostedZones = append(hostedZones, output.HostedZones...)
 		return true
 	})
+	if err != nil {
+		return nil, err
+	}
+
+	return hostedZones, nil
+}
+
+// FindLongestMatchingHostedZone finds the longest hosted zone that matches the given subdomain
+func (client *AWSClient) FindLongestMatchingHostedZone(subdomain string, listHostedZones func() ([]*route53.HostedZone, error)) (string, string, error) {
+	hostedZones, err := listHostedZones()
 	if err != nil {
 		return "", "", err
 	}
