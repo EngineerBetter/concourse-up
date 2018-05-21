@@ -67,11 +67,6 @@ var info = cli.Command{
 			return err
 		}
 
-		acmeClient, err := certs.NewAcmeClient()
-		if err != nil {
-			return err
-		}
-
 		client := concourse.NewClient(
 			awsClient,
 			terraform.NewClient,
@@ -83,7 +78,7 @@ var info = cli.Command{
 			os.Stdout,
 			os.Stderr,
 			util.FindUserIP,
-			acmeClient,
+			certs.NewAcmeClient,
 		)
 
 		info, err := client.FetchInfo()

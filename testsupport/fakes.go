@@ -5,6 +5,7 @@ import (
 	"errors"
 
 	"github.com/EngineerBetter/concourse-up/bosh"
+	"github.com/EngineerBetter/concourse-up/certs"
 	"github.com/EngineerBetter/concourse-up/config"
 	"github.com/EngineerBetter/concourse-up/terraform"
 	"github.com/aws/aws-sdk-go/service/route53"
@@ -208,6 +209,11 @@ func (client *FakeBoshClient) Cleanup() error {
 // Instances delegates to FakeInstances which is dynamically set by the tests
 func (client *FakeBoshClient) Instances() ([]bosh.Instance, error) {
 	return client.FakeInstances()
+}
+
+// NewFakeAcmeClient returns a new FakeAcmeClient
+func NewFakeAcmeClient(u *certs.User) (certs.AcmeClient, error) {
+	return &FakeAcmeClient{}, nil
 }
 
 // FakeAcmeClient implements certs.AcmeClient for testing

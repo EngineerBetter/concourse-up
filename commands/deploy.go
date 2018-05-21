@@ -118,11 +118,6 @@ var deploy = cli.Command{
 			return err
 		}
 
-		acmeClient, err := certs.NewAcmeClient()
-		if err != nil {
-			return err
-		}
-
 		client := concourse.NewClient(
 			awsClient,
 			terraform.NewClient,
@@ -134,7 +129,7 @@ var deploy = cli.Command{
 			os.Stdout,
 			os.Stderr,
 			util.FindUserIP,
-			acmeClient,
+			certs.NewAcmeClient,
 		)
 
 		return client.Deploy()

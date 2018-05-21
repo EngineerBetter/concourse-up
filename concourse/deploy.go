@@ -40,7 +40,7 @@ func (client *Client) Deploy() error {
 		return err
 	}
 
-	config, err = client.checkPreDeployConfigRequirements(client.acmeClient, isDomainUpdated, config, metadata)
+	config, err = client.checkPreDeployConfigRequirements(client.acmeClientConstructor, isDomainUpdated, config, metadata)
 	if err != nil {
 		return err
 	}
@@ -145,7 +145,7 @@ func (client *Client) checkPreTerraformConfigRequirements(conf *config.Config) (
 	return conf, nil
 }
 
-func (client *Client) checkPreDeployConfigRequirements(c certs.AcmeClient, isDomainUpdated bool, config *config.Config, metadata *terraform.Metadata) (*config.Config, error) {
+func (client *Client) checkPreDeployConfigRequirements(c func(u *certs.User) (certs.AcmeClient, error), isDomainUpdated bool, config *config.Config, metadata *terraform.Metadata) (*config.Config, error) {
 	if client.deployArgs.Domain == "" {
 		config.Domain = metadata.ATCPublicIP.Value
 	}
@@ -172,7 +172,7 @@ func (client *Client) checkPreDeployConfigRequirements(c certs.AcmeClient, isDom
 	return config, nil
 }
 
-func (client *Client) ensureDirectorCerts(c certs.AcmeClient, config *config.Config, metadata *terraform.Metadata) (*config.Config, error) {
+func (client *Client) ensureDirectorCerts(c func(u *certs.User) (certs.AcmeClient, error), config *config.Config, metadata *terraform.Metadata) (*config.Config, error) {
 	// If we already have director certificates, don't regenerate as changing them will
 	// force a bosh director re-deploy even if there are no other changes
 	if config.DirectorCACert != "" {
@@ -210,7 +210,7 @@ func timeTillExpiry(cert string) time.Duration {
 	return time.Until(c.NotAfter)
 }
 
-func (client *Client) ensureConcourseCerts(c certs.AcmeClient, domainUpdated bool, config *config.Config, metadata *terraform.Metadata) (*config.Config, error) {
+func (client *Client) ensureConcourseCerts(c func(u *certs.User) (certs.AcmeClient, error), domainUpdated bool, config *config.Config, metadata *terraform.Metadata) (*config.Config, error) {
 	if client.deployArgs.TLSCert != "" {
 		config.ConcourseCert = client.deployArgs.TLSCert
 		config.ConcourseKey = client.deployArgs.TLSKey

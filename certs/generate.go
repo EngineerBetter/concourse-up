@@ -22,21 +22,25 @@ type Certs struct {
 	Cert   []byte
 }
 
-type user struct {
+// User contains a key, a registration resource, and a sync parameter
+type User struct {
 	k crypto.PrivateKey
 	r *acme.RegistrationResource
 	sync.Once
 }
 
-func (u *user) GetEmail() string {
+// GetEmail returns the email for a user
+func (u *User) GetEmail() string {
 	return "nobody@example.com"
 }
 
-func (u *user) GetRegistration() *acme.RegistrationResource {
+// GetRegistration returns the registration for a user
+func (u *User) GetRegistration() *acme.RegistrationResource {
 	return u.r
 }
 
-func (u *user) GetPrivateKey() crypto.PrivateKey {
+// GetPrivateKey returns the private key for a user
+func (u *User) GetPrivateKey() crypto.PrivateKey {
 	u.Do(func() {
 		var err error
 		u.k, err = rsa.GenerateKey(rand.Reader, 2048)
@@ -75,11 +79,17 @@ type AcmeClient interface {
 }
 
 // Generate generates certs for use in a bosh director manifest
-func Generate(c AcmeClient, caName string, ipOrDomains ...string) (*Certs, error) {
+func Generate(constructor func(u *User) (AcmeClient, error), caName string, ipOrDomains ...string) (*Certs, error) {
+
 	if hasIP(ipOrDomains) {
 		return generateSelfSigned(caName, ipOrDomains...)
 	}
-	u := &user{}
+	u := &User{}
+
+	c, err := constructor(u)
+	if err != nil {
+		return nil, err
+	}
 
 	c.ExcludeChallenges([]acme.Challenge{acme.HTTP01, acme.TLSSNI01})
 	r53, err := route53.NewDNSProvider()

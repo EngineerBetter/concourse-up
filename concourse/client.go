@@ -18,13 +18,13 @@ type Client struct {
 	terraformClientFactory terraform.ClientFactory
 	boshClientFactory      bosh.ClientFactory
 	flyClientFactory       func(fly.Credentials, io.Writer, io.Writer) (fly.IClient, error)
-	certGenerator          func(c certs.AcmeClient, caName string, ip ...string) (*certs.Certs, error)
+	certGenerator          func(constructor func(u *certs.User) (certs.AcmeClient, error), caName string, ip ...string) (*certs.Certs, error)
 	configClient           config.IClient
 	deployArgs             *config.DeployArgs
 	stdout                 io.Writer
 	stderr                 io.Writer
 	ipChecker              func() (string, error)
-	acmeClient             certs.AcmeClient
+	acmeClientConstructor  func(u *certs.User) (certs.AcmeClient, error)
 }
 
 // IClient represents a concourse-up client
@@ -40,10 +40,10 @@ func NewClient(
 	terraformClientFactory terraform.ClientFactory,
 	boshClientFactory bosh.ClientFactory,
 	flyClientFactory func(fly.Credentials, io.Writer, io.Writer) (fly.IClient, error),
-	certGenerator func(c certs.AcmeClient, caName string, ip ...string) (*certs.Certs, error),
+	certGenerator func(constructor func(u *certs.User) (certs.AcmeClient, error), caName string, ip ...string) (*certs.Certs, error),
 	configClient config.IClient,
 	deployArgs *config.DeployArgs,
-	stdout, stderr io.Writer, ipChecker func() (string, error), acmeClient certs.AcmeClient) *Client {
+	stdout, stderr io.Writer, ipChecker func() (string, error), acmeClientConstructor func(u *certs.User) (certs.AcmeClient, error)) *Client {
 	return &Client{
 		iaasClient:             iaasClient,
 		terraformClientFactory: terraformClientFactory,
@@ -55,7 +55,7 @@ func NewClient(
 		stdout:                 stdout,
 		stderr:                 stderr,
 		ipChecker:              ipChecker,
-		acmeClient:             acmeClient,
+		acmeClientConstructor:  acmeClientConstructor,
 	}
 }
 
