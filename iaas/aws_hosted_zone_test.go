@@ -1,6 +1,8 @@
 package iaas_test
 
 import (
+	"os"
+
 	. "github.com/EngineerBetter/concourse-up/iaas"
 	"github.com/aws/aws-sdk-go/service/route53"
 
@@ -9,6 +11,12 @@ import (
 )
 
 var _ = Describe("Client#FindLongestMatchingHostedZone", func() {
+
+	BeforeEach(func() {
+		os.Setenv("AWS_SECRET_ACCESS_KEY", "123")
+		os.Setenv("AWS_ACCESS_KEY_ID", "123")
+	})
+
 	// var listHostedZones = iaas.ListHostedZones
 	var listHostedZonesFound = func() ([]*route53.HostedZone, error) {
 		zones := []*route53.HostedZone{}
