@@ -9,6 +9,7 @@ image_resource:
 
 inputs:
 - name: concourse-up
+- name: release
 
 run:
   path: concourse-up/ci/tasks/cleanup-tests.sh

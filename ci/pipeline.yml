@@ -653,9 +653,13 @@ jobs:
   serial_groups:
   - system-test
   plan:
-  - get: concourse-up
-  - get: once-daily
-    trigger: true
+  - aggregate:
+    - get: concourse-up
+    - get: once-daily
+      trigger: true
+    - get: release
+      params:
+        globs: [concourse-up-linux-amd64]
   - task: cleanup
     file: concourse-up/ci/tasks/cleanup-tests.yml
     params:
