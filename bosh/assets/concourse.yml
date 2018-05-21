@@ -264,8 +264,8 @@ instance_groups:
         influxdb:
           host: 127.0.0.1
           port: 8086
-          password: <% .InfluxDBUsername %>
-          username: <% .InfluxDBPassword %>
+          password: <% .InfluxDBPassword %>
+          username: <% .InfluxDBUsername %>
           database: riemann
   - name: influxdb
     release: influxdb
