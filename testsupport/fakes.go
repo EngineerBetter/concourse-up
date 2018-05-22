@@ -7,8 +7,8 @@ import (
 	"github.com/EngineerBetter/concourse-up/bosh"
 	"github.com/EngineerBetter/concourse-up/certs"
 	"github.com/EngineerBetter/concourse-up/config"
+	"github.com/EngineerBetter/concourse-up/iaas"
 	"github.com/EngineerBetter/concourse-up/terraform"
-	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/aws/aws-sdk-go/service/route53"
 	"github.com/xenolf/lego/acme"
 )
@@ -16,7 +16,7 @@ import (
 // FakeAWSClient implements iaas.IClient for testing
 type FakeAWSClient struct {
 	FakeDeleteVMsInVPC                func(vpcID string) ([]*string, error)
-	FakeDeleteVolumes                 func(volumesToDelete []*string, deleteVolume func(ec2Client *ec2.EC2, volumeID *string) error) error
+	FakeDeleteVolumes                 func(volumesToDelete []*string, deleteVolume func(ec2Client iaas.IEC2, volumeID *string) error, newEC2Client func() (iaas.IEC2, error)) error
 	FakeDeleteFile                    func(bucket, path string) error
 	FakeDeleteVersionedBucket         func(name string) error
 	FakeEnsureBucketExists            func(name string) error
@@ -24,6 +24,7 @@ type FakeAWSClient struct {
 	FakeFindLongestMatchingHostedZone func(subdomain string, listHostedZones func() ([]*route53.HostedZone, error)) (string, string, error)
 	FakeHasFile                       func(bucket, path string) (bool, error)
 	FakeLoadFile                      func(bucket, path string) ([]byte, error)
+	FakeNewEC2Client                  func() (iaas.IEC2, error)
 	FakeWriteFile                     func(bucket, path string, contents []byte) error
 	FakeRegion                        func() string
 }
@@ -44,8 +45,8 @@ func (client *FakeAWSClient) DeleteVMsInVPC(vpcID string) ([]*string, error) {
 }
 
 // DeleteVolumes delegates to FakeDeleteVolumes which is dynamically set by the tests
-func (client *FakeAWSClient) DeleteVolumes(volumesToDelete []*string, deleteVolume func(ec2Client *ec2.EC2, volumeID *string) error) error {
-	return client.FakeDeleteVolumes(volumesToDelete, deleteVolume)
+func (client *FakeAWSClient) DeleteVolumes(volumesToDelete []*string, deleteVolume func(ec2Client iaas.IEC2, volumeID *string) error, newEC2Client func() (iaas.IEC2, error)) error {
+	return client.FakeDeleteVolumes(volumesToDelete, deleteVolume, newEC2Client)
 }
 
 // DeleteFile delegates to FakeDeleteFile which is dynamically set by the tests
@@ -81,6 +82,11 @@ func (client *FakeAWSClient) HasFile(bucket, path string) (bool, error) {
 // LoadFile delegates to FakeLoadFile which is dynamically set by the tests
 func (client *FakeAWSClient) LoadFile(bucket, path string) ([]byte, error) {
 	return client.FakeLoadFile(bucket, path)
+}
+
+// NewEC2Client delegates to FakeNewEC2Client which is dynamically set by the tests
+func (client *FakeAWSClient) NewEC2Client() (iaas.IEC2, error) {
+	return client.FakeNewEC2Client()
 }
 
 // WriteFile delegates to FakeWriteFile which is dynamically set by the tests

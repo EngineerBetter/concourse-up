@@ -3,7 +3,6 @@ package iaas
 import (
 	"fmt"
 
-	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/aws/aws-sdk-go/service/route53"
 )
 
@@ -12,12 +11,13 @@ type IClient interface {
 	DeleteFile(bucket, path string) error
 	DeleteVersionedBucket(name string) error
 	DeleteVMsInVPC(vpcID string) ([]*string, error)
-	DeleteVolumes(volumesToDelete []*string, deleteVolume func(ec2Client *ec2.EC2, volumeID *string) error) error
+	DeleteVolumes(volumesToDelete []*string, deleteVolume func(ec2Client IEC2, volumeID *string) error, newEC2Client func() (IEC2, error)) error
 	EnsureBucketExists(name string) error
 	EnsureFileExists(bucket, path string, defaultContents []byte) ([]byte, bool, error)
 	FindLongestMatchingHostedZone(subdomain string, listHostedZones func() ([]*route53.HostedZone, error)) (string, string, error)
 	HasFile(bucket, path string) (bool, error)
 	LoadFile(bucket, path string) ([]byte, error)
+	NewEC2Client() (IEC2, error)
 	WriteFile(bucket, path string, contents []byte) error
 	Region() string
 	IAAS() string

@@ -17,6 +17,12 @@ type AWSClient struct {
 	region string
 }
 
+// IEC2 only implements functions used in the iaas package
+type IEC2 interface {
+	DescribeVolumes(input *ec2.DescribeVolumesInput) (*ec2.DescribeVolumesOutput, error)
+	DeleteVolume(input *ec2.DeleteVolumeInput) (*ec2.DeleteVolumeOutput, error)
+}
+
 func newAWS(region string) (IClient, error) {
 	if os.Getenv("AWS_ACCESS_KEY_ID") == "" {
 		return nil, errors.New("env var AWS_ACCESS_KEY_ID not found")
@@ -39,13 +45,26 @@ func (client *AWSClient) IAAS() string {
 	return "AWS"
 }
 
-// DeleteVolumes deletes the specified EBS volumes
-func (client *AWSClient) DeleteVolumes(volumes []*string, deleteVolume func(ec2Client *ec2.EC2, volumeID *string) error) error {
+// NewEC2Client creates a new EC2 client
+func (client *AWSClient) NewEC2Client() (IEC2, error) {
 	sess, err := session.NewSession(aws.NewConfig().WithCredentialsChainVerboseErrors(true))
+	if err != nil {
+		return nil, err
+	}
+	ec2Client := ec2.New(sess, &aws.Config{Region: &client.region})
+	return ec2Client, nil
+}
+
+// DeleteVolumes deletes the specified EBS volumes
+func (client *AWSClient) DeleteVolumes(volumes []*string, deleteVolume func(ec2Client IEC2, volumeID *string) error, newEC2Client func() (IEC2, error)) error {
+	if len(volumes) == 0 {
+		return nil
+	}
+
+	ec2Client, err := newEC2Client()
 	if err != nil {
 		return err
 	}
-	ec2Client := ec2.New(sess, &aws.Config{Region: &client.region})
 
 	volumesOutput, err := ec2Client.DescribeVolumes(&ec2.DescribeVolumesInput{
 		Filters: []*ec2.Filter{
@@ -56,7 +75,11 @@ func (client *AWSClient) DeleteVolumes(volumes []*string, deleteVolume func(ec2C
 				},
 			},
 		},
+		VolumeIds: volumes,
 	})
+	if err != nil {
+		return err
+	}
 
 	volumesToDelete := volumesOutput.Volumes
 
@@ -71,7 +94,7 @@ func (client *AWSClient) DeleteVolumes(volumes []*string, deleteVolume func(ec2C
 }
 
 // DeleteVolume deletes an EBS volume with the given ID
-func DeleteVolume(ec2Client *ec2.EC2, volumeID *string) error {
+func DeleteVolume(ec2Client IEC2, volumeID *string) error {
 	fmt.Printf("Deleting volume: %s\n", *volumeID)
 	_, err := ec2Client.DeleteVolume(&ec2.DeleteVolumeInput{
 		VolumeId: volumeID,

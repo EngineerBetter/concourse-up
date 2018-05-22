@@ -37,7 +37,7 @@ func (client *Client) Destroy() error {
 		return err
 	}
 
-	if err = client.iaasClient.DeleteVolumes(volumesToDelete, iaas.DeleteVolume); err != nil {
+	if err = client.iaasClient.DeleteVolumes(volumesToDelete, iaas.DeleteVolume, client.iaasClient.NewEC2Client); err != nil {
 		return err
 	}
 

@@ -11,6 +11,7 @@ import (
 	"github.com/EngineerBetter/concourse-up/config"
 	"github.com/EngineerBetter/concourse-up/director"
 	"github.com/EngineerBetter/concourse-up/fly"
+	"github.com/EngineerBetter/concourse-up/iaas"
 	"github.com/EngineerBetter/concourse-up/terraform"
 	"github.com/EngineerBetter/concourse-up/testsupport"
 	"github.com/aws/aws-sdk-go/service/route53"
@@ -48,6 +49,9 @@ var _ = Describe("Client", func() {
 		FakeDeleteVMsInVPC: func(vpcID string) ([]*string, error) {
 			actions = append(actions, fmt.Sprintf("deleting vms in %s", vpcID))
 			return nil, nil
+		},
+		FakeDeleteVolumes: func(volumesToDelete []*string, deleteVolume func(ec2Client iaas.IEC2, volumeID *string) error, newEC2Client func() (iaas.IEC2, error)) error {
+			return nil
 		},
 	}
 

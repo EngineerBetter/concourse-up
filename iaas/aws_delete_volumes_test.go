@@ -1,14 +1,38 @@
 package iaas_test
 
 import (
+	"fmt"
+	"io/ioutil"
 	"os"
 
-	. "github.com/EngineerBetter/concourse-up/iaas"
-	"github.com/aws/aws-sdk-go/service/route53"
-
+	"github.com/EngineerBetter/concourse-up/iaas"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/service/ec2"
 )
+
+type fakeEC2Client struct {
+}
+
+func (fakeEC2Client *fakeEC2Client) DescribeVolumes(input *ec2.DescribeVolumesInput) (*ec2.DescribeVolumesOutput, error) {
+	volume1 := &ec2.Volume{
+		VolumeId: input.VolumeIds[0],
+	}
+	volume2 := &ec2.Volume{
+		VolumeId: input.VolumeIds[1],
+	}
+	volumes := []*ec2.Volume{volume1, volume2}
+	output := &ec2.DescribeVolumesOutput{
+		Volumes: volumes,
+	}
+	return output, nil
+}
+
+func (fakeEC2Client *fakeEC2Client) DeleteVolume(input *ec2.DeleteVolumeInput) (*ec2.DeleteVolumeOutput, error) {
+	return nil, nil
+}
 
 var _ = Describe("Client#FindLongestMatchingHostedZone", func() {
 
@@ -17,38 +41,43 @@ var _ = Describe("Client#FindLongestMatchingHostedZone", func() {
 		os.Setenv("AWS_ACCESS_KEY_ID", "123")
 	})
 
-	// var listHostedZones = iaas.ListHostedZones
-	var listHostedZonesFound = func() ([]*route53.HostedZone, error) {
-		zones := []*route53.HostedZone{}
-		zone := &route53.HostedZone{}
-		zone = zone.SetName("concourse-up.engineerbetter.com")
-		zone = zone.SetId("Z2NEMKRYH9QASG")
-		zones = append(zones, zone)
-
-		return zones, nil
+	var fakeDeleteVolume = func(ec2Client iaas.IEC2, volumeID *string) error {
+		fmt.Printf("Deleting volume: %s\n", *volumeID)
+		return nil
 	}
 
-	var listHostedZonesNotFound = func() ([]*route53.HostedZone, error) {
-		return nil, nil
+	var fakeEC2ClientCreator = func() (iaas.IEC2, error) {
+		return &fakeEC2Client{}, nil
 	}
 
-	Context("When the hosted zone exists", func() {
-		It("Returns the hosted zone details", func() {
-			awsClient, err := New("AWS", "eu-west-1")
+	Context("When volumes are provided", func() {
+		It("deletes the volumes", func() {
+			awsClient, err := iaas.New("AWS", "eu-west-1")
 			Expect(err).To(Succeed())
-			zoneName, zoneID, err := (awsClient).FindLongestMatchingHostedZone("integration-test.concourse-up.engineerbetter.com", listHostedZonesFound)
-			Expect(err).ToNot(HaveOccurred())
-			Expect(zoneName).To(Equal("concourse-up.engineerbetter.com"))
-			Expect(zoneID).To(Equal("Z2NEMKRYH9QASG"))
+			volumes := []*string{aws.String("volume1"), aws.String("volume2")}
+			r, w, _ := os.Pipe()
+			tmp := os.Stdout
+			defer func() {
+				os.Stdout = tmp
+			}()
+			os.Stdout = w
+			go func() {
+				err = awsClient.DeleteVolumes(volumes, fakeDeleteVolume, fakeEC2ClientCreator)
+				w.Close()
+			}()
+			stdout, _ := ioutil.ReadAll(r)
+			Expect(err).To(Succeed())
+			Expect(string(stdout)).To(Equal("Deleting volume: volume1\nDeleting volume: volume2\n"))
 		})
 	})
 
-	Context("When the hosted zone does not exist", func() {
-		It("Returns a meaningful error", func() {
-			awsClient, err := New("AWS", "eu-west-1")
+	Context("When no volumes are provided", func() {
+		It("doesn't delete anything and succeeds", func() {
+			awsClient, err := iaas.New("AWS", "eu-west-1")
 			Expect(err).To(Succeed())
-			_, _, err = (awsClient).FindLongestMatchingHostedZone("abc.google.com", listHostedZonesNotFound)
-			Expect(err).To(MatchError("No matching hosted zone found for domain abc.google.com"))
+			volumes := []*string{}
+			err = awsClient.DeleteVolumes(volumes, fakeDeleteVolume, fakeEC2ClientCreator)
+			Expect(err).To(Succeed())
 		})
 	})
 })
