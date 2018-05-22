@@ -45,9 +45,9 @@ var _ = Describe("Client", func() {
 
 			return "", "", errors.New("hosted zone not found")
 		},
-		FakeDeleteVMsInVPC: func(vpcID string) error {
+		FakeDeleteVMsInVPC: func(vpcID string) ([]*string, error) {
 			actions = append(actions, fmt.Sprintf("deleting vms in %s", vpcID))
-			return nil
+			return nil, nil
 		},
 	}
 

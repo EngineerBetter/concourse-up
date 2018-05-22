@@ -2,6 +2,8 @@ package concourse
 
 import (
 	"io"
+
+	"github.com/EngineerBetter/concourse-up/iaas"
 )
 
 // Destroy destroys a concourse instance
@@ -22,7 +24,8 @@ func (client *Client) Destroy() error {
 		return err
 	}
 
-	if err = client.iaasClient.DeleteVMsInVPC(metadata.VPCID.Value); err != nil {
+	volumesToDelete, err := client.iaasClient.DeleteVMsInVPC(metadata.VPCID.Value)
+	if err != nil {
 		return err
 	}
 
@@ -31,6 +34,10 @@ func (client *Client) Destroy() error {
 	}
 
 	if err := client.configClient.DeleteAll(conf); err != nil {
+		return err
+	}
+
+	if err = client.iaasClient.DeleteVolumes(volumesToDelete, iaas.DeleteVolume); err != nil {
 		return err
 	}
 

@@ -8,13 +8,15 @@ import (
 	"github.com/EngineerBetter/concourse-up/certs"
 	"github.com/EngineerBetter/concourse-up/config"
 	"github.com/EngineerBetter/concourse-up/terraform"
+	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/aws/aws-sdk-go/service/route53"
 	"github.com/xenolf/lego/acme"
 )
 
 // FakeAWSClient implements iaas.IClient for testing
 type FakeAWSClient struct {
-	FakeDeleteVMsInVPC                func(vpcID string) error
+	FakeDeleteVMsInVPC                func(vpcID string) ([]*string, error)
+	FakeDeleteVolumes                 func(volumesToDelete []*string, deleteVolume func(ec2Client *ec2.EC2, volumeID *string) error) error
 	FakeDeleteFile                    func(bucket, path string) error
 	FakeDeleteVersionedBucket         func(name string) error
 	FakeEnsureBucketExists            func(name string) error
@@ -37,8 +39,13 @@ func (client *FakeAWSClient) Region() string {
 }
 
 // DeleteVMsInVPC delegates to FakeDeleteVMsInVPC which is dynamically set by the tests
-func (client *FakeAWSClient) DeleteVMsInVPC(vpcID string) error {
+func (client *FakeAWSClient) DeleteVMsInVPC(vpcID string) ([]*string, error) {
 	return client.FakeDeleteVMsInVPC(vpcID)
+}
+
+// DeleteVolumes delegates to FakeDeleteVolumes which is dynamically set by the tests
+func (client *FakeAWSClient) DeleteVolumes(volumesToDelete []*string, deleteVolume func(ec2Client *ec2.EC2, volumeID *string) error) error {
+	return client.FakeDeleteVolumes(volumesToDelete, deleteVolume)
 }
 
 // DeleteFile delegates to FakeDeleteFile which is dynamically set by the tests

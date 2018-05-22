@@ -39,11 +39,51 @@ func (client *AWSClient) IAAS() string {
 	return "AWS"
 }
 
-// DeleteVMsInVPC deletes all the VMs in the given VPC
-func (client *AWSClient) DeleteVMsInVPC(vpcID string) error {
+// DeleteVolumes deletes the specified EBS volumes
+func (client *AWSClient) DeleteVolumes(volumes []*string, deleteVolume func(ec2Client *ec2.EC2, volumeID *string) error) error {
 	sess, err := session.NewSession(aws.NewConfig().WithCredentialsChainVerboseErrors(true))
 	if err != nil {
 		return err
+	}
+	ec2Client := ec2.New(sess, &aws.Config{Region: &client.region})
+
+	volumesOutput, err := ec2Client.DescribeVolumes(&ec2.DescribeVolumesInput{
+		Filters: []*ec2.Filter{
+			{
+				Name: aws.String("status"),
+				Values: []*string{
+					aws.String("available"),
+				},
+			},
+		},
+	})
+
+	volumesToDelete := volumesOutput.Volumes
+
+	for _, volume := range volumesToDelete {
+		volumeID := volume.VolumeId
+		err = deleteVolume(ec2Client, volumeID)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// DeleteVolume deletes an EBS volume with the given ID
+func DeleteVolume(ec2Client *ec2.EC2, volumeID *string) error {
+	fmt.Printf("Deleting volume: %s\n", *volumeID)
+	_, err := ec2Client.DeleteVolume(&ec2.DeleteVolumeInput{
+		VolumeId: volumeID,
+	})
+	return err
+}
+
+// DeleteVMsInVPC deletes all the VMs in the given VPC
+func (client *AWSClient) DeleteVMsInVPC(vpcID string) ([]*string, error) {
+	sess, err := session.NewSession(aws.NewConfig().WithCredentialsChainVerboseErrors(true))
+	if err != nil {
+		return nil, err
 	}
 
 	filterName := "vpc-id"
@@ -60,25 +100,33 @@ func (client *AWSClient) DeleteVMsInVPC(vpcID string) error {
 		},
 	})
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	instancesToTerminate := []*string{}
+	volumesToDelete := []*string{}
 	for _, reservation := range resp.Reservations {
 		for _, instance := range reservation.Instances {
 			fmt.Printf("Terminating instance %s\n", *instance.InstanceId)
 			instancesToTerminate = append(instancesToTerminate, instance.InstanceId)
+			for _, blockDevice := range instance.BlockDeviceMappings {
+				volumesToDelete = append(volumesToDelete, blockDevice.Ebs.VolumeId)
+			}
 		}
 	}
 
 	if len(instancesToTerminate) == 0 {
-		return nil
+		return nil, nil
 	}
 
 	_, err = ec2Client.TerminateInstances(&ec2.TerminateInstancesInput{
 		InstanceIds: instancesToTerminate,
 	})
-	return err
+	if err != nil {
+		return nil, err
+	}
+
+	return volumesToDelete, nil
 }
 
 // ListHostedZones returns a list of hosted zones
