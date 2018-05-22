@@ -17,11 +17,18 @@ type fakeEC2Client struct {
 }
 
 func (fakeEC2Client *fakeEC2Client) DescribeVolumes(input *ec2.DescribeVolumesInput) (*ec2.DescribeVolumesOutput, error) {
+	var inputVolumes []*string
+	for _, filter := range input.Filters {
+		if *filter.Name == "volume-id" {
+			inputVolumes = filter.Values
+			break
+		}
+	}
 	volume1 := &ec2.Volume{
-		VolumeId: input.VolumeIds[0],
+		VolumeId: inputVolumes[0],
 	}
 	volume2 := &ec2.Volume{
-		VolumeId: input.VolumeIds[1],
+		VolumeId: inputVolumes[1],
 	}
 	volumes := []*ec2.Volume{volume1, volume2}
 	output := &ec2.DescribeVolumesOutput{

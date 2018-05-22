@@ -74,9 +74,13 @@ func (client *AWSClient) DeleteVolumes(volumes []*string, deleteVolume func(ec2C
 					aws.String("available"),
 				},
 			},
+			{
+				Name:   aws.String("volume-id"),
+				Values: volumes,
+			},
 		},
-		VolumeIds: volumes,
 	})
+
 	if err != nil {
 		return err
 	}
