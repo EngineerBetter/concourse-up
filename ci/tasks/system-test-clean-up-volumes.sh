@@ -23,8 +23,8 @@ volume_ids=$(aws ec2 describe-instances --filter "Name=vpc-id","Values=$vpc_id" 
 sleep 180
 
 volumes=$(aws ec2 describe-volumes --filters "Name=volume-id","Values=$volume_ids" --region eu-west-1 | jq '.Volumes')
-volumes_count=$(echo $volumes | jq '. | length')
+volumes_count=$(echo "$volumes" | jq '. | length')
 
 echo "Volumes still remaining after deletion: $volumes_count"
 
-[ $volumes_count -eq 0 ]
+[ "$volumes_count" -eq 0 ]

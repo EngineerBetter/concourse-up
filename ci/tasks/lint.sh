@@ -10,13 +10,13 @@ go get -u github.com/mattn/go-bindata/...
 go generate github.com/EngineerBetter/concourse-up/bosh
 go generate github.com/EngineerBetter/concourse-up/terraform
 gometalinter.v1 \
-  --exclude vendor \
-  --exclude "_test\.go" \
-  --disable=gotype \
-  --disable=gas \
-  --disable=aligncheck \
-  --disable=errcheck \
-  --deadline=500s \
-  ./...
+--exclude vendor \
+--exclude "_test\\.go" \
+--disable=gotype \
+--disable=gas \
+--disable=aligncheck \
+--disable=errcheck \
+--deadline=500s \
+./...
 
-shellcheck -e SC2046 $(find . -name '*.sh' | grep -v vendor)
+shellcheck -e SC2046,SC2140 $(find . -name '*.sh' | grep -v vendor)
