@@ -363,7 +363,7 @@ func (client *Client) setHostedZone(config *config.Config) error {
 	}
 	err = client.configClient.Update(config)
 
-	return nil
+	return err
 }
 
 const deployMsg = `DEPLOY SUCCESSFUL. Log in with:
