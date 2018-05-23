@@ -81,11 +81,9 @@ func (client *Client) deployBoshAndPipeline(config *config.Config, metadata *ter
 		return err
 	}
 
-	if err := writeDeploySuccessMessage(config, metadata, client.stdout); err != nil {
-		return err
-	}
+	err := writeDeploySuccessMessage(config, metadata, client.stdout)
 
-	return nil
+	return err
 }
 
 func (client *Client) updateBoshAndPipeline(config *config.Config, metadata *terraform.Metadata, flyClient fly.IClient) error {
@@ -363,9 +361,7 @@ func (client *Client) setHostedZone(config *config.Config) error {
 	if err != nil {
 		return err
 	}
-	if err = client.configClient.Update(config); err != nil {
-		return err
-	}
+	err = client.configClient.Update(config)
 
 	return nil
 }

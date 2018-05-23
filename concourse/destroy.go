@@ -29,11 +29,11 @@ func (client *Client) Destroy() error {
 		return err
 	}
 
-	if err := terraformClient.Destroy(); err != nil {
+	if err = terraformClient.Destroy(); err != nil {
 		return err
 	}
 
-	if err := client.configClient.DeleteAll(conf); err != nil {
+	if err = client.configClient.DeleteAll(conf); err != nil {
 		return err
 	}
 
