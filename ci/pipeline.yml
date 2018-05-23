@@ -64,6 +64,15 @@ resources:
     - compilation-vars.json
     private_key: ((github_private_key))
 
+- name: compilation-vars-git
+  type: git
+  source:
+    uri: git@github.com:EngineerBetter/concourse-up.git
+    branch: master
+    paths:
+    - compilation-vars.json
+    private_key: ((github_private_key))
+
 - name: image
   type: docker-image
   source:
@@ -470,7 +479,7 @@ jobs:
   - task: copy-compilation-vars
     image: image
     file: concourse-up/ci/tasks/copy-compilation-vars.yml
-  - put: concourse-up
+  - put: compilation-vars-git
     params:
       repository: concourse-up-new
       rebase: true
