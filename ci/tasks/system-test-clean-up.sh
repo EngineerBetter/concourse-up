@@ -46,7 +46,8 @@ echo "Instances still remaining after deletion: $instances_count"
 # Check that the RDS instance has been deleted
 set +e
 aws rds describe-db-instances --region eu-west-2 --db-instance-identifier "$rds_instance_name"
-set -e
 RdsExitCode=$?
+set -e
+
 echo "RDS instance check for $rds_instance_name returned exit code of $RdsExitCode (expecting non-zero)"
 [ "$RdsExitCode" -ne 0 ]
