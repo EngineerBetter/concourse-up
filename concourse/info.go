@@ -141,8 +141,8 @@ export BOSH_GW_HOST={{.Terraform.DirectorPublicIP.Value}}
 export BOSH_GW_PRIVATE_KEY={{.Config.PrivateKey | to_file}}
 export CREDHUB_SERVER={{.Config.CredhubURL}}
 export CREDHUB_CA_CERT='{{.Config.CredhubCACert}}'
-export CREDHUB_CLIENT=credhub_cli
-export CREDHUB_SECRET={{.Config.CredhubPassword}}
+export CREDHUB_CLIENT=credhub_admin
+export CREDHUB_SECRET={{.Config.CredhubAdminClientSecret}}
 `))
 
 // Env returns a string that is suitable for a shell to evaluate that sets environment

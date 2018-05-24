@@ -289,8 +289,9 @@ func (client *Client) deployBosh(config *config.Config, metadata *terraform.Meta
 	}
 
 	type credhubCreds struct {
-		Password string `yaml:"credhub_cli_password"`
-		CACert   struct {
+		Password          string `yaml:"credhub_cli_password"`
+		AdminClientSecret string `yaml:"credhub_admin_client_secret"`
+		CACert            struct {
 			Cert string `yaml:"ca"`
 		} `yaml:"credhub-tls"`
 	}
@@ -303,6 +304,7 @@ func (client *Client) deployBosh(config *config.Config, metadata *terraform.Meta
 	config.CredhubPassword = cc.Password
 	config.CredhubURL = fmt.Sprintf("https://%s:8844/", metadata.ATCPublicIP.Value)
 	config.CredhubUsername = "credhub-cli"
+	config.CredhubAdminClientSecret = cc.AdminClientSecret
 
 	return nil
 }

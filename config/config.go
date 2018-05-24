@@ -13,6 +13,7 @@ type Config struct {
 	CredhubURL                string `json:"credhub_url"`
 	CredhubUsername           string `json:"credhub_username"`
 	CredhubPassword           string `json:"credhub_password"`
+	CredhubAdminClientSecret  string `json:"credhub_admin_client_secret"`
 	CredhubCACert             string `json:"credhub_ca_cert"`
 	ConcourseCACert           string `json:"concourse_ca_cert"`
 	ConcourseCert             string `json:"concourse_cert"`

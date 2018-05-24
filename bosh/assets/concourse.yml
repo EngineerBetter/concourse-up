@@ -79,6 +79,8 @@ variables:
   type: password
 - name: credhub_cli_password
   type: password
+- name: credhub_admin_client_secret
+  type: password
 - name: uaa-passphrase
   type: password
 
@@ -127,12 +129,20 @@ instance_groups:
         clients:
           credhub_cli:
             override: true
-            authorized-grant-types: password,refresh_token,client_credentials
+            authorized-grant-types: password,refresh_token
             scope: credhub.read,credhub.write
-            authorities: uaa.resource,credhub.read,credhub.write
+            authorities: uaa.none
             access-token-validity: 30
             refresh-token-validity: 3600
-            secret: ((credhub_cli_password))
+            secret: ""
+          credhub_admin:
+            override: true
+            authorized-grant-types: client_credentials
+            scope: ""
+            authorities: credhub.read,credhub.write
+            access-token-validity: 30
+            refresh-token-validity: 3600
+            secret: ((credhub_admin_client_secret))
           atc_to_credhub:
             override: true
             authorized-grant-types: client_credentials
