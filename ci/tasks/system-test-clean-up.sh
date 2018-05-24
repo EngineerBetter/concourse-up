@@ -39,7 +39,7 @@ echo "Volumes still remaining after deletion: $volumes_count"
 
 # Check that EC2 instances have been deleted
 instances=$(aws ec2 describe-instances --filter "Name=vpc-id","Values=$vpc_id" --region eu-west-1)
-instances_count=$(echo $instances | jq '.Reservations | length')
+instances_count=$(echo "$instances" | jq '.Reservations | length')
 echo "Instances still remaining after deletion: $instances_count"
 [ "$instances_count" -eq 0 ]
 
