@@ -190,7 +190,7 @@ Concourse-up now automatically deploys Influxdb, Riemann, and Grafana on the web
 
 ## Credential Management
 
-Concourse-up deploys the [credhub](https://github.com/cloudfoundry-incubator/credhub) service alongside Concourse and configures Concourse to use it. More detail on how credhub integrates with Concourse can be found [here](https://concourse-ci.org/creds.html). You can log into credhub by running `$ concourse-up info --env --region $region $deployment`.
+Concourse-up deploys the [credhub](https://github.com/cloudfoundry-incubator/credhub) service alongside Concourse and configures Concourse to use it. More detail on how credhub integrates with Concourse can be found [here](https://concourse-ci.org/creds.html). You can log into credhub by running `$ eval $(concourse-up info --env --region $region $deployment)`.
 
 ## Firewall
 
