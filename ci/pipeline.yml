@@ -268,34 +268,35 @@ jobs:
 - name: compile-releases
   serial: true
   plan:
-  - get: version
-  - get: image
-    passed: [build-image]
-  - get: concourse-github-release
-    trigger: true
-  - get: concourse-stemcell
-    trigger: true
-  - get: director-stemcell
-    trigger: true
-  - get: concourse-release
-    trigger: true
-  - get: director-bosh-release
-    trigger: true
-  - get: riemann-release
-    trigger: true
-  - get: grafana-release
-    trigger: true
-  - get: influxdb-release
-    trigger: true
-  - get: director-bosh-cpi-release
-    trigger: true
-  - get: uaa-release
-    trigger: true
-  - get: credhub-release
-    trigger: true
-  - get: garden-runc-release
-    trigger: true
-  - get: concourse-up
+  - aggregate:
+    - get: version
+    - get: image
+      passed: [build-image]
+    - get: concourse-github-release
+      trigger: true
+    - get: concourse-stemcell
+      trigger: true
+    - get: director-stemcell
+      trigger: true
+    - get: concourse-release
+      trigger: true
+    - get: director-bosh-release
+      trigger: true
+    - get: riemann-release
+      trigger: true
+    - get: grafana-release
+      trigger: true
+    - get: influxdb-release
+      trigger: true
+    - get: director-bosh-cpi-release
+      trigger: true
+    - get: uaa-release
+      trigger: true
+    - get: credhub-release
+      trigger: true
+    - get: garden-runc-release
+      trigger: true
+    - get: concourse-up
   - task: compile
     file: concourse-up/ci/tasks/compile-bosh-releases.yml
     params:
