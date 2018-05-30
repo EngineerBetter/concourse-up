@@ -54,7 +54,7 @@ var deployFlags = []cli.Flag{
 	},
 	cli.StringFlag{
 		Name:        "worker-size",
-		Usage:       "(optional) Size of Concourse workers. Can be medium, large, xlarge, 2xlarge, 4xlarge, 10xlarge or 16xlarge",
+		Usage:       "(optional) Size of Concourse workers. Can be medium, large, xlarge, 2xlarge, 4xlarge, 12xlarge or 24xlarge",
 		EnvVar:      "WORKER_SIZE",
 		Value:       "xlarge",
 		Destination: &deployArgs.WorkerSize,

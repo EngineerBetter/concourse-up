@@ -94,7 +94,7 @@ func (a *DeployArgs) MarkSetFlags(c *cli.Context) error {
 }
 
 // WorkerSizes are the permitted concourse worker sizes
-var WorkerSizes = []string{"medium", "large", "xlarge", "2xlarge", "4xlarge", "10xlarge", "16xlarge"}
+var WorkerSizes = []string{"medium", "large", "xlarge", "2xlarge", "4xlarge", "12xlarge", "24xlarge"}
 
 // WebSizes are the permitted concourse web sizes
 var WebSizes = []string{"small", "medium", "large", "xlarge", "2xlarge"}
