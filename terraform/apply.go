@@ -14,6 +14,7 @@ func (client *Client) Apply(dryrun bool) error {
 	return client.terraform([]string{
 		action,
 		"-input=false",
+		"-auto-approve",
 	}, client.stdout)
 }
 
@@ -21,7 +22,7 @@ func (client *Client) Apply(dryrun bool) error {
 func (client *Client) Destroy() error {
 	return client.terraform([]string{
 		"destroy",
-		"-force",
+		"-auto-approve",
 	}, client.stdout)
 }
 
