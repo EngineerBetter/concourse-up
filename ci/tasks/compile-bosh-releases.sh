@@ -179,7 +179,7 @@ director_darwin_binary_url="https://s3.amazonaws.com/bosh-cli-artifacts/bosh-cli
 director_linux_binary_url="https://s3.amazonaws.com/bosh-cli-artifacts/bosh-cli-${bosh_cli_version}-linux-amd64"
 director_windows_binary_url="https://s3.amazonaws.com/bosh-cli-artifacts/bosh-cli-${bosh_cli_version}-windows-amd64.exe"
 
-terraform_version="0.10.2"
+terraform_version="0.11.7"
 
 wget "https://releases.hashicorp.com/terraform/${terraform_version}/terraform_${terraform_version}_darwin_amd64.zip"
 unzip "terraform_${terraform_version}_darwin_amd64.zip"
