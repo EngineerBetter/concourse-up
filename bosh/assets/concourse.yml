@@ -26,6 +26,11 @@ releases:
   sha1: "<% .CredhubReleaseSHA1 %>"
   version: <% .CredhubReleaseVersion %>
 
+- name: "backup-and-restore-sdk"
+  version: "1.7.0"
+  url: "https://bosh.io/d/github.com/cloudfoundry-incubator/backup-and-restore-sdk-release?v=1.7.0"
+  sha1: "5eca6d5b7942947ca7e6eaf84ebff79eb3f46a0e"
+
 - name: uaa
   sha1: "<% .UAAReleaseSHA1 %>"
   version: <% .UAAReleaseVersion %>
@@ -100,6 +105,19 @@ instance_groups:
   vm_extensions:
   - atc
   jobs:
+  - name: bbr-atcdb
+    release: concourse
+    properties:
+      postgresql_database: <% .DBName %>
+      postgresql:
+        database: <% .DBName %>
+        port: <% .DBPort %>
+        host: <% .DBHost %>
+        role:
+          name: <% .DBUsername %>
+          password: <% .DBPassword %>
+  - name: database-backup-restorer
+    release: backup-and-restore-sdk
   - name: uaa
     release: uaa
     properties:
