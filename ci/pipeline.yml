@@ -61,7 +61,6 @@ resources:
     ignore_paths:
     - ci/docker/*
     - README.md
-    - compilation-vars.json
     private_key: ((github_private_key))
 
 - name: compilation-vars-git
