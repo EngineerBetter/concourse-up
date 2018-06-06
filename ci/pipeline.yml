@@ -46,6 +46,7 @@ resources:
     - name: main
       username: admin
       password: ((atc_main_password))
+
 - name: image-source
   type: git
   source:
@@ -58,20 +59,10 @@ resources:
   source:
     uri: git@github.com:EngineerBetter/concourse-up.git
     branch: master
+    private_key: ((github_private_key))
     ignore_paths:
     - ci/docker/*
     - README.md
-    - compilation-vars.json
-    private_key: ((github_private_key))
-
-- name: compilation-vars-git
-  type: git
-  source:
-    uri: git@github.com:EngineerBetter/concourse-up.git
-    branch: master
-    paths:
-    - compilation-vars.json
-    private_key: ((github_private_key))
 
 - name: image
   type: docker-image
@@ -493,7 +484,7 @@ jobs:
   - task: copy-compilation-vars
     image: image
     file: concourse-up/ci/tasks/copy-compilation-vars.yml
-  - put: compilation-vars-git
+  - put: concourse-up
     params:
       repository: concourse-up-new
       rebase: true
