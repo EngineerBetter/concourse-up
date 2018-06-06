@@ -99,11 +99,9 @@ $bosh \
   deploy \
   cup-compilation-workspace.yml
 
-# Specifies the jobs to compile because Concourse 3.14 has jobs that need a Windows stemcell to compile
 $bosh \
   --deployment cup-compilation-workspace \
-  export-release "concourse/$concourse_release_version" "ubuntu-trusty/$concourse_stemcell_version" \
-  --job={atc,baggageclaim,bbr-atcdb,blackbox,tsa,worker}
+  export-release "concourse/$concourse_release_version" "ubuntu-trusty/$concourse_stemcell_version"
 
 $bosh \
   --deployment cup-compilation-workspace \
