@@ -118,6 +118,21 @@ instance_groups:
           password: <% .DBPassword %>
   - name: database-backup-restorer
     release: backup-and-restore-sdk
+  - name: bbr-uaadb
+    release: uaa
+    properties:
+      uaadb:
+        address: <% .DBHost %>
+        port: <% .DBPort %>
+        db_scheme: postgresql
+        tls_enabled: true
+        databases:
+        - tag: uaa
+          name: uaa
+        roles:
+        - tag: admin
+          name: <% .DBUsername %>
+          password: <% .DBPassword %>
   - name: uaa
     release: uaa
     properties:
@@ -197,6 +212,21 @@ instance_groups:
           serviceProviderCertificate: ((uaa-tls.certificate))
           serviceProviderKey: ((uaa-tls.private_key))
           serviceProviderKeyPassword: ""
+  - name: bbr-credhubdb
+    release: credhub
+    properties:
+      release_level_backup: true
+      credhub:
+        data_storage:
+          type: postgres
+          username: <% .DBUsername %>
+          password: <% .DBPassword %>
+          host: <% .DBHost %>
+          port: <% .DBPort %>
+          database: credhub
+          require_tls: true
+          tls_ca: |-
+            <% .Indent "12" .DBCACert %>
   - name: credhub
     release: credhub
     properties:
