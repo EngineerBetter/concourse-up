@@ -139,7 +139,7 @@ instance_groups:
       encryption:
         encryption_keys:
           - label: 'uaa-passphrase'
-            passphrase: ((uaa-passphrase))
+            passphrase: longlonglongpassword
         active_key_label: 'uaa-passphrase'
       uaa:
         url: &uaa-url https://<% .ATCPublicIP %>:8443
