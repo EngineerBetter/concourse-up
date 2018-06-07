@@ -251,7 +251,7 @@ instance_groups:
         encryption:
           keys:
           - provider_name: int
-            encryption_password: ((credhub-encryption-password))
+            encryption_password: longlonglongpassword
             active: true
           providers:
           - name: int
