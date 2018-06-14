@@ -31,7 +31,7 @@ type User struct {
 
 // GetEmail returns the email for a user
 func (u *User) GetEmail() string {
-	return "nobody@example.com"
+	return "nobody@madeupemailaddress.com"
 }
 
 // GetRegistration returns the registration for a user
