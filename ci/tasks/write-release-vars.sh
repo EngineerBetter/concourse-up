@@ -10,6 +10,8 @@ pushd compilation-vars
   director_stemcell_version=$(jq -r .director_stemcell_version compilation-vars.json)
   director_bosh_release_url=$(jq -r .director_bosh_release_url compilation-vars.json)
   director_bosh_release_version=$(jq -r .director_bosh_release_version compilation-vars.json)
+  director_bpm_release_url=$(jq -r .director_bpm_release_url compilation-vars.json)
+  director_bpm_release_version=$(jq -r .director_bpm_release_version compilation-vars.json)
   director_bosh_cpi_release_url=$(jq -r .director_bosh_cpi_release_url compilation-vars.json)
   director_bosh_cpi_release_version=$(jq -r .director_bosh_cpi_release_version compilation-vars.json)
   concourse_release_url=$(jq -r .concourse_release_url compilation-vars.json)
@@ -26,6 +28,7 @@ body="Auto-generated release
 
 Deploys:
 - BOSH [$director_bosh_release_version]($director_bosh_release_url)
+- BPM [$director_bpm_release_version]($director_bpm_release_url)
 - BOSH AWS CPI [$director_bosh_cpi_release_version]($director_bosh_cpi_release_url)
 - Director stemcell [bosh-aws-xen-hvm-ubuntu-trusty-go_agent $director_stemcell_version]($director_stemcell_url)
 - Concourse [$concourse_release_version]($concourse_release_url)
