@@ -149,7 +149,7 @@ $bosh \
 compiled_concourse_release=$(echo concourse-"$concourse_release_version"-ubuntu-trusty-"$concourse_stemcell_version"-*.tgz)
 compiled_garden_release=$(echo garden-runc-"$garden_release_version"-ubuntu-trusty-"$concourse_stemcell_version"-*.tgz)
 compiled_director_bosh_release=$(echo bosh-"$director_bosh_release_version"-ubuntu-trusty-"$concourse_stemcell_version"-*.tgz)
-compiled_director_bpm_release=$(echo bosh-"$director_bpm_release_version"-ubuntu-trusty-"$concourse_stemcell_version"-*.tgz)
+compiled_director_bpm_release=$(echo bpm-"$director_bpm_release_version"-ubuntu-trusty-"$concourse_stemcell_version"-*.tgz)
 compiled_riemann_release=$(echo riemann-"$riemann_release_version"-ubuntu-trusty-"$concourse_stemcell_version"-*.tgz)
 compiled_grafana_release=$(echo grafana-"$grafana_release_version"-ubuntu-trusty-"$concourse_stemcell_version"-*.tgz)
 compiled_influxdb_release=$(echo influxdb-"$influxdb_release_version"-ubuntu-trusty-"$concourse_stemcell_version"-*.tgz)
