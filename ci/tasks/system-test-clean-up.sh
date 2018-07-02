@@ -5,7 +5,7 @@ set -e
 if [ -z "$SYSTEM_TEST_ID" ]; then
     SYSTEM_TEST_ID=$RANDOM
 fi
-deployment="system-test-$SYSTEM_TEST_ID"
+deployment="systest-cleanup-$SYSTEM_TEST_ID"
 set -u
 
 cp "$BINARY_PATH" ./cup

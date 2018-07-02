@@ -6,7 +6,7 @@
 [ "$VERBOSE" ] && { set -x; export BOSH_LOG_LEVEL=debug; }
 set -eu
 
-deployment="system-test-$RANDOM"
+deployment="systest-update-$RANDOM"
 
 cleanup() {
   status=$?

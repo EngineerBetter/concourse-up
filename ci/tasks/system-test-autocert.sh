@@ -7,7 +7,7 @@ set -x
 cp "$BINARY_PATH" ./cup
 chmod +x ./cup
 
-deployment="system-test-$RANDOM"
+deployment="systest-autocert-$RANDOM"
 cleanup() {
   status=$?
   ./cup --non-interactive destroy $deployment

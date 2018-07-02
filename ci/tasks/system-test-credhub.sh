@@ -4,7 +4,7 @@
 set -eu
 set -x
 
-deployment="system-test-$RANDOM"
+deployment="systest-credhub-$RANDOM"
 cleanup() {
   status=$?
   ./cup --non-interactive destroy $deployment
