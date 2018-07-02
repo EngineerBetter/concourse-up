@@ -40,7 +40,7 @@ var DirectorStemcellVersion = "COMPILE_TIME_VARIABLE_bosh_directorStemcellVersio
 // DirectorBPMReleaseSHA1 is a compile-time varaible set with -ldflags
 var DirectorBPMReleaseSHA1 = "COMPILE_TIME_VARIABLE_bosh_directorBPMReleaseSHA1"
 
-//  DirectorBPMReleaseURL is a compile-time varaible set with -ldflags
+// DirectorBPMReleaseURL is a compile-time varaible set with -ldflags
 var DirectorBPMReleaseURL = "COMPILE_TIME_VARIABLE_bosh_directorBPMReleaseURL"
 
 // GenerateBoshInitManifest generates a manifest for the bosh director on AWS
