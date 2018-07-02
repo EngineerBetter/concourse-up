@@ -7,6 +7,9 @@ releases:
 - name: bosh-aws-cpi
   url: <% .DirectorCPIReleaseURL %>
   sha1: <% .DirectorCPIReleaseSHA1 %>
+- name: bpm
+  url: <% .DirectorBPMReleaseURL %>
+  sha1: <% .DirectorBPMReleaseSHA1 %>
 
 resource_pools:
 - name: vms
@@ -48,6 +51,8 @@ jobs:
 - name: bosh
   instances: 1
   templates:
+  - name: bpm
+    release: bpm
   - name: nats
     release: bosh
   - name: director

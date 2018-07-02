@@ -37,6 +37,12 @@ var DirectorStemcellURL = "COMPILE_TIME_VARIABLE_bosh_directorStemcellURL"
 // DirectorStemcellVersion is a compile-time varaible set with -ldflags
 var DirectorStemcellVersion = "COMPILE_TIME_VARIABLE_bosh_directorStemcellVersion"
 
+// DirectorBPMReleaseSHA1 is a compile-time varaible set with -ldflags
+var DirectorBPMReleaseSHA1 = "COMPILE_TIME_VARIABLE_bosh_directorBPMReleaseSHA1"
+
+//  DirectorBPMReleaseURL is a compile-time varaible set with -ldflags
+var DirectorBPMReleaseURL = "COMPILE_TIME_VARIABLE_bosh_directorBPMReleaseURL"
+
 // GenerateBoshInitManifest generates a manifest for the bosh director on AWS
 func generateBoshInitManifest(conf *config.Config, metadata *terraform.Metadata, privateKeyPath string) ([]byte, error) {
 	dbPort, err := strconv.Atoi(metadata.BoshDBPort.Value)
@@ -59,6 +65,8 @@ func generateBoshInitManifest(conf *config.Config, metadata *terraform.Metadata,
 		DBPassword:                conf.RDSPassword,
 		DBPort:                    dbPort,
 		DBUsername:                conf.RDSUsername,
+		DirectorBPMReleaseSHA1:    DirectorBPMReleaseSHA1,
+		DirectorBPMReleaseURL:     DirectorBPMReleaseURL,
 		DirectorCACert:            conf.DirectorCACert,
 		DirectorCPIReleaseSHA1:    DirectorCPIReleaseSHA1,
 		DirectorCPIReleaseURL:     DirectorCPIReleaseURL,
@@ -102,6 +110,8 @@ type awsDirectorManifestParams struct {
 	DBPassword                string
 	DBPort                    int
 	DBUsername                string
+	DirectorBPMReleaseSHA1    string
+	DirectorBPMReleaseURL     string
 	DirectorCACert            string
 	DirectorCPIReleaseSHA1    string
 	DirectorCPIReleaseURL     string

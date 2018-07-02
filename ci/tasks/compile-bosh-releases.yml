@@ -11,7 +11,7 @@ inputs:
 - name: concourse-release
 - name: concourse-stemcell
 - name: director-stemcell
-- name: director-bosh-release
+- name: bosh-deployment
 - name: director-bosh-cpi-release
 - name: riemann-release
 - name: grafana-release

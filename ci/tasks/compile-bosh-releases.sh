@@ -42,14 +42,21 @@ credhub_release_version=$(cat credhub-release/version)
 credhub_release_url=$(cat credhub-release/url)
 credhub_release_sha1=$(cat credhub-release/sha1)
 
-director_bosh_release_version=$(cat director-bosh-release/version)
+yq r -j bosh-deployment/bosh.yml > bosh.json
+director_bosh_release_version=$(jq -r '.releases[] | select(.name == "bosh") | .version ' bosh.json)
+director_bosh_release_url=$(jq -r '.releases[] | select(.name == "bosh") | .url ' bosh.json)
+
+director_bpm_release_version=$(jq -r '.releases[] | select(.name == "bpm") | .version ' bosh.json)
+director_bpm_release_url=$(jq -r '.releases[] | select(.name == "bpm") | .url ' bosh.json)
+
 concourse_release_version=$(cat concourse-release/version)
 garden_release_version=$(cat garden-runc-release/version)
 
 $bosh upload-stemcell "concourse-stemcell/stemcell.tgz"
 $bosh upload-release "garden-runc-release/release.tgz"
 $bosh upload-release "concourse-release/release.tgz"
-$bosh upload-release "director-bosh-release/release.tgz"
+$bosh upload-release "$director_bosh_release_url"
+$bosh upload-release "$director_bpm_release_url"
 $bosh upload-release "director-bosh-cpi-release/release.tgz"
 $bosh upload-release "riemann-release/release.tgz"
 $bosh upload-release "grafana-release/release.tgz"
@@ -67,6 +74,8 @@ releases:
   version: \"$garden_release_version\"
 - name: bosh
   version: \"$director_bosh_release_version\"
+- name: bpm
+  version: \"$director_bpm_release_version\"
 - name: bosh-aws-cpi
   version: \"$director_bosh_cpi_release_version\"
 - name: riemann
@@ -115,6 +124,10 @@ $bosh \
 
 $bosh \
   --deployment cup-compilation-workspace \
+  export-release "bpm/$director_bpm_release_version" "ubuntu-trusty/$concourse_stemcell_version"
+
+$bosh \
+  --deployment cup-compilation-workspace \
   export-release "riemann/$riemann_release_version" "ubuntu-trusty/$concourse_stemcell_version"
 
 $bosh \
@@ -136,6 +149,7 @@ $bosh \
 compiled_concourse_release=$(echo concourse-"$concourse_release_version"-ubuntu-trusty-"$concourse_stemcell_version"-*.tgz)
 compiled_garden_release=$(echo garden-runc-"$garden_release_version"-ubuntu-trusty-"$concourse_stemcell_version"-*.tgz)
 compiled_director_bosh_release=$(echo bosh-"$director_bosh_release_version"-ubuntu-trusty-"$concourse_stemcell_version"-*.tgz)
+compiled_director_bpm_release=$(echo bosh-"$director_bpm_release_version"-ubuntu-trusty-"$concourse_stemcell_version"-*.tgz)
 compiled_riemann_release=$(echo riemann-"$riemann_release_version"-ubuntu-trusty-"$concourse_stemcell_version"-*.tgz)
 compiled_grafana_release=$(echo grafana-"$grafana_release_version"-ubuntu-trusty-"$concourse_stemcell_version"-*.tgz)
 compiled_influxdb_release=$(echo influxdb-"$influxdb_release_version"-ubuntu-trusty-"$concourse_stemcell_version"-*.tgz)
@@ -145,6 +159,7 @@ compiled_credhub_release=$(echo credhub-"$credhub_release_version"-ubuntu-trusty
 aws s3 cp --acl public-read "$compiled_concourse_release" "s3://$PUBLIC_ARTIFACTS_BUCKET/$compiled_concourse_release"
 aws s3 cp --acl public-read "$compiled_garden_release" "s3://$PUBLIC_ARTIFACTS_BUCKET/$compiled_garden_release"
 aws s3 cp --acl public-read "$compiled_director_bosh_release" "s3://$PUBLIC_ARTIFACTS_BUCKET/$compiled_director_bosh_release"
+aws s3 cp --acl public-read "$compiled_director_bpm_release" "s3://$PUBLIC_ARTIFACTS_BUCKET/$compiled_director_bpm_release"
 aws s3 cp --acl public-read "$compiled_riemann_release" "s3://$PUBLIC_ARTIFACTS_BUCKET/$compiled_riemann_release"
 aws s3 cp --acl public-read "$compiled_grafana_release" "s3://$PUBLIC_ARTIFACTS_BUCKET/$compiled_grafana_release"
 aws s3 cp --acl public-read "$compiled_influxdb_release" "s3://$PUBLIC_ARTIFACTS_BUCKET/$compiled_influxdb_release"
@@ -157,6 +172,8 @@ aws s3 cp --acl public-read "concourse-github-release/fly_windows_amd64.exe" "s3
 
 director_bosh_release_sha1=$(sha1sum "$compiled_director_bosh_release" | awk '{ print $1 }')
 director_bosh_release_url="https://s3-$AWS_DEFAULT_REGION.amazonaws.com/$PUBLIC_ARTIFACTS_BUCKET/$compiled_director_bosh_release"
+director_bpm_release_sha1=$(sha1sum "$compiled_director_bpm_release" | awk '{ print $1 }')
+director_bpm_release_url="https://s3-$AWS_DEFAULT_REGION.amazonaws.com/$PUBLIC_ARTIFACTS_BUCKET/$compiled_director_bpm_release"
 concourse_release_sha1=$(sha1sum "$compiled_concourse_release" | awk '{ print $1 }')
 concourse_release_url="https://s3-$AWS_DEFAULT_REGION.amazonaws.com/$PUBLIC_ARTIFACTS_BUCKET/$compiled_concourse_release"
 garden_release_url="https://s3-$AWS_DEFAULT_REGION.amazonaws.com/$PUBLIC_ARTIFACTS_BUCKET/$compiled_garden_release"
@@ -207,6 +224,9 @@ echo "{
   \"director_stemcell_url\": \"$director_stemcell_url\",
   \"director_stemcell_sha1\": \"$director_stemcell_sha1\",
   \"director_stemcell_version\": \"$director_stemcell_version\",
+  \"director_bpm_release_url\": \"$director_bpm_release_url\",
+  \"director_bpm_release_sha1\": \"$director_bpm_release_sha1\",
+  \"director_bpm_release_version\": \"$director_bpm_release_version\",
   \"director_bosh_release_url\": \"$director_bosh_release_url\",
   \"director_bosh_release_sha1\": \"$director_bosh_release_sha1\",
   \"director_bosh_release_version\": \"$director_bosh_release_version\",

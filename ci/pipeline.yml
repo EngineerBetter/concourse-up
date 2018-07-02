@@ -155,10 +155,10 @@ resources:
   source:
     repository: concourse/concourse
 
-- name: director-bosh-release
-  type: bosh-io-release
+- name: bosh-deployment
+  type: git
   source:
-    repository: cloudfoundry/bosh
+    uri: https://github.com/cloudfoundry/bosh-deployment.git
 
 - name: director-bosh-cpi-release
   type: bosh-io-release
@@ -271,7 +271,7 @@ jobs:
       trigger: true
     - get: concourse-release
       trigger: true
-    - get: director-bosh-release
+    - get: bosh-deployment
       trigger: true
     - get: riemann-release
       trigger: true
