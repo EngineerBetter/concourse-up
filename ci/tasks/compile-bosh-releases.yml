@@ -10,7 +10,6 @@ inputs:
 - name: concourse-github-release
 - name: concourse-release
 - name: concourse-stemcell
-- name: director-stemcell
 - name: bosh-deployment
 - name: director-bosh-cpi-release
 - name: riemann-release
