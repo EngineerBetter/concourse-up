@@ -42,12 +42,11 @@ credhub_release_version=$(cat credhub-release/version)
 credhub_release_url=$(cat credhub-release/url)
 credhub_release_sha1=$(cat credhub-release/sha1)
 
-yq r -j bosh-deployment/bosh.yml > bosh.json
-director_bosh_release_version=$(jq -r '.releases[] | select(.name == "bosh") | .version ' bosh.json)
-director_bosh_release_url=$(jq -r '.releases[] | select(.name == "bosh") | .url ' bosh.json)
+director_bosh_release_version=$(bosh int bosh-deployment/bosh.yml --path /releases/name=bosh/version)
+director_bosh_release_url=$(bosh int bosh-deployment/bosh.yml --path /releases/name=bosh/url)
 
-director_bpm_release_version=$(jq -r '.releases[] | select(.name == "bpm") | .version ' bosh.json)
-director_bpm_release_url=$(jq -r '.releases[] | select(.name == "bpm") | .url ' bosh.json)
+director_bpm_release_version=$(bosh int bosh-deployment/bosh.yml --path /releases/name=bpm/version)
+director_bpm_release_url=$(bosh int bosh-deployment/bosh.yml --path /releases/name=bpm/url)
 
 concourse_release_version=$(cat concourse-release/version)
 garden_release_version=$(cat garden-runc-release/version)
