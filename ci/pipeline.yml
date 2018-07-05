@@ -145,11 +145,6 @@ resources:
   source:
     name: bosh-aws-xen-hvm-ubuntu-trusty-go_agent
 
-- name: director-stemcell
-  type: bosh-io-stemcell
-  source:
-    name: bosh-aws-xen-hvm-ubuntu-trusty-go_agent
-
 - name: concourse-release
   type: bosh-io-release
   source:
@@ -266,8 +261,6 @@ jobs:
     - get: concourse-github-release
       trigger: true
     - get: concourse-stemcell
-      trigger: true
-    - get: director-stemcell
       trigger: true
     - get: concourse-release
       trigger: true

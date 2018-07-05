@@ -14,9 +14,9 @@ concourse_stemcell_version=$(cat concourse-stemcell/version)
 concourse_stemcell_url=$(cat concourse-stemcell/url)
 concourse_stemcell_sha1=$(cat concourse-stemcell/sha1)
 
-director_stemcell_version=$(cat director-stemcell/version)
-director_stemcell_url=$(cat director-stemcell/url)
-director_stemcell_sha1=$(cat director-stemcell/sha1)
+director_stemcell_url=$(bosh int bosh-deployment/bosh.yml -o bosh-deployment/aws/cpi.yml --path /resource_pools/name=vms/stemcell/url)
+director_stemcell_version=$(echo $director_stemcell_url | awk -F= '{print $2}')
+director_stemcell_sha1=$(bosh int bosh-deployment/bosh.yml -o bosh-deployment/aws/cpi.yml --path /resource_pools/name=vms/stemcell/sha1)
 
 director_bosh_cpi_release_version=$(cat director-bosh-cpi-release/version)
 director_bosh_cpi_release_url=$(cat director-bosh-cpi-release/url)
