@@ -10,13 +10,17 @@ echo "$BOSH_CA_CERT" > bosh_ca_cert.pem
 
 bosh="bosh --non-interactive --environment $BOSH_TARGET --client $BOSH_USERNAME --client-secret $BOSH_PASSWORD --ca-cert bosh_ca_cert.pem"
 
-concourse_stemcell_version=$(cat concourse-stemcell/version)
-concourse_stemcell_url=$(cat concourse-stemcell/url)
-concourse_stemcell_sha1=$(cat concourse-stemcell/sha1)
 
 director_stemcell_url=$(bosh int bosh-deployment/bosh.yml -o bosh-deployment/aws/cpi.yml --path /resource_pools/name=vms/stemcell/url)
 director_stemcell_version=$(echo "$director_stemcell_url" | awk -F= '{print $2}')
 director_stemcell_sha1=$(bosh int bosh-deployment/bosh.yml -o bosh-deployment/aws/cpi.yml --path /resource_pools/name=vms/stemcell/sha1)
+
+# We currently use the concourse stemcell to compile releases for the director as well
+# we should separate them at some point and use latest for concourse but for now
+# we'll set the concourse-stemcell to be the same as the director one
+concourse_stemcell_version="$director_stemcell_version"
+concourse_stemcell_url="$director_stemcell_url"
+concourse_stemcell_sha1="$director_stemcell_sha1"
 
 director_bosh_cpi_release_version=$(cat director-bosh-cpi-release/version)
 director_bosh_cpi_release_url=$(cat director-bosh-cpi-release/url)
