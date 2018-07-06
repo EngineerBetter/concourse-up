@@ -169,11 +169,11 @@ $bosh \
 
 $bosh \
   --deployment cup-compilation-workspace-director \
-  export-release "bosh/$director_bosh_release_version" "ubuntu-trusty/$concourse_stemcell_version"
+  export-release "bosh/$director_bosh_release_version" "ubuntu-trusty/$director_stemcell_version"
 
 $bosh \
   --deployment cup-compilation-workspace-director \
-  export-release "bpm/$director_bpm_release_version" "ubuntu-trusty/$concourse_stemcell_version"
+  export-release "bpm/$director_bpm_release_version" "ubuntu-trusty/$director_stemcell_version"
 
 compiled_concourse_release=$(echo concourse-"$concourse_release_version"-ubuntu-trusty-"$concourse_stemcell_version"-*.tgz)
 compiled_garden_release=$(echo garden-runc-"$garden_release_version"-ubuntu-trusty-"$concourse_stemcell_version"-*.tgz)
@@ -187,13 +187,13 @@ compiled_director_bpm_release=$(echo bpm-"$director_bpm_release_version"-ubuntu-
 
 aws s3 cp --acl public-read "$compiled_concourse_release" "s3://$PUBLIC_ARTIFACTS_BUCKET/$compiled_concourse_release"
 aws s3 cp --acl public-read "$compiled_garden_release" "s3://$PUBLIC_ARTIFACTS_BUCKET/$compiled_garden_release"
-aws s3 cp --acl public-read "$compiled_director_bosh_release" "s3://$PUBLIC_ARTIFACTS_BUCKET/$compiled_director_bosh_release"
-aws s3 cp --acl public-read "$compiled_director_bpm_release" "s3://$PUBLIC_ARTIFACTS_BUCKET/$compiled_director_bpm_release"
 aws s3 cp --acl public-read "$compiled_riemann_release" "s3://$PUBLIC_ARTIFACTS_BUCKET/$compiled_riemann_release"
 aws s3 cp --acl public-read "$compiled_grafana_release" "s3://$PUBLIC_ARTIFACTS_BUCKET/$compiled_grafana_release"
 aws s3 cp --acl public-read "$compiled_influxdb_release" "s3://$PUBLIC_ARTIFACTS_BUCKET/$compiled_influxdb_release"
-aws s3 cp --acl public-read "$compiled_uaa_release" "s3://$PUBLIC_ARTIFACTS_BUCKET/$compiled_uaa_release"
 aws s3 cp --acl public-read "$compiled_credhub_release" "s3://$PUBLIC_ARTIFACTS_BUCKET/$compiled_credhub_release"
+aws s3 cp --acl public-read "$compiled_uaa_release" "s3://$PUBLIC_ARTIFACTS_BUCKET/$compiled_uaa_release"
+aws s3 cp --acl public-read "$compiled_director_bosh_release" "s3://$PUBLIC_ARTIFACTS_BUCKET/$compiled_director_bosh_release"
+aws s3 cp --acl public-read "$compiled_director_bpm_release" "s3://$PUBLIC_ARTIFACTS_BUCKET/$compiled_director_bpm_release"
 
 aws s3 cp --acl public-read "concourse-github-release/fly_darwin_amd64" "s3://$PUBLIC_ARTIFACTS_BUCKET/fly_darwin_amd64-$concourse_release_version"
 aws s3 cp --acl public-read "concourse-github-release/fly_linux_amd64" "s3://$PUBLIC_ARTIFACTS_BUCKET/fly_linux_amd64-$concourse_release_version"
