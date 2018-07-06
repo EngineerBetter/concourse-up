@@ -15,12 +15,9 @@ director_stemcell_url=$(bosh int bosh-deployment/bosh.yml -o bosh-deployment/aws
 director_stemcell_version=$(echo "$director_stemcell_url" | awk -F= '{print $2}')
 director_stemcell_sha1=$(bosh int bosh-deployment/bosh.yml -o bosh-deployment/aws/cpi.yml --path /resource_pools/name=vms/stemcell/sha1)
 
-# We currently use the concourse stemcell to compile releases for the director as well
-# we should separate them at some point and use latest for concourse but for now
-# we'll set the concourse-stemcell to be the same as the director one
-concourse_stemcell_version="$director_stemcell_version"
-concourse_stemcell_url="$director_stemcell_url"
-concourse_stemcell_sha1="$director_stemcell_sha1"
+concourse_stemcell_version="$(cat concourse-stemcell/version)"
+concourse_stemcell_url="$(cat concourse-stemcell/url)"
+concourse_stemcell_sha1="$(cat concourse-stemcell/sha1)"
 
 director_bosh_cpi_release_version=$(cat director-bosh-cpi-release/version)
 director_bosh_cpi_release_url=$(cat director-bosh-cpi-release/url)
@@ -56,6 +53,7 @@ concourse_release_version=$(cat concourse-release/version)
 garden_release_version=$(cat garden-runc-release/version)
 
 $bosh upload-stemcell "concourse-stemcell/stemcell.tgz"
+$bosh upload-stemcell "$director_stemcell_url"
 $bosh upload-release "garden-runc-release/release.tgz"
 $bosh upload-release "concourse-release/release.tgz"
 $bosh upload-release "$director_bosh_release_url"
@@ -67,35 +65,30 @@ $bosh upload-release "influxdb-release/release.tgz"
 $bosh upload-release "uaa-release/release.tgz"
 $bosh upload-release "credhub-release/release.tgz"
 
-echo "---
-name: cup-compilation-workspace
+cat << EOF > cup-compilation-workspace-concourse.yml
+---
+name: cup-compilation-workspace-concourse
 
 releases:
 - name: concourse
-  version: \"$concourse_release_version\"
+  version: "$concourse_release_version"
 - name: garden-runc
-  version: \"$garden_release_version\"
-- name: bosh
-  version: \"$director_bosh_release_version\"
-- name: bpm
-  version: \"$director_bpm_release_version\"
-- name: bosh-aws-cpi
-  version: \"$director_bosh_cpi_release_version\"
+  version: "$garden_release_version"
 - name: riemann
-  version: \"$riemann_release_version\"
+  version: "$riemann_release_version"
 - name: grafana
-  version: \"$grafana_release_version\"
+  version: "$grafana_release_version"
 - name: influxdb
-  version: \"$influxdb_release_version\"
-- name: uaa
-  version: \"$uaa_release_version\"
+  version: "$influxdb_release_version"
 - name: credhub
-  version: \"$credhub_release_version\"
+  version: "$credhub_release_version"
+- name: uaa
+  version: "$uaa_release_version"
 
 stemcells:
 - alias: trusty
   os: ubuntu-trusty
-  version: \"$concourse_stemcell_version\"
+  version: "$concourse_stemcell_version"
 
 instance_groups: []
 
@@ -104,60 +97,93 @@ update:
   max_in_flight: 1
   serial: false
   canary_watch_time: 1000-60000
-  update_watch_time: 1000-60000" > cup-compilation-workspace.yml
+  update_watch_time: 1000-60000
+EOF
+
+cat << EOF > cup-compilation-workspace-director.yml
+---
+name: cup-compilation-workspace-director
+
+releases:
+- name: bosh
+  version: "$director_bosh_release_version"
+- name: bpm
+  version: "$director_bpm_release_version"
+- name: bosh-aws-cpi
+  version: "$director_bosh_cpi_release_version"
+
+stemcells:
+- alias: trusty
+  os: ubuntu-trusty
+  version: "$director_stemcell_version"
+
+instance_groups: []
+
+update:
+  canaries: 1
+  max_in_flight: 1
+  serial: false
+  canary_watch_time: 1000-60000
+  update_watch_time: 1000-60000
+EOF
 
 $bosh \
-  --deployment cup-compilation-workspace \
+  --deployment cup-compilation-workspace-concourse \
   deploy \
-  cup-compilation-workspace.yml
+  cup-compilation-workspace-concourse.yml
+
+$bosh \
+  --deployment cup-compilation-workspace-director \
+  deploy \
+  cup-compilation-workspace-director.yml
 
 # avoids compiling Windows jobs released in Concourse 3.14
 $bosh \
-  --deployment cup-compilation-workspace \
+  --deployment cup-compilation-workspace-concourse \
   export-release "concourse/$concourse_release_version" "ubuntu-trusty/$concourse_stemcell_version" \
   --job={atc,baggageclaim,bbr-atcdb,blackbox,tsa,worker}
 
 $bosh \
-  --deployment cup-compilation-workspace \
+  --deployment cup-compilation-workspace-concourse \
   export-release "garden-runc/$garden_release_version" "ubuntu-trusty/$concourse_stemcell_version"
 
 $bosh \
-  --deployment cup-compilation-workspace \
-  export-release "bosh/$director_bosh_release_version" "ubuntu-trusty/$concourse_stemcell_version"
-
-$bosh \
-  --deployment cup-compilation-workspace \
-  export-release "bpm/$director_bpm_release_version" "ubuntu-trusty/$concourse_stemcell_version"
-
-$bosh \
-  --deployment cup-compilation-workspace \
+  --deployment cup-compilation-workspace-concourse \
   export-release "riemann/$riemann_release_version" "ubuntu-trusty/$concourse_stemcell_version"
 
 $bosh \
-  --deployment cup-compilation-workspace \
+  --deployment cup-compilation-workspace-concourse \
   export-release "grafana/$grafana_release_version" "ubuntu-trusty/$concourse_stemcell_version"
 
 $bosh \
-  --deployment cup-compilation-workspace \
+  --deployment cup-compilation-workspace-concourse \
   export-release "influxdb/$influxdb_release_version" "ubuntu-trusty/$concourse_stemcell_version"
 
 $bosh \
-  --deployment cup-compilation-workspace \
+  --deployment cup-compilation-workspace-concourse \
+  export-release "credhub/$credhub_release_version" "ubuntu-trusty/$concourse_stemcell_version"
+
+$bosh \
+  --deployment cup-compilation-workspace-concourse \
   export-release "uaa/$uaa_release_version" "ubuntu-trusty/$concourse_stemcell_version"
 
 $bosh \
-  --deployment cup-compilation-workspace \
-  export-release "credhub/$credhub_release_version" "ubuntu-trusty/$concourse_stemcell_version"
+  --deployment cup-compilation-workspace-director \
+  export-release "bosh/$director_bosh_release_version" "ubuntu-trusty/$concourse_stemcell_version"
+
+$bosh \
+  --deployment cup-compilation-workspace-director \
+  export-release "bpm/$director_bpm_release_version" "ubuntu-trusty/$concourse_stemcell_version"
 
 compiled_concourse_release=$(echo concourse-"$concourse_release_version"-ubuntu-trusty-"$concourse_stemcell_version"-*.tgz)
 compiled_garden_release=$(echo garden-runc-"$garden_release_version"-ubuntu-trusty-"$concourse_stemcell_version"-*.tgz)
-compiled_director_bosh_release=$(echo bosh-"$director_bosh_release_version"-ubuntu-trusty-"$concourse_stemcell_version"-*.tgz)
-compiled_director_bpm_release=$(echo bpm-"$director_bpm_release_version"-ubuntu-trusty-"$concourse_stemcell_version"-*.tgz)
 compiled_riemann_release=$(echo riemann-"$riemann_release_version"-ubuntu-trusty-"$concourse_stemcell_version"-*.tgz)
 compiled_grafana_release=$(echo grafana-"$grafana_release_version"-ubuntu-trusty-"$concourse_stemcell_version"-*.tgz)
 compiled_influxdb_release=$(echo influxdb-"$influxdb_release_version"-ubuntu-trusty-"$concourse_stemcell_version"-*.tgz)
-compiled_uaa_release=$(echo uaa-"$uaa_release_version"-ubuntu-trusty-"$concourse_stemcell_version"-*.tgz)
 compiled_credhub_release=$(echo credhub-"$credhub_release_version"-ubuntu-trusty-"$concourse_stemcell_version"-*.tgz)
+compiled_uaa_release=$(echo uaa-"$uaa_release_version"-ubuntu-trusty-"$concourse_stemcell_version"-*.tgz)
+compiled_director_bosh_release=$(echo bosh-"$director_bosh_release_version"-ubuntu-trusty-"$director_stemcell_version"-*.tgz)
+compiled_director_bpm_release=$(echo bpm-"$director_bpm_release_version"-ubuntu-trusty-"$director_stemcell_version"-*.tgz)
 
 aws s3 cp --acl public-read "$compiled_concourse_release" "s3://$PUBLIC_ARTIFACTS_BUCKET/$compiled_concourse_release"
 aws s3 cp --acl public-read "$compiled_garden_release" "s3://$PUBLIC_ARTIFACTS_BUCKET/$compiled_garden_release"
