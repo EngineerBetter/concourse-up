@@ -28,8 +28,8 @@ pushd compilation-vars
   concourse_riemann_release_url=$(jq -r .riemann_release_url compilation-vars.json)
   concourse_uaa_release_version=$(jq -r .uaa_release_version compilation-vars.json)
   concourse_uaa_release_url=$(jq -r .uaa_release_url compilation-vars.json)
-  bosh_cli_version=$(jq -r .director_linux_binary_url compilation-vars.json | grep -oE '\d+\.\d+\.\d+')
-  terraform_version=$(jq -r .terraform_linux_binary_url compilation-vars.json | grep -oE '\d+\.\d+\.\d+')
+  bosh_cli_version=$(jq -r .director_linux_binary_url compilation-vars.json | awk -F- '{print $5}')
+  terraform_version=$(jq -r .terraform_linux_binary_url compilation-vars.json | awk -F- '{print $NF}')
 popd
 
 name="concourse-up $version"
