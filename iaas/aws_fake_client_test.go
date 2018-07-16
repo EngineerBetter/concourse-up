@@ -35,11 +35,11 @@ func (fakeEC2Client *fakeEC2Client) DeleteVolume(input *ec2.DeleteVolumeInput) (
 
 func (fakeEC2Client *fakeEC2Client) DescribeSecurityGroups(input *ec2.DescribeSecurityGroupsInput) (*ec2.DescribeSecurityGroupsOutput, error) {
 	ipRange1 := &ec2.IpRange{
-		CidrIp:      aws.String("1.2.3.4"),
+		CidrIp:      aws.String("1.2.3.4/32"),
 		Description: aws.String("present"),
 	}
 	ipRange2 := &ec2.IpRange{
-		CidrIp:      aws.String("5.6.7.8"),
+		CidrIp:      aws.String("5.6.7.8/32"),
 		Description: aws.String("invalid"),
 	}
 

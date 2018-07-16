@@ -59,6 +59,8 @@ func (client *AWSClient) NewEC2Client() (IEC2, error) {
 // CheckForWhitelistedIP checks if the specified IP is whitelisted in the security group
 func (client *AWSClient) CheckForWhitelistedIP(ip, securityGroup string, newEC2Client func() (IEC2, error)) (bool, error) {
 
+	cidr := fmt.Sprintf("%s/32", ip)
+
 	ec2Client, err := newEC2Client()
 	if err != nil {
 		return false, err
@@ -78,7 +80,7 @@ func (client *AWSClient) CheckForWhitelistedIP(ip, securityGroup string, newEC2C
 	port22, port6868, port25555 := false, false, false
 	for _, entry := range ingressPermissions {
 		for _, sgIP := range entry.IpRanges {
-			if *sgIP.CidrIp == ip {
+			if *sgIP.CidrIp == cidr {
 				switch *entry.FromPort {
 				case 22:
 					port22 = true
