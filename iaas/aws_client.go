@@ -19,6 +19,7 @@ type AWSClient struct {
 
 // IEC2 only implements functions used in the iaas package
 type IEC2 interface {
+	DescribeSecurityGroups(input *ec2.DescribeSecurityGroupsInput) (*ec2.DescribeSecurityGroupsOutput, error)
 	DescribeVolumes(input *ec2.DescribeVolumesInput) (*ec2.DescribeVolumesOutput, error)
 	DeleteVolume(input *ec2.DeleteVolumeInput) (*ec2.DeleteVolumeOutput, error)
 }
@@ -53,6 +54,48 @@ func (client *AWSClient) NewEC2Client() (IEC2, error) {
 	}
 	ec2Client := ec2.New(sess, &aws.Config{Region: &client.region})
 	return ec2Client, nil
+}
+
+// CheckForWhitelistedIP checks if the specified IP is whitelisted in the security group
+func (client *AWSClient) CheckForWhitelistedIP(ip, securityGroup string, newEC2Client func() (IEC2, error)) (bool, error) {
+
+	ec2Client, err := newEC2Client()
+	if err != nil {
+		return false, err
+	}
+
+	securityGroupsOutput, err := ec2Client.DescribeSecurityGroups(&ec2.DescribeSecurityGroupsInput{
+		GroupIds: []*string{
+			aws.String(securityGroup),
+		},
+	})
+	if err != nil {
+		return false, err
+	}
+
+	ingressPermissions := securityGroupsOutput.SecurityGroups[0].IpPermissions
+
+	port22, port6868, port25555 := false, false, false
+	for _, entry := range ingressPermissions {
+		for _, sgIP := range entry.IpRanges {
+			if *sgIP.CidrIp == ip {
+				switch *entry.FromPort {
+				case 22:
+					port22 = true
+				case 6868:
+					port6868 = true
+				case 25555:
+					port25555 = true
+				}
+			}
+		}
+	}
+
+	if port22 && port6868 && port25555 {
+		return true, nil
+	}
+
+	return false, nil
 }
 
 // DeleteVolumes deletes the specified EBS volumes

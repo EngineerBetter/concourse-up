@@ -10,36 +10,7 @@ import (
 	. "github.com/onsi/gomega"
 
 	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/service/ec2"
 )
-
-type fakeEC2Client struct {
-}
-
-func (fakeEC2Client *fakeEC2Client) DescribeVolumes(input *ec2.DescribeVolumesInput) (*ec2.DescribeVolumesOutput, error) {
-	var inputVolumes []*string
-	for _, filter := range input.Filters {
-		if *filter.Name == "volume-id" {
-			inputVolumes = filter.Values
-			break
-		}
-	}
-	volume1 := &ec2.Volume{
-		VolumeId: inputVolumes[0],
-	}
-	volume2 := &ec2.Volume{
-		VolumeId: inputVolumes[1],
-	}
-	volumes := []*ec2.Volume{volume1, volume2}
-	output := &ec2.DescribeVolumesOutput{
-		Volumes: volumes,
-	}
-	return output, nil
-}
-
-func (fakeEC2Client *fakeEC2Client) DeleteVolume(input *ec2.DeleteVolumeInput) (*ec2.DeleteVolumeOutput, error) {
-	return nil, nil
-}
 
 var _ = Describe("Client#FindLongestMatchingHostedZone", func() {
 

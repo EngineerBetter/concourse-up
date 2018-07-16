@@ -2,6 +2,7 @@ package concourse
 
 import (
 	"bytes"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"strings"
@@ -35,6 +36,21 @@ func (client *Client) FetchInfo() (*Info, error) {
 
 	metadata, err := terraformClient.Output()
 	if err != nil {
+		return nil, err
+	}
+
+	userIP, err := client.ipChecker()
+	if err != nil {
+		return nil, err
+	}
+
+	whitelisted, err := client.iaasClient.CheckForWhitelistedIP(userIP, metadata.DirectorSecurityGroupID.Value, client.iaasClient.NewEC2Client)
+	if err != nil {
+		return nil, err
+	}
+
+	if !whitelisted {
+		err = fmt.Errorf("Do you need to add your IP %s to the %s-director security group (for ports 22, 6868, and 25555)?", userIP, config.Deployment)
 		return nil, err
 	}
 

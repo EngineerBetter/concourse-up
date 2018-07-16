@@ -15,6 +15,7 @@ import (
 
 // FakeAWSClient implements iaas.IClient for testing
 type FakeAWSClient struct {
+	FakeCheckForWhitelistedIP         func(ip, securityGroup string, newEC2Client func() (iaas.IEC2, error)) (bool, error)
 	FakeDeleteVMsInVPC                func(vpcID string) ([]*string, error)
 	FakeDeleteVolumes                 func(volumesToDelete []*string, deleteVolume func(ec2Client iaas.IEC2, volumeID *string) error, newEC2Client func() (iaas.IEC2, error)) error
 	FakeDeleteFile                    func(bucket, path string) error
@@ -37,6 +38,11 @@ func (client *FakeAWSClient) IAAS() string {
 // Region delegates to FakeRegion which is dynamically set by the tests
 func (client *FakeAWSClient) Region() string {
 	return client.FakeRegion()
+}
+
+// CheckForWhitelistedIP delegates to FakeCheckForWhitelistedIP which is dynamically set by the tests
+func (client *FakeAWSClient) CheckForWhitelistedIP(ip, securityGroup string, newEC2Client func() (iaas.IEC2, error)) (bool, error) {
+	return client.FakeCheckForWhitelistedIP(ip, securityGroup, newEC2Client)
 }
 
 // DeleteVMsInVPC delegates to FakeDeleteVMsInVPC which is dynamically set by the tests

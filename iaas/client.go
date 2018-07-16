@@ -8,6 +8,7 @@ import (
 
 // IClient represents actions taken against AWS
 type IClient interface {
+	CheckForWhitelistedIP(ip, securityGroup string, newEC2Client func() (IEC2, error)) (bool, error)
 	DeleteFile(bucket, path string) error
 	DeleteVersionedBucket(name string) error
 	DeleteVMsInVPC(vpcID string) ([]*string, error)
