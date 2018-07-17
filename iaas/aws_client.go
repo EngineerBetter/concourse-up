@@ -80,16 +80,7 @@ func (client *AWSClient) CheckForWhitelistedIP(ip, securityGroup string, newEC2C
 	port22, port6868, port25555 := false, false, false
 	for _, entry := range ingressPermissions {
 		for _, sgIP := range entry.IpRanges {
-			if *sgIP.CidrIp == cidr {
-				switch *entry.FromPort {
-				case 22:
-					port22 = true
-				case 6868:
-					port6868 = true
-				case 25555:
-					port25555 = true
-				}
-			}
+			checkPorts(*sgIP.CidrIp, cidr, &port22, &port6868, &port25555, *entry.FromPort)
 		}
 	}
 
@@ -98,6 +89,19 @@ func (client *AWSClient) CheckForWhitelistedIP(ip, securityGroup string, newEC2C
 	}
 
 	return false, nil
+}
+
+func checkPorts(sgCidr, cidr string, port22, port6868, port25555 *bool, fromPort int64) {
+	if sgCidr == cidr {
+		switch fromPort {
+		case 22:
+			*port22 = true
+		case 6868:
+			*port6868 = true
+		case 25555:
+			*port25555 = true
+		}
+	}
 }
 
 // DeleteVolumes deletes the specified EBS volumes
