@@ -234,7 +234,6 @@ instance_groups:
         tls:
           ca_cert:
             certificate: ((credhub-tls.ca))
-          insecure_skip_verify: true # Remove this line when the fix for https://github.com/concourse/concourse/issues/1873 is released
         url: https://127.0.0.1:8844
         client_id: atc_to_credhub
         client_secret: ((uaa_clients_atc_to_credhub))
