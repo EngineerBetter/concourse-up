@@ -46,6 +46,13 @@ var _ = Describe("Client", func() {
 
 			return "", "", errors.New("hosted zone not found")
 		},
+		FakeCheckForWhitelistedIP: func(ip, securityGroup string, newEC2Client func() (iaas.IEC2, error)) (bool, error) {
+			actions = append(actions, "checking security group for IP")
+			if ip == "1.2.3.4" {
+				return false, nil
+			}
+			return true, nil
+		},
 		FakeDeleteVMsInVPC: func(vpcID string) ([]*string, error) {
 			actions = append(actions, fmt.Sprintf("deleting vms in %s", vpcID))
 			return nil, nil
@@ -208,6 +215,10 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 				FakeCleanup: func() error {
 					actions = append(actions, "cleaning up bosh init")
 					return nil
+				},
+				FakeInstances: func() ([]bosh.Instance, error) {
+					actions = append(actions, "listing bosh instances")
+					return nil, nil
 				},
 			}, nil
 		}
@@ -520,6 +531,54 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 				client := buildClient()
 				err := client.Destroy()
 				Expect(err).ToNot(HaveOccurred())
+			})
+		})
+	})
+
+	Describe("FetchInfo", func() {
+		It("Loads the config file", func() {
+			client := buildClient()
+			_, err := client.FetchInfo()
+			Expect(err).ToNot(HaveOccurred())
+
+			Expect(actions).To(ContainElement("loading config file"))
+		})
+
+		It("Loads terraform output", func() {
+			client := buildClient()
+			_, err := client.FetchInfo()
+			Expect(err).ToNot(HaveOccurred())
+
+			Expect(actions).To(ContainElement("fetching terraform metadata"))
+		})
+
+		It("Checks that the IP is whitelisted", func() {
+			client := buildClient()
+			_, err := client.FetchInfo()
+			Expect(err).ToNot(HaveOccurred())
+
+			Expect(actions).To(ContainElement("checking security group for IP"))
+		})
+
+		It("Retrieves the BOSH instances", func() {
+			client := buildClient()
+			_, err := client.FetchInfo()
+			Expect(err).ToNot(HaveOccurred())
+
+			Expect(actions).To(ContainElement("listing bosh instances"))
+		})
+
+		Context("When the IP address isn't properly whitelisted", func() {
+			BeforeEach(func() {
+				ipChecker = func() (string, error) {
+					return "1.2.3.4", nil
+				}
+			})
+
+			It("Returns a meaningful error", func() {
+				client := buildClient()
+				_, err := client.FetchInfo()
+				Expect(err).To(MatchError("Do you need to add your IP 1.2.3.4 to the concourse-up-happymeal-director security group (for ports 22, 6868, and 25555)?"))
 			})
 		})
 	})
