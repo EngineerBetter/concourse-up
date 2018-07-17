@@ -195,4 +195,26 @@ var _ = Describe("commands", func() {
 			})
 		})
 	})
+
+	Describe("info", func() {
+		Context("When using --help", func() {
+			It("should display usage details", func() {
+				command := exec.Command(cliPath, "info", "--help")
+				session, err := Start(command, GinkgoWriter, GinkgoWriter)
+				Expect(err).ToNot(HaveOccurred(), "Error running CLI: "+cliPath)
+				Eventually(session).Should(Exit(0))
+				Expect(session.Out).To(Say("concourse-up info - Fetches information on a deployed environment"))
+			})
+		})
+
+		Context("When no name is passed in", func() {
+			It("should display correct usage", func() {
+				command := exec.Command(cliPath, "info")
+				session, err := Start(command, GinkgoWriter, GinkgoWriter)
+				Expect(err).ToNot(HaveOccurred())
+				Eventually(session).Should(Exit(1))
+				Expect(session.Err).To(Say("Usage is `concourse-up info <name>`"))
+			})
+		})
+	})
 })
