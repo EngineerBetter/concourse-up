@@ -1,0 +1,9 @@
+- type: replace
+  path: /instance_groups/name=web/vm_extensions?/-
+  value: atc
+
+- type: replace
+  path: /instance_groups/name=web/networks/-
+  value:
+    name: vip
+    static_ips: [((atc_eip))]

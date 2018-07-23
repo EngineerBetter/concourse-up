@@ -30,6 +30,7 @@ var _ = Describe("Client", func() {
 	var args *config.DeployArgs
 	var exampleConfig *config.Config
 	var ipChecker func() (string, error)
+	var exampleDirectorCreds []byte
 
 	certGenerator := func(c func(u *certs.User) (certs.AcmeClient, error), caName string, ip ...string) (*certs.Certs, error) {
 		actions = append(actions, fmt.Sprintf("generating cert ca: %s, cn: %s", caName, ip))
@@ -146,6 +147,8 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 			RDSInstanceClass:  "db.t2.medium",
 		}
 
+		exampleDirectorCreds = []byte("atc_password: s3cret")
+
 		configClient := &testsupport.FakeConfigClient{
 			FakeLoadOrCreate: func(deployArgs *config.DeployArgs) (*config.Config, bool, error) {
 				actions = append(actions, "loading or creating config file")
@@ -206,7 +209,7 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 					} else {
 						actions = append(actions, "deploying director")
 					}
-					return nil, nil, nil
+					return nil, exampleDirectorCreds, nil
 				},
 				FakeDelete: func([]byte) ([]byte, error) {
 					actions = append(actions, "deleting director")

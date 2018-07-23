@@ -24,10 +24,6 @@ func (client *Client) Deploy(state, creds []byte, detach bool) (newState, newCre
 		return state, creds, err
 	}
 
-	if err = client.uploadConcourseReleases(); err != nil {
-		return state, creds, err
-	}
-
 	if err = client.createDefaultDatabases(); err != nil {
 		return state, creds, err
 	}

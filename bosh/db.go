@@ -120,7 +120,7 @@ func (client *Client) createDefaultDatabases() error {
 		return err
 	}
 	defer db.Close()
-	dbNames := []string{client.config.ConcourseDBName, "uaa", "credhub"}
+	dbNames := []string{"concourse_atc", "uaa", "credhub"}
 	for _, dbName := range dbNames {
 		_, err := db.Exec("CREATE DATABASE " + dbName)
 		if err != nil && !strings.Contains(err.Error(),

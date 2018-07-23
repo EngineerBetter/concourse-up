@@ -74,14 +74,6 @@ var _ = Describe("Client", func() {
 					Expect(conf.ConcourseDBName).To(Equal("concourse_atc"))
 				})
 
-				It("Generates a secure random string for ConcoursePassword", func() {
-					Expect(conf.ConcoursePassword).To(beARandomPassword())
-				})
-
-				It("Sets the default value for the ConcourseUsername", func() {
-					Expect(conf.ConcourseUsername).To(Equal("admin"))
-				})
-
 				It("Sets the default value for the ConcourseWorkerCount", func() {
 					Expect(conf.ConcourseWorkerCount).To(Equal(1))
 				})
@@ -128,18 +120,6 @@ var _ = Describe("Client", func() {
 
 				It("Sets the GrafanaPassword to the ConcoursePassword", func() {
 					Expect(conf.GrafanaPassword).To(Equal(conf.ConcoursePassword))
-				})
-
-				It("Sets the default value for the GrafanaUsername", func() {
-					Expect(conf.GrafanaUsername).To(Equal("admin"))
-				})
-
-				It("Generates a secure random string for InfluxDBPassword", func() {
-					Expect(conf.InfluxDBPassword).To(beARandomPassword())
-				})
-
-				It("Sets the default value for the InfluxDBUsername", func() {
-					Expect(conf.InfluxDBUsername).To(Equal("admin"))
 				})
 
 				It("Sets the default value for the MultiAZRDS", func() {

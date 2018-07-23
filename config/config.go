@@ -18,7 +18,6 @@ type Config struct {
 	ConcourseCACert           string `json:"concourse_ca_cert"`
 	ConcourseCert             string `json:"concourse_cert"`
 	ConcourseDBName           string `json:"concourse_db_name"`
-	ConcourseKey              string `json:"concourse_key"`
 	ConcoursePassword         string `json:"concourse_password"`
 	ConcourseUserProvidedCert bool   `json:"concourse_user_provided_cert"`
 	ConcourseUsername         string `json:"concourse_username"`
@@ -43,8 +42,6 @@ type Config struct {
 	GrafanaUsername           string `json:"grafana_username"`
 	HostedZoneID              string `json:"hosted_zone_id"`
 	HostedZoneRecordPrefix    string `json:"hosted_zone_record_prefix"`
-	InfluxDBPassword          string `json:"influxdb_password"`
-	InfluxDBUsername          string `json:"influxdb_username"`
 	MultiAZRDS                bool   `json:"multi_az_rds"`
 	PrivateKey                string `json:"private_key"`
 	Project                   string `json:"project"`
@@ -56,14 +53,6 @@ type Config struct {
 	Region                    string `json:"region"`
 	SourceAccessIP            string `json:"source_access_ip"`
 	TFStatePath               string `json:"tf_state_path"`
-	TokenPrivateKey           string `json:"token_private_key"`
-	TokenPublicKey            string `json:"token_public_key"`
-	TSAFingerprint            string `json:"tsa_fingerprint"`
-	TSAPrivateKey             string `json:"tsa_private_key"`
-	TSAPublicKey              string `json:"tsa_public_key"`
-	WorkerFingerprint         string `json:"worker_fingerprint"`
-	WorkerPrivateKey          string `json:"worker_private_key"`
-	WorkerPublicKey           string `json:"worker_public_key"`
 	AllowIPs                  string `json:"allow_ips"`
 }
 
@@ -73,29 +62,9 @@ func generateDefaultConfig(iaas, project, deployment, configBucket, region strin
 		return nil, err
 	}
 
-	tsaPrivateKey, tsaPublicKey, tsaFingerprint, err := util.GenerateSSHKeyPair()
-	if err != nil {
-		return nil, err
-	}
-
-	workerPrivateKey, workerPublicKey, workerFingerprint, err := util.GenerateSSHKeyPair()
-	if err != nil {
-		return nil, err
-	}
-
-	tokenPrivateKey, tokenPublicKey, err := util.GenerateRSAKeyPair()
-	if err != nil {
-		return nil, err
-	}
-
-	concourseUsername := "admin"
-	concoursePassword := util.GeneratePassword()
-
 	conf := Config{
 		AvailabilityZone:         fmt.Sprintf("%sa", region),
 		ConcourseDBName:          "concourse_atc",
-		ConcoursePassword:        concoursePassword,
-		ConcourseUsername:        concourseUsername,
 		ConcourseWorkerCount:     1,
 		ConcourseWebSize:         "small",
 		ConcourseWorkerSize:      "xlarge",
@@ -108,10 +77,6 @@ func generateDefaultConfig(iaas, project, deployment, configBucket, region strin
 		DirectorRegistryPassword: util.GeneratePassword(),
 		DirectorUsername:         "admin",
 		EncryptionKey:            util.GeneratePasswordWithLength(32),
-		GrafanaPassword:          concoursePassword,
-		GrafanaUsername:          concourseUsername,
-		InfluxDBPassword:         util.GeneratePassword(),
-		InfluxDBUsername:         "admin",
 		MultiAZRDS:               false,
 		PrivateKey:               strings.TrimSpace(string(privateKey)),
 		Project:                  project,
@@ -121,14 +86,6 @@ func generateDefaultConfig(iaas, project, deployment, configBucket, region strin
 		RDSUsername:              "admin" + util.GeneratePassword(),
 		Region:                   region,
 		TFStatePath:              terraformStateFileName,
-		TokenPrivateKey:          strings.TrimSpace(string(tokenPrivateKey)),
-		TokenPublicKey:           strings.TrimSpace(string(tokenPublicKey)),
-		TSAFingerprint:           strings.TrimSpace(tsaFingerprint),
-		TSAPrivateKey:            strings.TrimSpace(string(tsaPrivateKey)),
-		TSAPublicKey:             strings.TrimSpace(string(tsaPublicKey)),
-		WorkerFingerprint:        strings.TrimSpace(workerFingerprint),
-		WorkerPrivateKey:         strings.TrimSpace(string(workerPrivateKey)),
-		WorkerPublicKey:          strings.TrimSpace(string(workerPublicKey)),
 	}
 
 	return &conf, nil

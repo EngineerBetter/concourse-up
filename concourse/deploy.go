@@ -45,6 +45,24 @@ func (client *Client) Deploy() error {
 		return err
 	}
 
+	if client.deployArgs.SelfUpdate {
+		err = client.updateBoshAndPipeline(config, metadata)
+	} else {
+		err = client.deployBoshAndPipeline(config, metadata)
+	}
+	if err != nil {
+		return err
+	}
+	return client.configClient.Update(config)
+}
+
+func (client *Client) deployBoshAndPipeline(config *config.Config, metadata *terraform.Metadata) error {
+	// When we are deploying for the first time rather than updating
+	// ensure that the pipeline is set _after_ the concourse is deployed
+	if err := client.deployBosh(config, metadata, false); err != nil {
+		return err
+	}
+
 	flyClient, err := client.flyClientFactory(fly.Credentials{
 		Target:   config.Deployment,
 		API:      fmt.Sprintf("https://%s", config.Domain),
@@ -59,37 +77,31 @@ func (client *Client) Deploy() error {
 	}
 	defer flyClient.Cleanup()
 
-	if client.deployArgs.SelfUpdate {
-		err = client.updateBoshAndPipeline(config, metadata, flyClient)
-	} else {
-		err = client.deployBoshAndPipeline(config, metadata, flyClient)
-	}
-	if err != nil {
-		return err
-	}
-	return client.configClient.Update(config)
-}
-
-func (client *Client) deployBoshAndPipeline(config *config.Config, metadata *terraform.Metadata, flyClient fly.IClient) error {
-	// When we are deploying for the first time rather than updating
-	// ensure that the pipeline is set _after_ the concourse is deployed
-	if err := client.deployBosh(config, metadata, false); err != nil {
-		return err
-	}
-
 	if err := flyClient.SetDefaultPipeline(client.deployArgs, config, false); err != nil {
 		return err
 	}
 
-	err := writeDeploySuccessMessage(config, metadata, client.stdout)
-
-	return err
+	return writeDeploySuccessMessage(config, metadata, client.stdout)
 }
 
-func (client *Client) updateBoshAndPipeline(config *config.Config, metadata *terraform.Metadata, flyClient fly.IClient) error {
+func (client *Client) updateBoshAndPipeline(config *config.Config, metadata *terraform.Metadata) error {
 	// If concourse is already running this is an update rather than a fresh deploy
 	// When updating we need to deploy the BOSH as the final step in order to
 	// Detach from the update, so the update job can exit
+	flyClient, err := client.flyClientFactory(fly.Credentials{
+		Target:   config.Deployment,
+		API:      fmt.Sprintf("https://%s", config.Domain),
+		Username: config.ConcourseUsername,
+		Password: config.ConcoursePassword,
+	},
+		client.stdout,
+		client.stderr,
+	)
+	if err != nil {
+		return err
+	}
+	defer flyClient.Cleanup()
+
 	concourseAlreadyRunning, err := flyClient.CanConnect()
 	if err != nil {
 		return err
@@ -211,7 +223,6 @@ func timeTillExpiry(cert string) time.Duration {
 func (client *Client) ensureConcourseCerts(c func(u *certs.User) (certs.AcmeClient, error), domainUpdated bool, config *config.Config, metadata *terraform.Metadata) (*config.Config, error) {
 	if client.deployArgs.TLSCert != "" {
 		config.ConcourseCert = client.deployArgs.TLSCert
-		config.ConcourseKey = client.deployArgs.TLSKey
 		config.ConcourseUserProvidedCert = true
 
 		return config, nil
@@ -230,7 +241,6 @@ func (client *Client) ensureConcourseCerts(c func(u *certs.User) (certs.AcmeClie
 	}
 
 	config.ConcourseCert = string(concourseCerts.Cert)
-	config.ConcourseKey = string(concourseCerts.Key)
 	config.ConcourseCACert = string(concourseCerts.CACert)
 
 	return config, nil
@@ -288,23 +298,30 @@ func (client *Client) deployBosh(config *config.Config, metadata *terraform.Meta
 		return err
 	}
 
-	type credhubCreds struct {
-		Password          string `yaml:"credhub_cli_password"`
-		AdminClientSecret string `yaml:"credhub_admin_client_secret"`
-		CACert            struct {
-			Cert string `yaml:"ca"`
-		} `yaml:"credhub-tls"`
+	var cc struct {
+		CredhubPassword          string `yaml:"credhub_cli_password"`
+		CredhubAdminClientSecret string `yaml:"credhub_admin_client_secret"`
+		WebTLS                   struct {
+			CA string `yaml:"ca"`
+		} `yaml:"web_tls"`
+		UaaClientsAtcToCredhub string `yaml:"uaa_clients_atc_to_credhub"`
+		AtcPassword            string `yaml:"atc_password"`
+		GrafanaPassword        string `yaml:"grafana_password"`
 	}
-	var cc credhubCreds
+
 	err = yaml.Unmarshal(boshCredsBytes, &cc)
 	if err != nil {
 		return err
 	}
-	config.CredhubCACert = cc.CACert.Cert
-	config.CredhubPassword = cc.Password
+
+	config.CredhubPassword = cc.CredhubPassword
+	config.CredhubAdminClientSecret = cc.CredhubAdminClientSecret
+	config.CredhubCACert = cc.WebTLS.CA
 	config.CredhubURL = fmt.Sprintf("https://%s:8844/", metadata.ATCPublicIP.Value)
 	config.CredhubUsername = "credhub-cli"
-	config.CredhubAdminClientSecret = cc.AdminClientSecret
+	config.ConcourseUsername = "admin"
+	config.ConcoursePassword = cc.AtcPassword
+	config.GrafanaPassword = cc.GrafanaPassword
 
 	return nil
 }
