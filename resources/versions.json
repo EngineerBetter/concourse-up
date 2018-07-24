@@ -1,0 +1,77 @@
+[
+  {
+    "type": "replace",
+    "path": "/releases/name=concourse",
+    "value": {
+      "name": "concourse",
+      "version": "3.14.1",
+      "url": "https://s3-eu-west-1.amazonaws.com/concourse-up-compiled-releases/concourse.tgz?versionId=zOISXS4Rg3BRlXgYiuJ7hVlMG1GzTTUf",
+      "sha1": "d18d3f63c97995401f3a14416c53b579e69412c5"
+    }
+  },
+  {
+    "type": "replace",
+    "path": "/releases/name=garden-runc",
+    "value": {
+      "name": "garden-runc",
+      "version": "1.15.1",
+      "url": "https://s3-eu-west-1.amazonaws.com/concourse-up-compiled-releases/garden-runc.tgz?versionId=zbcHQToFFcwckhg31qhBsh8k3kTT1jHs",
+      "sha1": "c9e5ccace7eb152cfac04ef02d73d909104f1b57"
+    }
+  },
+  {
+    "type": "replace",
+    "path": "/releases/name=riemann",
+    "value": {
+      "name": "riemann",
+      "version": "5",
+      "url": "https://s3-eu-west-1.amazonaws.com/concourse-up-compiled-releases/riemann.tgz?versionId=jZQSaDdVx8a4oOo5m.tlzy47fRdpwAFT",
+      "sha1": "954ccce719b8e75aea9679942fef9b18f2438111"
+    }
+  },
+  {
+    "type": "replace",
+    "path": "/releases/name=grafana",
+    "value": {
+      "name": "grafana",
+      "version": "13.2.0",
+      "url": "https://s3-eu-west-1.amazonaws.com/concourse-up-compiled-releases/grafana.tgz?versionId=ltnuk.mJVF7hcN6GZw.7xhlVd4sxLgtF",
+      "sha1": "2fd317299461a69db554bf5b1a3faf6cf02079d9"
+    }
+  },
+  {
+    "type": "replace",
+    "path": "/releases/name=influxdb",
+    "value": {
+      "name": "influxdb",
+      "version": "4",
+      "url": "https://s3-eu-west-1.amazonaws.com/concourse-up-compiled-releases/influxdb.tgz?versionId=jV7QfBo1ALYGmraHA0M2Q7p7Vw8AbWZ2",
+      "sha1": "2cbf4d9f8764dca159f712b5946d6f2b8bd51fb9"
+    }
+  },
+  {
+    "type": "replace",
+    "path": "/releases/name=credhub",
+    "value": {
+      "name": "credhub",
+      "version": "1.9.5",
+      "url": "https://s3-eu-west-1.amazonaws.com/concourse-up-compiled-releases/credhub.tgz?versionId=q69sDW0tj4f4djLFdgv1dKuMKWRISMvr",
+      "sha1": "fb5d779d84d92238a6d9b583e8bb573eee29fc40"
+    }
+  },
+  {
+    "type": "replace",
+    "path": "/releases/name=uaa",
+    "value": {
+      "name": "uaa",
+      "version": "60.2",
+      "url": "https://s3-eu-west-1.amazonaws.com/concourse-up-compiled-releases/uaa.tgz?versionId=0W0pvhu.GQ2.YFpq69AF4FxKGX3qB663",
+      "sha1": "25713647b70d7ec481eb4fd8aaa923c6d450ae40"
+    }
+  },
+  {
+    "type": "replace",
+    "path": "/stemcells/alias=trusty/version",
+    "value": "3586.26"
+  }
+]

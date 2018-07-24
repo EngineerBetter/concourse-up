@@ -1,0 +1,27 @@
+---
+platform: linux
+
+image_resource:
+  type: docker-image
+  source:
+    repository: golang
+
+inputs:
+- name: concourse-up
+- name: concourse-up-manifest
+- name: bosh-deployment
+
+outputs:
+- name: director-versions
+
+run:
+  path: bash
+  args:
+  - -euxc
+  - |
+    cp -r concourse-up/ci/tasks/get-versions $GOPATH/src/
+    go get get-versions/...
+    go run $GOPATH/src/get-versions/main.go
+
+params:
+  TARGET_FILE: director-versions/director-versions.json

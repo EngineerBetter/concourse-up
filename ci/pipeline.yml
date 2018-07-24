@@ -5,7 +5,7 @@ groups:
   - set-pipeline
   - build-image
   - unit-tests
-  - compile-releases
+  - get-versions
   - build
   - system-test
   - commit-compilation-vars
@@ -63,6 +63,12 @@ resources:
     ignore_paths:
     - ci/docker/*
     - README.md
+
+- name: concourse-up-manifest
+  type: git
+  source:
+    uri: git@github.com:EngineerBetter/concourse-up-manifest.git
+    private_key: ((github_private_key))
 
 - name: image
   type: docker-image
@@ -140,16 +146,6 @@ resources:
     repository: concourse
     access_token: ((github_access_token))
 
-- name: concourse-stemcell
-  type: bosh-io-stemcell
-  source:
-    name: bosh-aws-xen-hvm-ubuntu-trusty-go_agent
-
-- name: concourse-release
-  type: bosh-io-release
-  source:
-    repository: concourse/concourse
-
 - name: bosh-deployment
   type: git
   source:
@@ -159,36 +155,6 @@ resources:
   type: bosh-io-release
   source:
     repository: cloudfoundry-incubator/bosh-aws-cpi-release
-
-- name: riemann-release
-  type: bosh-io-release
-  source:
-    repository: xoebus/riemann-boshrelease
-
-- name: influxdb-release
-  type: bosh-io-release
-  source:
-    repository: vito/influxdb-boshrelease
-
-- name: grafana-release
-  type: bosh-io-release
-  source:
-    repository: vito/grafana-boshrelease
-
-- name: uaa-release
-  type: bosh-io-release
-  source:
-    repository: cloudfoundry/uaa-release
-
-- name: credhub-release
-  type: bosh-io-release
-  source:
-    repository: pivotal-cf/credhub-release
-
-- name: garden-runc-release
-  type: bosh-io-release
-  source:
-    repository: cloudfoundry/garden-runc-release
 
 - name: slack-alert
   type: slack-notification
@@ -251,53 +217,25 @@ jobs:
         text: |
           <!channel> Concourse Up unit tests failure!
 
-- name: compile-releases
+- name: get-versions
   serial: true
   plan:
   - aggregate:
-    - get: version
     - get: image
       passed: [build-image]
-    - get: concourse-github-release
-      trigger: true
-    - get: concourse-stemcell
-      trigger: true
-    - get: concourse-release
-      trigger: true
+    - get: concourse-up
     - get: bosh-deployment
       trigger: true
-    - get: riemann-release
+    - get: concourse-up-manifest
       trigger: true
-    - get: grafana-release
-      trigger: true
-    - get: influxdb-release
-      trigger: true
-    - get: director-bosh-cpi-release
-      trigger: true
-    - get: uaa-release
-      trigger: true
-    - get: credhub-release
-      trigger: true
-    - get: garden-runc-release
-      trigger: true
-    - get: concourse-up
-  - task: compile
-    file: concourse-up/ci/tasks/compile-bosh-releases.yml
-    params:
-      AWS_ACCESS_KEY_ID: ((concourse_up_test_access_key_id))
-      AWS_SECRET_ACCESS_KEY: ((concourse_up_test_secret_key))
-      AWS_DEFAULT_REGION: ((aws_default_region))
-      BOSH_USERNAME: ((bosh_username))
-      BOSH_PASSWORD: ((bosh_password))
-      BOSH_TARGET: ((bosh_target))
-      BOSH_CA_CERT: ((bosh_ca_cert))
-      PUBLIC_ARTIFACTS_BUCKET: concourse-up-public-artifacts
-  - put: compilation-vars
-    params:
-      file: compilation-vars/compilation-vars.json
-  - put: version
-    params:
-      file: version/version
+  - task: get-versions
+    file: concourse-up/ci/tasks/get-versions.yml
+  - task: copy-files
+    image: image
+    file: concourse-up/ci/tasks/copy-files.yml
+  - put: concourse-up
+    repository: concourse-up-new
+    rebase: true
 
 - name: build
   plan:

@@ -1,6 +1,7 @@
 package director
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
@@ -9,15 +10,6 @@ import (
 
 	"github.com/EngineerBetter/concourse-up/util"
 )
-
-// DarwinBinaryURL is a compile-time variable set with -ldflags
-var DarwinBinaryURL = "COMPILE_TIME_VARIABLE_director_darwin_binary_url"
-
-// LinuxBinaryURL is a compile-time variable set with -ldflags
-var LinuxBinaryURL = "COMPILE_TIME_VARIABLE_director_linux_binary_url"
-
-// WindowsBinaryURL is a compile-time variable set with -ldflags
-var WindowsBinaryURL = "COMPILE_TIME_VARIABLE_director_windows_binary_url"
 
 // IClient represents a bosh director client
 type IClient interface {
@@ -120,14 +112,23 @@ func (client *Client) ensureBinaryDownloaded() error {
 	return nil
 }
 
+//go:generate go-bindata -pkg $GOPACKAGE ../resources/director-versions.json
+var versionFile = MustAsset("../resources/director-versions.json")
+
 func getBoshCLIURL() (string, error) {
-	os := runtime.GOOS
-	if os == "darwin" {
-		return DarwinBinaryURL, nil
-	} else if os == "linux" {
-		return LinuxBinaryURL, nil
-	} else if os == "windows" {
-		return WindowsBinaryURL, nil
+	var x map[string]map[string]string
+	err := json.Unmarshal(versionFile, &x)
+	if err != nil {
+		return "", err
 	}
-	return "", fmt.Errorf("unknown os: `%s`", os)
+	switch runtime.GOOS {
+	case "darwin":
+		return x["bosh-cli"]["mac"], nil
+	case "linux":
+		return x["bosh-cli"]["linux"], nil
+	case "windows":
+		return x["bosh-cli"]["windows"], nil
+	default:
+		return "", fmt.Errorf("unknown os: `%s`", runtime.GOOS)
+	}
 }

@@ -132,8 +132,8 @@ func (client *Client) deployConcourse(creds []byte, detach bool) (newCreds []byt
 	return
 }
 
-//go:generate go-bindata -pkg $GOPACKAGE  assets/...
-var awsConcourseManifest = MustAsset("assets/manifest.yml")
+//go:generate go-bindata -pkg $GOPACKAGE  assets/... ../resources/...
 var awsConcourseGrafana = MustAsset("assets/grafana_dashboard.yml")
-var awsConcourseVersions = MustAsset("assets/ops/versions.json")
 var awsConcourseCompatibility = MustAsset("assets/ops/cup_compatibility.yml")
+var awsConcourseManifest = MustAsset("../resources/manifest.yml")
+var awsConcourseVersions = MustAsset("../resources/versions.json")

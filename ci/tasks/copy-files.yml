@@ -1,0 +1,13 @@
+---
+platform: linux
+
+inputs:
+- name: concourse-up
+- name: concourse-up-manifest
+- name: director-versions
+
+outputs:
+- name: concourse-up-new
+
+run:
+  path: concourse-up/ci/tasks/copy-files.sh

@@ -2,6 +2,7 @@ package fly
 
 import (
 	"bytes"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -16,15 +17,6 @@ import (
 	"github.com/EngineerBetter/concourse-up/config"
 	"github.com/EngineerBetter/concourse-up/util"
 )
-
-// DarwinBinaryURL is a compile-time variable set with -ldflags
-var DarwinBinaryURL = "COMPILE_TIME_VARIABLE_fly_darwin_binary_url"
-
-// LinuxBinaryURL is a compile-time variable set with -ldflags
-var LinuxBinaryURL = "COMPILE_TIME_VARIABLE_fly_linux_binary_url"
-
-// WindowsBinaryURL is a compile-time variable set with -ldflags
-var WindowsBinaryURL = "COMPILE_TIME_VARIABLE_fly_windows_binary_url"
 
 // ConcourseUpVersion is a compile-time variable set with -ldflags
 var ConcourseUpVersion = "COMPILE_TIME_VARIABLE_fly_concourse_up_version"
@@ -241,16 +233,25 @@ func (client *Client) run(args ...string) error {
 	return cmd.Run()
 }
 
+//go:generate go-bindata -pkg $GOPACKAGE ../resources/director-versions.json
+var versionFile = MustAsset("../resources/director-versions.json")
+
 func getFlyURL() (string, error) {
-	os := runtime.GOOS
-	if os == "darwin" {
-		return DarwinBinaryURL, nil
-	} else if os == "linux" {
-		return LinuxBinaryURL, nil
-	} else if os == "windows" {
-		return WindowsBinaryURL, nil
+	var x map[string]map[string]string
+	err := json.Unmarshal(versionFile, &x)
+	if err != nil {
+		return "", err
 	}
-	return "", fmt.Errorf("unknown os: `%s`", os)
+	switch runtime.GOOS {
+	case "darwin":
+		return x["fly"]["mac"], nil
+	case "linux":
+		return x["fly"]["linux"], nil
+	case "windows":
+		return x["fly"]["windows"], nil
+	default:
+		return "", fmt.Errorf("unknown os: `%s`", runtime.GOOS)
+	}
 }
 
 func (client *Client) buildDefaultPipelineParams(deployArgs *config.DeployArgs, config *config.Config) (*defaultPipelineParams, error) {

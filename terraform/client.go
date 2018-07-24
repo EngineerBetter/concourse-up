@@ -1,6 +1,7 @@
 package terraform
 
 import (
+	"archive/zip"
 	"bytes"
 	"encoding/json"
 	"fmt"
@@ -14,16 +15,7 @@ import (
 	"github.com/EngineerBetter/concourse-up/util"
 )
 
-// DarwinBinaryURL is a compile-time variable set with -ldflags
-var DarwinBinaryURL = "COMPILE_TIME_VARIABLE_terraform_darwin_binary_url"
-
-// LinuxBinaryURL is a compile-time variable set with -ldflags
-var LinuxBinaryURL = "COMPILE_TIME_VARIABLE_terraform_linux_binary_url"
-
-// WindowsBinaryURL is a compile-time variable set with -ldflags
-var WindowsBinaryURL = "COMPILE_TIME_VARIABLE_terraform_windows_binary_url"
-
-//go:generate go-bindata -pkg $GOPACKAGE assets/
+//go:generate go-bindata -pkg $GOPACKAGE assets/ ../resources/director-versions.json
 
 // AWSTemplate is a terraform configuration template for AWS
 var AWSTemplate = string(MustAsset("assets/main.tf"))
@@ -117,25 +109,27 @@ func (client *Client) Output() (*Metadata, error) {
 	return &metadata, nil
 }
 
+var versionFile = MustAsset("../resources/director-versions.json")
+
 func getTerraformURL() (string, error) {
-	os := runtime.GOOS
-	if os == "darwin" {
-		return DarwinBinaryURL, nil
-	} else if os == "linux" {
-		return LinuxBinaryURL, nil
-	} else if os == "windows" {
-		return WindowsBinaryURL, nil
+	var x map[string]map[string]string
+	err := json.Unmarshal(versionFile, &x)
+	if err != nil {
+		return "", err
 	}
-	return "", fmt.Errorf("unknown os: `%s`", os)
+	switch runtime.GOOS {
+	case "darwin":
+		return x["terraform"]["mac"], nil
+	case "linux":
+		return x["terraform"]["linux"], nil
+	case "windows":
+		return x["terraform"]["windows"], nil
+	default:
+		return "", fmt.Errorf("unknown os: `%s`", runtime.GOOS)
+	}
 }
 
 func setupBinary(tempDir *util.TempDir) error {
-	fileHandler, err := os.Create(tempDir.Path("terraform"))
-	if err != nil {
-		return err
-	}
-	defer fileHandler.Close()
-
 	url, err := getTerraformURL()
 	if err != nil {
 		return err
@@ -146,18 +140,30 @@ func setupBinary(tempDir *util.TempDir) error {
 		return err
 	}
 	defer resp.Body.Close()
+	var buf bytes.Buffer
+	n, err := buf.ReadFrom(resp.Body)
+	if err != nil {
+		return err
+	}
+	zr, err := zip.NewReader(bytes.NewReader(buf.Bytes()), n)
+	if err != nil {
+		return err
+	}
+	r, err := zr.File[0].Open()
+	if err != nil {
+		return err
+	}
+	defer r.Close()
 
-	if _, err := io.Copy(fileHandler, resp.Body); err != nil {
+	f, err := os.OpenFile(tempDir.Path("terraform"), os.O_CREATE|os.O_RDWR, 0700)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	if _, err := io.Copy(f, r); err != nil {
 		return err
 	}
 
-	if err := fileHandler.Sync(); err != nil {
-		return err
-	}
-
-	if err := os.Chmod(fileHandler.Name(), 0700); err != nil {
-		return err
-	}
-
-	return nil
+	return f.Close()
 }

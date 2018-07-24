@@ -1,6 +1,7 @@
 package bosh
 
 import (
+	"encoding/json"
 	"strconv"
 
 	"github.com/EngineerBetter/concourse-up/config"
@@ -10,38 +11,7 @@ import (
 	"github.com/EngineerBetter/concourse-up/util"
 )
 
-// DirectorCPIReleaseSHA1 is a compile-time varaible set with -ldflags
-var DirectorCPIReleaseSHA1 = "COMPILE_TIME_VARIABLE_bosh_directorCPIReleaseSHA1"
-
-// DirectorCPIReleaseURL is a compile-time varaible set with -ldflags
-var DirectorCPIReleaseURL = "COMPILE_TIME_VARIABLE_bosh_directorCPIReleaseURL"
-
-// DirectorCPIReleaseVersion is a compile-time varaible set with -ldflags
-var DirectorCPIReleaseVersion = "COMPILE_TIME_VARIABLE_bosh_directorCPIReleaseVersion"
-
-// DirectorReleaseSHA1 is a compile-time varaible set with -ldflags
-var DirectorReleaseSHA1 = "COMPILE_TIME_VARIABLE_bosh_directorReleaseSHA1"
-
-// DirectorReleaseURL is a compile-time varaible set with -ldflags
-var DirectorReleaseURL = "COMPILE_TIME_VARIABLE_bosh_directorReleaseURL"
-
-// DirectorReleaseVersion is a compile-time varaible set with -ldflags
-var DirectorReleaseVersion = "COMPILE_TIME_VARIABLE_bosh_directorReleaseVersion"
-
-// DirectorStemcellSHA1 is a compile-time varaible set with -ldflags
-var DirectorStemcellSHA1 = "COMPILE_TIME_VARIABLE_bosh_directorStemcellSHA1"
-
-// DirectorStemcellURL is a compile-time varaible set with -ldflags
-var DirectorStemcellURL = "COMPILE_TIME_VARIABLE_bosh_directorStemcellURL"
-
-// DirectorStemcellVersion is a compile-time varaible set with -ldflags
-var DirectorStemcellVersion = "COMPILE_TIME_VARIABLE_bosh_directorStemcellVersion"
-
-// DirectorBPMReleaseSHA1 is a compile-time varaible set with -ldflags
-var DirectorBPMReleaseSHA1 = "COMPILE_TIME_VARIABLE_bosh_directorBPMReleaseSHA1"
-
-// DirectorBPMReleaseURL is a compile-time varaible set with -ldflags
-var DirectorBPMReleaseURL = "COMPILE_TIME_VARIABLE_bosh_directorBPMReleaseURL"
+var versionFile = MustAsset("../resources/director-versions.json")
 
 // GenerateBoshInitManifest generates a manifest for the bosh director on AWS
 func generateBoshInitManifest(conf *config.Config, metadata *terraform.Metadata, privateKeyPath string) ([]byte, error) {
@@ -49,6 +19,9 @@ func generateBoshInitManifest(conf *config.Config, metadata *terraform.Metadata,
 	if err != nil {
 		return nil, err
 	}
+
+	var x map[string]map[string]string
+	err = json.Unmarshal(versionFile, &x)
 
 	templateParams := awsDirectorManifestParams{
 		AWSRegion:                 conf.Region,
@@ -65,17 +38,17 @@ func generateBoshInitManifest(conf *config.Config, metadata *terraform.Metadata,
 		DBPassword:                conf.RDSPassword,
 		DBPort:                    dbPort,
 		DBUsername:                conf.RDSUsername,
-		DirectorBPMReleaseSHA1:    DirectorBPMReleaseSHA1,
-		DirectorBPMReleaseURL:     DirectorBPMReleaseURL,
+		DirectorBPMReleaseSHA1:    x["bpm"]["sha1"],
+		DirectorBPMReleaseURL:     x["bpm"]["url"],
 		DirectorCACert:            conf.DirectorCACert,
-		DirectorCPIReleaseSHA1:    DirectorCPIReleaseSHA1,
-		DirectorCPIReleaseURL:     DirectorCPIReleaseURL,
-		DirectorCPIReleaseVersion: DirectorCPIReleaseVersion,
+		DirectorCPIReleaseSHA1:    x["cpi"]["sha1"],
+		DirectorCPIReleaseURL:     x["cpi"]["url"],
+		DirectorCPIReleaseVersion: x["cpi"]["version"],
 		DirectorCert:              conf.DirectorCert,
 		DirectorKey:               conf.DirectorKey,
-		DirectorReleaseSHA1:       DirectorReleaseSHA1,
-		DirectorReleaseURL:        DirectorReleaseURL,
-		DirectorReleaseVersion:    DirectorReleaseVersion,
+		DirectorReleaseSHA1:       x["bosh"]["sha1"],
+		DirectorReleaseURL:        x["bosh"]["url"],
+		DirectorReleaseVersion:    x["bosh"]["version"],
 		DirectorSubnetID:          metadata.PublicSubnetID.Value,
 		HMUserPassword:            conf.DirectorHMUserPassword,
 		KeyPairName:               metadata.DirectorKeyPair.Value,
@@ -86,9 +59,9 @@ func generateBoshInitManifest(conf *config.Config, metadata *terraform.Metadata,
 		RegistryPassword:          conf.DirectorRegistryPassword,
 		S3AWSAccessKeyID:          metadata.BlobstoreUserAccessKeyID.Value,
 		S3AWSSecretAccessKey:      metadata.BlobstoreSecretAccessKey.Value,
-		StemcellSHA1:              DirectorStemcellSHA1,
-		StemcellURL:               DirectorStemcellURL,
-		StemcellVersion:           DirectorStemcellVersion,
+		StemcellSHA1:              x["stemcell"]["sha1"],
+		StemcellURL:               x["stemcell"]["url"],
+		StemcellVersion:           x["stemcell"]["version"],
 		VMsSecurityGroupID:        metadata.VMsSecurityGroupID.Value,
 	}
 
