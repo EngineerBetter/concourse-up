@@ -8,7 +8,6 @@ groups:
   - get-versions
   - build
   - system-test
-  - commit-compilation-vars
   - auto
   - major
   - minor
@@ -88,15 +87,6 @@ resources:
     secret_access_key: ((concourse_ci_s3_secret_key))
     region_name: eu-west-1
 
-- name: compilation-vars
-  type: s3
-  source:
-    bucket: concourse-up-ci-artifacts
-    versioned_file: compilation-vars.json
-    access_key_id: ((concourse_ci_s3_access_key))
-    secret_access_key: ((concourse_ci_s3_secret_key))
-    region_name: eu-west-1
-
 - name: binary-linux
   type: s3
   source:
@@ -139,22 +129,10 @@ resources:
     access_token: ((github_access_token))
     drafts: true
 
-- name: concourse-github-release
-  type: github-release
-  source:
-    user: concourse
-    repository: concourse
-    access_token: ((github_access_token))
-
 - name: bosh-deployment
   type: git
   source:
     uri: https://github.com/cloudfoundry/bosh-deployment.git
-
-- name: director-bosh-cpi-release
-  type: bosh-io-release
-  source:
-    repository: cloudfoundry-incubator/bosh-aws-cpi-release
 
 - name: slack-alert
   type: slack-notification
@@ -245,11 +223,7 @@ jobs:
     - get: concourse-up
       trigger: true
       passed: [unit-tests]
-    - get: compilation-vars
-      trigger: true
-      passed: [compile-releases]
     - get: version
-      passed: [compile-releases]
   - aggregate:
     - do:
       - task: build-linux
@@ -292,9 +266,6 @@ jobs:
   plan:
   - aggregate:
     - get: version
-      passed: [build]
-    - get: compilation-vars
-      trigger: true
       passed: [build]
     - get: binary-linux
       trigger: true
@@ -389,51 +360,16 @@ jobs:
           text: |
             <!channel> Concourse Up system-test-clean-up failure!
 
-- name: commit-compilation-vars
-  serial: true
-  plan:
-  - aggregate:
-    - get: version
-      passed: [system-test]
-    - get: compilation-vars
-      trigger: true
-      passed: [system-test]
-    - get: binary-linux
-      trigger: true
-      passed: [system-test]
-    - get: binary-darwin
-      trigger: true
-      passed: [system-test]
-    - get: binary-windows
-      trigger: true
-      passed: [system-test]
-    - get: concourse-up
-      trigger: true
-      passed: [system-test]
-    - get: image
-      passed: [system-test]
-  - task: copy-compilation-vars
-    image: image
-    file: concourse-up/ci/tasks/copy-compilation-vars.yml
-  - put: concourse-up
-    params:
-      repository: concourse-up-new
-      rebase: true
-      notes: "update compilation vars"
-
 - name: auto
   serial: true
   plan:
   - aggregate:
-    - get: compilation-vars
-      trigger: true
-      passed: [commit-compilation-vars]
     - get: image
-      passed: [commit-compilation-vars]
+      passed: [system-test]
     - get: concourse-up
-      passed: [commit-compilation-vars]
+      passed: [system-test]
     - get: version
-      passed: [commit-compilation-vars]
+      passed: [system-test]
       params:
         bump: patch
   - aggregate: &build_binaries
@@ -483,15 +419,13 @@ jobs:
   serial: true
   plan:
   - aggregate:
-    - get: compilation-vars
-      passed: [commit-compilation-vars]
     - get: version
       params:
         bump: patch
     - get: image
-      passed: [commit-compilation-vars]
+      passed: [system-test]
     - get: concourse-up
-      passed: [commit-compilation-vars]
+      passed: [system-test]
   - aggregate: *build_binaries
   - task: write-release-vars
     image: image
@@ -521,15 +455,13 @@ jobs:
   serial: true
   plan:
   - aggregate:
-    - get: compilation-vars
-      passed: [commit-compilation-vars]
     - get: version
       params:
         bump: minor
     - get: image
-      passed: [commit-compilation-vars]
+      passed: [system-test]
     - get: concourse-up
-      passed: [commit-compilation-vars]
+      passed: [system-test]
   - aggregate: *build_binaries
   - task: write-release-vars
     image: image
@@ -559,15 +491,13 @@ jobs:
   serial: true
   plan:
   - aggregate:
-    - get: compilation-vars
-      passed: [commit-compilation-vars]
     - get: version
       params:
         bump: major
     - get: image
-      passed: [commit-compilation-vars]
+      passed: [system-test]
     - get: concourse-up
-      passed: [commit-compilation-vars]
+      passed: [system-test]
   - aggregate: *build_binaries
   - task: write-release-vars
     image: image
