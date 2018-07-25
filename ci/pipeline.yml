@@ -57,7 +57,7 @@ resources:
   type: git
   source:
     uri: git@github.com:EngineerBetter/concourse-up.git
-    branch: new-manifest
+    branch: master
     private_key: ((github_private_key))
     ignore_paths:
     - ci/docker/*
