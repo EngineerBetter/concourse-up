@@ -210,7 +210,7 @@ X9M1dN0p4Xj/+GYmJTCPbrYm3Jb9BoaE49tJOc789M+VI7lPZ4s=
 	It("Deploys concourse", func() {
 		_, _, err := client.Deploy(nil, nil, false)
 		Expect(err).ToNot(HaveOccurred())
-		expectedCommand := fmt.Sprintf("Running authenticated bosh command: --deployment concourse deploy %s/concourse.yml --vars-store %s/concourse-creds.yml --ops-file %s/versions.json --ops-file %s/cup_compatibility.yml --vars-file %s/grafana_dashboard.yml --var deployment_name=concourse --var domain= --var project=happymeal --var web_network_name=public --var worker_network_name=private --var-file postgres_ca_cert=%s/ca.pem --var postgres_host=rds.aws.com --var postgres_port=5432 --var postgres_role=admin --var postgres_password=s3cret --var postgres_host=rds.aws.com --var web_vm_type=concourse-web- --var worker_count=%s --var worker_vm_type=concourse- --var atc_eip=77.77.77.77 (detach: false)", tempDir, tempDir, tempDir, tempDir, tempDir, tempDir, tempDir)
+		expectedCommand := fmt.Sprintf("Running authenticated bosh command: --deployment concourse deploy %s/concourse.yml --vars-store %s/concourse-creds.yml --ops-file %s/versions.json --ops-file %s/cup_compatibility.yml --vars-file %s/grafana_dashboard.yml --var deployment_name=concourse --var domain= --var project=happymeal --var web_network_name=public --var worker_network_name=private --var-file postgres_ca_cert=%s/ca.pem --var postgres_host=rds.aws.com --var postgres_port=5432 --var postgres_role=admin --var postgres_password=s3cret --var postgres_host=rds.aws.com --var web_vm_type=concourse-web- --var worker_count=1 --var worker_vm_type=concourse- --var atc_eip=77.77.77.77 (detach: false)", tempDir, tempDir, tempDir, tempDir, tempDir, tempDir)
 		Expect(actions).To(ContainElement(expectedCommand))
 	})
 })
