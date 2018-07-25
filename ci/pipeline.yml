@@ -57,7 +57,7 @@ resources:
   type: git
   source:
     uri: git@github.com:EngineerBetter/concourse-up.git
-    branch: master
+    branch: new-manifest
     private_key: ((github_private_key))
     ignore_paths:
     - ci/docker/*
@@ -207,13 +207,14 @@ jobs:
     - get: concourse-up-manifest
       trigger: true
   - task: get-versions
-    file: concourse-up/ci/tasks/get-versions.yml
+    file: concourse-up/ci/tasks/get-versions/task.yml
   - task: copy-files
     image: image
     file: concourse-up/ci/tasks/copy-files.yml
   - put: concourse-up
-    repository: concourse-up-new
-    rebase: true
+    params:
+      repository: concourse-up-new
+      rebase: true
 
 - name: build
   plan:
