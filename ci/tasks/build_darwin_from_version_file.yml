@@ -9,7 +9,6 @@ params:
 inputs:
 - name: concourse-up
 - name: version
-- name: compilation-vars
 
 outputs:
 - name: build-darwin

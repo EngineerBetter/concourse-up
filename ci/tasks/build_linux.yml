@@ -8,7 +8,6 @@ params:
 
 inputs:
 - name: concourse-up
-- name: compilation-vars
 
 outputs:
 - name: build-linux
