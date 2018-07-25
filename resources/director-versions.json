@@ -1,37 +1,37 @@
 {
-    "bosh": {
-        "url": "https://s3.amazonaws.com/bosh-compiled-release-tarballs/bosh-266.4.0-ubuntu-trusty-3586.24-20180621-165809-30266228-20180621165813.tgz?versionId=inkSsUYxrlYaflh19kcwA7kYkF3eAHLh",
-        "sha1": "79ba3bdc160faff121e56ee5fd5f618ea48023ce",
-        "version": "266.4.0"
-    },
-    "bosh-cli": {
-        "windows": "https://s3.amazonaws.com/bosh-cli-artifacts/bosh-cli-5.0.1-windows-amd64.exe",
-        "mac": "https://s3.amazonaws.com/bosh-cli-artifacts/bosh-cli-5.0.1-darwin-amd64",
-        "linux": "https://s3.amazonaws.com/bosh-cli-artifacts/bosh-cli-5.0.1-linux-amd64"
-    },
-    "bpm": {
-        "url": "https://s3.amazonaws.com/bosh-compiled-release-tarballs/bpm-0.6.0-ubuntu-trusty-3586.24-20180618-221823-499813904-20180618221841.tgz?versionId=4XxS3rY2PTiCJK2xTUTjLyS5Puk4ZKbX",
-        "sha1": "60bc10eb7f78b10e54c08913ca1820014562f51c",
-        "version": "0.6.0"
-    },
-    "cpi": {
-        "url": "https://bosh.io/d/github.com/cloudfoundry-incubator/bosh-aws-cpi-release?v=71",
-        "sha1": "1007fde7a40090cdd76ea526466559f5e35c34d8",
-        "version": "71"
-    },
-    "fly": {
-        "windows": "https://github.com/concourse/concourse/releases/download/v3.14.1/fly_windows_amd64",
-        "mac": "https://github.com/concourse/concourse/releases/download/v3.14.1/fly_darwin_amd64",
-        "linux": "https://github.com/concourse/concourse/releases/download/v3.14.1/fly_linux_amd64"
-    },
-    "stemcell": {
-        "url": "https://bosh.io/d/stemcells/bosh-aws-xen-hvm-ubuntu-trusty-go_agent?v=3586.24",
-        "sha1": "dced51326eaa156cf634ff795631e4358d795385",
-        "version": ""
-    },
-    "terraform": {
-        "windows": "https://releases.hashicorp.com/terraform/0.11.7/terraform_0.11.7_windows_amd64.zip",
-        "mac": "https://releases.hashicorp.com/terraform/0.11.7/terraform_0.11.7_darwin_amd64.zip",
-        "linux": "https://releases.hashicorp.com/terraform/0.11.7/terraform_0.11.7_linux_amd64.zip"
-    }
+  "bosh": {
+    "url": "https://s3.amazonaws.com/bosh-compiled-release-tarballs/bosh-266.4.0-ubuntu-trusty-3586.24-20180621-165809-30266228-20180621165813.tgz?versionId=inkSsUYxrlYaflh19kcwA7kYkF3eAHLh",
+    "sha1": "79ba3bdc160faff121e56ee5fd5f618ea48023ce",
+    "version": "266.4.0"
+  },
+  "bosh-cli": {
+    "windows": "https://s3.amazonaws.com/bosh-cli-artifacts/bosh-cli-5.0.1-windows-amd64.exe",
+    "mac": "https://s3.amazonaws.com/bosh-cli-artifacts/bosh-cli-5.0.1-darwin-amd64",
+    "linux": "https://s3.amazonaws.com/bosh-cli-artifacts/bosh-cli-5.0.1-linux-amd64"
+  },
+  "bpm": {
+    "url": "https://s3.amazonaws.com/bosh-compiled-release-tarballs/bpm-0.6.0-ubuntu-trusty-3586.24-20180618-221823-499813904-20180618221841.tgz?versionId=4XxS3rY2PTiCJK2xTUTjLyS5Puk4ZKbX",
+    "sha1": "60bc10eb7f78b10e54c08913ca1820014562f51c",
+    "version": "0.6.0"
+  },
+  "cpi": {
+    "url": "https://bosh.io/d/github.com/cloudfoundry-incubator/bosh-aws-cpi-release?v=71",
+    "sha1": "1007fde7a40090cdd76ea526466559f5e35c34d8",
+    "version": "71"
+  },
+  "fly": {
+    "windows": "https://github.com/concourse/concourse/releases/download/v3.14.1/fly_windows_amd64",
+    "mac": "https://github.com/concourse/concourse/releases/download/v3.14.1/fly_darwin_amd64",
+    "linux": "https://github.com/concourse/concourse/releases/download/v3.14.1/fly_linux_amd64"
+  },
+  "stemcell": {
+    "url": "https://bosh.io/d/stemcells/bosh-aws-xen-hvm-ubuntu-trusty-go_agent?v=3586.24",
+    "sha1": "dced51326eaa156cf634ff795631e4358d795385",
+    "version": ""
+  },
+  "terraform": {
+    "windows": "https://releases.hashicorp.com/terraform/0.11.7/terraform_0.11.7_windows_amd64.zip",
+    "mac": "https://releases.hashicorp.com/terraform/0.11.7/terraform_0.11.7_darwin_amd64.zip",
+    "linux": "https://releases.hashicorp.com/terraform/0.11.7/terraform_0.11.7_linux_amd64.zip"
+  }
 }

@@ -78,7 +78,6 @@ instance_groups:
   instances: 1
   networks:
   - name: ((web_network_name))
-    default: [dns, gateway]
   stemcell: trusty
   vm_type: ((web_vm_type))
   jobs:
@@ -105,7 +104,7 @@ instance_groups:
       log_level: debug
       postgresql:
         ca_cert: ((postgres_ca_cert))
-        database: concourse_atc
+        database: atc
         host: ((postgres_host))
         port: ((postgres_port))
         role:
@@ -277,7 +276,7 @@ instance_groups:
 
 - name: worker
   azs: [z1]
-  instances: 1
+  instances: ((worker_count))
   networks:
   - name: ((worker_network_name))
   stemcell: trusty
