@@ -74,7 +74,7 @@ func (client *Client) createEnv(state, creds []byte) (newState, newCreds []byte,
 		return state, creds, err
 	}
 
-	if err := client.director.RunCommand(
+	if err = client.director.RunCommand(
 		client.stdout,
 		client.stderr,
 		"create-env",

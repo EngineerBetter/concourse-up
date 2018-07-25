@@ -20,11 +20,11 @@ RUN pip install --upgrade pip \
     && pip install awscli
 
 RUN go get github.com/onsi/ginkgo/ginkgo \
-           github.com/onsi/gomega \
-           gopkg.in/alecthomas/gometalinter.v1 \
-           github.com/square/certstrap
+    github.com/onsi/gomega \
+    gopkg.in/alecthomas/gometalinter \
+    github.com/square/certstrap
 
-RUN gometalinter.v1 --install
+RUN gometalinter --install
 
 RUN wget https://github.com/stedolan/jq/releases/download/jq-1.5/jq-linux64 \
     && mv jq-linux64 /usr/bin/jq \

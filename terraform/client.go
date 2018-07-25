@@ -50,7 +50,7 @@ func NewClient(iaas string, config *config.Config, stdout, stderr io.Writer) (IC
 		return nil, err
 	}
 
-	if err := setupBinary(tempDir); err != nil {
+	if err = setupBinary(tempDir); err != nil {
 		return nil, err
 	}
 
