@@ -22,6 +22,9 @@ func generateBoshInitManifest(conf *config.Config, metadata *terraform.Metadata,
 
 	var x map[string]map[string]string
 	err = json.Unmarshal(versionFile, &x)
+	if err != nil {
+		return nil, err
+	}
 
 	templateParams := awsDirectorManifestParams{
 		AWSRegion:                 conf.Region,

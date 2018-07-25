@@ -158,6 +158,9 @@ func getRelease(file, name string) (resource, error) {
 		} `json:"releases"`
 	}
 	err = yaml.Unmarshal(f, &manifest)
+	if err != nil {
+		return resource{}, err
+	}
 	for _, r := range manifest.Releases {
 		if r.Name != name {
 			continue
