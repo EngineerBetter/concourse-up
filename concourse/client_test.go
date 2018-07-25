@@ -179,7 +179,7 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 			},
 		}
 
-		terraformClientFactory := func(iaas string, config *config.Config, stdout, stderr io.Writer) (terraform.IClient, error) {
+		terraformClientFactory := func(iaas string, config *config.Config, stdout, stderr io.Writer, versionFile []byte) (terraform.IClient, error) {
 			return &testsupport.FakeTerraformClient{
 				FakeApply: func(dryrun bool) error {
 					Expect(dryrun).To(BeFalse())
@@ -238,7 +238,7 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 				awsClient,
 				terraformClientFactory,
 				boshClientFactory,
-				func(fly.Credentials, io.Writer, io.Writer) (fly.IClient, error) {
+				func(fly.Credentials, io.Writer, io.Writer, []byte) (fly.IClient, error) {
 					return fakeFlyClient, nil
 				},
 				certGenerator,
