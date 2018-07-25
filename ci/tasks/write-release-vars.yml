@@ -2,7 +2,6 @@
 platform: linux
 
 inputs:
-- name: compilation-vars
 - name: version
 - name: concourse-up
 
