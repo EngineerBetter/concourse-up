@@ -78,6 +78,7 @@ instance_groups:
   instances: 1
   networks:
   - name: ((web_network_name))
+    default: [dns, gateway]
   stemcell: trusty
   vm_type: ((web_vm_type))
   jobs:
@@ -279,6 +280,7 @@ instance_groups:
   instances: ((worker_count))
   networks:
   - name: ((worker_network_name))
+    default: [dns, gateway]
   stemcell: trusty
   vm_type: ((worker_vm_type))
   jobs:
