@@ -16,8 +16,8 @@ chmod +x ./cup
 sleep 60
 
 # Record ids of Concourse components
-vpc_id=$(aws ec2 describe-vpcs --filter "Name=tag:Name","Values=concourse-up-$deployment" --region eu-west-1 | jq -r '.Vpcs[0].VpcId')
-instances=$(aws ec2 describe-instances --filter "Name=vpc-id","Values=$vpc_id" --region eu-west-1)
+vpc_id=$(aws ec2 describe-vpcs --filter "Name=tag:Name,Values=concourse-up-$deployment" --region eu-west-1 | jq -r '.Vpcs[0].VpcId')
+instances=$(aws ec2 describe-instances --filter "Name=vpc-id,Values=$vpc_id" --region eu-west-1)
 volume_ids=$(echo "$instances" | jq -r '.Reservations[].Instances[].BlockDeviceMappings[].Ebs.VolumeId' | tr '\n' ',' | sed 's/,$//')
 
 # Get terraform state out of S3
@@ -32,13 +32,13 @@ rds_instance_name=$(terraform output -json | jq -r '.bosh_db_address.value' | aw
 sleep 180
 
 # Check that EBS volumes have been deleted
-volumes=$(aws ec2 describe-volumes --filters "Name=volume-id","Values=$volume_ids" --region eu-west-1 | jq '.Volumes')
+volumes=$(aws ec2 describe-volumes --filters "Name=volume-id,Values=$volume_ids" --region eu-west-1 | jq '.Volumes')
 volumes_count=$(echo "$volumes" | jq '. | length')
 echo "Volumes still remaining after deletion: $volumes_count"
 [ "$volumes_count" -eq 0 ]
 
 # Check that EC2 instances have been deleted
-instances=$(aws ec2 describe-instances --filter "Name=vpc-id","Values=$vpc_id" --region eu-west-1)
+instances=$(aws ec2 describe-instances --filter "Name=vpc-id,Values=$vpc_id" --region eu-west-1)
 instances_count=$(echo "$instances" | jq '.Reservations | length')
 echo "Instances still remaining after deletion: $instances_count"
 [ "$instances_count" -eq 0 ]

@@ -2,10 +2,10 @@
 
 set -eux
 
-which aws
-which certstrap
-which go
-which jq
-which bosh-cli
+command -v aws
+command -v certstrap
+command -v go
+command -v jq
+command -v bosh-cli
 
 echo "GOPATH is $GOPATH"

@@ -19,4 +19,4 @@ gometalinter \
 --enable-gc \
 ./...
 
-shellcheck -e SC2046,SC2140 $(find . -name '*.sh' | grep -v vendor)
+find . -name vendor -prune ! -type d -o -name '*.sh' -exec shellcheck {} +
