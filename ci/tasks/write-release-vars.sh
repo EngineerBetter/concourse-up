@@ -2,7 +2,7 @@
 
 set -eu
 
-# version=$(cat version/version)
+version=$(cat version/version)
 pushd resources
   bin_bosh_cli_version=$(                jq -r '."bosh-cli".linux' director-versions.json)
   bin_terraform_version=$(               jq -r '.terraform.linux' director-versions.json)
