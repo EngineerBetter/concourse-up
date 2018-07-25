@@ -71,6 +71,7 @@ func (client *Client) deployBoshAndPipeline(config *config.Config, metadata *ter
 	},
 		client.stdout,
 		client.stderr,
+		client.versionFile,
 	)
 	if err != nil {
 		return err
@@ -96,6 +97,7 @@ func (client *Client) updateBoshAndPipeline(config *config.Config, metadata *ter
 	},
 		client.stdout,
 		client.stderr,
+		client.versionFile,
 	)
 	if err != nil {
 		return err
@@ -247,7 +249,7 @@ func (client *Client) ensureConcourseCerts(c func(u *certs.User) (certs.AcmeClie
 }
 
 func (client *Client) applyTerraform(config *config.Config) (*terraform.Metadata, error) {
-	terraformClient, err := client.terraformClientFactory(client.iaasClient.IAAS(), config, client.stdout, client.stderr)
+	terraformClient, err := client.terraformClientFactory(client.iaasClient.IAAS(), config, client.stdout, client.stderr, client.versionFile)
 	if err != nil {
 		return nil, err
 	}

@@ -17,7 +17,7 @@ type Client struct {
 	iaasClient             iaas.IClient
 	terraformClientFactory terraform.ClientFactory
 	boshClientFactory      bosh.ClientFactory
-	flyClientFactory       func(fly.Credentials, io.Writer, io.Writer) (fly.IClient, error)
+	flyClientFactory       func(fly.Credentials, io.Writer, io.Writer, []byte) (fly.IClient, error)
 	certGenerator          func(constructor func(u *certs.User) (certs.AcmeClient, error), caName string, ip ...string) (*certs.Certs, error)
 	configClient           config.IClient
 	deployArgs             *config.DeployArgs
@@ -25,6 +25,7 @@ type Client struct {
 	stderr                 io.Writer
 	ipChecker              func() (string, error)
 	acmeClientConstructor  func(u *certs.User) (certs.AcmeClient, error)
+	versionFile            []byte
 }
 
 // IClient represents a concourse-up client
@@ -34,12 +35,15 @@ type IClient interface {
 	FetchInfo() (*Info, error)
 }
 
+//go:generate go-bindata -pkg $GOPACKAGE ../resources/director-versions.json
+var versionFile = MustAsset("../resources/director-versions.json")
+
 // NewClient returns a new Client
 func NewClient(
 	iaasClient iaas.IClient,
 	terraformClientFactory terraform.ClientFactory,
 	boshClientFactory bosh.ClientFactory,
-	flyClientFactory func(fly.Credentials, io.Writer, io.Writer) (fly.IClient, error),
+	flyClientFactory func(fly.Credentials, io.Writer, io.Writer, []byte) (fly.IClient, error),
 	certGenerator func(constructor func(u *certs.User) (certs.AcmeClient, error), caName string, ip ...string) (*certs.Certs, error),
 	configClient config.IClient,
 	deployArgs *config.DeployArgs,
@@ -56,6 +60,7 @@ func NewClient(
 		stderr:                 stderr,
 		ipChecker:              ipChecker,
 		acmeClientConstructor:  acmeClientConstructor,
+		versionFile:            versionFile,
 	}
 }
 
@@ -65,7 +70,7 @@ func (client *Client) buildBoshClient(config *config.Config, metadata *terraform
 		Password: config.DirectorPassword,
 		Host:     metadata.DirectorPublicIP.Value,
 		CACert:   config.DirectorCACert,
-	})
+	}, versionFile)
 	if err != nil {
 		return nil, err
 	}

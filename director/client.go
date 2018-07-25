@@ -34,12 +34,13 @@ type Client struct {
 	creds               Credentials
 	caCertPath          string
 	hasDownloadedBinary bool
+	versionFile         []byte
 }
 
 const caCertFilename = "ca-cert.pem"
 
 // NewClient returns a new client
-func NewClient(creds Credentials) (*Client, error) {
+func NewClient(creds Credentials, versionFile []byte) (*Client, error) {
 	tempDir, err := util.NewTempDir()
 	if err != nil {
 		return nil, err
@@ -55,6 +56,7 @@ func NewClient(creds Credentials) (*Client, error) {
 		creds:               creds,
 		caCertPath:          caCertPath,
 		hasDownloadedBinary: false,
+		versionFile:         versionFile,
 	}, nil
 }
 
@@ -84,7 +86,7 @@ func (client *Client) ensureBinaryDownloaded() error {
 	}
 	defer fileHandler.Close()
 
-	url, err := getBoshCLIURL()
+	url, err := getBoshCLIURL(client.versionFile)
 	if err != nil {
 		return err
 	}
@@ -112,10 +114,7 @@ func (client *Client) ensureBinaryDownloaded() error {
 	return nil
 }
 
-//go:generate go-bindata -pkg $GOPACKAGE ../resources/director-versions.json
-var versionFile = MustAsset("../resources/director-versions.json")
-
-func getBoshCLIURL() (string, error) {
+func getBoshCLIURL(versionFile []byte) (string, error) {
 	var x map[string]map[string]string
 	err := json.Unmarshal(versionFile, &x)
 	if err != nil {

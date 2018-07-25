@@ -30,10 +30,11 @@ type IClient interface {
 
 // Client represents a low-level wrapper for fly
 type Client struct {
-	tempDir *util.TempDir
-	creds   Credentials
-	stdout  io.Writer
-	stderr  io.Writer
+	tempDir     *util.TempDir
+	creds       Credentials
+	stdout      io.Writer
+	stderr      io.Writer
+	versionFile []byte
 }
 
 // Credentials represents credentials needed to connect to concourse
@@ -46,7 +47,7 @@ type Credentials struct {
 }
 
 // New returns a new fly client
-func New(creds Credentials, stdout, stderr io.Writer) (IClient, error) {
+func New(creds Credentials, stdout, stderr io.Writer, versionFile []byte) (IClient, error) {
 	tempDir, err := util.NewTempDir()
 	if err != nil {
 		return nil, err
@@ -58,7 +59,7 @@ func New(creds Credentials, stdout, stderr io.Writer) (IClient, error) {
 	}
 	defer fileHandler.Close()
 
-	url, err := getFlyURL()
+	url, err := getFlyURL(versionFile)
 	if err != nil {
 		return nil, err
 	}
@@ -86,6 +87,7 @@ func New(creds Credentials, stdout, stderr io.Writer) (IClient, error) {
 		creds,
 		stdout,
 		stderr,
+		versionFile,
 	}, nil
 }
 
@@ -233,10 +235,7 @@ func (client *Client) run(args ...string) error {
 	return cmd.Run()
 }
 
-//go:generate go-bindata -pkg $GOPACKAGE ../resources/director-versions.json
-var versionFile = MustAsset("../resources/director-versions.json")
-
-func getFlyURL() (string, error) {
+func getFlyURL(versionFile []byte) (string, error) {
 	var x map[string]map[string]string
 	err := json.Unmarshal(versionFile, &x)
 	if err != nil {

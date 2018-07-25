@@ -15,7 +15,7 @@ import (
 	"github.com/EngineerBetter/concourse-up/util"
 )
 
-//go:generate go-bindata -pkg $GOPACKAGE assets/ ../resources/director-versions.json
+//go:generate go-bindata -pkg $GOPACKAGE assets/
 
 // AWSTemplate is a terraform configuration template for AWS
 var AWSTemplate = string(MustAsset("assets/main.tf"))
@@ -30,17 +30,18 @@ type IClient interface {
 
 // Client wraps common terraform commands
 type Client struct {
-	configDir string
-	tempDir   *util.TempDir
-	stdout    io.Writer
-	stderr    io.Writer
+	configDir   string
+	tempDir     *util.TempDir
+	stdout      io.Writer
+	stderr      io.Writer
+	versionFile []byte
 }
 
 // ClientFactory is a function that builds a client interface
-type ClientFactory func(iaas string, config *config.Config, stdout, stderr io.Writer) (IClient, error)
+type ClientFactory func(iaas string, config *config.Config, stdout, stderr io.Writer, versionFile []byte) (IClient, error)
 
 // NewClient is a concrete implementation of ClientFactory
-func NewClient(iaas string, config *config.Config, stdout, stderr io.Writer) (IClient, error) {
+func NewClient(iaas string, config *config.Config, stdout, stderr io.Writer, versionFile []byte) (IClient, error) {
 	if iaas != "AWS" {
 		return nil, fmt.Errorf("IAAS not supported: %s", iaas)
 	}
@@ -50,7 +51,7 @@ func NewClient(iaas string, config *config.Config, stdout, stderr io.Writer) (IC
 		return nil, err
 	}
 
-	if err = setupBinary(tempDir); err != nil {
+	if err = setupBinary(tempDir, versionFile); err != nil {
 		return nil, err
 	}
 
@@ -70,10 +71,11 @@ func NewClient(iaas string, config *config.Config, stdout, stderr io.Writer) (IC
 	}
 
 	client := &Client{
-		tempDir:   tempDir,
-		configDir: configDir,
-		stdout:    stdout,
-		stderr:    stderr,
+		tempDir:     tempDir,
+		configDir:   configDir,
+		stdout:      stdout,
+		stderr:      stderr,
+		versionFile: versionFile,
 	}
 	devNull := bytes.NewBuffer(nil)
 	if err := client.terraform([]string{
@@ -109,9 +111,7 @@ func (client *Client) Output() (*Metadata, error) {
 	return &metadata, nil
 }
 
-var versionFile = MustAsset("../resources/director-versions.json")
-
-func getTerraformURL() (string, error) {
+func getTerraformURL(versionFile []byte) (string, error) {
 	var x map[string]map[string]string
 	err := json.Unmarshal(versionFile, &x)
 	if err != nil {
@@ -129,8 +129,8 @@ func getTerraformURL() (string, error) {
 	}
 }
 
-func setupBinary(tempDir *util.TempDir) error {
-	url, err := getTerraformURL()
+func setupBinary(tempDir *util.TempDir, versionFile []byte) error {
+	url, err := getTerraformURL(versionFile)
 	if err != nil {
 		return err
 	}

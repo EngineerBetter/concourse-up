@@ -13,7 +13,7 @@ func (client *Client) Destroy() error {
 		return err
 	}
 
-	terraformClient, err := client.terraformClientFactory(client.iaasClient.IAAS(), conf, client.stdout, client.stderr)
+	terraformClient, err := client.terraformClientFactory(client.iaasClient.IAAS(), conf, client.stdout, client.stderr, client.versionFile)
 	if err != nil {
 		return err
 	}

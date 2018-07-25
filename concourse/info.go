@@ -28,7 +28,7 @@ func (client *Client) FetchInfo() (*Info, error) {
 		return nil, err
 	}
 
-	terraformClient, err := client.terraformClientFactory(client.iaasClient.IAAS(), config, client.stdout, client.stderr)
+	terraformClient, err := client.terraformClientFactory(client.iaasClient.IAAS(), config, client.stdout, client.stderr, client.versionFile)
 	if err != nil {
 		return nil, err
 	}
