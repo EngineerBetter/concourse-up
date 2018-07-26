@@ -323,6 +323,7 @@ func (client *Client) deployBosh(config *config.Config, metadata *terraform.Meta
 	config.CredhubUsername = "credhub-cli"
 	config.ConcourseUsername = "admin"
 	config.ConcoursePassword = cc.AtcPassword
+	config.ConcourseCACert = cc.WebTLS.CA
 	config.GrafanaPassword = cc.GrafanaPassword
 
 	return nil
