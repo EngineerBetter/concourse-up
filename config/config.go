@@ -17,6 +17,7 @@ type Config struct {
 	CredhubCACert             string `json:"credhub_ca_cert"`
 	ConcourseCACert           string `json:"concourse_ca_cert"`
 	ConcourseCert             string `json:"concourse_cert"`
+	ConcourseKey              string `json:"concourse_key"`
 	ConcourseDBName           string `json:"concourse_db_name"`
 	ConcoursePassword         string `json:"concourse_password"`
 	ConcourseUserProvidedCert bool   `json:"concourse_user_provided_cert"`

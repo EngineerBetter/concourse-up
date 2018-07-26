@@ -225,6 +225,7 @@ func timeTillExpiry(cert string) time.Duration {
 func (client *Client) ensureConcourseCerts(c func(u *certs.User) (certs.AcmeClient, error), domainUpdated bool, config *config.Config, metadata *terraform.Metadata) (*config.Config, error) {
 	if client.deployArgs.TLSCert != "" {
 		config.ConcourseCert = client.deployArgs.TLSCert
+		config.ConcourseKey = client.deployArgs.TLSKey
 		config.ConcourseUserProvidedCert = true
 
 		return config, nil
@@ -243,6 +244,7 @@ func (client *Client) ensureConcourseCerts(c func(u *certs.User) (certs.AcmeClie
 	}
 
 	config.ConcourseCert = string(concourseCerts.Cert)
+	config.ConcourseKey = string(concourseCerts.Key)
 	config.ConcourseCACert = string(concourseCerts.CACert)
 
 	return config, nil

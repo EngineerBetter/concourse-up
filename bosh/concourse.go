@@ -126,6 +126,10 @@ func (client *Client) deployConcourse(creds []byte, detach bool) (newCreds []byt
 		fmt.Sprintf("worker_count=%d", client.config.ConcourseWorkerCount),
 		"--var",
 		"atc_eip="+client.metadata.ATCPublicIP.Value,
+		"--var",
+		"web_tls.cert="+client.config.ConcourseCert,
+		"--var",
+		"web_tls.key="+client.config.ConcourseKey,
 	)
 	newCreds, err1 := ioutil.ReadFile(credsPath)
 	if err == nil {
