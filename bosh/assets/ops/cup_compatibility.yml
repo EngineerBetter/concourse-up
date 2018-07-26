@@ -3,6 +3,10 @@
   value: atc
 
 - type: replace
+  path: /instance_groups/name=web/jobs/name=atc/properties/postgresql/database
+  value: concourse_atc
+
+- type: replace
   path: /instance_groups/name=web/networks/-
   value:
     name: vip
