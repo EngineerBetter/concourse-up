@@ -307,7 +307,7 @@ func (client *Client) deployBosh(config *config.Config, metadata *terraform.Meta
 		CredhubAdminClientSecret string `yaml:"credhub_admin_client_secret"`
 		WebTLS                   struct {
 			CA string `yaml:"ca"`
-		} `yaml:"web_tls"`
+		} `yaml:"external_tls"`
 		UaaClientsAtcToCredhub string `yaml:"uaa_clients_atc_to_credhub"`
 		AtcPassword            string `yaml:"atc_password"`
 		GrafanaPassword        string `yaml:"grafana_password"`
