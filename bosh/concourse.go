@@ -16,6 +16,8 @@ const concourseVersionsFilename = "versions.json"
 const concourseGrafanaFilename = "grafana_dashboard.yml"
 const concourseCompatibilityFilename = "cup_compatibility.yml"
 const postgresCACertFilename = "ca.pem"
+const concourseCertFilename = "cert.pem"
+const concourseKeyFilename = "key.pem"
 
 func (client *Client) uploadConcourseStemcell() error {
 	var ops []struct {
@@ -80,6 +82,16 @@ func (client *Client) deployConcourse(creds []byte, detach bool) (newCreds []byt
 		return
 	}
 
+	concourseCertPath, err := client.director.SaveFileToWorkingDir(concourseCertFilename, []byte(client.config.ConcourseCert))
+	if err != nil {
+		return
+	}
+
+	concourseKeyPath, err := client.director.SaveFileToWorkingDir(concourseKeyFilename, []byte(client.config.ConcourseKey))
+	if err != nil {
+		return
+	}
+
 	err = client.director.RunAuthenticatedCommand(
 		client.stdout,
 		client.stderr,
@@ -126,10 +138,10 @@ func (client *Client) deployConcourse(creds []byte, detach bool) (newCreds []byt
 		fmt.Sprintf("worker_count=%d", client.config.ConcourseWorkerCount),
 		"--var",
 		"atc_eip="+client.metadata.ATCPublicIP.Value,
-		"--var",
-		"external_tls.certificate="+client.config.ConcourseCert,
-		"--var",
-		"external_tls.private_key="+client.config.ConcourseKey,
+		"--var-file",
+		"external_tls.certificate="+concourseCertPath,
+		"--var-file",
+		"external_tls.private_key="+concourseKeyPath,
 	)
 	newCreds, err1 := ioutil.ReadFile(credsPath)
 	if err == nil {
