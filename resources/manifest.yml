@@ -38,7 +38,7 @@ variables:
     common_name: ConcourseCA
     is_ca: true
   type: certificate
-- name: web_tls
+- name: internal_tls
   type: certificate
   options:
     ca: ca
@@ -46,6 +46,11 @@ variables:
     alternative_names:
     - ((domain))
     - 127.0.0.1
+- name: external_tls
+  type: certificate
+  options:
+    ca: ca
+    common_name: ((domain))
 
 releases:
 - name: concourse
@@ -94,7 +99,7 @@ instance_groups:
         client_secret: ((uaa_clients_atc_to_credhub))
         tls:
           ca_cert:
-            certificate: ((web_tls.ca))
+            certificate: ((internal_tls.ca))
         url: https://((domain)):8844
       external_url: https://((domain))
       influxdb:
@@ -112,8 +117,8 @@ instance_groups:
           name: ((postgres_role))
           password: ((postgres_password))
         sslmode: verify-ca
-      tls_cert: ((web_tls.certificate))
-      tls_key: ((web_tls.private_key))
+      tls_cert: ((external_tls.certificate))
+      tls_key: ((external_tls.private_key))
       tls_bind_port: 443
       token_signing_key: ((token_signing_key))
   - name: tsa
@@ -166,8 +171,8 @@ instance_groups:
         listen_port: 3000
         root_url: https://((domain)):3000/
         ssl:
-          cert: ((web_tls.certificate))
-          key: ((web_tls.private_key))
+          cert: ((external_tls.certificate))
+          key: ((external_tls.private_key))
   - name: uaa
     release: uaa
     properties:
@@ -221,8 +226,8 @@ instance_groups:
         admin: {client_secret: ((uaa-admin))}
         login: {client_secret: ((uaa-login))}
         zones: {internal: {hostnames: []}}
-        sslCertificate: ((web_tls.certificate))
-        sslPrivateKey: ((web_tls.private_key))
+        sslCertificate: ((internal_tls.certificate))
+        sslPrivateKey: ((internal_tls.private_key))
         jwt:
           revocable: true
           policy:
@@ -244,19 +249,19 @@ instance_groups:
           password: ((postgres_password))
       login:
         saml:
-          serviceProviderCertificate: ((web_tls.certificate))
-          serviceProviderKey: ((web_tls.private_key))
+          serviceProviderCertificate: ((internal_tls.certificate))
+          serviceProviderKey: ((internal_tls.private_key))
           serviceProviderKeyPassword: ""
   - name: credhub
     release: credhub
     properties:
       credhub:
-        tls: ((web_tls))
+        tls: ((internal_tls))
         authentication:
           uaa:
             url: https://((domain)):8443
             verification_key: ((uaa-jwt.public_key))
-            ca_certs: [((web_tls.ca))]
+            ca_certs: [((internal_tls.ca))]
         data_storage:
           type: postgres
           username: ((postgres_role))
