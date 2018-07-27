@@ -22,13 +22,6 @@ resource_types:
   source:
     repository: concourse/concourse-pipeline-resource
 
-# Using an image based on this PR: https://github.com/concourse/github-release-resource/pull/72
-# Delete this when the PR gets merged
-- name: github-release
-  type: docker-image
-  source:
-    repository: engineerbetter/git-release-resource-72
-
 - name: slack-notification
   type: docker-image
   source:
@@ -533,9 +526,7 @@ jobs:
     - get: concourse-up
     - get: once-daily
       trigger: true
-    - get: release
-      params:
-        globs: [concourse-up-linux-amd64]
+    - get: binary-linux
   - task: cleanup
     file: concourse-up/ci/tasks/cleanup-tests.yml
     params:

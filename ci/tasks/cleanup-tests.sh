@@ -3,7 +3,7 @@
 set -e
 [ "$VERBOSE" ] && { set -x; export BOSH_LOG_LEVEL=debug; export BOSH_LOG_PATH=bosh.log; }
 
-cp release/concourse-up-linux-amd64 ./cup
+cp binary-linux/concourse-up-linux-amd64 ./cup
 chmod +x ./cup
 
 aws s3 ls \
