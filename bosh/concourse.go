@@ -127,9 +127,9 @@ func (client *Client) deployConcourse(creds []byte, detach bool) (newCreds []byt
 		"--var",
 		"atc_eip="+client.metadata.ATCPublicIP.Value,
 		"--var",
-		"web_tls.cert="+client.config.ConcourseCert,
+		"external_tls.cert="+client.config.ConcourseCert,
 		"--var",
-		"web_tls.key="+client.config.ConcourseKey,
+		"external_tls.key="+client.config.ConcourseKey,
 	)
 	newCreds, err1 := ioutil.ReadFile(credsPath)
 	if err == nil {
