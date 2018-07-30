@@ -69,8 +69,8 @@ releases:
   version: latest
 
 stemcells:
-- alias: trusty
-  os: ubuntu-trusty
+- alias: xenial
+  os: ubuntu-xenial
   version: latest
 
 tags:
@@ -84,7 +84,7 @@ instance_groups:
   networks:
   - name: ((web_network_name))
     default: [dns, gateway]
-  stemcell: trusty
+  stemcell: xenial
   vm_type: ((web_vm_type))
   jobs:
   - name: atc
@@ -286,7 +286,7 @@ instance_groups:
   networks:
   - name: ((worker_network_name))
     default: [dns, gateway]
-  stemcell: trusty
+  stemcell: xenial
   vm_type: ((worker_vm_type))
   jobs:
   - name: worker
