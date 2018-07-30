@@ -8,3 +8,4 @@ concourse-up-*.json
 .idea
 /concourse-up
 bindata.go
+.vs/

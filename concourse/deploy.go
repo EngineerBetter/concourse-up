@@ -305,9 +305,9 @@ func (client *Client) deployBosh(config *config.Config, metadata *terraform.Meta
 	var cc struct {
 		CredhubPassword          string `yaml:"credhub_cli_password"`
 		CredhubAdminClientSecret string `yaml:"credhub_admin_client_secret"`
-		WebTLS                   struct {
+		InternalTLS              struct {
 			CA string `yaml:"ca"`
-		} `yaml:"external_tls"`
+		} `yaml:"internal_tls"`
 		UaaClientsAtcToCredhub string `yaml:"uaa_clients_atc_to_credhub"`
 		AtcPassword            string `yaml:"atc_password"`
 		GrafanaPassword        string `yaml:"grafana_password"`
@@ -320,12 +320,11 @@ func (client *Client) deployBosh(config *config.Config, metadata *terraform.Meta
 
 	config.CredhubPassword = cc.CredhubPassword
 	config.CredhubAdminClientSecret = cc.CredhubAdminClientSecret
-	config.CredhubCACert = cc.WebTLS.CA
+	config.CredhubCACert = cc.InternalTLS.CA
 	config.CredhubURL = fmt.Sprintf("https://%s:8844/", metadata.ATCPublicIP.Value)
 	config.CredhubUsername = "credhub-cli"
 	config.ConcourseUsername = "admin"
 	config.ConcoursePassword = cc.AtcPassword
-	config.ConcourseCACert = cc.WebTLS.CA
 	config.GrafanaPassword = cc.GrafanaPassword
 
 	return nil
