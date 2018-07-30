@@ -308,9 +308,7 @@ func (client *Client) deployBosh(config *config.Config, metadata *terraform.Meta
 		InternalTLS              struct {
 			CA string `yaml:"ca"`
 		} `yaml:"internal_tls"`
-		UaaClientsAtcToCredhub string `yaml:"uaa_clients_atc_to_credhub"`
-		AtcPassword            string `yaml:"atc_password"`
-		GrafanaPassword        string `yaml:"grafana_password"`
+		AtcPassword string `yaml:"atc_password"`
 	}
 
 	err = yaml.Unmarshal(boshCredsBytes, &cc)
@@ -325,7 +323,7 @@ func (client *Client) deployBosh(config *config.Config, metadata *terraform.Meta
 	config.CredhubUsername = "credhub-cli"
 	config.ConcourseUsername = "admin"
 	config.ConcoursePassword = cc.AtcPassword
-	config.GrafanaPassword = cc.GrafanaPassword
+	config.GrafanaPassword = cc.AtcPassword
 
 	return nil
 }
