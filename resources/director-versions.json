@@ -20,9 +20,9 @@
     "version": "71"
   },
   "fly": {
-    "windows": "https://github.com/concourse/concourse/releases/download/v3.14.1/fly_windows_amd64",
-    "mac": "https://github.com/concourse/concourse/releases/download/v3.14.1/fly_darwin_amd64",
-    "linux": "https://github.com/concourse/concourse/releases/download/v3.14.1/fly_linux_amd64"
+    "windows": "https://github.com/concourse/concourse/releases/download/v4.0.0/fly_windows_amd64",
+    "mac": "https://github.com/concourse/concourse/releases/download/v4.0.0/fly_darwin_amd64",
+    "linux": "https://github.com/concourse/concourse/releases/download/v4.0.0/fly_linux_amd64"
   },
   "stemcell": {
     "url": "https://bosh.io/d/stemcells/bosh-aws-xen-hvm-ubuntu-trusty-go_agent?v=3586.24",

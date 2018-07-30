@@ -91,8 +91,11 @@ instance_groups:
     release: concourse
     properties:
       allow_self_signed_certificates: true
-      basic_auth_password: ((atc_password))
-      basic_auth_username: admin
+      add_local_users: ['admin:((atc_password))']
+      main_team:
+        auth:
+          local:
+            users: [admin]
       bind_port: 80
       credhub:
         client_id: atc_to_credhub
