@@ -18,7 +18,7 @@ pushd resources
   deployment_influxdb_release_version=$( jq -r '.[] | select(.value.name? == "influxdb") | .value.version' versions.json)
   deployment_riemann_release_url=$(      jq -r '.[] | select(.value.name? == "riemann") | .value.url' versions.json)
   deployment_riemann_release_version=$(  jq -r '.[] | select(.value.name? == "riemann") | .value.version' versions.json)
-  deployment_stemcell_version=$(         jq -r '.[] | select(.path == "/stemcells/alias=trusty/version") | .value' versions.json)
+  deployment_stemcell_version=$(         jq -r '.[] | select(.path == "/stemcells/alias=xenial/version") | .value' versions.json)
   deployment_uaa_release_url=$(          jq -r '.[] | select(.value.name? == "uaa") | .value.url' versions.json)
   deployment_uaa_release_version=$(      jq -r '.[] | select(.value.name? == "uaa") | .value.version' versions.json)
   director_bosh_cpi_release_url=$(       jq -r .cpi.url director-versions.json)
@@ -39,8 +39,8 @@ Auto-generated release
 
 Deploys:
 
-- Concourse VM stemcell bosh-aws-xen-hvm-ubuntu-trusty-go_agent $deployment_stemcell_version
-- Director stemcell     bosh-aws-xen-hvm-ubuntu-trusty-go_agent $director_stemcell_version
+- Concourse VM stemcell bosh-aws-xen-hvm-ubuntu-xenial-go_agent $deployment_stemcell_version
+- Director stemcell     bosh-aws-xen-hvm-ubuntu-xenial-go_agent $director_stemcell_version
 - Concourse [$deployment_concourse_release_version]($deployment_concourse_release_url)
 - Garden RunC [$deployment_garden_release_version]($deployment_garden_release_url)
 - BOSH [$director_bosh_release_version]($director_bosh_release_url)

@@ -30,7 +30,7 @@ func (client *Client) uploadConcourseStemcell() error {
 	}
 	var version string
 	for _, op := range ops {
-		if op.Path != "/stemcells/alias=trusty/version" {
+		if op.Path != "/stemcells/alias=xenial/version" {
 			continue
 		}
 		err := json.Unmarshal(op.Value, &version)
@@ -46,7 +46,7 @@ func (client *Client) uploadConcourseStemcell() error {
 		client.stderr,
 		false,
 		"upload-stemcell",
-		fmt.Sprintf("https://s3.amazonaws.com/bosh-aws-light-stemcells/light-bosh-stemcell-%s-aws-xen-hvm-ubuntu-trusty-go_agent.tgz", version),
+		fmt.Sprintf("https://s3.amazonaws.com/bosh-aws-light-stemcells/light-bosh-stemcell-%s-aws-xen-hvm-ubuntu-xenial-go_agent.tgz", version),
 	)
 }
 
