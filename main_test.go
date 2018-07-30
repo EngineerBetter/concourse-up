@@ -1,11 +1,7 @@
 package main_test
 
 import (
-	"encoding/json"
-	"fmt"
-	"os"
 	"os/exec"
-	"strings"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -18,23 +14,10 @@ var (
 )
 
 var _ = Describe("concourse-up", func() {
-	var ldFlags []string
-
 	BeforeSuite(func() {
-		compilationVars := map[string]string{}
+		var err error
 
-		file, err := os.Open("compilation-vars.json")
-		Expect(err).To(Succeed())
-		defer file.Close()
-
-		err = json.NewDecoder(file).Decode(&compilationVars)
-		Expect(err).To(Succeed())
-
-		ldFlags = []string{
-			fmt.Sprintf("-X main.ConcourseUpVersion=%s", "0.0.0"),
-		}
-
-		cliPath, err = Build("github.com/EngineerBetter/concourse-up", "-ldflags", strings.Join(ldFlags, " "))
+		cliPath, err = Build("github.com/EngineerBetter/concourse-up")
 		Expect(err).ToNot(HaveOccurred(), "Error building source")
 	})
 
