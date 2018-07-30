@@ -5,8 +5,8 @@
     "value": {
       "name": "concourse",
       "version": "3.14.1",
-      "url": "https://s3-eu-west-1.amazonaws.com/concourse-up-compiled-releases/concourse.tgz?versionId=.bEoWoF0U91zrO4AYFTEQtc5fTnw06Jh",
-      "sha1": "e206a9b3097191e9de90a9d92e7bc4efc097aace"
+      "url": "https://s3-eu-west-1.amazonaws.com/concourse-up-compiled-releases/concourse.tgz?versionId=4RQWjZroPy0u2lhwaoxD3uQV9BRswocP",
+      "sha1": "2ba967b04bc3cddf891881080cbc6bd3882a662b"
     }
   },
   {
@@ -15,8 +15,8 @@
     "value": {
       "name": "garden-runc",
       "version": "1.16.0",
-      "url": "https://s3-eu-west-1.amazonaws.com/concourse-up-compiled-releases/garden-runc.tgz?versionId=3sRnFOsdVasHivoRywqV.EbainbFbFa_",
-      "sha1": "06d7c58e74e8138d7715e2fa670c8366bb4c96a1"
+      "url": "https://s3-eu-west-1.amazonaws.com/concourse-up-compiled-releases/garden-runc.tgz?versionId=SxJJXtzRIozCtSK0TkrJNmkJGABrozR6",
+      "sha1": "dd0bb91b3d77b0c3b462653d4a58c23ef722b7f7"
     }
   },
   {
@@ -25,8 +25,8 @@
     "value": {
       "name": "riemann",
       "version": "5",
-      "url": "https://s3-eu-west-1.amazonaws.com/concourse-up-compiled-releases/riemann.tgz?versionId=WuEqz3UT9xhf9z3LUJTICBJ2Zf_Tek8s",
-      "sha1": "0db11fa725e33ca94d727eed9cf1549903bef36c"
+      "url": "https://s3-eu-west-1.amazonaws.com/concourse-up-compiled-releases/riemann.tgz?versionId=.jJMpBRNwjudK.AvxWwoDh0WWLm21a3_",
+      "sha1": "c43fe3d87001db64928493ab5fdebf66b0a84d75"
     }
   },
   {
@@ -35,8 +35,8 @@
     "value": {
       "name": "grafana",
       "version": "13.2.0",
-      "url": "https://s3-eu-west-1.amazonaws.com/concourse-up-compiled-releases/grafana.tgz?versionId=y9P5n0dW5TkmbTaoKylJyMObbqBnWV8Y",
-      "sha1": "dd13b6bff260e551e4f46cbd51da3a7c2d58dccc"
+      "url": "https://s3-eu-west-1.amazonaws.com/concourse-up-compiled-releases/grafana.tgz?versionId=EK81hYZBhMr7BDgAeuFZiEQOtSck_xUJ",
+      "sha1": "2ba2458d8b14d4a2a3879d3a105a97ed1550211e"
     }
   },
   {
@@ -45,8 +45,8 @@
     "value": {
       "name": "influxdb",
       "version": "4",
-      "url": "https://s3-eu-west-1.amazonaws.com/concourse-up-compiled-releases/influxdb.tgz?versionId=iXRSD9MQ96zEiYkkffbHiWBacfSYhyj9",
-      "sha1": "a404a8db3a0bcd863d5fdcf30a6269a1b48befff"
+      "url": "https://s3-eu-west-1.amazonaws.com/concourse-up-compiled-releases/influxdb.tgz?versionId=fbhtUAgnQ2pxAgh.XyGC_wNaqtOczxo3",
+      "sha1": "6e427e4f67f5c8d8fc9783a869e4403fde61480d"
     }
   },
   {
@@ -55,8 +55,8 @@
     "value": {
       "name": "credhub",
       "version": "1.9.5",
-      "url": "https://s3-eu-west-1.amazonaws.com/concourse-up-compiled-releases/credhub.tgz?versionId=CQtoj_H62NhGrK1Jm2ccxji3B_MVZqYX",
-      "sha1": "ae3d530fadeb495179257221559d4d5784ef78f0"
+      "url": "https://s3-eu-west-1.amazonaws.com/concourse-up-compiled-releases/credhub.tgz?versionId=BSQvYY4_1NHgP.YQmky9QXAgp.raHTyg",
+      "sha1": "89de4dd66373d908dae3cf11e58b2c422ecbc8a6"
     }
   },
   {
@@ -65,13 +65,13 @@
     "value": {
       "name": "uaa",
       "version": "60.2",
-      "url": "https://s3-eu-west-1.amazonaws.com/concourse-up-compiled-releases/uaa.tgz?versionId=WQdXlUK9glqkhFVQBQnXDKXG5m0IxPy7",
-      "sha1": "d5c8222801155ad88c331136ee45065f98756f47"
+      "url": "https://s3-eu-west-1.amazonaws.com/concourse-up-compiled-releases/uaa.tgz?versionId=cZt36CDd0GNNSQ9f49oqysjRAUwS7bJG",
+      "sha1": "5ffd588c7c00af455ac17c8a41950ee6be8f7729"
     }
   },
   {
     "type": "replace",
-    "path": "/stemcells/alias=trusty/version",
-    "value": "3586.26"
+    "path": "/stemcells/alias=xenial/version",
+    "value": "97"
   }
 ]
