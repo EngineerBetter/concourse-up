@@ -4,6 +4,9 @@ variables:
 - name: credhub-encryption-password
   type: password
   options: {length: 40}
+- name: atc_encryption_key
+  type: password
+  options: {length: 40}
 - name: uaa-jwt
   type: rsa
   options: {key_length: 4096}
@@ -90,6 +93,7 @@ instance_groups:
   - name: atc
     release: concourse
     properties:
+      encryption_key: ((atc_encryption_key))
       allow_self_signed_certificates: true
       add_local_users: ['admin:((atc_password))']
       main_team:
