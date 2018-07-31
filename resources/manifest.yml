@@ -6,7 +6,7 @@ variables:
   options: {length: 40}
 - name: atc_encryption_key
   type: password
-  options: {length: 40}
+  options: {length: 32}
 - name: uaa-jwt
   type: rsa
   options: {key_length: 4096}
