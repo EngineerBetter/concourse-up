@@ -14,7 +14,7 @@ RUN go get github.com/onsi/ginkgo/ginkgo \
 
 RUN gometalinter --install
 
-RUN wget https://github.com/concourse/concourse/releases/download/v3.14.1/fly_linux_amd64 \
+RUN wget https://github.com/concourse/concourse/releases/download/v4.0.0/fly_linux_amd64 \
     && mv fly_linux_amd64 /usr/bin/fly \
     && chmod +x /usr/bin/fly
 
