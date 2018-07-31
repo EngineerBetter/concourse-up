@@ -91,6 +91,7 @@ func (client *Client) deployConcourse(creds []byte, detach bool) (newCreds []byt
 		"atc_eip":                  client.metadata.ATCPublicIP.Value,
 		"external_tls.certificate": client.config.ConcourseCert,
 		"external_tls.private_key": client.config.ConcourseKey,
+		"atc_encryption_key":       client.config.EncryptionKey,
 	}
 
 	if client.config.ConcoursePassword != "" {
