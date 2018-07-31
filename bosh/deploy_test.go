@@ -208,11 +208,4 @@ X9M1dN0p4Xj/+GYmJTCPbrYm3Jb9BoaE49tJOc789M+VI7lPZ4s=
 		Expect(err).ToNot(HaveOccurred())
 		Expect(actions).To(ContainElement("Saving file to working dir: concourse.yml"))
 	})
-
-	It("Deploys concourse", func() {
-		_, _, err := client.Deploy(nil, nil, false)
-		Expect(err).ToNot(HaveOccurred())
-		expectedCommand := fmt.Sprintf("Running authenticated bosh command: --deployment concourse deploy %[1]s/concourse.yml --vars-store %[1]s/concourse-creds.yml --ops-file %[1]s/versions.json --ops-file %[1]s/cup_compatibility.yml --vars-file %[1]s/grafana_dashboard.yml --var deployment_name=concourse --var domain= --var project=happymeal --var web_network_name=public --var worker_network_name=private --var-file postgres_ca_cert=%[1]s/ca.pem --var postgres_host=rds.aws.com --var postgres_port=5432 --var postgres_role=admin --var postgres_password=s3cret --var postgres_host=rds.aws.com --var web_vm_type=concourse-web- --var worker_vm_type=concourse- --var worker_count=1 --var atc_eip=77.77.77.77 --var-file external_tls.certificate=%[1]s/cert.pem --var-file external_tls.private_key=%[1]s/key.pem (detach: false)", tempDir)
-		Expect(actions).To(ContainElement(expectedCommand))
-	})
 })

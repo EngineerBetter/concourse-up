@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"strconv"
 
 	"github.com/EngineerBetter/concourse-up/db"
 )
@@ -15,9 +16,6 @@ const concourseDeploymentName = "concourse"
 const concourseVersionsFilename = "versions.json"
 const concourseGrafanaFilename = "grafana_dashboard.yml"
 const concourseCompatibilityFilename = "cup_compatibility.yml"
-const postgresCACertFilename = "ca.pem"
-const concourseCertFilename = "cert.pem"
-const concourseKeyFilename = "key.pem"
 
 func (client *Client) uploadConcourseStemcell() error {
 	var ops []struct {
@@ -72,82 +70,69 @@ func (client *Client) deployConcourse(creds []byte, detach bool) (newCreds []byt
 		return
 	}
 
-	postgresCACertPath, err := client.director.SaveFileToWorkingDir(postgresCACertFilename, []byte(db.RDSRootCert))
-	if err != nil {
-		return
-	}
-
 	credsPath, err := client.director.SaveFileToWorkingDir(credsFilename, creds)
 	if err != nil {
 		return
 	}
 
-	concourseCertPath, err := client.director.SaveFileToWorkingDir(concourseCertFilename, []byte(client.config.ConcourseCert))
-	if err != nil {
-		return
+	vmap := map[string]string{
+		"deployment_name":          concourseDeploymentName,
+		"domain":                   client.config.Domain,
+		"project":                  client.config.Project,
+		"web_network_name":         "public",
+		"worker_network_name":      "private",
+		"postgres_host":            client.metadata.BoshDBAddress.Value,
+		"postgres_port":            client.metadata.BoshDBPort.Value,
+		"postgres_role":            client.config.RDSUsername,
+		"postgres_password":        client.config.RDSPassword,
+		"postgres_ca_cert":         db.RDSRootCert,
+		"web_vm_type":              "concourse-web-" + client.config.ConcourseWebSize,
+		"worker_vm_type":           "concourse-" + client.config.ConcourseWorkerSize,
+		"worker_count":             strconv.Itoa(client.config.ConcourseWorkerCount),
+		"atc_eip":                  client.metadata.ATCPublicIP.Value,
+		"external_tls.certificate": client.config.ConcourseCert,
+		"external_tls.private_key": client.config.ConcourseKey,
 	}
 
-	concourseKeyPath, err := client.director.SaveFileToWorkingDir(concourseKeyFilename, []byte(client.config.ConcourseKey))
-	if err != nil {
-		return
+	if client.config.ConcoursePassword != "" {
+		vmap["atc_password"] = client.config.ConcoursePassword
 	}
+
+	vs := vars(vmap)
 
 	err = client.director.RunAuthenticatedCommand(
 		client.stdout,
 		client.stderr,
 		detach,
-		"--deployment",
-		concourseDeploymentName,
-		"deploy",
-		concourseManifestPath,
-		"--vars-store",
-		credsPath,
-		"--ops-file",
-		concourseVersionsPath,
-		"--ops-file",
-		concourseCompatibilityPath,
-		"--vars-file",
-		concourseGrafanaPath,
-		"--var",
-		"deployment_name="+concourseDeploymentName,
-		"--var",
-		"domain="+client.config.Domain,
-		"--var",
-		"project="+client.config.Project,
-		"--var",
-		"web_network_name=public",
-		"--var",
-		"worker_network_name=private",
-		"--var-file",
-		"postgres_ca_cert="+postgresCACertPath,
-		"--var",
-		"postgres_host="+client.metadata.BoshDBAddress.Value,
-		"--var",
-		"postgres_port="+client.metadata.BoshDBPort.Value,
-		"--var",
-		"postgres_role="+client.config.RDSUsername,
-		"--var",
-		"postgres_password="+client.config.RDSPassword,
-		"--var",
-		"postgres_host="+client.metadata.BoshDBAddress.Value,
-		"--var",
-		"web_vm_type=concourse-web-"+client.config.ConcourseWebSize,
-		"--var",
-		"worker_vm_type=concourse-"+client.config.ConcourseWorkerSize,
-		"--var",
-		fmt.Sprintf("worker_count=%d", client.config.ConcourseWorkerCount),
-		"--var",
-		"atc_eip="+client.metadata.ATCPublicIP.Value,
-		"--var-file",
-		"external_tls.certificate="+concourseCertPath,
-		"--var-file",
-		"external_tls.private_key="+concourseKeyPath,
+		append([]string{
+			"--deployment",
+			concourseDeploymentName,
+			"deploy",
+			concourseManifestPath,
+			"--vars-store",
+			credsPath,
+			"--ops-file",
+			concourseVersionsPath,
+			"--ops-file",
+			concourseCompatibilityPath,
+			"--vars-file",
+			concourseGrafanaPath,
+		},
+			vs...)...,
 	)
 	newCreds, err1 := ioutil.ReadFile(credsPath)
 	if err == nil {
 		err = err1
 	}
 	return
+}
+
+func vars(vars map[string]string) []string {
+	var x []string
+	for k, v := range vars {
+		x = append(x, "--var", fmt.Sprintf("%s=%q", k, v))
+	}
+	return x
 }
 
 //go:generate go-bindata -pkg $GOPACKAGE  assets/... ../resources/...
