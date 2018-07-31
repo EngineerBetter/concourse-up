@@ -129,11 +129,11 @@ func (client *Client) deployConcourse(creds []byte, detach bool) (newCreds []byt
 func vars(vars map[string]interface{}) []string {
 	var x []string
 	for k, v := range vars {
-		switch v_ := v.(type) {
+		switch v.(type) {
 		case string:
-			x = append(x, "--var", fmt.Sprintf("%s=%q", k, v_))
+			x = append(x, "--var", fmt.Sprintf("%s=%q", k, v))
 		case int:
-			x = append(x, "--var", fmt.Sprintf("%s=%d", k, v_))
+			x = append(x, "--var", fmt.Sprintf("%s=%d", k, v))
 		default:
 			panic("unsupported type")
 		}
