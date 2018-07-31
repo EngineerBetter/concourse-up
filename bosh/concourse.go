@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
-	"strconv"
 
 	"github.com/EngineerBetter/concourse-up/db"
 )
@@ -75,7 +74,7 @@ func (client *Client) deployConcourse(creds []byte, detach bool) (newCreds []byt
 		return
 	}
 
-	vmap := map[string]string{
+	vmap := map[string]interface{}{
 		"deployment_name":          concourseDeploymentName,
 		"domain":                   client.config.Domain,
 		"project":                  client.config.Project,
@@ -88,7 +87,7 @@ func (client *Client) deployConcourse(creds []byte, detach bool) (newCreds []byt
 		"postgres_ca_cert":         db.RDSRootCert,
 		"web_vm_type":              "concourse-web-" + client.config.ConcourseWebSize,
 		"worker_vm_type":           "concourse-" + client.config.ConcourseWorkerSize,
-		"worker_count":             strconv.Itoa(client.config.ConcourseWorkerCount),
+		"worker_count":             client.config.ConcourseWorkerCount,
 		"atc_eip":                  client.metadata.ATCPublicIP.Value,
 		"external_tls.certificate": client.config.ConcourseCert,
 		"external_tls.private_key": client.config.ConcourseKey,
@@ -127,10 +126,17 @@ func (client *Client) deployConcourse(creds []byte, detach bool) (newCreds []byt
 	return
 }
 
-func vars(vars map[string]string) []string {
+func vars(vars map[string]interface{}) []string {
 	var x []string
 	for k, v := range vars {
-		x = append(x, "--var", fmt.Sprintf("%s=%q", k, v))
+		switch v_ := v.(type) {
+		case string:
+			x = append(x, "--var", fmt.Sprintf("%s=%q", k, v_))
+		case int:
+			x = append(x, "--var", fmt.Sprintf("%s=%d", k, v_))
+		default:
+			panic("unsupported type")
+		}
 	}
 	return x
 }
