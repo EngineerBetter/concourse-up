@@ -3,7 +3,6 @@ groups:
 - name: Main
   jobs:
   - set-pipeline
-  - build-image
   - unit-tests
   - get-versions
   - build
@@ -39,13 +38,6 @@ resources:
       username: admin
       password: ((atc_main_password))
 
-- name: image-source
-  type: git
-  source:
-    uri: https://github.com/EngineerBetter/concourse-up.git
-    branch: master
-    paths: [ci/docker/*]
-
 - name: concourse-up
   type: git
   source:
@@ -65,7 +57,7 @@ resources:
 - name: image
   type: docker-image
   source:
-    repository: engineerbetter/cup-image
+    repository: engineerbetter/pcf-ops
     username: ((dockerhub_user))
     password: ((dockerhub_password))
 
@@ -137,15 +129,6 @@ resources:
   source: {interval: 24h}
 
 jobs:
-- name: build-image
-  public: false
-  plan:
-  - get: image-source
-    trigger: true
-  - put: image
-    params:
-      build: image-source/ci/docker
-
 - name: set-pipeline
   plan:
   - get: concourse-up
@@ -161,7 +144,6 @@ jobs:
   plan:
   - aggregate:
     - get: image
-      passed: [build-image]
     - get: concourse-up
       trigger: true
       passed: [set-pipeline]
@@ -193,7 +175,6 @@ jobs:
   plan:
   - aggregate:
     - get: image
-      passed: [build-image]
     - get: concourse-up
     - get: bosh-deployment
       trigger: true
