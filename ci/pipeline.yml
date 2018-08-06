@@ -54,7 +54,7 @@ resources:
     uri: git@github.com:EngineerBetter/concourse-up-manifest.git
     private_key: ((github_private_key))
 
-- name: image
+- name: pcf-ops
   type: docker-image
   source:
     repository: engineerbetter/pcf-ops
@@ -143,7 +143,7 @@ jobs:
 - name: unit-tests
   plan:
   - aggregate:
-    - get: image
+    - get: pcf-ops
     - get: concourse-up
       trigger: true
       passed: [set-pipeline]
@@ -174,7 +174,7 @@ jobs:
   serial: true
   plan:
   - aggregate:
-    - get: image
+    - get: pcf-ops
     - get: concourse-up
     - get: bosh-deployment
       trigger: true
@@ -193,7 +193,7 @@ jobs:
 - name: build
   plan:
   - aggregate:
-    - get: image
+    - get: pcf-ops
       passed: [unit-tests]
     - get: concourse-up
       trigger: true
@@ -254,7 +254,7 @@ jobs:
     - get: concourse-up
       trigger: true
       passed: [build]
-    - get: image
+    - get: pcf-ops
       passed: [build]
     - get: release
       params:
@@ -339,7 +339,7 @@ jobs:
   serial: true
   plan:
   - aggregate:
-    - get: image
+    - get: pcf-ops
       passed: [system-test]
     - get: concourse-up
       passed: [system-test]
@@ -397,7 +397,7 @@ jobs:
     - get: version
       params:
         bump: patch
-    - get: image
+    - get: pcf-ops
       passed: [system-test]
     - get: concourse-up
       passed: [system-test]
@@ -433,7 +433,7 @@ jobs:
     - get: version
       params:
         bump: minor
-    - get: image
+    - get: pcf-ops
       passed: [system-test]
     - get: concourse-up
       passed: [system-test]
@@ -469,7 +469,7 @@ jobs:
     - get: version
       params:
         bump: major
-    - get: image
+    - get: pcf-ops
       passed: [system-test]
     - get: concourse-up
       passed: [system-test]
