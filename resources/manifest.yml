@@ -281,8 +281,9 @@ instance_groups:
         encryption:
           keys:
           - provider_name: int
-            encryption_password: ((credhub-encryption-password))
             active: true
+            key_properties:
+              encryption_password: ((credhub-encryption-password))
           providers:
           - name: int
             type: internal
