@@ -148,7 +148,7 @@ jobs:
       trigger: true
       passed: [set-pipeline]
   - task: lint
-    image: image
+    image: pcf-ops
     file: concourse-up/ci/tasks/lint.yml
     on_failure:
       put: slack-alert
@@ -157,7 +157,7 @@ jobs:
         text: |
           <!channel> Concourse Up lint failure!
   - task: unit-test
-    image: image
+    image: pcf-ops
     file: concourse-up/ci/tasks/unit-test.yml
     params:
       AWS_ACCESS_KEY_ID: ((concourse_up_test_access_key_id))
@@ -183,7 +183,7 @@ jobs:
   - task: get-versions
     file: concourse-up/ci/tasks/get-versions/task.yml
   - task: copy-files
-    image: image
+    image: pcf-ops
     file: concourse-up/ci/tasks/copy-files.yml
   - put: concourse-up
     params:
@@ -202,7 +202,7 @@ jobs:
   - aggregate:
     - do:
       - task: build-linux
-        image: image
+        image: pcf-ops
         params:
           GOOS: linux
           GOARCH: amd64
@@ -213,7 +213,7 @@ jobs:
           file: build-linux/concourse-up-linux-amd64
     - do:
       - task: build-darwin
-        image: image
+        image: pcf-ops
         params:
           GOOS: darwin
           GOARCH: amd64
@@ -224,7 +224,7 @@ jobs:
           file: build-darwin/concourse-up-darwin-amd64
     - do:
       - task: build-windows
-        image: image
+        image: pcf-ops
         params:
           GOOS: windows
           GOARCH: amd64
@@ -349,25 +349,25 @@ jobs:
         bump: patch
   - aggregate: &build_binaries
     - task: build-linux
-      image: image
+      image: pcf-ops
       params:
         GOARCH: amd64
         OUTPUT_FILE: concourse-up-linux-amd64
       file: concourse-up/ci/tasks/build_linux_from_version_file.yml
     - task: build-darwin
-      image: image
+      image: pcf-ops
       params:
         GOARCH: amd64
         OUTPUT_FILE: concourse-up-darwin-amd64
       file: concourse-up/ci/tasks/build_darwin_from_version_file.yml
     - task: build-windows
-      image: image
+      image: pcf-ops
       params:
         GOARCH: amd64
         OUTPUT_FILE: concourse-up-windows-amd64.exe
       file: concourse-up/ci/tasks/build_windows_from_version_file.yml
   - task: write-release-vars
-    image: image
+    image: pcf-ops
     file: concourse-up/ci/tasks/write-release-vars.yml
   - put: release
     params:
@@ -403,7 +403,7 @@ jobs:
       passed: [system-test]
   - aggregate: *build_binaries
   - task: write-release-vars
-    image: image
+    image: pcf-ops
     file: concourse-up/ci/tasks/write-release-vars.yml
   - put: release-drafts
     params:
@@ -439,7 +439,7 @@ jobs:
       passed: [system-test]
   - aggregate: *build_binaries
   - task: write-release-vars
-    image: image
+    image: pcf-ops
     file: concourse-up/ci/tasks/write-release-vars.yml
   - put: release-drafts
     params:
@@ -475,7 +475,7 @@ jobs:
       passed: [system-test]
   - aggregate: *build_binaries
   - task: write-release-vars
-    image: image
+    image: pcf-ops
     file: concourse-up/ci/tasks/write-release-vars.yml
   - put: release-drafts
     params:
