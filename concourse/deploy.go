@@ -108,6 +108,7 @@ func (client *Client) updateBoshAndPipeline(config *config.Config, metadata *ter
 	// When updating we need to deploy the BOSH as the final step in order to
 	// Detach from the update, so the update job can exit
 	config.ConcourseUsername = "admin"
+	var err error
 	config.ConcoursePassword, err = client.getMeMyPassword()
 	if err != nil {
 		return err
