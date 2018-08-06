@@ -113,7 +113,6 @@ username=$(echo "$config" | jq -r '.config.concourse_username')
 password=$(echo "$config" | jq -r '.config.concourse_password')
 echo "$config" | jq -r '.config.concourse_ca_cert' > generated-ca-cert.pem
 
-fly logout --all
 
 fly --target system-test-custom-domain-with-cert login \
   --ca-cert out/$deployment.crt \
