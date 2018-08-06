@@ -35,7 +35,7 @@ sleep 300
 
 echo "UPDATE TO NEW VERSION"
 
-rm -f $HOME/.flyrc
+rm -f "$HOME/.flyrc"
 
 ./cup-new deploy $deployment
 
