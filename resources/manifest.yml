@@ -264,6 +264,11 @@ instance_groups:
     properties:
       credhub:
         tls: ((internal_tls))
+        authorization:
+          permissions:
+            - path: /*
+              actors: ["uaa-client:credhub_cli","uaa-client:credhub_admin"]
+              operations: [read,write,delete,read_acl,write_acl]
         authentication:
           uaa:
             url: https://((domain)):8443
