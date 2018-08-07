@@ -2,7 +2,7 @@
   {
     "type": "replace",
     "path": "/stemcells/alias=xenial/version",
-    "value": "97"
+    "value": "97.3"
   },
   {
     "type": "replace",
@@ -10,11 +10,11 @@
     "value": {
       "name": "concourse",
       "version": "4.0.0",
-      "url": "https://s3-eu-west-1.amazonaws.com/concourse-up-compiled-releases/concourse.tgz?versionId=qoqYk7T6V1nSF29xEGGPph10Lp3Nthku",
-      "sha1": "5ffa0e0ffae149c314877629255a6c9df86912db",
+      "url": "https://s3-eu-west-1.amazonaws.com/concourse-up-compiled-releases/concourse.tgz?versionId=0TKycZZrR1S7S8M2l_yBGB2IJot54Y.V",
+      "sha1": "42b3e30c590bc3a0f8df321989b069087adf1f1a",
       "stemcell": {
         "os": "ubuntu-xenial",
-        "version": "97"
+        "version": "97.3"
       }
     }
   },
@@ -24,11 +24,11 @@
     "value": {
       "name": "garden-runc",
       "version": "1.16.1",
-      "url": "https://s3-eu-west-1.amazonaws.com/concourse-up-compiled-releases/garden-runc.tgz?versionId=86KAQ2L8dVSzJcKQENxA1f5gAK.oz16L",
-      "sha1": "2ca2736c660697b0382e6d14dcf8fd7682f42120",
+      "url": "https://s3-eu-west-1.amazonaws.com/concourse-up-compiled-releases/garden-runc.tgz?versionId=oWbW5fiYcPBirD9foV_50T2mR74USpTa",
+      "sha1": "f2ff8ae7d7541b7fadfaad89fa43f042c1df20a4",
       "stemcell": {
         "os": "ubuntu-xenial",
-        "version": "97"
+        "version": "97.3"
       }
     }
   },
@@ -38,11 +38,11 @@
     "value": {
       "name": "riemann",
       "version": "5",
-      "url": "https://s3-eu-west-1.amazonaws.com/concourse-up-compiled-releases/riemann.tgz?versionId=qqZ.8B.QNvmWpKz9_8TXzbEJ.TfoviIk",
-      "sha1": "1b9748cb25fa62ba5563c5574aae2a9bebeb25f4",
+      "url": "https://s3-eu-west-1.amazonaws.com/concourse-up-compiled-releases/riemann.tgz?versionId=j0jATxhQO5OMaIurMWBbQ_xLoUmAUrTy",
+      "sha1": "918f07f604c78caabad23ece1606282ba36c3d97",
       "stemcell": {
         "os": "ubuntu-xenial",
-        "version": "97"
+        "version": "97.3"
       }
     }
   },
@@ -52,11 +52,11 @@
     "value": {
       "name": "grafana",
       "version": "13.2.0",
-      "url": "https://s3-eu-west-1.amazonaws.com/concourse-up-compiled-releases/grafana.tgz?versionId=4HnKiCkRkEPoI7yPOYr0tcTZPrSsB1_c",
-      "sha1": "3d9c5a9f90697a28f40198b606abf055a55cbef3",
+      "url": "https://s3-eu-west-1.amazonaws.com/concourse-up-compiled-releases/grafana.tgz?versionId=iPw6xlf9wjQmfYsMfLpIfesWIXHb5b.g",
+      "sha1": "d509e5e281de3a038ba667511ec33315a561e514",
       "stemcell": {
         "os": "ubuntu-xenial",
-        "version": "97"
+        "version": "97.3"
       }
     }
   },
@@ -66,11 +66,11 @@
     "value": {
       "name": "influxdb",
       "version": "4",
-      "url": "https://s3-eu-west-1.amazonaws.com/concourse-up-compiled-releases/influxdb.tgz?versionId=pft2uLyMx3Xcm_2pr3CMJDAz..Eu82Vg",
-      "sha1": "e8293189a832cfcd2e5e9f8f781fce0477384865",
+      "url": "https://s3-eu-west-1.amazonaws.com/concourse-up-compiled-releases/influxdb.tgz?versionId=dGA3faNl.bZGxe4AgLOEHS90PehOdrp_",
+      "sha1": "7ebe5cd6ea2691591d3780a1a77209995b77d49f",
       "stemcell": {
         "os": "ubuntu-xenial",
-        "version": "97"
+        "version": "97.3"
       }
     }
   },
@@ -79,12 +79,12 @@
     "path": "/releases/name=credhub",
     "value": {
       "name": "credhub",
-      "version": "1.9.5",
-      "url": "https://s3-eu-west-1.amazonaws.com/concourse-up-compiled-releases/credhub.tgz?versionId=5IHwFPFaJMej57BwawTJiQdu1ejnH43O",
-      "sha1": "96391d23dd27f0eebb95cdc308eb01a42c91493a",
+      "version": "2.0.0",
+      "url": "https://s3-eu-west-1.amazonaws.com/concourse-up-compiled-releases/credhub.tgz?versionId=4x2_cJFMBQEQ.zNBodhv9f19JKsiFQxc",
+      "sha1": "9e9bde53d9e3c0a3689aa83601f2f3af82e0c620",
       "stemcell": {
         "os": "ubuntu-xenial",
-        "version": "97"
+        "version": "97.3"
       }
     }
   },
@@ -94,11 +94,11 @@
     "value": {
       "name": "uaa",
       "version": "60.2",
-      "url": "https://s3-eu-west-1.amazonaws.com/concourse-up-compiled-releases/uaa.tgz?versionId=lOF6DwLB30UkV8N2JC4hfqdsH2vCnLa2",
-      "sha1": "b2256f75ce468622dde5cd9e67888fdb438a6f3f",
+      "url": "https://s3-eu-west-1.amazonaws.com/concourse-up-compiled-releases/uaa.tgz?versionId=yXHrx_mS4.TuQEeH8aWExohdwvLuTWOK",
+      "sha1": "71c935a605c4b523202a12b2fa5b1c2f48f9c0ad",
       "stemcell": {
         "os": "ubuntu-xenial",
-        "version": "97"
+        "version": "97.3"
       }
     }
   }
