@@ -269,6 +269,9 @@ instance_groups:
             - path: /*
               actors: ["uaa-client:credhub_cli","uaa-client:credhub_admin"]
               operations: [read,write,delete,read_acl,write_acl]
+            - path: /concourse/*
+              actors: ["uaa-client:atc_to_credhub"]
+              operations: [read,read_acl]
         authentication:
           uaa:
             url: https://((domain)):8443
