@@ -85,34 +85,10 @@ func (client *Client) deployBoshAndPipeline(config *config.Config, metadata *ter
 	return writeDeploySuccessMessage(config, metadata, client.stdout)
 }
 
-func (client *Client) getMeMyPassword() (string, error) {
-	boshCredsBytes, err := loadDirectorCreds(client.configClient)
-	if err != nil {
-		return "", nil
-	}
-	var cc struct {
-		AtcPassword string `yaml:"atc_password"`
-	}
-
-	err = yaml.Unmarshal(boshCredsBytes, &cc)
-	if err != nil {
-		return "", err
-	}
-
-	return cc.AtcPassword, nil
-
-}
-
 func (client *Client) updateBoshAndPipeline(config *config.Config, metadata *terraform.Metadata) error {
 	// If concourse is already running this is an update rather than a fresh deploy
 	// When updating we need to deploy the BOSH as the final step in order to
 	// Detach from the update, so the update job can exit
-	config.ConcourseUsername = "admin"
-	var err error
-	config.ConcoursePassword, err = client.getMeMyPassword()
-	if err != nil {
-		return err
-	}
 	flyClient, err := client.flyClientFactory(fly.Credentials{
 		Target:   config.Deployment,
 		API:      fmt.Sprintf("https://%s", config.Domain),
