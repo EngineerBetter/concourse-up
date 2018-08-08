@@ -91,13 +91,14 @@ certstrap request-cert \
 
 certstrap sign "$custom_domain" --CA "$deployment"
 
-./cup deploy $deployment \
-  --domain $custom_domain \
-  --tls-cert "$(cat out/$custom_domain.crt)" \
-  --tls-key "$(cat out/$custom_domain.key)" \
-  --allow-ips "$(dig +short myip.opendns.com @resolver1.opendns.com)" \
-  --workers 2 \
-  --worker-size large
+./cup deploy $deployment
+# ./cup deploy $deployment \
+#   --domain $custom_domain \
+#   --tls-cert "$(cat out/$custom_domain.crt)" \
+#   --tls-key "$(cat out/$custom_domain.key)" \
+#   --allow-ips "$(dig +short myip.opendns.com @resolver1.opendns.com)" \
+#   --workers 2 \
+#   --worker-size large
 
 sleep 60
 
@@ -113,15 +114,18 @@ username=$(echo "$config" | jq -r '.config.concourse_username')
 password=$(echo "$config" | jq -r '.config.concourse_password')
 echo "$config" | jq -r '.config.concourse_ca_cert' > generated-ca-cert.pem
 
-rm -f "$HOME/.flyrc"
-
 fly --target system-test-custom-domain-with-cert login \
-  --ca-cert out/$deployment.crt \
-  --concourse-url https://$custom_domain \
+  --concourse-url https://$domain \
   --username "$username" \
   --password "$password"
+# fly --target system-test-custom-domain-with-cert login \
+#   --ca-cert out/$deployment.crt \
+#   --concourse-url https://$custom_domain \
+#   --username "$username" \
+#   --password "$password"
 
-curl -k "https://$custom_domain:3000"
+curl -k "https://$domain:3000"
+# curl -k "https://$custom_domain:3000"
 
 fly --target system-test-custom-domain-with-cert sync
 
