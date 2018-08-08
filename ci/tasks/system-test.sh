@@ -115,7 +115,7 @@ password=$(echo "$config" | jq -r '.config.concourse_password')
 echo "$config" | jq -r '.config.concourse_ca_cert' > generated-ca-cert.pem
 
 fly --target system-test-custom-domain-with-cert login \
-  --concourse-url "https://$domain" \
+  --concourse-url https://$domain \
   --username "$username" \
   --password "$password"
 # fly --target system-test-custom-domain-with-cert login \
