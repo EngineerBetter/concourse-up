@@ -10,8 +10,8 @@
     "value": {
       "name": "concourse",
       "version": "4.0.0",
-      "url": "https://s3-eu-west-1.amazonaws.com/concourse-up-compiled-releases/concourse.tgz?versionId=SgfwH7tvWCyosk0EBDKFHGXu8ewapdxa",
-      "sha1": "7cdf3fbe1d5a75ac40f1036ae634df217c24fcbd",
+      "url": "https://s3-eu-west-1.amazonaws.com/concourse-up-compiled-releases/concourse.tgz?versionId=F_SQHWAcofrQou5Dd0pSWlbt_taatKLZ",
+      "sha1": "780072d50a1caec6445a459863497693cf29c619",
       "stemcell": {
         "os": "ubuntu-xenial",
         "version": "97.3"
@@ -24,8 +24,8 @@
     "value": {
       "name": "garden-runc",
       "version": "1.16.2",
-      "url": "https://s3-eu-west-1.amazonaws.com/concourse-up-compiled-releases/garden-runc.tgz?versionId=_lzgBeof7XLFn_hcQ5ZOyOy3.ylqiT4g",
-      "sha1": "f31502a1ec1b46c43111b0cd06bd4f1d2a4bf1ef",
+      "url": "https://s3-eu-west-1.amazonaws.com/concourse-up-compiled-releases/garden-runc.tgz?versionId=jm4uxnxBcwBMCAkiafUfnQ3nXR5gF6bW",
+      "sha1": "39c155f4b44106cfc48e1055a53807171c624d93",
       "stemcell": {
         "os": "ubuntu-xenial",
         "version": "97.3"
@@ -38,8 +38,8 @@
     "value": {
       "name": "riemann",
       "version": "5",
-      "url": "https://s3-eu-west-1.amazonaws.com/concourse-up-compiled-releases/riemann.tgz?versionId=2_h0lnh7XnlTqAGijIEo7vNCPdfAG8b9",
-      "sha1": "e6a7cf8d5060da9841a623b540c7875375fbe629",
+      "url": "https://s3-eu-west-1.amazonaws.com/concourse-up-compiled-releases/riemann.tgz?versionId=SGVm4qsyJF1egQPXuw.A_n2zRkUcTPEq",
+      "sha1": "2104e1ca7e482eee126915bf57394a67349ff3f2",
       "stemcell": {
         "os": "ubuntu-xenial",
         "version": "97.3"
@@ -52,8 +52,8 @@
     "value": {
       "name": "grafana",
       "version": "13.2.0",
-      "url": "https://s3-eu-west-1.amazonaws.com/concourse-up-compiled-releases/grafana.tgz?versionId=SbUrNr7XJMIO.ib.Yj5SRLy9mYkCiC02",
-      "sha1": "93ded3eacd24daa3cf52db9f428a65453dd86bde",
+      "url": "https://s3-eu-west-1.amazonaws.com/concourse-up-compiled-releases/grafana.tgz?versionId=v3hs_kn0jhpoctza.XOj1UPMkzjDKfHU",
+      "sha1": "84174e211cc4cfbf8f86374939a7c46d1101e902",
       "stemcell": {
         "os": "ubuntu-xenial",
         "version": "97.3"
@@ -66,8 +66,8 @@
     "value": {
       "name": "influxdb",
       "version": "4",
-      "url": "https://s3-eu-west-1.amazonaws.com/concourse-up-compiled-releases/influxdb.tgz?versionId=jp0Lj4tLHUkaROBAoAk3kjRK2PAFdcq9",
-      "sha1": "f56a845eac54c2bfe553e8b28af9e7f4abe93ad7",
+      "url": "https://s3-eu-west-1.amazonaws.com/concourse-up-compiled-releases/influxdb.tgz?versionId=iTkdgLGnIL78NlWvH5G4SfJMKQSy5C4C",
+      "sha1": "c39cbf59d57c0aa78086eb4307ebafbfa1a56d1d",
       "stemcell": {
         "os": "ubuntu-xenial",
         "version": "97.3"
@@ -79,9 +79,9 @@
     "path": "/releases/name=credhub",
     "value": {
       "name": "credhub",
-      "version": "2.0.0",
-      "url": "https://s3-eu-west-1.amazonaws.com/concourse-up-compiled-releases/credhub.tgz?versionId=N6YlskHKI0Y9caGvCHV6uAZZzNXjVecg",
-      "sha1": "4a8d6e45c2136336912d5c28d8c0d64dbdadfeba",
+      "version": "2.0.1",
+      "url": "https://s3-eu-west-1.amazonaws.com/concourse-up-compiled-releases/credhub.tgz?versionId=31PPGnQmLMbyhjDQYhgEupAeeLxDEFbl",
+      "sha1": "62d4b700f7eaba041f7faa390084d93676cd9ac5",
       "stemcell": {
         "os": "ubuntu-xenial",
         "version": "97.3"
@@ -94,8 +94,8 @@
     "value": {
       "name": "uaa",
       "version": "60.2",
-      "url": "https://s3-eu-west-1.amazonaws.com/concourse-up-compiled-releases/uaa.tgz?versionId=dDWjA_EsW90YLqhyLNGQz1rPrdfBoOOk",
-      "sha1": "6a975a937b293cb7f4acb31311d4b0b9cdf6baf0",
+      "url": "https://s3-eu-west-1.amazonaws.com/concourse-up-compiled-releases/uaa.tgz?versionId=.NIDLB.k6quVEjonCfffNsih8I96ZLcO",
+      "sha1": "cd1a5ddc61b081b04356a1c004cb3568f40cbec3",
       "stemcell": {
         "os": "ubuntu-xenial",
         "version": "97.3"
