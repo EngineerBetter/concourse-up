@@ -2,7 +2,7 @@
 groups:
 - name: Main
   jobs:
-  - set-pipeline
+  # - set-pipeline
   - unit-tests
   - get-versions
   - build
@@ -16,10 +16,10 @@ groups:
   - cleanup
 
 resource_types:
-- name: pipeline
-  type: docker-image
-  source:
-    repository: concourse/concourse-pipeline-resource
+# - name: pipeline
+#   type: docker-image
+#   source:
+#     repository: concourse/concourse-pipeline-resource
 
 - name: slack-notification
   type: docker-image
@@ -28,15 +28,15 @@ resource_types:
     tag: latest
 
 resources:
-- name: this-pipeline
-  type: pipeline
-  source:
-    target: https://ci.engineerbetter.com
-    insecure: "true"
-    teams:
-    - name: main
-      username: admin
-      password: ((atc_main_password))
+# - name: this-pipeline
+#   type: pipeline
+#   source:
+#     target: https://ci.engineerbetter.com
+#     insecure: "true"
+#     teams:
+#     - name: main
+#       username: admin
+#       password: ((atc_main_password))
 
 - name: concourse-up
   type: git
@@ -129,16 +129,16 @@ resources:
   source: {interval: 24h}
 
 jobs:
-- name: set-pipeline
-  plan:
-  - get: concourse-up
-    trigger: true
-  - put: this-pipeline
-    params:
-      pipelines:
-      - name: concourse-up
-        team: main
-        config_file: concourse-up/ci/pipeline.yml
+# - name: set-pipeline
+#   plan:
+#   - get: concourse-up
+#     trigger: true
+#   - put: this-pipeline
+#     params:
+#       pipelines:
+#       - name: concourse-up
+#         team: main
+#         config_file: concourse-up/ci/pipeline.yml
 
 - name: unit-tests
   plan:
@@ -146,7 +146,7 @@ jobs:
     - get: pcf-ops
     - get: concourse-up
       trigger: true
-      passed: [set-pipeline]
+      # passed: [set-pipeline]
   - task: lint
     image: pcf-ops
     file: concourse-up/ci/tasks/lint.yml
