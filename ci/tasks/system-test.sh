@@ -91,8 +91,6 @@ certstrap request-cert \
 
 certstrap sign "$custom_domain" --CA "$deployment"
 
-rm -f "$HOME/.flyrc"
-
 ./cup deploy $deployment \
   --domain $custom_domain \
   --tls-cert "$(cat out/$custom_domain.crt)" \
