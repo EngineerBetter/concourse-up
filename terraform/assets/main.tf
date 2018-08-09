@@ -449,14 +449,14 @@ resource "aws_security_group" "atc" {
     to_port     = 80
     protocol    = "tcp"
     security_groups = ["${aws_security_group.vms.id}", "${aws_security_group.director.id}"]
-    cidr_blocks = ["${aws_eip.nat.public_ip}/32", <% .AllowIPs %>]
+    cidr_blocks = ["${aws_eip.nat.public_ip}/32", "${aws_eip.atc.public_ip}/32", <% .AllowIPs %>]
   }
 
   ingress {
     from_port   = 443
     to_port     = 443
     protocol    = "tcp"
-    cidr_blocks = ["${aws_eip.nat.public_ip}/32", <% .AllowIPs %>]
+    cidr_blocks = ["${aws_eip.nat.public_ip}/32", "${aws_eip.atc.public_ip}/32", <% .AllowIPs %>]
   }
 
   ingress {
