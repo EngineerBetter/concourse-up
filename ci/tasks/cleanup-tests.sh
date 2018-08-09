@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -e
+set -ex
 [ "$VERBOSE" ] && { set -x; export BOSH_LOG_LEVEL=debug; export BOSH_LOG_PATH=bosh.log; }
 
 cp binary-linux/concourse-up-linux-amd64 ./cup
