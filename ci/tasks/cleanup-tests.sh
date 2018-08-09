@@ -6,19 +6,27 @@ set -ex
 cp binary-linux/concourse-up-linux-amd64 ./cup
 chmod +x ./cup
 
+delete_bucket() {
+  # attempt to delete the bucket
+  # eventual consistency means it may already be gone
+  # so continue regardless of result
+  aws rb --force "s3://$1" 2>/dev/null || true
+}
+
 aws s3 ls \
 | grep -E 'concourse-up-systest' \
 | awk '{print $3}' \
 > buckets
 
 while read -r line; do
-  if aws s3 ls "s3://$line" | grep -q terraform.tfstate; then
-    echo "$line" >> non-empty
+  if aws s3 ls "s3://$line" 2>/dev/null; then
+    if [[ "$(aws s3 ls "s3://$line")" =~ terraform.tfstate ]]; then
+      echo "$line" >> non-empty
+    else
+      delete_bucket "$line"
+    fi
   else
-    # attempt to delete the bucket
-    # eventual consistency means it may already be gone
-    # so continue regardless of result
-    aws rb --force "s3://$line" 2>/dev/null || true
+    delete_bucket "$line"
   fi
 done < buckets
 
