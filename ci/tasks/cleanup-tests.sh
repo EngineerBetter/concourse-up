@@ -7,6 +7,29 @@ cp binary-linux/concourse-up-linux-amd64 ./cup
 chmod +x ./cup
 
 aws s3 ls \
-| awk -F- '/concourse-up-systest/{print "yes yes | ./cup destroy --region "$7"-"$8"-"$9" "$5"-"$6}' \
-| sort -u \
+| grep -E 'concourse-up-systest' \
+| awk '{print $3}'\
+> buckets
+
+while read -r line; do
+  if [ ! "$(aws s3 ls "s3://$line")" ]; then
+    aws rb "s3://$line"
+  else
+    echo "$line" >> non-empty
+  fi
+done < buckets
+
+while read -r line; do
+  if echo "$line" | grep -qE '^concourse-up-systest-\d+'; then
+    echo "$line" | awk -F- '{print "yes yes | ./cup destroy --region "$5"-"$6"-"$7" "$3"-"$4}' >> cup-delete
+  elif echo "$line" | grep -qE '^concourse-up-systest-[a-zA-Z]+-\d+'; then
+    echo "$line" | awk -F- '{print "yes yes | ./cup destroy --region "$6"-"$7"-"$8" "$3"-"$4"-"$5}' >> cup-delete
+  else
+    printf "Unexpected bucket format %s -- skipping\\n" "$line"
+  fi
+done < non-empty
+
+sort -u cup-delete \
 | xargs -P 8 -I {} bash -c '{}'
+
+rm buckets non-empty cup-delete
