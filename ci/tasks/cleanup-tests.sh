@@ -15,7 +15,10 @@ while read -r line; do
   if aws s3 ls "s3://$line"; then
     echo "$line" >> non-empty
   else
-    aws rb "s3://$line"
+    # attempt to delete the bucket
+    # eventual consistency means it may already be gone
+    # so continue regardless of result
+    aws rb "s3://$line" 2>/dev/null || true
   fi
 done < buckets
 
