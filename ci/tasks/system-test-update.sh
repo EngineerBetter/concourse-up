@@ -37,12 +37,14 @@ echo "UPDATE TO NEW VERSION"
 
 # rm -f "$HOME/.flyrc"
 
+config=$(./cup-new info --json $deployment)
+
 cat <<EOF > to_run.sh
 ./cup-new deploy $deployment
 
 sleep 60
 
-config=$(./cup-new info --json $deployment)
+config="$config"
 domain=$(echo "$config" | jq -r '.config.domain')
 username=$(echo "$config" | jq -r '.config.concourse_username')
 password=$(echo "$config" | jq -r '.config.concourse_password')
@@ -50,11 +52,11 @@ echo "$config" | jq -r '.config.concourse_ca_cert' > generated-ca-cert.pem
 
 fly --target system-test login \
   --ca-cert generated-ca-cert.pem \
-  --concourse-url "https://$domain" \
-  --username "$username" \
-  --password "$password"
+  --concourse-url "https://\$domain" \
+  --username "\$username" \
+  --password "\$password"
 
-curl -k "https://$domain:3000"
+curl -k "https://\$domain:3000"
 
 fly --target system-test sync
 
