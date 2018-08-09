@@ -8,7 +8,7 @@ chmod +x ./cup
 
 aws s3 ls \
 | grep -E 'concourse-up-systest' \
-| awk '{print $3}'\
+| awk '{print $3}' \
 > buckets
 
 while read -r line; do
