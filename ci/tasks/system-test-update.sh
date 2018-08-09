@@ -35,8 +35,9 @@ sleep 300
 
 echo "UPDATE TO NEW VERSION"
 
-rm -f "$HOME/.flyrc"
+# rm -f "$HOME/.flyrc"
 
+cat <<EOF > to_run.sh
 ./cup-new deploy $deployment
 
 sleep 60
@@ -68,3 +69,5 @@ fly --target system-test unpause-pipeline \
 fly --target system-test trigger-job \
   --job hello/hello \
   --watch
+EOF
+chmod +x to_run.sh
