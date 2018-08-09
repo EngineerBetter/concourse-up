@@ -43,4 +43,4 @@ done < non-empty
 sort -u cup-delete \
 | xargs -P 8 -I {} bash -c '{}'
 
-rm buckets non-empty cup-delete
+rm -f buckets non-empty cup-delete
