@@ -516,3 +516,9 @@ jobs:
     params:
       AWS_ACCESS_KEY_ID: ((concourse_up_test_access_key_id))
       AWS_SECRET_ACCESS_KEY: ((concourse_up_test_secret_key))
+    on_failure:
+      put: slack-alert
+      params:
+        channel: "#integrations"
+        text: |
+          Concourse-Up cleanup failure!
