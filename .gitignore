@@ -9,3 +9,4 @@ concourse-up-*.json
 /concourse-up
 bindata.go
 .vs/
+.pre-commit-config.yaml
