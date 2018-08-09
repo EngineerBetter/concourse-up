@@ -23,9 +23,9 @@ while read -r line; do
 done < buckets
 
 while read -r line; do
-  if echo "$line" | grep -qE '^concourse-up-systest-\d+'; then
+  if echo "$line" | grep -qE '^concourse-up-systest-[0-9]+'; then
     echo "$line" | awk -F- '{print "yes yes | ./cup destroy --region "$5"-"$6"-"$7" "$3"-"$4}' >> cup-delete
-  elif echo "$line" | grep -qE '^concourse-up-systest-[a-zA-Z]+-\d+'; then
+  elif echo "$line" | grep -qE '^concourse-up-systest-[a-zA-Z]+-[0-9]+'; then
     echo "$line" | awk -F- '{print "yes yes | ./cup destroy --region "$6"-"$7"-"$8" "$3"-"$4"-"$5}' >> cup-delete
   else
     printf "Unexpected bucket format %s -- skipping\\n" "$line"
