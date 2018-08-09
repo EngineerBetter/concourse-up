@@ -12,10 +12,10 @@ aws s3 ls \
 > buckets
 
 while read -r line; do
-  if [ ! "$(aws s3 ls "s3://$line")" ]; then
-    aws rb "s3://$line"
-  else
+  if aws s3 ls "s3://$line"; then
     echo "$line" >> non-empty
+  else
+    aws rb "s3://$line"
   fi
 done < buckets
 
