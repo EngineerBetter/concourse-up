@@ -20,6 +20,8 @@ resource_types:
   type: docker-image
   source:
     repository: concourse/concourse-pipeline-resource
+    tag: 3
+
 
 - name: slack-notification
   type: docker-image
