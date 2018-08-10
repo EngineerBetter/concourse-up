@@ -3,7 +3,7 @@
 set -eu
 
 version=$(cat version/version)
-pushd resources
+pushd concourse-up/resources
   bin_bosh_cli_version=$(                jq -r '."bosh-cli".linux' director-versions.json)
   bin_terraform_version=$(               jq -r '.terraform.linux' director-versions.json)
   deployment_concourse_release_url=$(    jq -r '.[] | select(.value.name? == "concourse") | .value.url' versions.json)
