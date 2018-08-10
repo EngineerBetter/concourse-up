@@ -322,8 +322,10 @@ func (client *Client) deployBosh(config *config.Config, metadata *terraform.Meta
 	config.CredhubURL = fmt.Sprintf("https://%s:8844/", config.Domain)
 	config.CredhubUsername = "credhub-cli"
 	config.ConcourseUsername = "admin"
-	config.ConcoursePassword = cc.AtcPassword
-	config.GrafanaPassword = cc.AtcPassword
+	if len(cc.AtcPassword) > 0 {
+		config.ConcoursePassword = cc.AtcPassword
+		config.GrafanaPassword = cc.AtcPassword
+	}
 
 	return nil
 }
