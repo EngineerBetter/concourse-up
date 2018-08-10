@@ -1,0 +1,133 @@
+# github.com/DATA-DOG/go-sqlmock v1.3.0
+github.com/DATA-DOG/go-sqlmock
+# github.com/asaskevich/govalidator v0.0.0-20171111151018-521b25f4b05f
+github.com/asaskevich/govalidator
+# github.com/aws/aws-sdk-go v1.12.59
+github.com/aws/aws-sdk-go/aws
+github.com/aws/aws-sdk-go/aws/awserr
+github.com/aws/aws-sdk-go/aws/session
+github.com/aws/aws-sdk-go/service/ec2
+github.com/aws/aws-sdk-go/service/route53
+github.com/aws/aws-sdk-go/service/s3
+github.com/aws/aws-sdk-go/aws/client
+github.com/aws/aws-sdk-go/aws/request
+github.com/aws/aws-sdk-go/aws/credentials
+github.com/aws/aws-sdk-go/aws/endpoints
+github.com/aws/aws-sdk-go/aws/corehandlers
+github.com/aws/aws-sdk-go/aws/credentials/stscreds
+github.com/aws/aws-sdk-go/aws/defaults
+github.com/aws/aws-sdk-go/aws/awsutil
+github.com/aws/aws-sdk-go/aws/client/metadata
+github.com/aws/aws-sdk-go/aws/signer/v4
+github.com/aws/aws-sdk-go/private/protocol
+github.com/aws/aws-sdk-go/private/protocol/ec2query
+github.com/aws/aws-sdk-go/private/protocol/restxml
+github.com/aws/aws-sdk-go/internal/shareddefaults
+github.com/aws/aws-sdk-go/service/sts
+github.com/aws/aws-sdk-go/aws/credentials/ec2rolecreds
+github.com/aws/aws-sdk-go/aws/credentials/endpointcreds
+github.com/aws/aws-sdk-go/aws/ec2metadata
+github.com/aws/aws-sdk-go/private/protocol/rest
+github.com/aws/aws-sdk-go/private/protocol/query/queryutil
+github.com/aws/aws-sdk-go/private/protocol/xml/xmlutil
+github.com/aws/aws-sdk-go/private/protocol/query
+# github.com/fatih/color v1.5.0
+github.com/fatih/color
+# github.com/ghodss/yaml v1.0.0
+github.com/ghodss/yaml
+# github.com/go-ini/ini v1.32.0
+github.com/go-ini/ini
+# github.com/jmespath/go-jmespath v0.0.0-20160202185014-0b12d6b521d8
+github.com/jmespath/go-jmespath
+# github.com/lib/pq v0.0.0-20171126050459-83612a56d3dd
+github.com/lib/pq
+github.com/lib/pq/oid
+# github.com/mattn/go-colorable v0.0.9
+github.com/mattn/go-colorable
+# github.com/mattn/go-isatty v0.0.3
+github.com/mattn/go-isatty
+# github.com/miekg/dns v1.0.3
+github.com/miekg/dns
+# github.com/onsi/ginkgo v1.4.0
+github.com/onsi/ginkgo
+github.com/onsi/ginkgo/extensions/table
+github.com/onsi/ginkgo/config
+github.com/onsi/ginkgo/internal/codelocation
+github.com/onsi/ginkgo/internal/failer
+github.com/onsi/ginkgo/internal/remote
+github.com/onsi/ginkgo/internal/suite
+github.com/onsi/ginkgo/internal/testingtproxy
+github.com/onsi/ginkgo/internal/writer
+github.com/onsi/ginkgo/reporters
+github.com/onsi/ginkgo/reporters/stenographer
+github.com/onsi/ginkgo/types
+github.com/onsi/ginkgo/internal/spec_iterator
+github.com/onsi/ginkgo/internal/containernode
+github.com/onsi/ginkgo/internal/leafnodes
+github.com/onsi/ginkgo/internal/spec
+github.com/onsi/ginkgo/internal/specrunner
+github.com/onsi/ginkgo/reporters/stenographer/support/go-colorable
+github.com/onsi/ginkgo/reporters/stenographer/support/go-isatty
+# github.com/onsi/gomega v1.3.0
+github.com/onsi/gomega
+github.com/onsi/gomega/gbytes
+github.com/onsi/gomega/gexec
+github.com/onsi/gomega/types
+github.com/onsi/gomega/internal/assertion
+github.com/onsi/gomega/internal/asyncassertion
+github.com/onsi/gomega/internal/testingtsupport
+github.com/onsi/gomega/matchers
+github.com/onsi/gomega/format
+github.com/onsi/gomega/internal/oraclematcher
+github.com/onsi/gomega/matchers/support/goraph/bipartitegraph
+github.com/onsi/gomega/matchers/support/goraph/edge
+github.com/onsi/gomega/matchers/support/goraph/node
+github.com/onsi/gomega/matchers/support/goraph/util
+# github.com/square/certstrap v1.1.1
+github.com/square/certstrap/pkix
+# github.com/xenolf/lego v0.4.1
+github.com/xenolf/lego/acme
+github.com/xenolf/lego/providers/dns/route53
+# golang.org/x/crypto v0.0.0-20180111101123-5f55bce93ad2
+golang.org/x/crypto/ssh
+golang.org/x/crypto/curve25519
+golang.org/x/crypto/ed25519
+golang.org/x/crypto/ocsp
+golang.org/x/crypto/ed25519/internal/edwards25519
+# golang.org/x/net v0.0.0-20180110232232-ab555f366c45
+golang.org/x/net/proxy
+golang.org/x/net/publicsuffix
+golang.org/x/net/ipv4
+golang.org/x/net/ipv6
+golang.org/x/net/html/charset
+golang.org/x/net/bpf
+golang.org/x/net/internal/iana
+golang.org/x/net/internal/socket
+golang.org/x/net/html
+golang.org/x/net/html/atom
+# golang.org/x/sys v0.0.0-20180110071738-810d70003458
+golang.org/x/sys/unix
+# golang.org/x/text v0.0.0-20171227012246-e19ae1496984
+golang.org/x/text/encoding
+golang.org/x/text/encoding/charmap
+golang.org/x/text/encoding/htmlindex
+golang.org/x/text/transform
+golang.org/x/text/encoding/internal/identifier
+golang.org/x/text/encoding/internal
+golang.org/x/text/encoding/japanese
+golang.org/x/text/encoding/korean
+golang.org/x/text/encoding/simplifiedchinese
+golang.org/x/text/encoding/traditionalchinese
+golang.org/x/text/encoding/unicode
+golang.org/x/text/language
+golang.org/x/text/internal/utf8internal
+golang.org/x/text/runes
+golang.org/x/text/internal/tag
+# gopkg.in/square/go-jose.v1 v1.1.0
+gopkg.in/square/go-jose.v1
+gopkg.in/square/go-jose.v1/cipher
+gopkg.in/square/go-jose.v1/json
+# gopkg.in/urfave/cli.v1 v1.20.0
+gopkg.in/urfave/cli.v1
+# gopkg.in/yaml.v2 v2.0.0
+gopkg.in/yaml.v2
