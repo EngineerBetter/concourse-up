@@ -411,7 +411,7 @@ jobs:
     params:
       name: release-vars/name
       commitish: release-vars/commit
-      body: concourse-up/ci/release/body
+      body: release-vars/body
       tag: version/version
       globs:
       - build-linux/concourse-up-linux-amd64
@@ -447,7 +447,7 @@ jobs:
     params:
       name: release-vars/name
       commitish: release-vars/commit
-      body: concourse-up/ci/release/body
+      body: release-vars/body
       tag: version/version
       globs:
       - build-linux/concourse-up-linux-amd64
@@ -483,7 +483,7 @@ jobs:
     params:
       name: release-vars/name
       commitish: release-vars/commit
-      body: concourse-up/ci/release/body
+      body: release-vars/body
       tag: version/version
       globs:
       - build-linux/concourse-up-linux-amd64
