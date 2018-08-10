@@ -39,6 +39,7 @@ echo "UPDATE TO NEW VERSION"
 
 config=$(./cup-new info --json $deployment)
 
+exit 1
 cat <<EOF > to_run.sh
 ./cup-new deploy $deployment
 
