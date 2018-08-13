@@ -535,7 +535,7 @@ resource "aws_db_subnet_group" "default" {
     concourse-up-component = "rds"
   }
 
-  depends_on = ["${aws_db_instance.default.name}"]
+  depends_on = ["aws_db_instance.default"]
 }
 
 resource "aws_db_instance" "default" {
