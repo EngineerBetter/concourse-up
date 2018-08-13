@@ -342,7 +342,7 @@ jobs:
       image_resource:
         type: docker-image
         source:
-          repository: engineerbetter/cup-image
+          repository: engineerbetter/pcf-ops
       inputs:
       - name: concourse-up-release
       run:
@@ -383,7 +383,7 @@ jobs:
       image_resource:
         type: docker-image
         source:
-          repository: engineerbetter/cup-image
+          repository: engineerbetter/pcf-ops
       inputs:
       - name: concourse-up-release
       run:
