@@ -143,6 +143,9 @@ func (client *Client) SetDefaultPipeline(deployArgs *config.DeployArgs, config *
 		if err := client.sync(); err != nil {
 			return err
 		}
+		if err := client.login(); err != nil {
+			return err
+		}
 	}
 
 	pipelinePath := client.tempDir.Path("default-pipeline.yml")
