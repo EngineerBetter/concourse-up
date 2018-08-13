@@ -282,11 +282,11 @@ func (client *Client) deployBosh(config *config.Config, metadata *terraform.Meta
 
 	boshStateBytes, err := loadDirectorState(client.configClient)
 	if err != nil {
-		return nil
+		return err
 	}
 	boshCredsBytes, err := loadDirectorCreds(client.configClient)
 	if err != nil {
-		return nil
+		return err
 	}
 
 	boshStateBytes, boshCredsBytes, err = boshClient.Deploy(boshStateBytes, boshCredsBytes, detach)
