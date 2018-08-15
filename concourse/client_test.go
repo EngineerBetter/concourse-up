@@ -162,7 +162,7 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 				actions = append(actions, fmt.Sprintf("deleting config asset: %s", filename))
 				return nil
 			},
-			FakeUpdate: func(config *config.Config) error {
+			FakeUpdate: func(config config.Config) error {
 				actions = append(actions, "updating config file")
 				return nil
 			},

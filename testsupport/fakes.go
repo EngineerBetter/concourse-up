@@ -125,7 +125,7 @@ func (client *FakeFlyClient) CanConnect() (bool, error) {
 // FakeConfigClient implements config.IClient for testing
 type FakeConfigClient struct {
 	FakeLoad         func() (*config.Config, error)
-	FakeUpdate       func(*config.Config) error
+	FakeUpdate       func(config.Config) error
 	FakeLoadOrCreate func(deployArgs *config.DeployArgs) (config.Config, bool, error)
 	FakeStoreAsset   func(filename string, contents []byte) error
 	FakeLoadAsset    func(filename string) ([]byte, error)
@@ -140,7 +140,7 @@ func (client *FakeConfigClient) Load() (*config.Config, error) {
 }
 
 // Update delegates to FakeUpdate which is dynamically set by the tests
-func (client *FakeConfigClient) Update(config *config.Config) error {
+func (client *FakeConfigClient) Update(config config.Config) error {
 	return client.FakeUpdate(config)
 }
 

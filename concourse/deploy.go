@@ -35,17 +35,17 @@ func (client *Client) Deploy() (config.Config, error) {
 	}
 	isDomainUpdated := client.deployArgs.Domain != c.Domain
 
-	configRef, err := client.checkPreTerraformConfigRequirements(&c)
+	c, err = client.checkPreTerraformConfigRequirements(c)
 	if err != nil {
 		return c, err
 	}
 
-	metadata, err := client.applyTerraform(configRef)
+	metadata, err := client.applyTerraform(&c)
 	if err != nil {
-		return *configRef, err
+		return c, err
 	}
 
-	configRef, err = client.checkPreDeployConfigRequirements(client.acmeClientConstructor, isDomainUpdated, configRef, metadata)
+	configRef, err := client.checkPreDeployConfigRequirements(client.acmeClientConstructor, isDomainUpdated, &c, metadata)
 	if err != nil {
 		return *configRef, err
 	}
@@ -58,7 +58,7 @@ func (client *Client) Deploy() (config.Config, error) {
 	if err != nil {
 		return *configRef, err
 	}
-	return *configRef, client.configClient.Update(configRef)
+	return *configRef, client.configClient.Update(*configRef)
 }
 
 func (client *Client) deployBoshAndPipeline(config *config.Config, metadata *terraform.Metadata) error {
@@ -132,12 +132,12 @@ func (client *Client) updateBoshAndPipeline(config *config.Config, metadata *ter
 	return err
 }
 
-func (client *Client) checkPreTerraformConfigRequirements(conf *config.Config) (*config.Config, error) {
+func (client *Client) checkPreTerraformConfigRequirements(conf config.Config) (config.Config, error) {
 	region := client.deployArgs.AWSRegion
 
 	if conf.Region != "" {
 		if conf.Region != region {
-			return nil, fmt.Errorf("found previous deployment in %s. Refusing to deploy to %s as changing regions for existing deployments is not supported", conf.Region, region)
+			return conf, fmt.Errorf("found previous deployment in %s. Refusing to deploy to %s as changing regions for existing deployments is not supported", conf.Region, region)
 		}
 	}
 
@@ -150,13 +150,13 @@ func (client *Client) checkPreTerraformConfigRequirements(conf *config.Config) (
 
 	// When in self-update mode do not override the user IP, since we already have access to the worker
 	if !client.deployArgs.SelfUpdate {
-		if err := client.setUserIP(conf); err != nil {
-			return nil, err
+		if conf, err := client.setUserIP(conf); err != nil {
+			return conf, err
 		}
 	}
 
-	if err := client.setHostedZone(conf); err != nil {
-		return nil, err
+	if err := client.setHostedZone(&conf); err != nil {
+		return conf, err
 	}
 
 	return conf, nil
@@ -182,7 +182,7 @@ func (client *Client) checkPreDeployConfigRequirements(c func(u *certs.User) (ce
 	config.ConcourseWebSize = client.deployArgs.WebSize
 	config.DirectorPublicIP = metadata.DirectorPublicIP.Value
 
-	if err := client.configClient.Update(config); err != nil {
+	if err := client.configClient.Update(*config); err != nil {
 		return nil, err
 	}
 
@@ -349,25 +349,25 @@ func (client *Client) loadConfig() (config.Config, error) {
 	return cfg, nil
 }
 
-func (client *Client) setUserIP(config *config.Config) error {
+func (client *Client) setUserIP(c config.Config) (config.Config, error) {
 	userIP, err := client.ipChecker()
 	if err != nil {
-		return err
+		return c, err
 	}
 
-	if config.SourceAccessIP != userIP {
-		config.SourceAccessIP = userIP
+	if c.SourceAccessIP != userIP {
+		c.SourceAccessIP = userIP
 		_, err = client.stderr.Write([]byte(fmt.Sprintf(
 			"\nWARNING: allowing access from local machine (address: %s)\n\n", userIP)))
 		if err != nil {
-			return err
+			return c, err
 		}
-		if err = client.configClient.Update(config); err != nil {
-			return err
+		if err = client.configClient.Update(c); err != nil {
+			return c, err
 		}
 	}
 
-	return nil
+	return c, nil
 }
 
 func (client *Client) setHostedZone(config *config.Config) error {
@@ -389,7 +389,7 @@ func (client *Client) setHostedZone(config *config.Config) error {
 	if err != nil {
 		return err
 	}
-	err = client.configClient.Update(config)
+	err = client.configClient.Update(*config)
 
 	return err
 }

@@ -18,7 +18,7 @@ type IClient interface {
 	Load() (*Config, error)
 	DeleteAll(config *Config) error
 	LoadOrCreate(deployArgs *DeployArgs) (Config, bool, error)
-	Update(*Config) error
+	Update(Config) error
 	StoreAsset(filename string, contents []byte) error
 	HasAsset(filename string) (bool, error)
 	LoadAsset(filename string) ([]byte, error)
@@ -72,7 +72,7 @@ func (client *Client) HasAsset(filename string) (bool, error) {
 }
 
 // Update stores the conconcourse up config file to S3
-func (client *Client) Update(config *Config) error {
+func (client *Client) Update(config Config) error {
 	bytes, err := json.Marshal(config)
 	if err != nil {
 		return err
