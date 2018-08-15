@@ -15,9 +15,9 @@
     "version": "0.9.0"
   },
   "cpi": {
-    "url": "https://bosh.io/d/github.com/cloudfoundry-incubator/bosh-aws-cpi-release?v=71",
-    "sha1": "1007fde7a40090cdd76ea526466559f5e35c34d8",
-    "version": "71"
+    "url": "https://bosh.io/d/github.com/cloudfoundry-incubator/bosh-aws-cpi-release?v=72",
+    "sha1": "b7999e95115bb691a630c07f0439ef5b577884c2",
+    "version": "72"
   },
   "fly": {
     "windows": "https://github.com/concourse/concourse/releases/download/v4.0.0/fly_windows_amd64",
