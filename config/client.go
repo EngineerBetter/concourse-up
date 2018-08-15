@@ -17,7 +17,7 @@ const configFilePath = "config.json"
 type IClient interface {
 	Load() (*Config, error)
 	DeleteAll(config *Config) error
-	LoadOrCreate(deployArgs *DeployArgs) (*Config, bool, error)
+	LoadOrCreate(deployArgs *DeployArgs) (Config, bool, error)
 	Update(*Config) error
 	StoreAsset(filename string, contents []byte) error
 	HasAsset(filename string) (bool, error)
@@ -144,7 +144,7 @@ func (b cidrBlocks) String() (string, error) {
 }
 
 // LoadOrCreate loads an existing config file from S3, or creates a default if one doesn't already exist
-func (client *Client) LoadOrCreate(deployArgs *DeployArgs) (*Config, bool, error) {
+func (client *Client) LoadOrCreate(deployArgs *DeployArgs) (Config, bool, error) {
 
 	config, err := generateDefaultConfig(
 		deployArgs.IAAS,
@@ -154,15 +154,15 @@ func (client *Client) LoadOrCreate(deployArgs *DeployArgs) (*Config, bool, error
 		deployArgs.AWSRegion,
 	)
 	if err != nil {
-		return nil, false, err
+		return Config{}, false, err
 	}
 	defaultConfigBytes, err := json.Marshal(&config)
 	if err != nil {
-		return nil, false, err
+		return Config{}, false, err
 	}
 	err = client.iaas.EnsureBucketExists(client.configBucket())
 	if err != nil {
-		return nil, false, err
+		return Config{}, false, err
 	}
 	configBytes, createdNewFile, err := client.iaas.EnsureFileExists(
 		client.configBucket(),
@@ -170,21 +170,21 @@ func (client *Client) LoadOrCreate(deployArgs *DeployArgs) (*Config, bool, error
 		defaultConfigBytes,
 	)
 	if err != nil {
-		return nil, false, err
+		return Config{}, createdNewFile, err
 	}
 	err = json.Unmarshal(configBytes, &config)
 	if err != nil {
-		return nil, false, err
+		return Config{}, createdNewFile, err
 	}
 	allow, err := parseCIDRBlocks(deployArgs.AllowIPs)
 	if err != nil {
-		return nil, false, err
+		return Config{}, createdNewFile, err
 	}
 	config, err = updateAllowedIPs(config, DBSizes[deployArgs.DBSize], allow)
 	if err != nil {
-		return nil, false, err
+		return Config{}, createdNewFile, err
 	}
-	return &config, createdNewFile, nil
+	return config, createdNewFile, nil
 }
 
 func (client *Client) deployment() string {

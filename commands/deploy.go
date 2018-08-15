@@ -132,6 +132,6 @@ var deploy = cli.Command{
 			certs.NewAcmeClient,
 		)
 
-		return client.Deploy()
+		return client.DeployAction()
 	},
 }

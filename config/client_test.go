@@ -52,7 +52,7 @@ var _ = Describe("Client", func() {
 
 	Describe("LoadOrCreate", func() {
 		Context("When the there is no existing config", func() {
-			var conf *Config
+			var conf Config
 			var createdANewFile bool
 
 			BeforeEach(func() {

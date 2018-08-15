@@ -21,39 +21,44 @@ import (
 	"github.com/EngineerBetter/concourse-up/terraform"
 )
 
+// DeployAction runs Deploy
+func (client *Client) DeployAction() error {
+	_, err := client.Deploy()
+	return err
+}
+
 // Deploy deploys a concourse instance
-func (client *Client) Deploy() error {
-	config, err := client.loadConfig()
+func (client *Client) Deploy() (config.Config, error) {
+	c, err := client.loadConfig()
 	if err != nil {
-		return err
+		return config.Config{}, err
+	}
+	isDomainUpdated := client.deployArgs.Domain != c.Domain
+
+	configRef, err := client.checkPreTerraformConfigRequirements(&c)
+	if err != nil {
+		return c, err
 	}
 
-	isDomainUpdated := client.deployArgs.Domain != config.Domain
-
-	config, err = client.checkPreTerraformConfigRequirements(config)
+	metadata, err := client.applyTerraform(configRef)
 	if err != nil {
-		return err
+		return *configRef, err
 	}
 
-	metadata, err := client.applyTerraform(config)
+	configRef, err = client.checkPreDeployConfigRequirements(client.acmeClientConstructor, isDomainUpdated, configRef, metadata)
 	if err != nil {
-		return err
-	}
-
-	config, err = client.checkPreDeployConfigRequirements(client.acmeClientConstructor, isDomainUpdated, config, metadata)
-	if err != nil {
-		return err
+		return *configRef, err
 	}
 
 	if client.deployArgs.SelfUpdate {
-		err = client.updateBoshAndPipeline(config, metadata)
+		err = client.updateBoshAndPipeline(configRef, metadata)
 	} else {
-		err = client.deployBoshAndPipeline(config, metadata)
+		err = client.deployBoshAndPipeline(configRef, metadata)
 	}
 	if err != nil {
-		return err
+		return *configRef, err
 	}
-	return client.configClient.Update(config)
+	return *configRef, client.configClient.Update(configRef)
 }
 
 func (client *Client) deployBoshAndPipeline(config *config.Config, metadata *terraform.Metadata) error {
@@ -330,15 +335,15 @@ func (client *Client) deployBosh(config *config.Config, metadata *terraform.Meta
 	return nil
 }
 
-func (client *Client) loadConfig() (*config.Config, error) {
+func (client *Client) loadConfig() (config.Config, error) {
 	cfg, createdNewConfig, err := client.configClient.LoadOrCreate(client.deployArgs)
 	if err != nil {
-		return nil, err
+		return config.Config{}, err
 	}
 
 	if !createdNewConfig {
 		if err = writeConfigLoadedSuccessMessage(client.stdout); err != nil {
-			return nil, err
+			return config.Config{}, err
 		}
 	}
 	return cfg, nil
