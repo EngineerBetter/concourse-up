@@ -150,7 +150,8 @@ func (client *Client) checkPreTerraformConfigRequirements(conf config.Config) (c
 
 	// When in self-update mode do not override the user IP, since we already have access to the worker
 	if !client.deployArgs.SelfUpdate {
-		conf, err := client.setUserIP(conf)
+		var err error
+		conf, err = client.setUserIP(conf)
 		if err != nil {
 			return conf, err
 		}
