@@ -125,17 +125,22 @@ func parseCIDRBlocks(s string) (cidrBlocks, error) {
 	return x, nil
 }
 
-func (b cidrBlocks) String() string {
+func (b cidrBlocks) String() (string, error) {
 	var buf bytes.Buffer
 	for i, ipNet := range b {
 		if i > 0 {
-			fmt.Fprintf(&buf, ", %q", ipNet)
+			_, err := fmt.Fprintf(&buf, ", %q", ipNet)
+			if err != nil {
+				return "", err
+			}
 		} else {
-
-			fmt.Fprintf(&buf, "%q", ipNet)
+			_, err := fmt.Fprintf(&buf, "%q", ipNet)
+			if err != nil {
+				return "", err
+			}
 		}
 	}
-	return buf.String()
+	return buf.String(), nil
 }
 
 // LoadOrCreate loads an existing config file from S3, or creates a default if one doesn't already exist
@@ -175,7 +180,7 @@ func (client *Client) LoadOrCreate(deployArgs *DeployArgs) (*Config, bool, error
 	if err != nil {
 		return nil, false, err
 	}
-	err = updateConfig(&config, DBSizes[deployArgs.DBSize], allow)
+	config, err = updateAllowedIPs(config, DBSizes[deployArgs.DBSize], allow)
 	if err != nil {
 		return nil, false, err
 	}

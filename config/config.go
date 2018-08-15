@@ -92,8 +92,12 @@ func generateDefaultConfig(iaas, project, deployment, configBucket, region strin
 	return conf, nil
 }
 
-func updateConfig(c *Config, rdsInstanceClass string, ingressAddresses cidrBlocks) error {
+func updateAllowedIPs(c Config, rdsInstanceClass string, ingressAddresses cidrBlocks) (Config, error) {
+	addr, err := ingressAddresses.String()
+	if err != nil {
+		return c, err
+	}
 	c.RDSInstanceClass = rdsInstanceClass
-	c.AllowIPs = ingressAddresses.String()
-	return nil
+	c.AllowIPs = addr
+	return c, nil
 }
