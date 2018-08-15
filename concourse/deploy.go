@@ -150,12 +150,14 @@ func (client *Client) checkPreTerraformConfigRequirements(conf config.Config) (c
 
 	// When in self-update mode do not override the user IP, since we already have access to the worker
 	if !client.deployArgs.SelfUpdate {
-		if conf, err := client.setUserIP(conf); err != nil {
+		conf, err := client.setUserIP(conf)
+		if err != nil {
 			return conf, err
 		}
 	}
 
-	if err := client.setHostedZone(&conf); err != nil {
+	conf, err := client.setHostedZone(conf)
+	if err != nil {
 		return conf, err
 	}
 
@@ -370,28 +372,28 @@ func (client *Client) setUserIP(c config.Config) (config.Config, error) {
 	return c, nil
 }
 
-func (client *Client) setHostedZone(config *config.Config) error {
+func (client *Client) setHostedZone(c config.Config) (config.Config, error) {
 	domain := client.deployArgs.Domain
 	if client.deployArgs.Domain == "" {
-		return nil
+		return c, nil
 	}
 
 	hostedZoneName, hostedZoneID, err := client.iaasClient.FindLongestMatchingHostedZone(domain, iaas.ListHostedZones)
 	if err != nil {
-		return err
+		return c, err
 	}
-	config.HostedZoneID = hostedZoneID
-	config.HostedZoneRecordPrefix = strings.TrimSuffix(domain, fmt.Sprintf(".%s", hostedZoneName))
-	config.Domain = domain
+	c.HostedZoneID = hostedZoneID
+	c.HostedZoneRecordPrefix = strings.TrimSuffix(domain, fmt.Sprintf(".%s", hostedZoneName))
+	c.Domain = domain
 
 	_, err = client.stderr.Write([]byte(fmt.Sprintf(
 		"\nWARNING: adding record %s to Route53 hosted zone %s ID: %s\n\n", domain, hostedZoneName, hostedZoneID)))
 	if err != nil {
-		return err
+		return c, err
 	}
-	err = client.configClient.Update(*config)
+	err = client.configClient.Update(c)
 
-	return err
+	return c, err
 }
 
 const deployMsg = `DEPLOY SUCCESSFUL. Log in with:
