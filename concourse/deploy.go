@@ -40,7 +40,7 @@ func (client *Client) Deploy() (config.Config, error) {
 		return c, err
 	}
 
-	metadata, err := client.applyTerraform(&c)
+	metadata, err := client.applyTerraform(c)
 	if err != nil {
 		return c, err
 	}
@@ -257,8 +257,8 @@ func (client *Client) ensureConcourseCerts(c func(u *certs.User) (certs.AcmeClie
 	return config, nil
 }
 
-func (client *Client) applyTerraform(config *config.Config) (*terraform.Metadata, error) {
-	terraformClient, err := client.terraformClientFactory(client.iaasClient.IAAS(), config, client.stdout, client.stderr, client.versionFile)
+func (client *Client) applyTerraform(c config.Config) (*terraform.Metadata, error) {
+	terraformClient, err := client.terraformClientFactory(client.iaasClient.IAAS(), c, client.stdout, client.stderr, client.versionFile)
 	if err != nil {
 		return nil, err
 	}

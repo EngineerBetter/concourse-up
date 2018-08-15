@@ -38,10 +38,10 @@ type Client struct {
 }
 
 // ClientFactory is a function that builds a client interface
-type ClientFactory func(iaas string, config *config.Config, stdout, stderr io.Writer, versionFile []byte) (IClient, error)
+type ClientFactory func(iaas string, config config.Config, stdout, stderr io.Writer, versionFile []byte) (IClient, error)
 
 // NewClient is a concrete implementation of ClientFactory
-func NewClient(iaas string, config *config.Config, stdout, stderr io.Writer, versionFile []byte) (IClient, error) {
+func NewClient(iaas string, config config.Config, stdout, stderr io.Writer, versionFile []byte) (IClient, error) {
 	if iaas != "AWS" {
 		return nil, fmt.Errorf("IAAS not supported: %s", iaas)
 	}
