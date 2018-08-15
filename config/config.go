@@ -57,10 +57,10 @@ type Config struct {
 	AllowIPs                  string `json:"allow_ips"`
 }
 
-func generateDefaultConfig(iaas, project, deployment, configBucket, region string) (*Config, error) {
+func generateDefaultConfig(iaas, project, deployment, configBucket, region string) (Config, error) {
 	privateKey, publicKey, _, err := util.GenerateSSHKeyPair()
 	if err != nil {
-		return nil, err
+		return Config{}, err
 	}
 
 	conf := Config{
@@ -89,7 +89,7 @@ func generateDefaultConfig(iaas, project, deployment, configBucket, region strin
 		TFStatePath:              terraformStateFileName,
 	}
 
-	return &conf, nil
+	return conf, nil
 }
 
 func updateConfig(c *Config, rdsInstanceClass string, ingressAddresses cidrBlocks) error {

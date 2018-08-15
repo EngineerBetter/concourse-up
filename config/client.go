@@ -151,7 +151,7 @@ func (client *Client) LoadOrCreate(deployArgs *DeployArgs) (*Config, bool, error
 	if err != nil {
 		return nil, false, err
 	}
-	defaultConfigBytes, err := json.Marshal(config)
+	defaultConfigBytes, err := json.Marshal(&config)
 	if err != nil {
 		return nil, false, err
 	}
@@ -167,7 +167,7 @@ func (client *Client) LoadOrCreate(deployArgs *DeployArgs) (*Config, bool, error
 	if err != nil {
 		return nil, false, err
 	}
-	err = json.Unmarshal(configBytes, config)
+	err = json.Unmarshal(configBytes, &config)
 	if err != nil {
 		return nil, false, err
 	}
@@ -175,11 +175,11 @@ func (client *Client) LoadOrCreate(deployArgs *DeployArgs) (*Config, bool, error
 	if err != nil {
 		return nil, false, err
 	}
-	err = updateConfig(config, DBSizes[deployArgs.DBSize], allow)
+	err = updateConfig(&config, DBSizes[deployArgs.DBSize], allow)
 	if err != nil {
 		return nil, false, err
 	}
-	return config, createdNewFile, nil
+	return &config, createdNewFile, nil
 }
 
 func (client *Client) deployment() string {
