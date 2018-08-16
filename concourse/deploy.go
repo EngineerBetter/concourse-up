@@ -45,20 +45,20 @@ func (client *Client) Deploy() (config.Config, error) {
 		return c, err
 	}
 
-	configRef, err := client.checkPreDeployConfigRequirements(client.acmeClientConstructor, isDomainUpdated, &c, metadata)
+	c, err = client.checkPreDeployConfigRequirements(client.acmeClientConstructor, isDomainUpdated, c, metadata)
 	if err != nil {
-		return *configRef, err
+		return c, err
 	}
 
 	if client.deployArgs.SelfUpdate {
-		err = client.updateBoshAndPipeline(configRef, metadata)
+		err = client.updateBoshAndPipeline(&c, metadata)
 	} else {
-		err = client.deployBoshAndPipeline(configRef, metadata)
+		err = client.deployBoshAndPipeline(&c, metadata)
 	}
 	if err != nil {
-		return *configRef, err
+		return c, err
 	}
-	return *configRef, client.configClient.Update(*configRef)
+	return c, client.configClient.Update(c)
 }
 
 func (client *Client) deployBoshAndPipeline(config *config.Config, metadata *terraform.Metadata) error {
@@ -165,57 +165,57 @@ func (client *Client) checkPreTerraformConfigRequirements(conf config.Config) (c
 	return conf, nil
 }
 
-func (client *Client) checkPreDeployConfigRequirements(c func(u *certs.User) (certs.AcmeClient, error), isDomainUpdated bool, config *config.Config, metadata *terraform.Metadata) (*config.Config, error) {
+func (client *Client) checkPreDeployConfigRequirements(c func(u *certs.User) (certs.AcmeClient, error), isDomainUpdated bool, cfg config.Config, metadata *terraform.Metadata) (config.Config, error) {
 	if client.deployArgs.Domain == "" {
-		config.Domain = metadata.ATCPublicIP.Value
+		cfg.Domain = metadata.ATCPublicIP.Value
 	}
 
-	config, err := client.ensureDirectorCerts(c, config, metadata)
+	cfg, err := client.ensureDirectorCerts(c, cfg, metadata)
 	if err != nil {
-		return nil, err
+		return config.Config{}, err
 	}
 
-	config, err = client.ensureConcourseCerts(c, isDomainUpdated, config, metadata)
+	cfg, err = client.ensureConcourseCerts(c, isDomainUpdated, cfg, metadata)
 	if err != nil {
-		return nil, err
+		return config.Config{}, err
 	}
 
-	config.ConcourseWorkerCount = client.deployArgs.WorkerCount
-	config.ConcourseWorkerSize = client.deployArgs.WorkerSize
-	config.ConcourseWebSize = client.deployArgs.WebSize
-	config.DirectorPublicIP = metadata.DirectorPublicIP.Value
+	cfg.ConcourseWorkerCount = client.deployArgs.WorkerCount
+	cfg.ConcourseWorkerSize = client.deployArgs.WorkerSize
+	cfg.ConcourseWebSize = client.deployArgs.WebSize
+	cfg.DirectorPublicIP = metadata.DirectorPublicIP.Value
 
-	if err := client.configClient.Update(*config); err != nil {
-		return nil, err
+	if err := client.configClient.Update(cfg); err != nil {
+		return config.Config{}, err
 	}
 
-	return config, nil
+	return cfg, nil
 }
 
-func (client *Client) ensureDirectorCerts(c func(u *certs.User) (certs.AcmeClient, error), config *config.Config, metadata *terraform.Metadata) (*config.Config, error) {
+func (client *Client) ensureDirectorCerts(c func(u *certs.User) (certs.AcmeClient, error), cfg config.Config, metadata *terraform.Metadata) (config.Config, error) {
 	// If we already have director certificates, don't regenerate as changing them will
 	// force a bosh director re-deploy even if there are no other changes
-	if config.DirectorCACert != "" {
-		return config, nil
+	if cfg.DirectorCACert != "" {
+		return cfg, nil
 	}
 
 	ip := metadata.DirectorPublicIP.Value
 	_, err := client.stdout.Write(
 		[]byte(fmt.Sprintf("\nGENERATING BOSH DIRECTOR CERTIFICATE (%s, 10.0.0.6)\n", ip)))
 	if err != nil {
-		return nil, err
+		return config.Config{}, err
 	}
 
-	directorCerts, err := client.certGenerator(c, config.Deployment, ip, "10.0.0.6")
+	directorCerts, err := client.certGenerator(c, cfg.Deployment, ip, "10.0.0.6")
 	if err != nil {
-		return nil, err
+		return config.Config{}, err
 	}
 
-	config.DirectorCACert = string(directorCerts.CACert)
-	config.DirectorCert = string(directorCerts.Cert)
-	config.DirectorKey = string(directorCerts.Key)
+	cfg.DirectorCACert = string(directorCerts.CACert)
+	cfg.DirectorCert = string(directorCerts.Cert)
+	cfg.DirectorKey = string(directorCerts.Key)
 
-	return config, nil
+	return cfg, nil
 }
 
 func timeTillExpiry(cert string) time.Duration {
@@ -230,32 +230,32 @@ func timeTillExpiry(cert string) time.Duration {
 	return time.Until(c.NotAfter)
 }
 
-func (client *Client) ensureConcourseCerts(c func(u *certs.User) (certs.AcmeClient, error), domainUpdated bool, config *config.Config, metadata *terraform.Metadata) (*config.Config, error) {
+func (client *Client) ensureConcourseCerts(c func(u *certs.User) (certs.AcmeClient, error), domainUpdated bool, cfg config.Config, metadata *terraform.Metadata) (config.Config, error) {
 	if client.deployArgs.TLSCert != "" {
-		config.ConcourseCert = client.deployArgs.TLSCert
-		config.ConcourseKey = client.deployArgs.TLSKey
-		config.ConcourseUserProvidedCert = true
+		cfg.ConcourseCert = client.deployArgs.TLSCert
+		cfg.ConcourseKey = client.deployArgs.TLSKey
+		cfg.ConcourseUserProvidedCert = true
 
-		return config, nil
+		return cfg, nil
 	}
 
 	// Skip concourse re-deploy if certs have already been set,
 	// unless domain has changed
-	if config.ConcourseCert != "" && !domainUpdated && timeTillExpiry(config.ConcourseCert) > 28*24*time.Hour {
-		return config, nil
+	if cfg.ConcourseCert != "" && !domainUpdated && timeTillExpiry(cfg.ConcourseCert) > 28*24*time.Hour {
+		return cfg, nil
 	}
 
-	// If no domain has been provided by the user, the value of config.Domain is set to the ATC's public IP in checkPreDeployConfigRequirements
-	concourseCerts, err := client.certGenerator(c, config.Deployment, config.Domain)
+	// If no domain has been provided by the user, the value of cfg.Domain is set to the ATC's public IP in checkPreDeployConfigRequirements
+	concourseCerts, err := client.certGenerator(c, cfg.Deployment, cfg.Domain)
 	if err != nil {
-		return nil, err
+		return config.Config{}, err
 	}
 
-	config.ConcourseCert = string(concourseCerts.Cert)
-	config.ConcourseKey = string(concourseCerts.Key)
-	config.ConcourseCACert = string(concourseCerts.CACert)
+	cfg.ConcourseCert = string(concourseCerts.Cert)
+	cfg.ConcourseKey = string(concourseCerts.Key)
+	cfg.ConcourseCACert = string(concourseCerts.CACert)
 
-	return config, nil
+	return cfg, nil
 }
 
 func (client *Client) applyTerraform(c config.Config) (*terraform.Metadata, error) {
