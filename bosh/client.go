@@ -22,7 +22,7 @@ const CredsFilename = "director-creds.yml"
 
 // Client is a concrete implementation of the IClient interface
 type Client struct {
-	config   *config.Config
+	config   config.Config
 	metadata *terraform.Metadata
 	director director.IClient
 	db       Opener
@@ -39,10 +39,10 @@ type IClient interface {
 }
 
 // ClientFactory creates a new IClient
-type ClientFactory func(config *config.Config, metadata *terraform.Metadata, director director.IClient, stdout, stderr io.Writer) (IClient, error)
+type ClientFactory func(config config.Config, metadata *terraform.Metadata, director director.IClient, stdout, stderr io.Writer) (IClient, error)
 
 // NewClient creates a new Client
-func NewClient(config *config.Config, metadata *terraform.Metadata, director director.IClient, stdout, stderr io.Writer) (IClient, error) {
+func NewClient(config config.Config, metadata *terraform.Metadata, director director.IClient, stdout, stderr io.Writer) (IClient, error) {
 	addr := net.JoinHostPort(metadata.DirectorPublicIP.Value, "22")
 	key, err := ssh.ParsePrivateKey([]byte(config.PrivateKey))
 	if err != nil {

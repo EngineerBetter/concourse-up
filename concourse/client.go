@@ -64,7 +64,7 @@ func NewClient(
 	}
 }
 
-func (client *Client) buildBoshClient(config *config.Config, metadata *terraform.Metadata) (bosh.IClient, error) {
+func (client *Client) buildBoshClient(config config.Config, metadata *terraform.Metadata) (bosh.IClient, error) {
 	director, err := director.NewClient(director.Credentials{
 		Username: config.DirectorUsername,
 		Password: config.DirectorPassword,

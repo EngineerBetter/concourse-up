@@ -24,7 +24,7 @@ var ConcourseUpVersion = "COMPILE_TIME_VARIABLE_fly_concourse_up_version"
 // IClient represents an interface for a client
 type IClient interface {
 	CanConnect() (bool, error)
-	SetDefaultPipeline(deployArgs *config.DeployArgs, config *config.Config, allowFlyVersionDiscrepancy bool) error
+	SetDefaultPipeline(deployArgs *config.DeployArgs, config config.Config, allowFlyVersionDiscrepancy bool) error
 	Cleanup() error
 }
 
@@ -134,7 +134,7 @@ func (client *Client) CanConnect() (bool, error) {
 }
 
 // SetDefaultPipeline sets the default pipeline against a given concourse
-func (client *Client) SetDefaultPipeline(deployArgs *config.DeployArgs, config *config.Config, allowFlyVersionDiscrepancy bool) error {
+func (client *Client) SetDefaultPipeline(deployArgs *config.DeployArgs, config config.Config, allowFlyVersionDiscrepancy bool) error {
 	if err := client.login(); err != nil {
 		return err
 	}
@@ -170,7 +170,7 @@ func (client *Client) SetDefaultPipeline(deployArgs *config.DeployArgs, config *
 	return client.run("unpause-pipeline", "--pipeline", pipelineName)
 }
 
-func (client *Client) writePipelineConfig(pipelinePath string, deployArgs *config.DeployArgs, config *config.Config) error {
+func (client *Client) writePipelineConfig(pipelinePath string, deployArgs *config.DeployArgs, config config.Config) error {
 	fileHandler, err := os.Create(pipelinePath)
 	if err != nil {
 		return err
@@ -256,7 +256,7 @@ func getFlyURL(versionFile []byte) (string, error) {
 	}
 }
 
-func (client *Client) buildDefaultPipelineParams(deployArgs *config.DeployArgs, config *config.Config) (*defaultPipelineParams, error) {
+func (client *Client) buildDefaultPipelineParams(deployArgs *config.DeployArgs, config config.Config) (*defaultPipelineParams, error) {
 	awsAccessKeyID := os.Getenv("AWS_ACCESS_KEY_ID")
 	if awsAccessKeyID == "" {
 		return nil, errors.New("env var AWS_ACCESS_KEY_ID not found")

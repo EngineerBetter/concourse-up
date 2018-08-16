@@ -81,7 +81,7 @@ var _ = Describe("Delete", func() {
 			PublicSubnetID:           terraform.MetadataStringValue{Value: "sn-public-123"},
 			VMsSecurityGroupID:       terraform.MetadataStringValue{Value: "sg-456"},
 		}
-		exampleConfig := &config.Config{
+		exampleConfig := config.Config{
 			PublicKey:              "example-public-key",
 			PrivateKey:             "example-private-key",
 			Region:                 "eu-west-1",

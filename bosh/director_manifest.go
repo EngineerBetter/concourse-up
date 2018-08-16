@@ -14,7 +14,7 @@ import (
 var versionFile = MustAsset("../resources/director-versions.json")
 
 // GenerateBoshInitManifest generates a manifest for the bosh director on AWS
-func generateBoshInitManifest(conf *config.Config, metadata *terraform.Metadata, privateKeyPath string) ([]byte, error) {
+func generateBoshInitManifest(conf config.Config, metadata *terraform.Metadata, privateKeyPath string) ([]byte, error) {
 	dbPort, err := strconv.Atoi(metadata.BoshDBPort.Value)
 	if err != nil {
 		return nil, err

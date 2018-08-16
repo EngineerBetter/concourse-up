@@ -51,9 +51,9 @@ func (client *Client) Deploy() (config.Config, error) {
 	}
 
 	if client.deployArgs.SelfUpdate {
-		err = client.updateBoshAndPipeline(&c, metadata)
+		err = client.updateBoshAndPipeline(c, metadata)
 	} else {
-		err = client.deployBoshAndPipeline(&c, metadata)
+		err = client.deployBoshAndPipeline(c, metadata)
 	}
 	if err != nil {
 		return c, err
@@ -61,7 +61,7 @@ func (client *Client) Deploy() (config.Config, error) {
 	return c, client.configClient.Update(c)
 }
 
-func (client *Client) deployBoshAndPipeline(config *config.Config, metadata *terraform.Metadata) error {
+func (client *Client) deployBoshAndPipeline(config config.Config, metadata *terraform.Metadata) error {
 	// When we are deploying for the first time rather than updating
 	// ensure that the pipeline is set _after_ the concourse is deployed
 	if err := client.deployBosh(config, metadata, false); err != nil {
@@ -90,15 +90,15 @@ func (client *Client) deployBoshAndPipeline(config *config.Config, metadata *ter
 	return writeDeploySuccessMessage(config, metadata, client.stdout)
 }
 
-func (client *Client) updateBoshAndPipeline(config *config.Config, metadata *terraform.Metadata) error {
+func (client *Client) updateBoshAndPipeline(c config.Config, metadata *terraform.Metadata) error {
 	// If concourse is already running this is an update rather than a fresh deploy
 	// When updating we need to deploy the BOSH as the final step in order to
 	// Detach from the update, so the update job can exit
 	flyClient, err := client.flyClientFactory(fly.Credentials{
-		Target:   config.Deployment,
-		API:      fmt.Sprintf("https://%s", config.Domain),
-		Username: config.ConcourseUsername,
-		Password: config.ConcoursePassword,
+		Target:   c.Deployment,
+		API:      fmt.Sprintf("https://%s", c.Domain),
+		Username: c.ConcourseUsername,
+		Password: c.ConcoursePassword,
 	},
 		client.stdout,
 		client.stderr,
@@ -119,11 +119,11 @@ func (client *Client) updateBoshAndPipeline(config *config.Config, metadata *ter
 	}
 
 	// Allow a fly version discrepancy since we might be targetting an older Concourse
-	if err = flyClient.SetDefaultPipeline(client.deployArgs, config, true); err != nil {
+	if err = flyClient.SetDefaultPipeline(client.deployArgs, c, true); err != nil {
 		return err
 	}
 
-	if err = client.deployBosh(config, metadata, true); err != nil {
+	if err = client.deployBosh(c, metadata, true); err != nil {
 		return err
 	}
 
@@ -281,7 +281,7 @@ func (client *Client) applyTerraform(c config.Config) (*terraform.Metadata, erro
 	return metadata, nil
 }
 
-func (client *Client) deployBosh(config *config.Config, metadata *terraform.Metadata, detach bool) error {
+func (client *Client) deployBosh(config config.Config, metadata *terraform.Metadata, detach bool) error {
 	boshClient, err := client.buildBoshClient(config, metadata)
 	if err != nil {
 		return err
@@ -406,7 +406,7 @@ Log into credhub with:
 eval "$(concourse-up info {{.Project}} --region {{.Region}} --env)"
 `
 
-func writeDeploySuccessMessage(config *config.Config, metadata *terraform.Metadata, stdout io.Writer) error {
+func writeDeploySuccessMessage(config config.Config, metadata *terraform.Metadata, stdout io.Writer) error {
 	t := template.Must(template.New("deploy").Parse(deployMsg))
 	return t.Execute(stdout, config)
 }

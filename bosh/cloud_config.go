@@ -14,7 +14,7 @@ type awsCloudConfigParams struct {
 	PrivateSubnetID    string
 }
 
-func generateCloudConfig(conf *config.Config, metadata *terraform.Metadata) ([]byte, error) {
+func generateCloudConfig(conf config.Config, metadata *terraform.Metadata) ([]byte, error) {
 	templateParams := awsCloudConfigParams{
 		AvailabilityZone:   conf.AvailabilityZone,
 		VMsSecurityGroupID: metadata.VMsSecurityGroupID.Value,

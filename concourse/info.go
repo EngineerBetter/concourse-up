@@ -54,7 +54,7 @@ func (client *Client) FetchInfo() (*Info, error) {
 		return nil, err
 	}
 
-	boshClient, err := client.buildBoshClient(config, metadata)
+	boshClient, err := client.buildBoshClient(*config, metadata)
 	if err != nil {
 		return nil, err
 	}

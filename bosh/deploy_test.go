@@ -83,7 +83,7 @@ var _ = Describe("Deploy", func() {
 			VMsSecurityGroupID:       terraform.MetadataStringValue{Value: "sg-456"},
 		}
 
-		exampleConfig := &config.Config{
+		exampleConfig := config.Config{
 			PublicKey: "example-public-key",
 			PrivateKey: `-----BEGIN RSA PRIVATE KEY-----
 MIIEogIBAAKCAQEAsoHoo0qYchdIiXIOB4EEWo060NrgUqIIH+o8KLOPXfVBnffS

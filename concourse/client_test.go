@@ -64,7 +64,7 @@ var _ = Describe("Client", func() {
 	}
 
 	fakeFlyClient := &testsupport.FakeFlyClient{
-		FakeSetDefaultPipeline: func(deployArgs *config.DeployArgs, config *config.Config, allowFlyVersionDiscrepancy bool) error {
+		FakeSetDefaultPipeline: func(deployArgs *config.DeployArgs, config config.Config, allowFlyVersionDiscrepancy bool) error {
 			actions = append(actions, "setting default pipeline")
 			return nil
 		},
@@ -201,7 +201,7 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 			}, nil
 		}
 
-		boshClientFactory := func(config *config.Config, metadata *terraform.Metadata, director director.IClient, stdout, stderr io.Writer) (bosh.IClient, error) {
+		boshClientFactory := func(config config.Config, metadata *terraform.Metadata, director director.IClient, stdout, stderr io.Writer) (bosh.IClient, error) {
 			return &testsupport.FakeBoshClient{
 				FakeDeploy: func(stateFileBytes, credsFileBytes []byte, detach bool) ([]byte, []byte, error) {
 					if detach {
