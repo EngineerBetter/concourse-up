@@ -154,9 +154,9 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 				actions = append(actions, "loading or creating config file")
 				return exampleConfig, false, nil
 			},
-			FakeLoad: func() (*config.Config, error) {
+			FakeLoad: func() (config.Config, error) {
 				actions = append(actions, "loading config file")
-				return &exampleConfig, nil
+				return exampleConfig, nil
 			},
 			FakeDeleteAsset: func(filename string) error {
 				actions = append(actions, fmt.Sprintf("deleting config asset: %s", filename))
@@ -173,7 +173,7 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 			FakeHasAsset: func(filename string) (bool, error) {
 				return false, nil
 			},
-			FakeDeleteAll: func(config *config.Config) error {
+			FakeDeleteAll: func(config config.Config) error {
 				actions = append(actions, "deleting config")
 				return nil
 			},

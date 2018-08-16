@@ -15,8 +15,8 @@ const configFilePath = "config.json"
 
 // IClient is an interface for the config file client
 type IClient interface {
-	Load() (*Config, error)
-	DeleteAll(config *Config) error
+	Load() (Config, error)
+	DeleteAll(config Config) error
 	LoadOrCreate(deployArgs *DeployArgs) (Config, bool, error)
 	Update(Config) error
 	StoreAsset(filename string, contents []byte) error
@@ -82,26 +82,26 @@ func (client *Client) Update(config Config) error {
 }
 
 // DeleteAll deletes the entire configuration bucket
-func (client *Client) DeleteAll(config *Config) error {
+func (client *Client) DeleteAll(config Config) error {
 	return client.iaas.DeleteVersionedBucket(config.ConfigBucket)
 }
 
 // Load loads an existing config file from S3
-func (client *Client) Load() (*Config, error) {
+func (client *Client) Load() (Config, error) {
 	configBytes, err := client.iaas.LoadFile(
 		client.configBucket(),
 		configFilePath,
 	)
 	if err != nil {
-		return nil, err
+		return Config{}, err
 	}
 
 	conf := Config{}
-	if err := json.Unmarshal(configBytes, &conf); err != nil {
-		return nil, err
+	if err := json.Unmarshal(configBytes, conf); err != nil {
+		return Config{}, err
 	}
 
-	return &conf, nil
+	return conf, nil
 }
 
 type cidrBlocks []*net.IPNet

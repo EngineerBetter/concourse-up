@@ -17,7 +17,7 @@ import (
 // Info represents the terraform output and concourse-up config files
 type Info struct {
 	Terraform *terraform.Metadata `json:"terraform"`
-	Config    *config.Config      `json:"config"`
+	Config    config.Config       `json:"config"`
 	Instances []bosh.Instance     `json:"instances"`
 }
 
@@ -28,7 +28,7 @@ func (client *Client) FetchInfo() (*Info, error) {
 		return nil, err
 	}
 
-	terraformClient, err := client.terraformClientFactory(client.iaasClient.IAAS(), *config, client.stdout, client.stderr, client.versionFile)
+	terraformClient, err := client.terraformClientFactory(client.iaasClient.IAAS(), config, client.stdout, client.stderr, client.versionFile)
 	if err != nil {
 		return nil, err
 	}
@@ -54,7 +54,7 @@ func (client *Client) FetchInfo() (*Info, error) {
 		return nil, err
 	}
 
-	boshClient, err := client.buildBoshClient(*config, metadata)
+	boshClient, err := client.buildBoshClient(config, metadata)
 	if err != nil {
 		return nil, err
 	}
