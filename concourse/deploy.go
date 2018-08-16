@@ -21,6 +21,21 @@ import (
 	"github.com/EngineerBetter/concourse-up/terraform"
 )
 
+// BoshParams represents the params used and produced by a BOSH deploy
+type BoshParams struct {
+	CredhubPassword          string
+	CredhubAdminClientSecret string
+	CredhubCACert            string
+	CredhubURL               string
+	CredhubUsername          string
+	ConcourseUsername        string
+	ConcoursePassword        string
+	GrafanaPassword          string
+	DirectorUsername         string
+	DirectorPassword         string
+	DirectorCACert           string
+}
+
 // DeployAction runs Deploy
 func (client *Client) DeployAction() error {
 	_, err := client.Deploy()
@@ -35,62 +50,102 @@ func (client *Client) Deploy() (config.Config, error) {
 	}
 	isDomainUpdated := client.deployArgs.Domain != c.Domain
 
-	c, err = client.checkPreTerraformConfigRequirements(c)
+	r, err := client.checkPreTerraformConfigRequirements(c)
 	if err != nil {
 		return c, err
 	}
+	c.Region = r.Region
+	c.RDSInstanceClass = r.RDSInstanceClass
+	c.SourceAccessIP = r.SourceAccessIP
+	c.HostedZoneID = r.HostedZoneID
+	c.HostedZoneRecordPrefix = r.HostedZoneRecordPrefix
+	c.Domain = r.Domain
 
 	metadata, err := client.applyTerraform(c)
 	if err != nil {
 		return c, err
 	}
 
-	c, err = client.checkPreDeployConfigRequirements(client.acmeClientConstructor, isDomainUpdated, c, metadata)
+	err = client.configClient.Update(c)
 	if err != nil {
 		return c, err
 	}
 
+	cr, err := client.checkPreDeployConfigRequirements(client.acmeClientConstructor, isDomainUpdated, c, metadata)
+	if err != nil {
+		return c, err
+	}
+
+	c.Domain = cr.Domain
+	c.ConcourseWorkerCount = cr.ConcourseWorkerCount
+	c.ConcourseWorkerSize = cr.ConcourseWorkerSize
+	c.ConcourseWebSize = cr.ConcourseWebSize
+	c.DirectorPublicIP = cr.DirectorPublicIP
+	c.DirectorCACert = cr.DirectorCerts.DirectorCACert
+	c.DirectorCert = cr.DirectorCerts.DirectorCert
+	c.DirectorKey = cr.DirectorCerts.DirectorKey
+	c.ConcourseCert = cr.Certs.ConcourseCert
+	c.ConcourseKey = cr.Certs.ConcourseKey
+	c.ConcourseUserProvidedCert = cr.Certs.ConcourseUserProvidedCert
+	c.ConcourseCACert = cr.Certs.ConcourseCACert
+
+	var bp BoshParams
 	if client.deployArgs.SelfUpdate {
-		err = client.updateBoshAndPipeline(c, metadata)
+		bp, err = client.updateBoshAndPipeline(c, metadata)
 	} else {
-		err = client.deployBoshAndPipeline(c, metadata)
+		bp, err = client.deployBoshAndPipeline(c, metadata)
 	}
 	if err != nil {
 		return c, err
 	}
+
+	c.CredhubPassword = bp.CredhubPassword
+	c.CredhubAdminClientSecret = bp.CredhubAdminClientSecret
+	c.CredhubCACert = bp.CredhubCACert
+	c.CredhubURL = bp.CredhubURL
+	c.CredhubUsername = bp.CredhubUsername
+	c.ConcourseUsername = bp.ConcourseUsername
+	c.ConcoursePassword = bp.ConcoursePassword
+	c.GrafanaPassword = bp.GrafanaPassword
+	c.DirectorUsername = bp.DirectorUsername
+	c.DirectorPassword = bp.DirectorPassword
+	c.DirectorCACert = bp.DirectorCACert
+
 	return c, client.configClient.Update(c)
 }
 
-func (client *Client) deployBoshAndPipeline(config config.Config, metadata *terraform.Metadata) error {
+func (client *Client) deployBoshAndPipeline(config config.Config, metadata *terraform.Metadata) (BoshParams, error) {
 	// When we are deploying for the first time rather than updating
 	// ensure that the pipeline is set _after_ the concourse is deployed
-	if err := client.deployBosh(config, metadata, false); err != nil {
-		return err
+
+	bp, err := client.deployBosh(config, metadata, false)
+	if err != nil {
+		return BoshParams{}, err
 	}
 
 	flyClient, err := client.flyClientFactory(fly.Credentials{
 		Target:   config.Deployment,
 		API:      fmt.Sprintf("https://%s", config.Domain),
-		Username: config.ConcourseUsername,
-		Password: config.ConcoursePassword,
+		Username: bp.ConcourseUsername,
+		Password: bp.ConcoursePassword,
 	},
 		client.stdout,
 		client.stderr,
 		client.versionFile,
 	)
 	if err != nil {
-		return err
+		return bp, err
 	}
 	defer flyClient.Cleanup()
 
 	if err := flyClient.SetDefaultPipeline(client.deployArgs, config, false); err != nil {
-		return err
+		return bp, err
 	}
 
-	return writeDeploySuccessMessage(config, metadata, client.stdout)
+	return bp, writeDeploySuccessMessage(config, metadata, client.stdout)
 }
 
-func (client *Client) updateBoshAndPipeline(c config.Config, metadata *terraform.Metadata) error {
+func (client *Client) updateBoshAndPipeline(c config.Config, metadata *terraform.Metadata) (BoshParams, error) {
 	// If concourse is already running this is an update rather than a fresh deploy
 	// When updating we need to deploy the BOSH as the final step in order to
 	// Detach from the update, so the update job can exit
@@ -105,117 +160,187 @@ func (client *Client) updateBoshAndPipeline(c config.Config, metadata *terraform
 		client.versionFile,
 	)
 	if err != nil {
-		return err
+		return BoshParams{}, err
 	}
 	defer flyClient.Cleanup()
 
 	concourseAlreadyRunning, err := flyClient.CanConnect()
 	if err != nil {
-		return err
+		return BoshParams{}, err
 	}
 
 	if !concourseAlreadyRunning {
-		return fmt.Errorf("In detach mode but it seems that concourse is not currently running")
+		return BoshParams{}, fmt.Errorf("In detach mode but it seems that concourse is not currently running")
 	}
 
 	// Allow a fly version discrepancy since we might be targetting an older Concourse
 	if err = flyClient.SetDefaultPipeline(client.deployArgs, c, true); err != nil {
-		return err
+		return BoshParams{}, err
 	}
 
-	if err = client.deployBosh(c, metadata, true); err != nil {
-		return err
+	bp, err := client.deployBosh(c, metadata, true)
+	if err != nil {
+		return BoshParams{}, err
 	}
 
 	_, err = client.stdout.Write([]byte("\nUPGRADE RUNNING IN BACKGROUND\n\n"))
 
-	return err
+	return bp, err
 }
 
-func (client *Client) checkPreTerraformConfigRequirements(conf config.Config) (config.Config, error) {
+// TerraformRequirements represents the required values for running terraform
+type TerraformRequirements struct {
+	Region                 string
+	RDSInstanceClass       string
+	SourceAccessIP         string
+	HostedZoneID           string
+	HostedZoneRecordPrefix string
+	Domain                 string
+}
+
+func (client *Client) checkPreTerraformConfigRequirements(conf config.Config) (TerraformRequirements, error) {
+	r := TerraformRequirements{
+		Region:                 conf.Region,
+		RDSInstanceClass:       conf.RDSInstanceClass,
+		SourceAccessIP:         conf.SourceAccessIP,
+		HostedZoneID:           conf.HostedZoneID,
+		HostedZoneRecordPrefix: conf.HostedZoneRecordPrefix,
+		Domain:                 conf.Domain,
+	}
+
 	region := client.deployArgs.AWSRegion
 
 	if conf.Region != "" {
 		if conf.Region != region {
-			return conf, fmt.Errorf("found previous deployment in %s. Refusing to deploy to %s as changing regions for existing deployments is not supported", conf.Region, region)
+			return r, fmt.Errorf("found previous deployment in %s. Refusing to deploy to %s as changing regions for existing deployments is not supported", conf.Region, region)
 		}
 	}
 
-	conf.Region = region
+	r.Region = region
 
-	// If the RDS instance size has manually set, override the existing size in the config
 	if client.deployArgs.DBSizeIsSet {
-		conf.RDSInstanceClass = config.DBSizes[client.deployArgs.DBSize]
+		r.RDSInstanceClass = config.DBSizes[client.deployArgs.DBSize]
 	}
 
 	// When in self-update mode do not override the user IP, since we already have access to the worker
 	if !client.deployArgs.SelfUpdate {
 		var err error
-		conf, err = client.setUserIP(conf)
+		r.SourceAccessIP, err = client.setUserIP(conf)
 		if err != nil {
-			return conf, err
+			return r, err
 		}
 	}
 
-	conf, err := client.setHostedZone(conf)
+	zone, err := client.setHostedZone(conf)
 	if err != nil {
-		return conf, err
+		return r, err
 	}
+	r.HostedZoneID = zone.HostedZoneID
+	r.HostedZoneRecordPrefix = zone.HostedZoneRecordPrefix
+	r.Domain = zone.Domain
 
-	return conf, nil
+	return r, nil
 }
 
-func (client *Client) checkPreDeployConfigRequirements(c func(u *certs.User) (certs.AcmeClient, error), isDomainUpdated bool, cfg config.Config, metadata *terraform.Metadata) (config.Config, error) {
+// DirectorCerts represents the certificate of a Director
+type DirectorCerts struct {
+	DirectorCACert string
+	DirectorCert   string
+	DirectorKey    string
+}
+
+// Certs represents the certificate of a Concourse
+type Certs struct {
+	ConcourseCert             string
+	ConcourseKey              string
+	ConcourseUserProvidedCert bool
+	ConcourseCACert           string
+}
+
+// Requirements represents the pre deployment requirements of a Concourse
+type Requirements struct {
+	Domain               string
+	ConcourseWorkerCount int
+	ConcourseWorkerSize  string
+	ConcourseWebSize     string
+	DirectorPublicIP     string
+	DirectorCerts        DirectorCerts
+	Certs                Certs
+}
+
+func (client *Client) checkPreDeployConfigRequirements(c func(u *certs.User) (certs.AcmeClient, error), isDomainUpdated bool, cfg config.Config, metadata *terraform.Metadata) (Requirements, error) {
+	cr := Requirements{
+		Domain:               cfg.Domain,
+		ConcourseWorkerCount: cfg.ConcourseWorkerCount,
+		ConcourseWorkerSize:  cfg.ConcourseWorkerSize,
+		ConcourseWebSize:     cfg.ConcourseWebSize,
+		DirectorPublicIP:     cfg.DirectorPublicIP,
+	}
+
 	if client.deployArgs.Domain == "" {
-		cfg.Domain = metadata.ATCPublicIP.Value
+		cr.Domain = metadata.ATCPublicIP.Value
 	}
 
-	cfg, err := client.ensureDirectorCerts(c, cfg, metadata)
+	dc := DirectorCerts{
+		DirectorCACert: cfg.DirectorCACert,
+		DirectorCert:   cfg.DirectorCert,
+		DirectorKey:    cfg.DirectorKey,
+	}
+
+	dc, err := client.ensureDirectorCerts(c, dc, cfg.Deployment, metadata)
 	if err != nil {
-		return config.Config{}, err
+		return cr, err
 	}
 
-	cfg, err = client.ensureConcourseCerts(c, isDomainUpdated, cfg, metadata)
+	cr.DirectorCerts = dc
+
+	cc := Certs{
+		ConcourseCert:             cfg.ConcourseCert,
+		ConcourseKey:              cfg.ConcourseKey,
+		ConcourseUserProvidedCert: cfg.ConcourseUserProvidedCert,
+		ConcourseCACert:           cfg.ConcourseCACert,
+	}
+
+	cc, err = client.ensureConcourseCerts(c, isDomainUpdated, cc, cfg.Deployment, cr.Domain, metadata)
 	if err != nil {
-		return config.Config{}, err
+		return cr, err
 	}
 
-	cfg.ConcourseWorkerCount = client.deployArgs.WorkerCount
-	cfg.ConcourseWorkerSize = client.deployArgs.WorkerSize
-	cfg.ConcourseWebSize = client.deployArgs.WebSize
-	cfg.DirectorPublicIP = metadata.DirectorPublicIP.Value
+	cr.Certs = cc
 
-	if err := client.configClient.Update(cfg); err != nil {
-		return config.Config{}, err
-	}
+	cr.ConcourseWorkerCount = client.deployArgs.WorkerCount
+	cr.ConcourseWorkerSize = client.deployArgs.WorkerSize
+	cr.ConcourseWebSize = client.deployArgs.WebSize
+	cr.DirectorPublicIP = metadata.DirectorPublicIP.Value
 
-	return cfg, nil
+	return cr, nil
 }
 
-func (client *Client) ensureDirectorCerts(c func(u *certs.User) (certs.AcmeClient, error), cfg config.Config, metadata *terraform.Metadata) (config.Config, error) {
+func (client *Client) ensureDirectorCerts(c func(u *certs.User) (certs.AcmeClient, error), dc DirectorCerts, deployment string, metadata *terraform.Metadata) (DirectorCerts, error) {
 	// If we already have director certificates, don't regenerate as changing them will
 	// force a bosh director re-deploy even if there are no other changes
-	if cfg.DirectorCACert != "" {
-		return cfg, nil
+	certs := dc
+	if certs.DirectorCACert != "" {
+		return certs, nil
 	}
 
 	ip := metadata.DirectorPublicIP.Value
 	_, err := client.stdout.Write(
 		[]byte(fmt.Sprintf("\nGENERATING BOSH DIRECTOR CERTIFICATE (%s, 10.0.0.6)\n", ip)))
 	if err != nil {
-		return config.Config{}, err
+		return certs, err
 	}
 
-	directorCerts, err := client.certGenerator(c, cfg.Deployment, ip, "10.0.0.6")
+	directorCerts, err := client.certGenerator(c, deployment, ip, "10.0.0.6")
 	if err != nil {
-		return config.Config{}, err
+		return certs, err
 	}
 
-	cfg.DirectorCACert = string(directorCerts.CACert)
-	cfg.DirectorCert = string(directorCerts.Cert)
-	cfg.DirectorKey = string(directorCerts.Key)
+	certs.DirectorCACert = string(directorCerts.CACert)
+	certs.DirectorCert = string(directorCerts.Cert)
+	certs.DirectorKey = string(directorCerts.Key)
 
-	return cfg, nil
+	return certs, nil
 }
 
 func timeTillExpiry(cert string) time.Duration {
@@ -230,32 +355,34 @@ func timeTillExpiry(cert string) time.Duration {
 	return time.Until(c.NotAfter)
 }
 
-func (client *Client) ensureConcourseCerts(c func(u *certs.User) (certs.AcmeClient, error), domainUpdated bool, cfg config.Config, metadata *terraform.Metadata) (config.Config, error) {
-	if client.deployArgs.TLSCert != "" {
-		cfg.ConcourseCert = client.deployArgs.TLSCert
-		cfg.ConcourseKey = client.deployArgs.TLSKey
-		cfg.ConcourseUserProvidedCert = true
+func (client *Client) ensureConcourseCerts(c func(u *certs.User) (certs.AcmeClient, error), domainUpdated bool, cc Certs, deployment, domain string, metadata *terraform.Metadata) (Certs, error) {
+	certs := cc
 
-		return cfg, nil
+	if client.deployArgs.TLSCert != "" {
+		certs.ConcourseCert = client.deployArgs.TLSCert
+		certs.ConcourseKey = client.deployArgs.TLSKey
+		certs.ConcourseUserProvidedCert = true
+
+		return certs, nil
 	}
 
 	// Skip concourse re-deploy if certs have already been set,
 	// unless domain has changed
-	if cfg.ConcourseCert != "" && !domainUpdated && timeTillExpiry(cfg.ConcourseCert) > 28*24*time.Hour {
-		return cfg, nil
+	if certs.ConcourseCert != "" && !domainUpdated && timeTillExpiry(certs.ConcourseCert) > 28*24*time.Hour {
+		return certs, nil
 	}
 
 	// If no domain has been provided by the user, the value of cfg.Domain is set to the ATC's public IP in checkPreDeployConfigRequirements
-	concourseCerts, err := client.certGenerator(c, cfg.Deployment, cfg.Domain)
+	Certs, err := client.certGenerator(c, deployment, domain)
 	if err != nil {
-		return config.Config{}, err
+		return certs, err
 	}
 
-	cfg.ConcourseCert = string(concourseCerts.Cert)
-	cfg.ConcourseKey = string(concourseCerts.Key)
-	cfg.ConcourseCACert = string(concourseCerts.CACert)
+	certs.ConcourseCert = string(Certs.Cert)
+	certs.ConcourseKey = string(Certs.Key)
+	certs.ConcourseCACert = string(Certs.CACert)
 
-	return cfg, nil
+	return certs, nil
 }
 
 func (client *Client) applyTerraform(c config.Config) (*terraform.Metadata, error) {
@@ -281,20 +408,32 @@ func (client *Client) applyTerraform(c config.Config) (*terraform.Metadata, erro
 	return metadata, nil
 }
 
-func (client *Client) deployBosh(config config.Config, metadata *terraform.Metadata, detach bool) error {
+func (client *Client) deployBosh(config config.Config, metadata *terraform.Metadata, detach bool) (BoshParams, error) {
+	// TODO: bubble this up
+	bp := BoshParams{
+		CredhubPassword:          config.CredhubPassword,
+		CredhubAdminClientSecret: config.CredhubAdminClientSecret,
+		CredhubCACert:            config.CredhubCACert,
+		CredhubURL:               config.CredhubURL,
+		CredhubUsername:          config.CredhubUsername,
+		ConcourseUsername:        config.ConcourseUsername,
+		ConcoursePassword:        config.ConcoursePassword,
+		GrafanaPassword:          config.GrafanaPassword,
+	}
+
 	boshClient, err := client.buildBoshClient(config, metadata)
 	if err != nil {
-		return err
+		return bp, err
 	}
 	defer boshClient.Cleanup()
 
 	boshStateBytes, err := loadDirectorState(client.configClient)
 	if err != nil {
-		return err
+		return bp, err
 	}
 	boshCredsBytes, err := loadDirectorCreds(client.configClient)
 	if err != nil {
-		return err
+		return bp, err
 	}
 
 	boshStateBytes, boshCredsBytes, err = boshClient.Deploy(boshStateBytes, boshCredsBytes, detach)
@@ -307,7 +446,7 @@ func (client *Client) deployBosh(config config.Config, metadata *terraform.Metad
 		err = err1
 	}
 	if err != nil {
-		return err
+		return bp, err
 	}
 
 	var cc struct {
@@ -321,21 +460,21 @@ func (client *Client) deployBosh(config config.Config, metadata *terraform.Metad
 
 	err = yaml.Unmarshal(boshCredsBytes, &cc)
 	if err != nil {
-		return err
+		return bp, err
 	}
 
-	config.CredhubPassword = cc.CredhubPassword
-	config.CredhubAdminClientSecret = cc.CredhubAdminClientSecret
-	config.CredhubCACert = cc.InternalTLS.CA
-	config.CredhubURL = fmt.Sprintf("https://%s:8844/", config.Domain)
-	config.CredhubUsername = "credhub-cli"
-	config.ConcourseUsername = "admin"
+	bp.CredhubPassword = cc.CredhubPassword
+	bp.CredhubAdminClientSecret = cc.CredhubAdminClientSecret
+	bp.CredhubCACert = cc.InternalTLS.CA
+	bp.CredhubURL = fmt.Sprintf("https://%s:8844/", config.Domain)
+	bp.CredhubUsername = "credhub-cli"
+	bp.ConcourseUsername = "admin"
 	if len(cc.AtcPassword) > 0 {
-		config.ConcoursePassword = cc.AtcPassword
-		config.GrafanaPassword = cc.AtcPassword
+		bp.ConcoursePassword = cc.AtcPassword
+		bp.GrafanaPassword = cc.AtcPassword
 	}
 
-	return nil
+	return bp, nil
 }
 
 func (client *Client) loadConfig() (config.Config, error) {
@@ -352,49 +491,57 @@ func (client *Client) loadConfig() (config.Config, error) {
 	return cfg, nil
 }
 
-func (client *Client) setUserIP(c config.Config) (config.Config, error) {
+func (client *Client) setUserIP(c config.Config) (string, error) {
+	sourceAccessIP := c.SourceAccessIP
 	userIP, err := client.ipChecker()
 	if err != nil {
-		return c, err
+		return sourceAccessIP, err
 	}
 
-	if c.SourceAccessIP != userIP {
-		c.SourceAccessIP = userIP
+	if sourceAccessIP != userIP {
+		sourceAccessIP = userIP
 		_, err = client.stderr.Write([]byte(fmt.Sprintf(
 			"\nWARNING: allowing access from local machine (address: %s)\n\n", userIP)))
 		if err != nil {
-			return c, err
-		}
-		if err = client.configClient.Update(c); err != nil {
-			return c, err
+			return sourceAccessIP, err
 		}
 	}
 
-	return c, nil
+	return sourceAccessIP, nil
 }
 
-func (client *Client) setHostedZone(c config.Config) (config.Config, error) {
+// HostedZone represents a DNS hosted zone
+type HostedZone struct {
+	HostedZoneID           string
+	HostedZoneRecordPrefix string
+	Domain                 string
+}
+
+func (client *Client) setHostedZone(c config.Config) (HostedZone, error) {
+	zone := HostedZone{
+		HostedZoneID:           c.HostedZoneID,
+		HostedZoneRecordPrefix: c.HostedZoneRecordPrefix,
+		Domain:                 c.Domain,
+	}
 	domain := client.deployArgs.Domain
 	if client.deployArgs.Domain == "" {
-		return c, nil
+		return zone, nil
 	}
 
 	hostedZoneName, hostedZoneID, err := client.iaasClient.FindLongestMatchingHostedZone(domain, iaas.ListHostedZones)
 	if err != nil {
-		return c, err
+		return zone, err
 	}
-	c.HostedZoneID = hostedZoneID
-	c.HostedZoneRecordPrefix = strings.TrimSuffix(domain, fmt.Sprintf(".%s", hostedZoneName))
-	c.Domain = domain
+	zone.HostedZoneID = hostedZoneID
+	zone.HostedZoneRecordPrefix = strings.TrimSuffix(domain, fmt.Sprintf(".%s", hostedZoneName))
+	zone.Domain = domain
 
 	_, err = client.stderr.Write([]byte(fmt.Sprintf(
 		"\nWARNING: adding record %s to Route53 hosted zone %s ID: %s\n\n", domain, hostedZoneName, hostedZoneID)))
 	if err != nil {
-		return c, err
+		return zone, err
 	}
-	err = client.configClient.Update(c)
-
-	return c, err
+	return zone, err
 }
 
 const deployMsg = `DEPLOY SUCCESSFUL. Log in with:

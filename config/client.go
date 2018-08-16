@@ -97,7 +97,7 @@ func (client *Client) Load() (Config, error) {
 	}
 
 	conf := Config{}
-	if err := json.Unmarshal(configBytes, conf); err != nil {
+	if err := json.Unmarshal(configBytes, &conf); err != nil {
 		return Config{}, err
 	}
 

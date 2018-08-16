@@ -390,7 +390,7 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 			_, err := client.Deploy()
 			Expect(err).ToNot(HaveOccurred())
 
-			Expect(actions[8]).To(Equal("deploying director"))
+			Expect(testsupport.CompareActions(actions, "deploying director", "setting default pipeline")).To(BeNumerically("<", 0))
 		})
 
 		Context("When running in self-update mode and the concourse is already deployed", func() {
