@@ -12,7 +12,7 @@ inputs:
 - name: binary-linux
 
 run:
-  path: concourse-up/ci/tasks/cleanup-tests.sh
+  path: concourse-up/ci/tasks/cleanup-tests.rb
 
 params:
   AWS_ACCESS_KEY_ID:
