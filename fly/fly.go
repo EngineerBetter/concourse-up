@@ -91,10 +91,17 @@ func New(creds Credentials, stdout, stderr io.Writer, versionFile []byte) (IClie
 	}, nil
 }
 
+var (
+	execCommand = exec.Command
+)
+
+func (client *Client) runFly(args ...string) *exec.Cmd {
+	return execCommand(client.tempDir.Path("fly"), args...)
+}
+
 // CanConnect returns true if it can connect to the concourse
 func (client *Client) CanConnect() (bool, error) {
-	cmd := exec.Command(
-		client.tempDir.Path("fly"),
+	cmd := client.runFly(
 		"--target",
 		client.creds.Target,
 		"login",
@@ -232,7 +239,7 @@ func (client *Client) sync() error {
 
 func (client *Client) run(args ...string) error {
 	args = append([]string{"--target", client.creds.Target}, args...)
-	cmd := exec.Command(client.tempDir.Path("fly"), args...)
+	cmd := client.runFly(args...)
 	cmd.Stdout = client.stdout
 	cmd.Stderr = client.stderr
 	return cmd.Run()
