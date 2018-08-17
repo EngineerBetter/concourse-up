@@ -35,7 +35,7 @@ buckets.each_line do |bucket|
   end
 end
 
-return if non_empty.empty?
+exit(0) if non_empty.empty?
 
 non_empty.each do |bucket|
   if /^concourse-up-systest-[0-9]+/ =~ "#{bucket}"
