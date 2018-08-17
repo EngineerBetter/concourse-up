@@ -114,18 +114,32 @@ func (client *Client) Deploy() (config.Config, error) {
 	return c, client.configClient.Update(c)
 }
 
-func (client *Client) deployBoshAndPipeline(config config.Config, metadata *terraform.Metadata) (BoshParams, error) {
+func (client *Client) deployBoshAndPipeline(c config.Config, metadata *terraform.Metadata) (BoshParams, error) {
 	// When we are deploying for the first time rather than updating
 	// ensure that the pipeline is set _after_ the concourse is deployed
 
-	bp, err := client.deployBosh(config, metadata, false)
+	bp := BoshParams{
+		CredhubPassword:          c.CredhubPassword,
+		CredhubAdminClientSecret: c.CredhubAdminClientSecret,
+		CredhubCACert:            c.CredhubCACert,
+		CredhubURL:               c.CredhubURL,
+		CredhubUsername:          c.CredhubUsername,
+		ConcourseUsername:        c.ConcourseUsername,
+		ConcoursePassword:        c.ConcoursePassword,
+		GrafanaPassword:          c.GrafanaPassword,
+		DirectorUsername:         c.DirectorUsername,
+		DirectorPassword:         c.DirectorPassword,
+		DirectorCACert:           c.DirectorCACert,
+	}
+
+	bp, err := client.deployBosh(c, metadata, false)
 	if err != nil {
-		return BoshParams{}, err
+		return bp, err
 	}
 
 	flyClient, err := client.flyClientFactory(fly.Credentials{
-		Target:   config.Deployment,
-		API:      fmt.Sprintf("https://%s", config.Domain),
+		Target:   c.Deployment,
+		API:      fmt.Sprintf("https://%s", c.Domain),
 		Username: bp.ConcourseUsername,
 		Password: bp.ConcoursePassword,
 	},
@@ -138,17 +152,32 @@ func (client *Client) deployBoshAndPipeline(config config.Config, metadata *terr
 	}
 	defer flyClient.Cleanup()
 
-	if err := flyClient.SetDefaultPipeline(client.deployArgs, config, false); err != nil {
+	if err := flyClient.SetDefaultPipeline(client.deployArgs, c, false); err != nil {
 		return bp, err
 	}
 
-	return bp, writeDeploySuccessMessage(config, metadata, client.stdout)
+	return bp, writeDeploySuccessMessage(c, metadata, client.stdout)
 }
 
 func (client *Client) updateBoshAndPipeline(c config.Config, metadata *terraform.Metadata) (BoshParams, error) {
 	// If concourse is already running this is an update rather than a fresh deploy
 	// When updating we need to deploy the BOSH as the final step in order to
 	// Detach from the update, so the update job can exit
+
+	bp := BoshParams{
+		CredhubPassword:          c.CredhubPassword,
+		CredhubAdminClientSecret: c.CredhubAdminClientSecret,
+		CredhubCACert:            c.CredhubCACert,
+		CredhubURL:               c.CredhubURL,
+		CredhubUsername:          c.CredhubUsername,
+		ConcourseUsername:        c.ConcourseUsername,
+		ConcoursePassword:        c.ConcoursePassword,
+		GrafanaPassword:          c.GrafanaPassword,
+		DirectorUsername:         c.DirectorUsername,
+		DirectorPassword:         c.DirectorPassword,
+		DirectorCACert:           c.DirectorCACert,
+	}
+
 	flyClient, err := client.flyClientFactory(fly.Credentials{
 		Target:   c.Deployment,
 		API:      fmt.Sprintf("https://%s", c.Domain),
@@ -160,27 +189,27 @@ func (client *Client) updateBoshAndPipeline(c config.Config, metadata *terraform
 		client.versionFile,
 	)
 	if err != nil {
-		return BoshParams{}, err
+		return bp, err
 	}
 	defer flyClient.Cleanup()
 
 	concourseAlreadyRunning, err := flyClient.CanConnect()
 	if err != nil {
-		return BoshParams{}, err
+		return bp, err
 	}
 
 	if !concourseAlreadyRunning {
-		return BoshParams{}, fmt.Errorf("In detach mode but it seems that concourse is not currently running")
+		return bp, fmt.Errorf("In detach mode but it seems that concourse is not currently running")
 	}
 
 	// Allow a fly version discrepancy since we might be targetting an older Concourse
 	if err = flyClient.SetDefaultPipeline(client.deployArgs, c, true); err != nil {
-		return BoshParams{}, err
+		return bp, err
 	}
 
-	bp, err := client.deployBosh(c, metadata, true)
+	bp, err = client.deployBosh(c, metadata, true)
 	if err != nil {
-		return BoshParams{}, err
+		return bp, err
 	}
 
 	_, err = client.stdout.Write([]byte("\nUPGRADE RUNNING IN BACKGROUND\n\n"))
@@ -409,7 +438,6 @@ func (client *Client) applyTerraform(c config.Config) (*terraform.Metadata, erro
 }
 
 func (client *Client) deployBosh(config config.Config, metadata *terraform.Metadata, detach bool) (BoshParams, error) {
-	// TODO: bubble this up
 	bp := BoshParams{
 		CredhubPassword:          config.CredhubPassword,
 		CredhubAdminClientSecret: config.CredhubAdminClientSecret,
@@ -419,6 +447,9 @@ func (client *Client) deployBosh(config config.Config, metadata *terraform.Metad
 		ConcourseUsername:        config.ConcourseUsername,
 		ConcoursePassword:        config.ConcoursePassword,
 		GrafanaPassword:          config.GrafanaPassword,
+		DirectorUsername:         config.DirectorUsername,
+		DirectorPassword:         config.DirectorPassword,
+		DirectorCACert:           config.DirectorCACert,
 	}
 
 	boshClient, err := client.buildBoshClient(config, metadata)
