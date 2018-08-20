@@ -46,12 +46,12 @@ non_empty.each do |bucket|
   if /^concourse-up-systest-[0-9]+/ =~ "#{bucket}"
     deployment = bucket.split('-')[2..3].join('-')
     region = bucket.split('-')[4..6].join('-')
-    str = sprintf("./cup destroy --region %s %s", region, deployment)
+    str = sprintf("yes yes | ./cup destroy --region %s %s", region, deployment)
     `echo #{str} >> to_delete`
   elsif /^concourse-up-systest-[a-zA-Z]+-[0-9]+/ =~ "#{bucket}"
     deployment = bucket.split('-')[2..4].join('-')
     region = bucket.split('-')[5..7].join('-')
-    str = sprintf("./cup destroy --region %s %s", region, deployment)
+    str = sprintf("yes yes | ./cup destroy --region %s %s", region, deployment)
     `echo #{str} >> to_delete`
   else
     puts "Unexpected bucket format #{bucket} -- skipping"
