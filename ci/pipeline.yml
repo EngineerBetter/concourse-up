@@ -53,6 +53,9 @@ resources:
   source:
     uri: git@github.com:EngineerBetter/concourse-up-manifest.git
     private_key: ((github_private_key))
+    paths:
+    - manifest.yml
+    - ops/versions.json
 
 - name: pcf-ops
   type: docker-image
