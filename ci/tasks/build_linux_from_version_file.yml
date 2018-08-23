@@ -7,7 +7,7 @@ params:
   OUTPUT_FILE:
 
 inputs:
-- name: concourse-up
+- name: concourse-up-whole-repo
 - name: version
 
 outputs:
