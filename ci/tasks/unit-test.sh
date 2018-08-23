@@ -3,6 +3,7 @@
 set -eu
 
 mkdir -p "$GOPATH/src/github.com/EngineerBetter/concourse-up"
+mkdir -p "$GOPATH/src/github.com/EngineerBetter/concourse-up-ops"
 mv concourse-up/* "$GOPATH/src/github.com/EngineerBetter/concourse-up"
 mv concourse-up-ops/* "$GOPATH/src/github.com/EngineerBetter/concourse-up-ops"
 cd "$GOPATH/src/github.com/EngineerBetter/concourse-up"
