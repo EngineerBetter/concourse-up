@@ -6,6 +6,7 @@ cp -r concourse-up/. concourse-up-new
 mv director-versions/director-versions.json concourse-up-new/resources/director-versions.json
 mv concourse-up-manifest/manifest.yml concourse-up-new/resources/manifest.yml
 mv concourse-up-manifest/ops/versions.json concourse-up-new/resources/versions.json
+mv concourse-up-manifest/ops/shas.json concourse-up-new/resources/shas.json
 
 pushd concourse-up-new
   if [[ $(git status --porcelain) ]]; then
