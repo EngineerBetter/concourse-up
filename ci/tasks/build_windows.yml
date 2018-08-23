@@ -13,4 +13,4 @@ outputs:
 - name: build-windows
 
 run:
-  path: concourse-up/ci/tasks/build.sh
+  path: concourse-up-whole-repo/ci/tasks/build.sh
