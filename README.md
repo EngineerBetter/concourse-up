@@ -278,3 +278,15 @@ $ ginkgo -r
 ### Building locally
 
 `concourse-up` uses [golang compile-time variables](https://github.com/golang/go/wiki/GcToolchainTricks#including-build-information-in-the-executable) to set the release versions it uses. To build locally use the `build_local.sh` script, rather than running `go build`.
+
+### Bumping Manifest/Ops File versions
+
+The `get-versions` job in the pipeline listens for new patch or minor versions of `manifest.yml` and `ops/versions.json` coming from the `concourse-up-manifest` repo. In order to pick up a new major version first make sure it exists on the `release` branch in `concourse-up-manifest` then modify `tag_filter: X.*.*` in the `concourse-up-manifest` resource where `X` is the major version you want to pin to.
+
+### Pipeline Resource Names
+
+In the `concourse-up` pipeline there are three different resources listening to this repo.
+
+* `concourse-up` is the whole repo. This is used to run all the jobs but doesn't trigger anything
+* `concourse-up-code` listens for changes to `concourse-up` code and ignores changes to this README, `resources/manifest.yml`, `resources/versions.json`, `resources/director-versions.json`, and `resources/shas.json`
+* `concourse-up-versions` is the complement of `concourse-up-code` (i.e. it just listens for ops file and manifest changes)
