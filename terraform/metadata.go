@@ -19,6 +19,7 @@ type Metadata struct {
 	PrivateSubnetID         MetadataStringValue `json:"private_subnet_id" valid:"required"`
 	VPCID                   MetadataStringValue `json:"vpc_id" valid:"required"`
 	NatGatewayIP            MetadataStringValue `json:"nat_gateway_ip" valid:"required"`
+	VMsInstanceProfile      MetadataStringValue `json:"worker_instance_profile" valid:"required"`
 
 	BlobstoreBucket          MetadataStringValue `json:"blobstore_bucket" valid:"required"`
 	BlobstoreUserAccessKeyID MetadataStringValue `json:"blobstore_user_access_key_id" valid:"required"`
