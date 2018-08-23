@@ -441,6 +441,7 @@ jobs:
     - get: version
       params:
         bump: patch
+      passed: [system-test]
     - get: pcf-ops
       passed: [system-test]
     - get: concourse-up
@@ -477,6 +478,7 @@ jobs:
     - get: version
       params:
         bump: minor
+      passed: [system-test]
     - get: pcf-ops
       passed: [system-test]
     - get: concourse-up
@@ -511,6 +513,7 @@ jobs:
   plan:
   - aggregate:
     - get: version
+      passed: [system-test]
       params:
         bump: major
     - get: pcf-ops
