@@ -13,6 +13,7 @@ const concourseManifestFilename = "concourse.yml"
 const credsFilename = "concourse-creds.yml"
 const concourseDeploymentName = "concourse"
 const concourseVersionsFilename = "versions.json"
+const concourseSHAsFilename = "shas.json"
 const concourseGrafanaFilename = "grafana_dashboard.yml"
 const concourseCompatibilityFilename = "cup_compatibility.yml"
 
@@ -55,6 +56,11 @@ func (client *Client) deployConcourse(creds []byte, detach bool) (newCreds []byt
 	}
 
 	concourseVersionsPath, err := client.director.SaveFileToWorkingDir(concourseVersionsFilename, awsConcourseVersions)
+	if err != nil {
+		return
+	}
+
+	concourseSHAsPath, err := client.director.SaveFileToWorkingDir(concourseSHAsFilename, awsConcourseSHAs)
 	if err != nil {
 		return
 	}
@@ -114,6 +120,8 @@ func (client *Client) deployConcourse(creds []byte, detach bool) (newCreds []byt
 			"--ops-file",
 			concourseVersionsPath,
 			"--ops-file",
+			concourseSHAsPath,
+			"--ops-file",
 			concourseCompatibilityPath,
 			"--vars-file",
 			concourseGrafanaPath,
@@ -147,3 +155,4 @@ var awsConcourseGrafana = MustAsset("assets/grafana_dashboard.yml")
 var awsConcourseCompatibility = MustAsset("assets/ops/cup_compatibility.yml")
 var awsConcourseManifest = MustAsset("../resources/manifest.yml")
 var awsConcourseVersions = MustAsset("../resources/versions.json")
+var awsConcourseSHAs = MustAsset("../resources/shas.json")
