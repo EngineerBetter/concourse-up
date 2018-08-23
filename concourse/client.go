@@ -35,8 +35,8 @@ type IClient interface {
 	FetchInfo() (*Info, error)
 }
 
-//go:generate go-bindata -pkg $GOPACKAGE ../resources/director-versions.json
-var versionFile = MustAsset("../resources/director-versions.json")
+//go:generate go-bindata -pkg $GOPACKAGE ../../concourse-up-ops/director-versions.json
+var versionFile = MustAsset("../../concourse-up-ops/director-versions.json")
 
 // NewClient returns a new Client
 func NewClient(
