@@ -38,7 +38,7 @@ resources:
       username: admin
       password: ((atc_main_password))
 
-- name: concourse-up
+- name: concourse-up-code
   type: git
   source:
     uri: git@github.com:EngineerBetter/concourse-up.git
@@ -49,8 +49,9 @@ resources:
     - resources/versions.json
     - resources/shas.json
     - resources/manifest.yml
+    - resources/director-versions.json
 
-- name: concourse-up-whole-repo
+- name: concourse-up
   type: git
   source:
     uri: git@github.com:EngineerBetter/concourse-up.git
@@ -156,8 +157,9 @@ resources:
 jobs:
 - name: set-pipeline
   plan:
-  - get: concourse-up
+  - get: concourse-up-code
     trigger: true
+  - get: concourse-up
   - put: this-pipeline
     params:
       pipelines:
@@ -169,11 +171,13 @@ jobs:
   plan:
   - aggregate:
     - get: pcf-ops
-    - get: concourse-up
+    - get: concourse-up-code
       trigger: true
       passed: [set-pipeline]
     - get: concourse-up-versions
       trigger: true
+    - get: concourse-up
+      passed: [set-pipeline]
   - task: lint
     image: pcf-ops
     file: concourse-up/ci/tasks/lint.yml
@@ -202,7 +206,7 @@ jobs:
   plan:
   - aggregate:
     - get: pcf-ops
-    - get: concourse-up-whole-repo
+    - get: concourse-up
     - get: bosh-deployment
       trigger: true
     - get: concourse-up-manifest
@@ -212,7 +216,7 @@ jobs:
   - task: copy-files
     image: pcf-ops
     file: concourse-up/ci/tasks/copy-files.yml
-  - put: concourse-up-whole-repo
+  - put: concourse-up
     params:
       repository: concourse-up-new
       rebase: true
@@ -222,13 +226,14 @@ jobs:
   - aggregate:
     - get: pcf-ops
       passed: [unit-tests]
-    - get: concourse-up
+    - get: concourse-up-code
       trigger: true
       passed: [unit-tests]
     - get: concourse-up-versions
       trigger: true
       passed: [unit-tests]
-    - get: concourse-up-whole-repo
+    - get: concourse-up
+      passed: [unit-tests]
     - get: version
   - aggregate:
     - do:
@@ -282,11 +287,13 @@ jobs:
     - get: binary-windows
       trigger: true
       passed: [build]
-    - get: concourse-up
+    - get: concourse-up-code
       trigger: true
       passed: [build]
     - get: concourse-up-versions
       trigger: true
+      passed: [build]
+    - get: concourse-up
       passed: [build]
     - get: pcf-ops
       passed: [build]
@@ -380,7 +387,6 @@ jobs:
     - get: concourse-up-versions
       trigger: true
       passed: [system-test]
-    - get: concourse-up-whole-repo
     - get: version
       passed: [system-test]
       params:
@@ -439,7 +445,6 @@ jobs:
       passed: [system-test]
     - get: concourse-up
       passed: [system-test]
-    - get: concourse-up-whole-repo
   - aggregate: *build_binaries
   - task: write-release-vars
     image: pcf-ops
@@ -476,7 +481,6 @@ jobs:
       passed: [system-test]
     - get: concourse-up
       passed: [system-test]
-    - get: concourse-up-whole-repo
   - aggregate: *build_binaries
   - task: write-release-vars
     image: pcf-ops
@@ -513,7 +517,6 @@ jobs:
       passed: [system-test]
     - get: concourse-up
       passed: [system-test]
-    - get: concourse-up-whole-repo
   - aggregate: *build_binaries
   - task: write-release-vars
     image: pcf-ops

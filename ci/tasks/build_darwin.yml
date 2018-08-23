@@ -7,10 +7,10 @@ params:
   OUTPUT_FILE:
 
 inputs:
-- name: concourse-up-whole-repo
+- name: concourse-up
 
 outputs:
 - name: build-darwin
 
 run:
-  path: concourse-up-whole-repo/ci/tasks/build.sh
+  path: concourse-up/ci/tasks/build.sh

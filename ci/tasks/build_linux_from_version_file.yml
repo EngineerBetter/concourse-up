@@ -7,11 +7,11 @@ params:
   OUTPUT_FILE:
 
 inputs:
-- name: concourse-up-whole-repo
+- name: concourse-up
 - name: version
 
 outputs:
 - name: build-linux
 
 run:
-  path: concourse-up-whole-repo/ci/tasks/build.sh
+  path: concourse-up/ci/tasks/build.sh
