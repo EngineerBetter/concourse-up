@@ -4,7 +4,6 @@ groups:
   jobs:
   - set-pipeline
   - unit-tests
-  - get-versions
   - build
   - system-test
   - auto
@@ -38,7 +37,7 @@ resources:
       username: admin
       password: ((atc_main_password))
 
-- name: concourse-up-code
+- name: concourse-up
   type: git
   source:
     uri: git@github.com:EngineerBetter/concourse-up.git
@@ -46,38 +45,17 @@ resources:
     private_key: ((github_private_key))
     ignore_paths:
     - README.md
-    - resources/versions.json
-    - resources/shas.json
-    - resources/manifest.yml
-    - resources/director-versions.json
 
-- name: concourse-up
+- name: concourse-up-ops
   type: git
   source:
-    uri: git@github.com:EngineerBetter/concourse-up.git
+    uri: git@github.com:EngineerBetter/concourse-up-ops.git
     branch: master
-    private_key: ((github_private_key))
-
-- name: concourse-up-versions
-  type: git
-  source:
-    uri: git@github.com:EngineerBetter/concourse-up.git
-    branch: master
-    private_key: ((github_private_key))
-    paths:
-    - resources/versions.json
-    - resources/manifest.yml
-    - resources/director-versions.json
-
-- name: concourse-up-manifest
-  type: git
-  source:
-    uri: git@github.com:EngineerBetter/concourse-up-manifest.git
-    branch: release
     tag_filter: 0.*.*
     private_key: ((github_private_key))
     paths:
     - manifest.yml
+    - director-versions.yml
     - ops/versions.json
 
 - name: pcf-ops
@@ -140,11 +118,6 @@ resources:
     access_token: ((github_access_token))
     drafts: true
 
-- name: bosh-deployment
-  type: git
-  source:
-    uri: https://github.com/cloudfoundry/bosh-deployment.git
-
 - name: slack-alert
   type: slack-notification
   source:
@@ -157,9 +130,8 @@ resources:
 jobs:
 - name: set-pipeline
   plan:
-  - get: concourse-up-code
-    trigger: true
   - get: concourse-up
+    trigger: true
   - put: this-pipeline
     params:
       pipelines:
@@ -171,13 +143,11 @@ jobs:
   plan:
   - aggregate:
     - get: pcf-ops
-    - get: concourse-up-code
-      trigger: true
-      passed: [set-pipeline]
-    - get: concourse-up-versions
-      trigger: true
     - get: concourse-up
+      trigger: true
       passed: [set-pipeline]
+    - get: concourse-up-ops
+      trigger: true
   - task: lint
     image: pcf-ops
     file: concourse-up/ci/tasks/lint.yml
@@ -201,38 +171,16 @@ jobs:
         text: |
           <!channel> Concourse Up unit tests failure!
 
-- name: get-versions
-  serial: true
-  plan:
-  - aggregate:
-    - get: pcf-ops
-    - get: concourse-up
-    - get: bosh-deployment
-      trigger: true
-    - get: concourse-up-manifest
-      trigger: true
-  - task: get-versions
-    file: concourse-up/ci/tasks/get-versions/task.yml
-  - task: copy-files
-    image: pcf-ops
-    file: concourse-up/ci/tasks/copy-files.yml
-  - put: concourse-up
-    params:
-      repository: concourse-up-new
-      rebase: true
-
 - name: build
   plan:
   - aggregate:
     - get: pcf-ops
       passed: [unit-tests]
-    - get: concourse-up-code
-      trigger: true
-      passed: [unit-tests]
-    - get: concourse-up-versions
-      trigger: true
-      passed: [unit-tests]
     - get: concourse-up
+      trigger: true
+      passed: [unit-tests]
+    - get: concourse-up-ops
+      trigger: true
       passed: [unit-tests]
     - get: version
   - aggregate:
@@ -287,13 +235,11 @@ jobs:
     - get: binary-windows
       trigger: true
       passed: [build]
-    - get: concourse-up-code
-      trigger: true
-      passed: [build]
-    - get: concourse-up-versions
-      trigger: true
-      passed: [build]
     - get: concourse-up
+      trigger: true
+      passed: [build]
+    - get: concourse-up-ops
+      trigger: true
       passed: [build]
     - get: pcf-ops
       passed: [build]
@@ -384,7 +330,7 @@ jobs:
       passed: [system-test]
     - get: concourse-up
       passed: [system-test]
-    - get: concourse-up-versions
+    - get: concourse-up-ops
       trigger: true
       passed: [system-test]
     - get: version
@@ -410,6 +356,12 @@ jobs:
         GOARCH: amd64
         OUTPUT_FILE: concourse-up-windows-amd64.exe
       file: concourse-up/ci/tasks/build_windows_from_version_file.yml
+  - task: get-ops-version
+    image: pcf-ops
+    file: concourse-up/ci/tasks/get-ops-version.yml
+    params:
+      CONCOURSE_PASSWORD: ((ebci_password))
+      CONCOURSE_URL: https://ci.engineerbetter.com
   - task: write-release-vars
     image: pcf-ops
     file: concourse-up/ci/tasks/write-release-vars.yml
@@ -447,6 +399,12 @@ jobs:
     - get: concourse-up
       passed: [system-test]
   - aggregate: *build_binaries
+  - task: get-ops-version
+    image: pcf-ops
+    file: concourse-up/ci/tasks/get-ops-version.yml
+    params:
+      CONCOURSE_PASSWORD: ((ebci_password))
+      CONCOURSE_URL: https://ci.engineerbetter.com
   - task: write-release-vars
     image: pcf-ops
     file: concourse-up/ci/tasks/write-release-vars.yml
@@ -484,6 +442,12 @@ jobs:
     - get: concourse-up
       passed: [system-test]
   - aggregate: *build_binaries
+  - task: get-ops-version
+    image: pcf-ops
+    file: concourse-up/ci/tasks/get-ops-version.yml
+    params:
+      CONCOURSE_PASSWORD: ((ebci_password))
+      CONCOURSE_URL: https://ci.engineerbetter.com
   - task: write-release-vars
     image: pcf-ops
     file: concourse-up/ci/tasks/write-release-vars.yml
@@ -521,6 +485,12 @@ jobs:
     - get: concourse-up
       passed: [system-test]
   - aggregate: *build_binaries
+  - task: get-ops-version
+    image: pcf-ops
+    file: concourse-up/ci/tasks/get-ops-version.yml
+    params:
+      CONCOURSE_PASSWORD: ((ebci_password))
+      CONCOURSE_URL: https://ci.engineerbetter.com
   - task: write-release-vars
     image: pcf-ops
     file: concourse-up/ci/tasks/write-release-vars.yml

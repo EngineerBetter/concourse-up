@@ -150,9 +150,9 @@ func vars(vars map[string]interface{}) []string {
 	return x
 }
 
-//go:generate go-bindata -pkg $GOPACKAGE  assets/... ../resources/...
+//go:generate go-bindata -pkg $GOPACKAGE  assets/... ../../concourse-up-ops/...
 var awsConcourseGrafana = MustAsset("assets/grafana_dashboard.yml")
 var awsConcourseCompatibility = MustAsset("assets/ops/cup_compatibility.yml")
-var awsConcourseManifest = MustAsset("../resources/manifest.yml")
-var awsConcourseVersions = MustAsset("../resources/versions.json")
-var awsConcourseSHAs = MustAsset("../resources/shas.json")
+var awsConcourseManifest = MustAsset("../../concourse-up-ops/manifest.yml")
+var awsConcourseVersions = MustAsset("../../concourse-up-ops/ops/versions.json")
+var awsConcourseSHAs = MustAsset("../../concourse-up-ops/ops/shas.json")

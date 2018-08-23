@@ -4,6 +4,7 @@ platform: linux
 inputs:
 - name: version
 - name: concourse-up
+- name: ops-version
 
 outputs:
 - name: release-vars

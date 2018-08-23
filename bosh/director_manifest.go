@@ -11,7 +11,7 @@ import (
 	"github.com/EngineerBetter/concourse-up/util"
 )
 
-var versionFile = MustAsset("../resources/director-versions.json")
+var versionFile = MustAsset("../../concourse-up-ops/director-versions.json")
 
 // GenerateBoshInitManifest generates a manifest for the bosh director on AWS
 func generateBoshInitManifest(conf config.Config, metadata *terraform.Metadata, privateKeyPath string) ([]byte, error) {

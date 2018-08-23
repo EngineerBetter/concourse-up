@@ -30,6 +30,10 @@ pushd concourse-up/resources
   director_stemcell_version=$(           jq -r .stemcell.url director-versions.json | cut -d= -f2)
 popd
 
+pushd ops-version
+  ops_version=$(cat version)
+popd
+
 name="concourse-up $version"
 
 echo "$name" > release-vars/name
@@ -57,6 +61,8 @@ Deploys:
 - UAA [$deployment_uaa_release_version]($deployment_uaa_release_url)
 - BOSH CLI $bin_bosh_cli_version
 - Terraform $bin_terraform_version
+
+>Note to build locally you will need to clone [concourse-up-ops](https://github.com/EngineerBetter/concourse-up-ops/tree/$ops_version) (version $ops_version) to the same level as concourse-up to get the required manifests and ops files.
 EOF
 
 pushd concourse-up
