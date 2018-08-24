@@ -26,6 +26,11 @@ resource_types:
     repository: cfcommunity/slack-notification-resource
     tag: latest
 
+- name: build-metadata
+  type: docker-image
+  source:
+    repository: mastertinner/build-metadata-resource
+
 resources:
 - name: this-pipeline
   type: pipeline
@@ -126,6 +131,9 @@ resources:
 - name: once-daily
   type: time
   source: {interval: 24h}
+
+- name: build-metadata
+  type: build-metadata
 
 jobs:
 - name: set-pipeline
@@ -337,6 +345,7 @@ jobs:
       passed: [system-test]
       params:
         bump: patch
+    - get: build-metadata
   - aggregate: &build_binaries
     - task: build-linux
       image: pcf-ops
@@ -400,6 +409,7 @@ jobs:
       passed: [system-test]
     - get: concourse-up-ops
       passed: [system-test]
+    - get: build-metadata
   - aggregate: *build_binaries
   - task: get-ops-version
     image: pcf-ops
@@ -445,6 +455,7 @@ jobs:
       passed: [system-test]
     - get: concourse-up-ops
       passed: [system-test]
+    - get: build-metadata
   - aggregate: *build_binaries
   - task: get-ops-version
     image: pcf-ops
@@ -490,6 +501,7 @@ jobs:
       passed: [system-test]
     - get: concourse-up-ops
       passed: [system-test]
+    - get: build-metadata
   - aggregate: *build_binaries
   - task: get-ops-version
     image: pcf-ops
