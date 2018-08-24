@@ -31,7 +31,25 @@ echo "DEPLOY OLD VERSION"
 
 # Wait for previous deployment to finish
 # Otherwise terraform state can get into an invalid state
-sleep 300
+# Also wait to make sure the BOSH lock is not taken before
+# starting deploy
+sleep 60
+
+wait_time=0
+while :
+do
+  ((wait_time++))
+  if [[ $wait_time -ge 10 ]]; then
+    echo "Waited too long for lock" && exit 1
+  fi
+  locks=$(bosh locks --json | jq -r '.Tables[].Rows | length')
+  if [[ $locks -eq 0 ]]; then
+    break;
+  else
+    echo "waiting for bosh lock"
+    sleep 30
+  fi
+done
 
 echo "UPDATE TO NEW VERSION"
 
