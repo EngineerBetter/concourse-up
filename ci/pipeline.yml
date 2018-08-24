@@ -398,6 +398,8 @@ jobs:
       passed: [system-test]
     - get: concourse-up
       passed: [system-test]
+    - get: concourse-up-ops
+      passed: [system-test]
   - aggregate: *build_binaries
   - task: get-ops-version
     image: pcf-ops
@@ -441,6 +443,8 @@ jobs:
       passed: [system-test]
     - get: concourse-up
       passed: [system-test]
+    - get: concourse-up-ops
+      passed: [system-test]
   - aggregate: *build_binaries
   - task: get-ops-version
     image: pcf-ops
@@ -483,6 +487,8 @@ jobs:
     - get: pcf-ops
       passed: [system-test]
     - get: concourse-up
+      passed: [system-test]
+    - get: concourse-up-ops
       passed: [system-test]
   - aggregate: *build_binaries
   - task: get-ops-version
