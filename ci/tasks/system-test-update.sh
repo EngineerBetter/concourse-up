@@ -38,7 +38,7 @@ sleep 60
 wait_time=0
 while :
 do
-  ((wait_time++))
+  (( ++wait_time ))
   if [[ $wait_time -ge 10 ]]; then
     echo "Waited too long for lock" && exit 1
   fi
