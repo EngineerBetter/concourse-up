@@ -66,7 +66,6 @@ func generateBoshInitManifest(conf config.Config, metadata *terraform.Metadata, 
 		StemcellURL:               x["stemcell"]["url"],
 		StemcellVersion:           x["stemcell"]["version"],
 		VMsSecurityGroupID:        metadata.VMsSecurityGroupID.Value,
-		VMsInstanceProfile:        metadata.VMsInstanceProfile.Value,
 	}
 
 	return util.RenderTemplate(awsDirectorManifestTemplate, templateParams)
@@ -112,7 +111,6 @@ type awsDirectorManifestParams struct {
 	StemcellURL               string
 	StemcellVersion           string
 	VMsSecurityGroupID        string
-	VMsInstanceProfile        string
 }
 
 // Indent is a helper function to indent the field a given number of spaces

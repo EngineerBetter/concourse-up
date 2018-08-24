@@ -562,70 +562,6 @@ resource "aws_db_instance" "default" {
   }
 }
 
-data "aws_iam_policy_document" "worker_policy" {
-  description = "Concourse worker policy"
-
-  statement {
-    sid       = ""
-    effect    = "Allow"
-    resources = ["*"]
-    actions   = ["sts:AssumeRole"]
-  }
-
-  statement {
-    sid       = ""
-    effect    = "Allow"
-    resources = ["*"]
-
-    actions = [
-      "ecs:CreateCluster",
-      "ecs:DeregisterContainerInstance",
-      "ecs:DiscoverPollEndpoint",
-      "ecs:Poll",
-      "ecs:RegisterContainerInstance",
-      "ecs:StartTelemetrySession",
-      "ecs:Submit*",
-      "ecr:GetAuthorizationToken",
-      "ecr:GetDownloadUrlForLayer",
-      "ecr:BatchGetImage",
-      "ecr:BatchCheckLayerAvailability",
-      "s3:GetObject",
-      "logs:CreateLogStream",
-      "logs:PutLogEvents",
-    ]
-  }
-}
-
-resource "aws_iam_role" "worker_role" {
-  description = "concourse-worker-${var.deployment}"
-  assume_role_policy = <<EOF
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Action": "sts:AssumeRole",
-      "Principal": {
-        "Service": ["ec2.amazonaws.com"]
-      },
-      "Effect": "Allow"
-    }
-  ]
-}
-EOF
-}
-
-resource "aws_iam_policy_attachment" "worker_role_policy_attachment" {
-  name       = "concourse-worker-instance-policy-attachment-${var.deployment}"
-  roles      = ["${aws_iam_role.cluster_instance_role.id}"]
-  policy_arn = "${aws_iam_policy.worker_policy.arn}"
-}
-
-resource "aws_iam_instance_profile" "worker_profile" {
-  name = "concourse-worker-instance-profile-${var.deployment}"
-  path = "/"
-  role = "${aws_iam_role.worker_role.name}"
-}
-
 output "vpc_id" {
   value = "${aws_vpc.default.id}"
 }
@@ -698,8 +634,4 @@ output "bosh_db_port" {
 
 output "bosh_db_address" {
   value = "${aws_db_instance.default.address}"
-}
-
-output "worker_instance_profile" {
-  value = "${aws_iam_instance_profile.worker_instance_profile.name}"
 }

@@ -64,8 +64,6 @@ vm_types:
       encrypted: true
     security_groups:
     - <% .VMsSecurityGroupID %>
-    iam_instance_profile:
-    - <% .VMsInstanceProfile %>
 
 - name: concourse-large
   cloud_properties:
@@ -78,8 +76,6 @@ vm_types:
       encrypted: true
     security_groups:
     - <% .VMsSecurityGroupID %>
-    iam_instance_profile:
-    - <% .VMsInstanceProfile %>
 
 - name: concourse-xlarge
   cloud_properties:
@@ -92,8 +88,6 @@ vm_types:
       encrypted: true
     security_groups:
     - <% .VMsSecurityGroupID %>
-    iam_instance_profile:
-    - <% .VMsInstanceProfile %>
 
 - name: concourse-2xlarge
   cloud_properties:
@@ -106,8 +100,6 @@ vm_types:
       encrypted: true
     security_groups:
     - <% .VMsSecurityGroupID %>
-    iam_instance_profile:
-    - <% .VMsInstanceProfile %>
 
 - name: concourse-4xlarge
   cloud_properties:
@@ -120,8 +112,6 @@ vm_types:
       encrypted: true
     security_groups:
     - <% .VMsSecurityGroupID %>
-    iam_instance_profile:
-    - <% .VMsInstanceProfile %>
 
 - name: concourse-10xlarge
   cloud_properties:
@@ -134,8 +124,6 @@ vm_types:
       encrypted: true
     security_groups:
     - <% .VMsSecurityGroupID %>
-    iam_instance_profile:
-    - <% .VMsInstanceProfile %>
 
 - name: concourse-16xlarge
   cloud_properties:
@@ -148,8 +136,6 @@ vm_types:
       encrypted: true
     security_groups:
     - <% .VMsSecurityGroupID %>
-    iam_instance_profile:
-    - <% .VMsInstanceProfile %>
 
 - name: compilation
   cloud_properties:
