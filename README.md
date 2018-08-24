@@ -51,6 +51,11 @@ Download the [latest release](https://github.com/EngineerBetter/concourse-up/rel
 
 ## Usage
 
+### Choosing a project name
+
+Project name is used to create AWS bucket which have globally unique namespace.
+This means your project name needs to be **globally unique across all** concourse-up deployments.
+
 ### Deploy
 
 Deploy a new Concourse with:
@@ -75,6 +80,13 @@ eval "$(concourse-up info ci --env)"
 ```
 
 A new deploy from scratch takes approximately 20 minutes.
+
+If you get an error message like the one below it means your project name is not unique, see 'Choosing a project name' above.
+
+```
+Forbidden: Forbidden
+	status code: 403, request id: [SOMETHING], host id: [SOMETHING]
+```
 
 #### Flags
 
