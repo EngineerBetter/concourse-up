@@ -55,7 +55,7 @@ resources:
     private_key: ((github_private_key))
     paths:
     - manifest.yml
-    - director-versions.yml
+    - director-versions.json
     - ops/versions.json
 
 - name: pcf-ops
