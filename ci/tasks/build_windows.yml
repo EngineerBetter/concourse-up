@@ -8,6 +8,7 @@ params:
 
 inputs:
 - name: concourse-up
+- name: concourse-up-ops
 
 outputs:
 - name: build-windows

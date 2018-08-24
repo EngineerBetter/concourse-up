@@ -4,7 +4,6 @@ groups:
   jobs:
   - set-pipeline
   - unit-tests
-  - get-versions
   - build
   - system-test
   - auto
@@ -27,6 +26,11 @@ resource_types:
     repository: cfcommunity/slack-notification-resource
     tag: latest
 
+- name: build-metadata
+  type: docker-image
+  source:
+    repository: mastertinner/build-metadata-resource
+
 resources:
 - name: this-pipeline
   type: pipeline
@@ -45,14 +49,19 @@ resources:
     branch: master
     private_key: ((github_private_key))
     ignore_paths:
-    - ci/docker/*
     - README.md
 
-- name: concourse-up-manifest
+- name: concourse-up-ops
   type: git
   source:
-    uri: git@github.com:EngineerBetter/concourse-up-manifest.git
+    uri: git@github.com:EngineerBetter/concourse-up-ops.git
+    branch: master
+    tag_filter: 0.*.*
     private_key: ((github_private_key))
+    paths:
+    - manifest.yml
+    - director-versions.json
+    - ops/versions.json
 
 - name: pcf-ops
   type: docker-image
@@ -114,11 +123,6 @@ resources:
     access_token: ((github_access_token))
     drafts: true
 
-- name: bosh-deployment
-  type: git
-  source:
-    uri: https://github.com/cloudfoundry/bosh-deployment.git
-
 - name: slack-alert
   type: slack-notification
   source:
@@ -127,6 +131,9 @@ resources:
 - name: once-daily
   type: time
   source: {interval: 24h}
+
+- name: build-metadata
+  type: build-metadata
 
 jobs:
 - name: set-pipeline
@@ -147,6 +154,8 @@ jobs:
     - get: concourse-up
       trigger: true
       passed: [set-pipeline]
+    - get: concourse-up-ops
+      trigger: true
   - task: lint
     image: pcf-ops
     file: concourse-up/ci/tasks/lint.yml
@@ -170,32 +179,15 @@ jobs:
         text: |
           <!channel> Concourse Up unit tests failure!
 
-- name: get-versions
-  serial: true
-  plan:
-  - aggregate:
-    - get: pcf-ops
-    - get: concourse-up
-    - get: bosh-deployment
-      trigger: true
-    - get: concourse-up-manifest
-      trigger: true
-  - task: get-versions
-    file: concourse-up/ci/tasks/get-versions/task.yml
-  - task: copy-files
-    image: pcf-ops
-    file: concourse-up/ci/tasks/copy-files.yml
-  - put: concourse-up
-    params:
-      repository: concourse-up-new
-      rebase: true
-
 - name: build
   plan:
   - aggregate:
     - get: pcf-ops
       passed: [unit-tests]
     - get: concourse-up
+      trigger: true
+      passed: [unit-tests]
+    - get: concourse-up-ops
       trigger: true
       passed: [unit-tests]
     - get: version
@@ -252,6 +244,9 @@ jobs:
       trigger: true
       passed: [build]
     - get: concourse-up
+      trigger: true
+      passed: [build]
+    - get: concourse-up-ops
       trigger: true
       passed: [build]
     - get: pcf-ops
@@ -343,10 +338,14 @@ jobs:
       passed: [system-test]
     - get: concourse-up
       passed: [system-test]
+    - get: concourse-up-ops
+      trigger: true
+      passed: [system-test]
     - get: version
       passed: [system-test]
       params:
         bump: patch
+    - get: build-metadata
   - aggregate: &build_binaries
     - task: build-linux
       image: pcf-ops
@@ -366,6 +365,12 @@ jobs:
         GOARCH: amd64
         OUTPUT_FILE: concourse-up-windows-amd64.exe
       file: concourse-up/ci/tasks/build_windows_from_version_file.yml
+  - task: get-ops-version
+    image: pcf-ops
+    file: concourse-up/ci/tasks/get-ops-version.yml
+    params:
+      CONCOURSE_PASSWORD: ((ebci_password))
+      CONCOURSE_URL: https://ci.engineerbetter.com
   - task: write-release-vars
     image: pcf-ops
     file: concourse-up/ci/tasks/write-release-vars.yml
@@ -397,11 +402,21 @@ jobs:
     - get: version
       params:
         bump: patch
+      passed: [system-test]
     - get: pcf-ops
       passed: [system-test]
     - get: concourse-up
       passed: [system-test]
+    - get: concourse-up-ops
+      passed: [system-test]
+    - get: build-metadata
   - aggregate: *build_binaries
+  - task: get-ops-version
+    image: pcf-ops
+    file: concourse-up/ci/tasks/get-ops-version.yml
+    params:
+      CONCOURSE_PASSWORD: ((ebci_password))
+      CONCOURSE_URL: https://ci.engineerbetter.com
   - task: write-release-vars
     image: pcf-ops
     file: concourse-up/ci/tasks/write-release-vars.yml
@@ -433,11 +448,21 @@ jobs:
     - get: version
       params:
         bump: minor
+      passed: [system-test]
     - get: pcf-ops
       passed: [system-test]
     - get: concourse-up
       passed: [system-test]
+    - get: concourse-up-ops
+      passed: [system-test]
+    - get: build-metadata
   - aggregate: *build_binaries
+  - task: get-ops-version
+    image: pcf-ops
+    file: concourse-up/ci/tasks/get-ops-version.yml
+    params:
+      CONCOURSE_PASSWORD: ((ebci_password))
+      CONCOURSE_URL: https://ci.engineerbetter.com
   - task: write-release-vars
     image: pcf-ops
     file: concourse-up/ci/tasks/write-release-vars.yml
@@ -467,13 +492,23 @@ jobs:
   plan:
   - aggregate:
     - get: version
+      passed: [system-test]
       params:
         bump: major
     - get: pcf-ops
       passed: [system-test]
     - get: concourse-up
       passed: [system-test]
+    - get: concourse-up-ops
+      passed: [system-test]
+    - get: build-metadata
   - aggregate: *build_binaries
+  - task: get-ops-version
+    image: pcf-ops
+    file: concourse-up/ci/tasks/get-ops-version.yml
+    params:
+      CONCOURSE_PASSWORD: ((ebci_password))
+      CONCOURSE_URL: https://ci.engineerbetter.com
   - task: write-release-vars
     image: pcf-ops
     file: concourse-up/ci/tasks/write-release-vars.yml

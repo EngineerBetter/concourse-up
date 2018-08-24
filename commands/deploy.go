@@ -89,7 +89,7 @@ var deployFlags = []cli.Flag{
 	},
 	cli.StringFlag{
 		Name:        "allow-ips",
-		Usage:       "(optional) Comma seperated list of IP addresses or CIDR ranges to allow access too",
+		Usage:       "(optional) Comma separated list of IP addresses or CIDR ranges to allow access to",
 		EnvVar:      "ALLOW_IPS",
 		Value:       "0.0.0.0/0",
 		Destination: &deployArgs.AllowIPs,

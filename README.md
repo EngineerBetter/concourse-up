@@ -19,7 +19,7 @@ $ AWS_ACCESS_KEY_ID=<access-key-id> \
 Concourse is easy to get started with, but as soon as you want your team to use it you've
 previously had to learn BOSH. Teams who just want great CI shouldn't need to think about this.
 The goal of `concourse-up` is to hide the complexity of [BOSH](https://bosh.io), while giving you all the benefits,
-providing you with a single command for getting your Concourse up and keeping it running. You can read more about the rationale for this tool in [this blog post](http://www.engineerbetter.com/2017/05/03/introducing-concourse-up.html). Some newer features, including self-update, are described in [this blog post](http://www.engineerbetter.com/2017/09/18/perpetual-motion-software-updates.html).
+providing you with a single command for getting your Concourse up and keeping it running. You can read more about the rationale for this tool in [this blog post](http://www.engineerbetter.com/2017/05/03/introducing-concourse-up.html). Some more recent features, including self-update, are described in [this blog post](http://www.engineerbetter.com/2017/09/18/perpetual-motion-software-updates.html).
 
 ## Features
 
@@ -51,125 +51,131 @@ Download the [latest release](https://github.com/EngineerBetter/concourse-up/rel
 
 ## Usage
 
+### Deploy
+
 Deploy a new Concourse with:
 
-```
+```sh
 $ concourse-up deploy <your-project-name>
 ```
 
 eg:
 
-```
+```sh
 $ concourse-up deploy ci
 
 ...
 DEPLOY SUCCESSFUL. Log in with:
-fly --target ci login --insecure --concourse-url https://52.18.43.185 --username admin --password abc123def456
+fly --target ci login --insecure --concourse-url https://10.0.0.0 --username  --password
 
-Metrics available at https://52.18.43.185:3000 using the same username and password
+Metrics available at https://10.0.0.0:3000 using the same username and password
 
 Log into credhub with:
-credhub login -u credhub-cli -p foobar987 -s https://52.18.43.185:8844/ --ca-cert "..."
+eval "$(concourse-up info ci --env)"
 ```
 
-A new deploy from scratch takes approximately 12 minutes.
+A new deploy from scratch takes approximately 20 minutes.
+
+#### Flags
+
+All flags are optional
+
+* `--region value`       AWS region (default: "eu-west-1") [$AWS_REGION]
+* `--domain value`       Domain to use as endpoint for Concourse web interface (eg: ci.myproject.com) [$DOMAIN]
+    ```sh
+    $ concourse-up deploy --domain chimichanga.engineerbetter.com chimichanga
+    ```
+
+    In the example above `concourse-up` will search for a Route 53 hosted zone that matches `chimichanga.engineerbetter.com` or `engineerbetter.com` and add a record to the longest match (`chimichanga.engineerbetter.com` in this example).
+
+* `--tls-cert value`     TLS cert to use with Concourse endpoint [$TLS_CERT]
+* `--tls-key value`      TLS private key to use with Concourse endpoint [$TLS_KEY]
+
+    By default `concourse-up` will generate a self-signed cert using the given domain. If you'd like to provide your own certificate instead, pass the cert and private key as strings using the `--tls-cert` and `--tls-key` flags respectively. eg:
+
+    ```sh
+    $ concourse-up deploy \
+      --domain chimichanga.engineerbetter.com \
+      --tls-cert "$(cat chimichanga.engineerbetter.com.crt)" \
+      --tls-key "$(cat chimichanga.engineerbetter.com.key)" \
+      chimichanga
+    ```
+
+* `--workers value`      Number of Concourse worker instances to deploy (default: 1) [$WORKERS]
+* `--worker-size value`  Size of Concourse workers. Can be medium, large, xlarge, 2xlarge, 4xlarge, 10xlarge or 16xlarge (default: "xlarge") [$WORKER_SIZE]
+
+    | --worker-size | AWS Instance type |
+    |---------------|-------------------|
+    | medium        | t2.medium         |
+    | large         | m4.large          |
+    | xlarge        | m4.xlarge         |
+    | 2xlarge       | m4.2xlarge        |
+    | 4xlarge       | m4.4xlarge        |
+    | 10xlarge      | m4.10xlarge       |
+    | 16xlarge      | m4.16xlarge       |
+
+* `--web-size value`     Size of Concourse web node. Can be small, medium, large, xlarge, 2xlarge (default: "small") [$WEB_SIZE]
+
+    | --web-size | AWS Instance type |
+    |------------|-------------------|
+    | small      | t2.small          |
+    | medium     | t2.medium         |
+    | large      | t2.large          |
+    | xlarge     | t2.xlarge         |
+    | 2xlarge    | t2.2xlarge        |
+
+* `--db-size value`      Size of Concourse RDS instance. Can be small, medium, large, xlarge, 2xlarge, or 4xlarge (default: "small") [$DB_SIZE]
+
+    >Note that when changing the database size on an existing concourse-up deployment, the RDS instance will scaled by terraform resulting in approximately 3 minutes of downtime.
+
+    The following table shows the allowed database sizes and the corresponding AWS RDS instance types
+
+    | --db-size | AWS Instance type |
+    |-----------|-------------------|
+    | small     | db.t2.small       |
+    | medium    | db.t2.medium      |
+    | large     | db.m4.large       |
+    | xlarge    | db.m4.xlarge      |
+    | 2xlarge   | db.m4.2xlarge     |
+    | 4xlarge   | db.m4.4xlarge     |
+
+* `--allow-ips value`    Comma separated list of IP addresses or CIDR ranges to allow access to (default: "0.0.0.0/0") [$ALLOW_IPS]
+
+### Info
 
 To fetch information about your `concourse-up` deployment:
 
-```
+```sh
 $ concourse-up info --json <your-project-name>
 ```
 
-To destroy a Concourse:
+To load credentials into your environment from your `concourse-up` deployment:
 
+```sh
+$ eval "$(concourse-up info <your-project-name> --env)"
 ```
+
+#### Flags
+
+All flags are optional
+
+`--region value`  AWS region (default: "eu-west-1") [$AWS_REGION]
+`--json`          Output as json [$JSON]
+`--env`           Output environment variables
+
+### Destroy
+
+To destroy your Concourse:
+
+```sh
 $ concourse-up destroy <your-project-name>
 ```
 
-That's it!
+#### Flags
 
-### Region Configuration
+All flags are optional
 
-By default `concourse-up` deploys the BOSH director and Concourse VMs into `eu-west-1` region. To change the region, use the `--region` flag eg:
-
-```
-$ concourse-up deploy --region us-east-1 chimichanga
-```
-
-When deploying to a non-default region, you *must* pass the `--region` flag with all subsequent commands eg:
-
-```
-$ concourse-up info --region us-east-1 chimichanga
-$ concourse-up destroy --region us-east-1 chimichanga
-```
-
-### Worker Configuration
-
-By default `concourse-up` deploys a single worker instance of the `m4.xlarge` type. To increase the number of workers pass in the `--workers` flag eg:
-
-```
-$ concourse-up deploy --workers 3 chimichanga
-```
-
-You can also change the size of each worker instance using the `--worker-size` flag. eg:
-
-```
-$ concourse-up deploy --worker-size xlarge chimichanga
-```
-
-The following table shows the allowed worker sizes and the corresponding AWS instance types
-
-| --worker-size | AWS Instance type |
-|---------------|-------------------|
-| medium        | t2.medium         |
-| large         | m4.large          |
-| xlarge        | m4.xlarge         |
-| 2xlarge       | m4.2xlarge        |
-| 4xlarge       | m4.4xlarge        |
-| 10xlarge      | m4.10xlarge       |
-| 16xlarge      | m4.16xlarge       |
-
-
-### Custom Domains
-
-You can use a custom domain using the `--domain` flag eg:
-
-```
-$ concourse-up deploy --domain chimichanga.engineerbetter.com chimichanga
-```
-
-In the example above `concourse-up` will search for a Route 53 hosted zone that matches `chimichanga.engineerbetter.com` or `engineerbetter.com` and add a record to the longest match (`chimichanga.engineerbetter.com` in this example).
-
-By default `concourse-up` will generate a self-signed cert using the given domain. If you'd like to provide your own certificate instead, pass the cert and private key as strings using the `--tls-cert` and `--tls-key` flags respectively. eg:
-
-```
-$ concourse-up deploy \
-  --domain chimichanga.engineerbetter.com \
-  --tls-cert "$(cat chimichanga.engineerbetter.com.crt)" \
-  --tls-key "$(cat chimichanga.engineerbetter.com.key)" \
-  chimichanga
-```
-
-## RDS Size Configuration
-
-You can change the size of the RDS instance shared by BOSH and the Concourse using the `--db-size` flag. eg:
-
-```
-$ concourse-up deploy --db-size medium chimichanga
-```
-
-Note that when changing the database size on an existing concourse-up deployment, the RDS instance will scaled by terraform resulting in approximately 3 minutes of downtime.
-
-The following table shows the allowed database sizes and the corresponding AWS RDS instance types
-
-| --db-size | AWS Instance type |
-|-----------|-------------------|
-| small     | db.t2.small       |
-| medium    | db.t2.medium      |
-| large     | db.m4.large       |
-| xlarge    | db.m4.xlarge      |
-| 2xlarge   | db.m4.2xlarge     |
-| 4xlarge   | db.m4.4xlarge     |
+* `--region value`  AWS region (default: "eu-west-1") [$AWS_REGION]
 
 ## Self-update
 
@@ -208,14 +214,14 @@ By default, `concourse-up` deploys to the AWS eu-west-1 (Ireland) region, and us
 
 | Component     | Size             | Count | Price (USD) |
 |---------------|------------------|-------|------------:|
-| BOSH director | t2.small         |     1 |       18.25 |
-| Web Server    | t2.small         |     1 |       18.25 |
-| Worker        | m4.xlarge (spot) |     1 |       40.00 |
+| BOSH director | t2.small         |     1 |       18.30 |
+| Web Server    | t2.small         |     1 |       18.30 |
+| Worker        | m4.xlarge (spot) |     1 |      ~50.00 |
 | RDS instance  | db.t2.small      |     1 |       28.47 |
-| NAT Gateway   |         -        |     1 |       35.04 |
+| NAT Gateway   |         -        |     1 |       35.15 |
 | gp2 storage   | 20GB (bosh, web) |     2 |        4.40 |
-| gp2 storage   | 220GB (worker)   |     1 |       22.00 |
-| **Total**     |                  |       |  **170.81** |
+| gp2 storage   | 200GB (worker)   |     1 |       22.00 |
+| **Total**     |                  |       |  **176.62** |
 
 ## What it does
 
@@ -251,8 +257,6 @@ If you'd like to run concourse-up with it's own IAM account, create a user with 
 
 ## Project
 
-[Pivotal Tracker](https://www.pivotaltracker.com/n/projects/2011803)
-
 [CI Pipeline](https://ci.engineerbetter.com/teams/main/pipelines/concourse-up) (deployed with Concourse Up!)
 
 ## Development
@@ -278,3 +282,9 @@ $ ginkgo -r
 ### Building locally
 
 `concourse-up` uses [golang compile-time variables](https://github.com/golang/go/wiki/GcToolchainTricks#including-build-information-in-the-executable) to set the release versions it uses. To build locally use the `build_local.sh` script, rather than running `go build`.
+
+You will also need to clone [`concourse-up-ops`](https://github.com/EngineerBetter/concourse-up-ops) to the same level as `concourse-up` to get the manifest and ops files necessary for building. Check the latest release of `concourse-up` for the appropriate tag of `concourse-up-ops`
+
+### Bumping Manifest/Ops File versions
+
+The pipeline listens for new patch or minor versions of `manifest.yml` and `ops/versions.json` coming from the `concourse-up-ops` repo. In order to pick up a new major version first make sure it exists in the repo then modify `tag_filter: X.*.*` in the `concourse-up-ops` resource where `X` is the major version you want to pin to.

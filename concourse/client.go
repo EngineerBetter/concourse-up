@@ -35,8 +35,8 @@ type IClient interface {
 	FetchInfo() (*Info, error)
 }
 
-//go:generate go-bindata -pkg $GOPACKAGE ../resources/director-versions.json
-var versionFile = MustAsset("../resources/director-versions.json")
+//go:generate go-bindata -pkg $GOPACKAGE ../../concourse-up-ops/director-versions.json
+var versionFile = MustAsset("../../concourse-up-ops/director-versions.json")
 
 // NewClient returns a new Client
 func NewClient(
@@ -47,7 +47,9 @@ func NewClient(
 	certGenerator func(constructor func(u *certs.User) (certs.AcmeClient, error), caName string, ip ...string) (*certs.Certs, error),
 	configClient config.IClient,
 	deployArgs *config.DeployArgs,
-	stdout, stderr io.Writer, ipChecker func() (string, error), acmeClientConstructor func(u *certs.User) (certs.AcmeClient, error)) *Client {
+	stdout, stderr io.Writer,
+	ipChecker func() (string, error),
+	acmeClientConstructor func(u *certs.User) (certs.AcmeClient, error)) *Client {
 	return &Client{
 		iaasClient:             iaasClient,
 		terraformClientFactory: terraformClientFactory,

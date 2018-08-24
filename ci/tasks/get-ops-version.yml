@@ -1,0 +1,16 @@
+platform: linux
+
+inputs:
+- name: concourse-up-ops
+- name: concourse-up
+- name: build-metadata
+
+outputs:
+- name: ops-version
+
+params:
+  CONCOURSE_PASSWORD:
+  CONCOURSE_URL:
+
+run:
+  path: concourse-up/ci/tasks/get-ops-version.sh
