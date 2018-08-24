@@ -35,6 +35,8 @@ echo "DEPLOY OLD VERSION"
 # starting deploy
 sleep 60
 
+eval "$(./cup-old info --env $deployment)"
+
 wait_time=0
 while :
 do
