@@ -44,8 +44,8 @@ fly --target system-test set-team \
   --team-name=git-team \
   --github-user=EngineerBetterCI
 
-fly --target system-test login \
-  --team-name=git-team 2>&1 >fly_out &
+( fly --target system-test login \
+  --team-name=git-team 2>&1 ) >fly_out &
 
 pkill -9 fly
 
