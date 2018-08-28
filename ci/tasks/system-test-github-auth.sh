@@ -42,7 +42,8 @@ fly --target system-test login \
 
 fly --target system-test set-team \
   --team-name=git-team \
-  --github-user=EngineerBetterCI
+  --github-user=EngineerBetterCI \
+  --non-interactive
 
 ( fly --target system-test login \
   --team-name=git-team 2>&1 ) >fly_out &
