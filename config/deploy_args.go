@@ -40,6 +40,35 @@ var DBSizes = map[string]string{
 	"4xlarge": "db.m4.4xlarge",
 }
 
+// ModifyCerts allows mutation of cert related fields
+func (args *DeployArgs) ModifyCerts(Domain, TLSCert, TLSKey string) {
+	args.Domain = Domain
+	args.TLSCert = TLSCert
+	args.TLSKey = TLSKey
+}
+
+// ModifyWorker allows mutation of worker related fields
+func (args *DeployArgs) ModifyWorker(WorkerCount int, WorkerSize string) {
+	args.WorkerCount = WorkerCount
+	args.WorkerSize = WorkerSize
+}
+
+// ModifyWeb allows mutation of web related fields
+func (args *DeployArgs) ModifyWeb(WebSize string) {
+	args.WebSize = WebSize
+}
+
+// ModifyDB allows mutation of web related fields
+func (args *DeployArgs) ModifyDB(DBSize string) {
+	args.DBSize = DBSize
+}
+
+// ModifyGithub allows mutation of github related fields
+func (args *DeployArgs) ModifyGithub(GithubAuthClientID, GithubAuthClientSecret string) {
+	args.GithubAuthClientID = GithubAuthClientID
+	args.GithubAuthClientSecret = GithubAuthClientSecret
+}
+
 // Validate validates that flag interdependencies
 func (args DeployArgs) Validate() error {
 	if err := args.validateCertFields(); err != nil {
@@ -55,6 +84,10 @@ func (args DeployArgs) Validate() error {
 	}
 
 	if err := args.validateDBFields(); err != nil {
+		return err
+	}
+
+	if err := args.validateGithubFields(); err != nil {
 		return err
 	}
 
@@ -77,7 +110,7 @@ func (args DeployArgs) validateCertFields() error {
 
 func (args DeployArgs) validateWorkerFields() error {
 	if args.WorkerCount < 1 {
-		return errors.New("minimum of workers is 1")
+		return errors.New("minimum number of workers is 1")
 	}
 
 	for _, size := range WorkerSizes {
@@ -100,6 +133,17 @@ func (args DeployArgs) validateWebFields() error {
 func (args DeployArgs) validateDBFields() error {
 	if _, ok := DBSizes[args.DBSize]; !ok {
 		return fmt.Errorf("unknown DB size: `%s`. Valid sizes are: %v", args.DBSize, DBSizes)
+	}
+
+	return nil
+}
+
+func (args DeployArgs) validateGithubFields() error {
+	if args.GithubAuthClientID != "" && args.GithubAuthClientSecret == "" {
+		return errors.New("--github-auth-client-id requires --github-auth-client-secret to also be provided")
+	}
+	if args.GithubAuthClientID == "" && args.GithubAuthClientSecret != "" {
+		return errors.New("--github-auth-client-secret requires --github-auth-client-id to also be provided")
 	}
 
 	return nil
