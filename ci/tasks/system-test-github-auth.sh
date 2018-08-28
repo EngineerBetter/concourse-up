@@ -7,7 +7,7 @@ deployment="systest-github-$RANDOM"
 
 cleanup() {
   status=$?
-  ./cup-new --non-interactive destroy $deployment
+  ./cup --non-interactive destroy $deployment
   exit $status
 }
 set +u
@@ -45,12 +45,13 @@ fly --target system-test set-team \
   --github-user=EngineerBetterCI \
   --non-interactive
 
-( fly --target system-test login \
-  --team-name=git-team 2>&1 ) >fly_out &
+( ( fly --target system-test login --team-name=git-team 2>&1 ) >fly_out ) &
+
+sleep 5
 
 pkill -9 fly
 
-url="$(grep redirect fly_out)"
+url="$(grep redirect fly_out | sed 's/ //g')"
 
 curl -sL "$url" | grep -q '/sky/issuer/auth/github'
 
