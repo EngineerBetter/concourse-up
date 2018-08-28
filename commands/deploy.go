@@ -121,6 +121,7 @@ var deploy = cli.Command{
 		}
 
 		deployArgs.DBSizeIsSet = c.IsSet("db-size")
+		deployArgs.GithubAuthIsSet = c.IsSet("github-auth-client-id") && c.IsSet("github-auth-client-secret")
 		if err := deployArgs.Validate(); err != nil {
 			return err
 		}

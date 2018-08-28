@@ -16,6 +16,7 @@ const concourseVersionsFilename = "versions.json"
 const concourseSHAsFilename = "shas.json"
 const concourseGrafanaFilename = "grafana_dashboard.yml"
 const concourseCompatibilityFilename = "cup_compatibility.yml"
+const concourseGitHubAuthFilename = "github-auth.yml"
 
 func (client *Client) uploadConcourseStemcell() error {
 	var ops []struct {
@@ -75,6 +76,11 @@ func (client *Client) deployConcourse(creds []byte, detach bool) (newCreds []byt
 		return
 	}
 
+	concourseGitHubAuthPath, err := client.director.SaveFileToWorkingDir(concourseGitHubAuthFilename, awsConcourseGitHubAuth)
+	if err != nil {
+		return
+	}
+
 	credsPath, err := client.director.SaveFileToWorkingDir(credsFilename, creds)
 	if err != nil {
 		return
@@ -104,29 +110,38 @@ func (client *Client) deployConcourse(creds []byte, detach bool) (newCreds []byt
 		vmap["atc_password"] = client.config.ConcoursePassword
 	}
 
+	if client.config.GithubAuthIsSet {
+		vmap["github_client_id"] = client.config.GithubClientID
+		vmap["github_client_secret"] = client.config.GithubClientSecret
+	}
+
 	vs := vars(vmap)
+
+	flagFiles := []string{
+		"--deployment",
+		concourseDeploymentName,
+		"deploy",
+		concourseManifestPath,
+		"--vars-store",
+		credsPath,
+		"--ops-file",
+		concourseVersionsPath,
+		"--ops-file",
+		concourseSHAsPath,
+		"--ops-file",
+		concourseCompatibilityPath,
+		"--vars-file",
+		concourseGrafanaPath,
+	}
+	if client.config.GithubAuthIsSet {
+		flagFiles = append(flagFiles, "--ops-file", concourseGitHubAuthPath)
+	}
 
 	err = client.director.RunAuthenticatedCommand(
 		client.stdout,
 		client.stderr,
 		detach,
-		append([]string{
-			"--deployment",
-			concourseDeploymentName,
-			"deploy",
-			concourseManifestPath,
-			"--vars-store",
-			credsPath,
-			"--ops-file",
-			concourseVersionsPath,
-			"--ops-file",
-			concourseSHAsPath,
-			"--ops-file",
-			concourseCompatibilityPath,
-			"--vars-file",
-			concourseGrafanaPath,
-		},
-			vs...)...,
+		append(flagFiles, vs...)...,
 	)
 	newCreds, err1 := ioutil.ReadFile(credsPath)
 	if err == nil {
@@ -153,6 +168,7 @@ func vars(vars map[string]interface{}) []string {
 //go:generate go-bindata -pkg $GOPACKAGE  assets/... ../../concourse-up-ops/...
 var awsConcourseGrafana = MustAsset("assets/grafana_dashboard.yml")
 var awsConcourseCompatibility = MustAsset("assets/ops/cup_compatibility.yml")
+var awsConcourseGitHubAuth = MustAsset("assets/ops/github-auth.yml")
 var awsConcourseManifest = MustAsset("../../concourse-up-ops/manifest.yml")
 var awsConcourseVersions = MustAsset("../../concourse-up-ops/ops/versions.json")
 var awsConcourseSHAs = MustAsset("../../concourse-up-ops/ops/shas.json")

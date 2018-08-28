@@ -39,6 +39,9 @@ type Config struct {
 	DirectorUsername          string `json:"director_username"`
 	Domain                    string `json:"domain"`
 	EncryptionKey             string `json:"encryption_key"`
+	GithubAuthIsSet           bool   `json:"github_auth_is_set"`
+	GithubClientID            string `json:"github_client_id"`
+	GithubClientSecret        string `json:"github_client_secret"`
 	GrafanaPassword           string `json:"grafana_password"`
 	GrafanaUsername           string `json:"grafana_username"`
 	HostedZoneID              string `json:"hosted_zone_id"`

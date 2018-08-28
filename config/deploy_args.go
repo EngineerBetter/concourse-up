@@ -22,6 +22,8 @@ type DeployArgs struct {
 	AllowIPs               string
 	GithubAuthClientID     string
 	GithubAuthClientSecret string
+	// GithubAuthIsSet is true if the user has specified both the --github-auth-client-secret and --github-auth-client-id flags
+	GithubAuthIsSet bool
 }
 
 // WorkerSizes are the permitted concourse worker sizes
@@ -64,9 +66,10 @@ func (args *DeployArgs) ModifyDB(DBSize string) {
 }
 
 // ModifyGithub allows mutation of github related fields
-func (args *DeployArgs) ModifyGithub(GithubAuthClientID, GithubAuthClientSecret string) {
+func (args *DeployArgs) ModifyGithub(GithubAuthClientID, GithubAuthClientSecret string, GithubAuthIsSet bool) {
 	args.GithubAuthClientID = GithubAuthClientID
 	args.GithubAuthClientSecret = GithubAuthClientSecret
+	args.GithubAuthIsSet = GithubAuthIsSet
 }
 
 // Validate validates that flag interdependencies

@@ -162,6 +162,17 @@ var _ = Describe("Client", func() {
 					Expect(conf.TFStatePath).To(Equal("terraform.tfstate"))
 				})
 			})
+			Describe("github auth flags are present", func() {
+				It("sets the github auth config fields", func() {
+					deployArgs.ModifyGithub("id", "secret", true)
+					conf, createdANewFile, err := client.LoadOrCreate(deployArgs)
+					Expect(err).To(Succeed())
+					Expect(createdANewFile).To(BeTrue())
+					Expect(conf.GithubClientID).To(Equal("id"))
+					Expect(conf.GithubClientSecret).To(Equal("secret"))
+					Expect(conf.GithubAuthIsSet).To(BeTrue())
+				})
+			})
 		})
 	})
 })

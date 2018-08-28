@@ -184,6 +184,11 @@ func (client *Client) LoadOrCreate(deployArgs *DeployArgs) (Config, bool, error)
 	if err != nil {
 		return Config{}, createdNewFile, err
 	}
+	if deployArgs.GithubAuthIsSet {
+		config.GithubClientID = deployArgs.GithubAuthClientID
+		config.GithubClientSecret = deployArgs.GithubAuthClientSecret
+		config.GithubAuthIsSet = deployArgs.GithubAuthIsSet
+	}
 	return config, createdNewFile, nil
 }
 

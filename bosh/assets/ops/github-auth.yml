@@ -1,0 +1,6 @@
+
+- type: replace
+  path: /instance_groups/name=web/jobs/name=atc/properties/github_auth?
+  value:
+    client_id: ((github_client_id))
+    client_secret: ((github_client_secret))

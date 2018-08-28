@@ -124,14 +124,14 @@ var _ = Describe("DeployArgs", func() {
 		Context("validateGithubFields", func() {
 			Context("When an all github fields are specified", func() {
 				It("is valid", func() {
-					deployArgs.ModifyGithub("client ID", "client secret")
+					deployArgs.ModifyGithub("client ID", "client secret", true)
 					err := deployArgs.Validate()
 					Expect(err).ToNot(HaveOccurred())
 				})
 			})
 			Context("When only the client ID is specified", func() {
 				It("returns a helpful error", func() {
-					deployArgs.ModifyGithub("client ID", "")
+					deployArgs.ModifyGithub("client ID", "", false)
 					err := deployArgs.Validate()
 					Expect(err).To(HaveOccurred())
 					Expect(err.Error()).To(ContainSubstring("--github-auth-client-id requires --github-auth-client-secret to also be provided"))
@@ -139,7 +139,7 @@ var _ = Describe("DeployArgs", func() {
 			})
 			Context("When only the client secret is specified", func() {
 				It("returns a helpful error", func() {
-					deployArgs.ModifyGithub("", "client secret")
+					deployArgs.ModifyGithub("", "client secret", false)
 					err := deployArgs.Validate()
 					Expect(err).To(HaveOccurred())
 					Expect(err.Error()).To(ContainSubstring("--github-auth-client-secret requires --github-auth-client-id to also be provided"))

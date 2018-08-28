@@ -86,7 +86,7 @@ var _ = Describe("commands", func() {
 				session, err := Start(command, GinkgoWriter, GinkgoWriter)
 				Expect(err).ToNot(HaveOccurred())
 				Eventually(session).Should(Exit(1))
-				Expect(session.Err).To(Say("minimum of workers is 1"))
+				Expect(session.Err).To(Say("minimum number of workers is 1"))
 			})
 		})
 
