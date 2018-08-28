@@ -329,6 +329,20 @@ jobs:
           channel: "#integrations"
           text: |
             <!channel> Concourse Up system-test-clean-up failure!
+    - task: system-test-github-auth
+      file: concourse-up/ci/tasks/system-test-github-auth.yml
+      params:
+        AWS_ACCESS_KEY_ID: ((concourse_up_test_access_key_id))
+        AWS_SECRET_ACCESS_KEY: ((concourse_up_test_secret_key))
+        BINARY_PATH: binary-linux/concourse-up-linux-amd64
+        GITHUB_AUTH_CLIENT_ID: ((github_auth_client_id))
+        GITHUB_AUTH_CLIENT_SECRET: ((github_auth_client_secret))
+      on_failure:
+        put: slack-alert
+        params:
+          channel: "#integrations"
+          text: |
+            <!channel> Concourse Up system-test-github-auth failure!
 
 - name: auto
   serial: true

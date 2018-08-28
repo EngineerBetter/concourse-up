@@ -1,0 +1,22 @@
+---
+platform: linux
+image_resource:
+  type: docker-image
+  source:
+    repository: engineerbetter/pcf-ops
+    tag: latest
+inputs:
+- name: concourse-up
+- name: binary-linux
+- name: release
+
+run:
+  path: concourse-up/ci/tasks/system-test-github-auth.sh
+
+params:
+  AWS_ACCESS_KEY_ID:
+  AWS_SECRET_ACCESS_KEY:
+  BINARY_PATH:
+  GITHUB_AUTH_CLIENT_ID:
+  GITHUB_AUTH_CLIENT_SECRET:
+  VERBOSE:
