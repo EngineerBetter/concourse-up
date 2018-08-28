@@ -18,8 +18,10 @@ type DeployArgs struct {
 	SelfUpdate  bool
 	DBSize      string
 	// DBSizeIsSet is true if the user has manually specified the db-size (ie, it's not the default)
-	DBSizeIsSet bool
-	AllowIPs    string
+	DBSizeIsSet            bool
+	AllowIPs               string
+	GithubAuthClientID     string
+	GithubAuthClientSecret string
 }
 
 // WorkerSizes are the permitted concourse worker sizes

@@ -94,6 +94,20 @@ var deployFlags = []cli.Flag{
 		Value:       "0.0.0.0/0",
 		Destination: &deployArgs.AllowIPs,
 	},
+	cli.StringFlag{
+		Name:        "github-auth-client-id",
+		Usage:       "(optional) Comma seperated list of IP addresses or CIDR ranges to allow access too",
+		EnvVar:      "GITHUB_AUTH_CLIENT_ID",
+		Value:       "",
+		Destination: &deployArgs.GithubAuthClientID,
+	},
+	cli.StringFlag{
+		Name:        "github-auth-client-secret",
+		Usage:       "(optional) Comma seperated list of IP addresses or CIDR ranges to allow access too",
+		EnvVar:      "GITHUB_AUTH_CLIENT_SECRET",
+		Value:       "",
+		Destination: &deployArgs.GithubAuthClientSecret,
+	},
 }
 
 var deploy = cli.Command{
