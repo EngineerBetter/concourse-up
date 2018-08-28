@@ -38,10 +38,7 @@ name="concourse-up $version"
 
 echo "$name" > release-vars/name
 
-# TODO: remove notice once github auth is supported again
 cat << EOF > release-vars/body
-Concourse 4.0 has changed the way that Authentication options are configured, which must now be set at deploy time. If you previously used "fly" to configure third party authentication providers (e.g GitHub oAuth) then this option is no longer available. The Concourse-Up team are currently looking at solutions to this problem
----
 
 Auto-generated release
 
