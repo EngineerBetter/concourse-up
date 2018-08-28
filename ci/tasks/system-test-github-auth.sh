@@ -40,6 +40,13 @@ fly --target system-test login \
   --username "$username" \
   --password "$password"
 
+echo "Check for github credentials in self-update pipeline"
+fly --target system-test get-pipeline --pipeline=concourse-up-self-update > pipeline
+
+grep -q "$GITHUB_AUTH_CLIENT_ID" pipeline
+grep -q "$GITHUB_AUTH_CLIENT_SECRET" pipeline
+
+echo "Check that github auth is enabled"
 fly --target system-test set-team \
   --team-name=git-team \
   --github-user=EngineerBetterCI \

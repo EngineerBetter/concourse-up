@@ -275,33 +275,37 @@ func (client *Client) buildDefaultPipelineParams(deployArgs *config.DeployArgs, 
 	}
 
 	return &defaultPipelineParams{
-		AWSAccessKeyID:     awsAccessKeyID,
-		AWSSecretAccessKey: awsSecretAccessKey,
-		Deployment:         strings.TrimPrefix(config.Deployment, "concourse-up-"),
-		FlagAWSRegion:      deployArgs.AWSRegion,
-		FlagDomain:         deployArgs.Domain,
-		FlagTLSCert:        deployArgs.TLSCert,
-		FlagTLSKey:         deployArgs.TLSKey,
-		FlagWebSize:        deployArgs.WebSize,
-		FlagWorkerSize:     deployArgs.WorkerSize,
-		FlagWorkers:        deployArgs.WorkerCount,
-		ConcourseUpVersion: ConcourseUpVersion,
+		AWSAccessKeyID:       awsAccessKeyID,
+		AWSSecretAccessKey:   awsSecretAccessKey,
+		Deployment:           strings.TrimPrefix(config.Deployment, "concourse-up-"),
+		FlagAWSRegion:        deployArgs.AWSRegion,
+		FlagDomain:           deployArgs.Domain,
+		FlagGithubAuthID:     deployArgs.GithubAuthClientID,
+		FlagGithubAuthSecret: deployArgs.GithubAuthClientSecret,
+		FlagTLSCert:          deployArgs.TLSCert,
+		FlagTLSKey:           deployArgs.TLSKey,
+		FlagWebSize:          deployArgs.WebSize,
+		FlagWorkerSize:       deployArgs.WorkerSize,
+		FlagWorkers:          deployArgs.WorkerCount,
+		ConcourseUpVersion:   ConcourseUpVersion,
 	}, nil
 }
 
 type defaultPipelineParams struct {
-	AWSAccessKeyID     string
-	AWSDefaultRegion   string
-	AWSSecretAccessKey string
-	Deployment         string
-	FlagAWSRegion      string
-	FlagDomain         string
-	FlagTLSCert        string
-	FlagTLSKey         string
-	FlagWebSize        string
-	FlagWorkerSize     string
-	FlagWorkers        int
-	ConcourseUpVersion string
+	AWSAccessKeyID       string
+	AWSDefaultRegion     string
+	AWSSecretAccessKey   string
+	Deployment           string
+	FlagAWSRegion        string
+	FlagDomain           string
+	FlagGithubAuthID     string
+	FlagGithubAuthSecret string
+	FlagTLSCert          string
+	FlagTLSKey           string
+	FlagWebSize          string
+	FlagWorkerSize       string
+	FlagWorkers          int
+	ConcourseUpVersion   string
 }
 
 // Indent is a helper function to indent the field a given number of spaces
@@ -341,6 +345,8 @@ jobs:
       WORKER_SIZE: "<% .FlagWorkerSize %>"
       WEB_SIZE: "<% .FlagWebSize %>"
       DEPLOYMENT: "<% .Deployment %>"
+      GITHUB_AUTH_CLIENT_ID: "<% .FlagGithubAuthID %>"
+      GITHUB_AUTH_CLIENT_SECRET: "<% .FlagGithubAuthSecret %>"
       AWS_ACCESS_KEY_ID: "<% .AWSAccessKeyID %>"
       AWS_SECRET_ACCESS_KEY: "<% .AWSSecretAccessKey %>"
       SELF_UPDATE: true
@@ -382,6 +388,8 @@ jobs:
       WORKER_SIZE: "<% .FlagWorkerSize %>"
       WEB_SIZE: "<% .FlagWebSize %>"
       DEPLOYMENT: "<% .Deployment %>"
+      GITHUB_AUTH_CLIENT_ID: "<% .FlagGithubAuthID %>"
+      GITHUB_AUTH_CLIENT_SECRET: "<% .FlagGithubAuthSecret %>"
       AWS_ACCESS_KEY_ID: "<% .AWSAccessKeyID %>"
       AWS_SECRET_ACCESS_KEY: "<% .AWSSecretAccessKey %>"
       SELF_UPDATE: true
