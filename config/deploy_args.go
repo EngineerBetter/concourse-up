@@ -3,6 +3,7 @@ package config
 import (
 	"errors"
 	"fmt"
+	"regexp"
 
 	"gopkg.in/urfave/cli.v1"
 )
@@ -74,6 +75,10 @@ func (args DeployArgs) Validate() error {
 		return err
 	}
 
+	if err := args.validateTags(); err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -134,7 +139,13 @@ func (args DeployArgs) validateGithubFields() error {
 
 func (args DeployArgs) validateTags() error {
 	for _, tag := range args.Tags {
-		fmt.Println(tag)
+		m, err := regexp.MatchString(`\w+=\w+`, tag)
+		if err != nil {
+			return err
+		}
+		if !m {
+			return fmt.Errorf("`%v` is not in the format `key=value`", tag)
+		}
 	}
 	return nil
 }
