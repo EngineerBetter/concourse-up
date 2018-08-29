@@ -140,8 +140,8 @@ All flags are optional
     | 4xlarge   | db.m4.4xlarge     |
 
 * `--allow-ips value`    Comma separated list of IP addresses or CIDR ranges to allow access to (default: "0.0.0.0/0") [$ALLOW_IPS]
-* `--github-auth-client-id value`      omma seperated list of IP addresses or CIDR ranges to allow access too [$GITHUB_AUTH_CLIENT_ID]
-* `--github-auth-client-secret value`  Comma seperated list of IP addresses or CIDR ranges to allow access too [$GITHUB_AUTH_CLIENT_SECRET]
+* `--github-auth-client-id value`      Client ID for a github OAuth application - Used for Github Auth [$GITHUB_AUTH_CLIENT_ID]
+* `--github-auth-client-secret value`  Client Secret for a github OAuth application - Used for Github Auth [$GITHUB_AUTH_CLIENT_SECRET]
 
 ### Info
 

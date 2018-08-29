@@ -96,13 +96,13 @@ var deployFlags = []cli.Flag{
 	},
 	cli.StringFlag{
 		Name:        "github-auth-client-id",
-		Usage:       "(optional) Comma seperated list of IP addresses or CIDR ranges to allow access too",
+		Usage:       "(optional) Client ID for a github OAuth application - Used for Github Auth",
 		EnvVar:      "GITHUB_AUTH_CLIENT_ID",
 		Destination: &deployArgs.GithubAuthClientID,
 	},
 	cli.StringFlag{
 		Name:        "github-auth-client-secret",
-		Usage:       "(optional) Comma seperated list of IP addresses or CIDR ranges to allow access too",
+		Usage:       "(optional) Client Secret for a github OAuth application - Used for Github Auth",
 		EnvVar:      "GITHUB_AUTH_CLIENT_SECRET",
 		Destination: &deployArgs.GithubAuthClientSecret,
 	},
