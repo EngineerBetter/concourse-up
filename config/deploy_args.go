@@ -3,6 +3,8 @@ package config
 import (
 	"errors"
 	"fmt"
+
+	"gopkg.in/urfave/cli.v1"
 )
 
 // DeployArgs are arguments passed to the deploy command
@@ -24,6 +26,7 @@ type DeployArgs struct {
 	GithubAuthClientSecret string
 	// GithubAuthIsSet is true if the user has specified both the --github-auth-client-secret and --github-auth-client-id flags
 	GithubAuthIsSet bool
+	Tags            cli.StringSlice
 }
 
 // WorkerSizes are the permitted concourse worker sizes
@@ -40,29 +43,6 @@ var DBSizes = map[string]string{
 	"xlarge":  "db.m4.xlarge",
 	"2xlarge": "db.m4.2xlarge",
 	"4xlarge": "db.m4.4xlarge",
-}
-
-// ModifyCerts allows mutation of cert related fields
-func (args *DeployArgs) ModifyCerts(Domain, TLSCert, TLSKey string) {
-	args.Domain = Domain
-	args.TLSCert = TLSCert
-	args.TLSKey = TLSKey
-}
-
-// ModifyWorker allows mutation of worker related fields
-func (args *DeployArgs) ModifyWorker(WorkerCount int, WorkerSize string) {
-	args.WorkerCount = WorkerCount
-	args.WorkerSize = WorkerSize
-}
-
-// ModifyWeb allows mutation of web related fields
-func (args *DeployArgs) ModifyWeb(WebSize string) {
-	args.WebSize = WebSize
-}
-
-// ModifyDB allows mutation of web related fields
-func (args *DeployArgs) ModifyDB(DBSize string) {
-	args.DBSize = DBSize
 }
 
 // ModifyGithub allows mutation of github related fields
@@ -149,5 +129,12 @@ func (args DeployArgs) validateGithubFields() error {
 		return errors.New("--github-auth-client-secret requires --github-auth-client-id to also be provided")
 	}
 
+	return nil
+}
+
+func (args DeployArgs) validateTags() error {
+	for _, tag := range args.Tags {
+		fmt.Println(tag)
+	}
 	return nil
 }
