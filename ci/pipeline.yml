@@ -335,6 +335,8 @@ jobs:
         AWS_ACCESS_KEY_ID: ((concourse_up_test_access_key_id))
         AWS_SECRET_ACCESS_KEY: ((concourse_up_test_secret_key))
         BINARY_PATH: binary-linux/concourse-up-linux-amd64
+        EB_WILDCARD_CERT: ((eb_wildcard.certificate))
+        EB_WILDCARD_KEY: ((eb_wildcard.private_key))
         GITHUB_AUTH_CLIENT_ID: ((github_auth_client_id))
         GITHUB_AUTH_CLIENT_SECRET: ((github_auth_client_secret))
       on_failure:

@@ -26,16 +26,16 @@ echo "DEPLOY WITH GITHUB FLAGS"
 ./cup deploy $deployment \
   --github-auth-client-id "$GITHUB_AUTH_CLIENT_ID" \
   --github-auth-client-secret "$GITHUB_AUTH_CLIENT_SECRET" \
-  --domain cup.engineerbetter.com
+  --domain cup.engineerbetter.com \
+  --tls-cert "$EB_WILDCARD_CERT" \
+  --tls-key "$EB_WILDCARD_KEY"
 
 config=$(./cup info --json $deployment)
 domain=$(echo "$config" | jq -r '.config.domain')
 username=$(echo "$config" | jq -r '.config.concourse_username')
 password=$(echo "$config" | jq -r '.config.concourse_password')
-echo "$config" | jq -r '.config.concourse_ca_cert' > generated-ca-cert.pem
 
 fly --target system-test login \
-  --ca-cert generated-ca-cert.pem \
   --concourse-url "https://$domain" \
   --username "$username" \
   --password "$password"
