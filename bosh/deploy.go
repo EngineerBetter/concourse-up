@@ -69,20 +69,40 @@ func (client *Client) createEnv(state, creds []byte) (newState, newCreds []byte,
 		return state, creds, err
 	}
 
+	extraTagsPath, err := client.director.SaveFileToWorkingDir(extraTagsFilename, extraTags)
+	if err != nil {
+		return state, creds, err
+	}
+
 	err = touch(credsFilePath)
 	if err != nil {
 		return state, creds, err
 	}
 
-	if err = client.director.RunCommand(
-		client.stdout,
-		client.stderr,
+	flagFiles := []string{
 		"create-env",
 		directorManifestPath,
 		"--state",
 		stateFilePath,
 		"--vars-store",
 		credsFilePath,
+	}
+
+	t, err1 := client.buildTagsYaml(client.config.Project, "director")
+	if err1 != nil {
+		return state, creds, err
+	}
+	vmap := map[string]interface{}{
+		"tags": t,
+	}
+	vs := vars(vmap)
+	flagFiles = append(flagFiles, "--ops-file", extraTagsPath)
+	flagFiles = append(flagFiles, vs...)
+
+	if err = client.director.RunCommand(
+		client.stdout,
+		client.stderr,
+		flagFiles...,
 	); err != nil {
 		// Even if deploy does not work, try and save the state file
 		// This prevents issues with re-trying

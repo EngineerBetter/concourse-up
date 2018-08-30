@@ -28,6 +28,8 @@ type DeployArgs struct {
 	// GithubAuthIsSet is true if the user has specified both the --github-auth-client-secret and --github-auth-client-id flags
 	GithubAuthIsSet bool
 	Tags            cli.StringSlice
+	// TagsIsSet is true if the user has specified tags using --tags
+	TagsIsSet bool
 }
 
 // WorkerSizes are the permitted concourse worker sizes

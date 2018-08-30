@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"strings"
 
 	"github.com/EngineerBetter/concourse-up/db"
 )
@@ -17,6 +18,7 @@ const concourseSHAsFilename = "shas.json"
 const concourseGrafanaFilename = "grafana_dashboard.yml"
 const concourseCompatibilityFilename = "cup_compatibility.yml"
 const concourseGitHubAuthFilename = "github-auth.yml"
+const extraTagsFilename = "extra_tags.yml"
 
 func (client *Client) uploadConcourseStemcell() error {
 	var ops []struct {
@@ -86,6 +88,11 @@ func (client *Client) deployConcourse(creds []byte, detach bool) (newCreds []byt
 		return
 	}
 
+	extraTagsPath, err := client.director.SaveFileToWorkingDir(extraTagsFilename, extraTags)
+	if err != nil {
+		return nil, err
+	}
+
 	vmap := map[string]interface{}{
 		"deployment_name":          concourseDeploymentName,
 		"domain":                   client.config.Domain,
@@ -106,17 +113,6 @@ func (client *Client) deployConcourse(creds []byte, detach bool) (newCreds []byt
 		"atc_encryption_key":       client.config.EncryptionKey,
 	}
 
-	if client.config.ConcoursePassword != "" {
-		vmap["atc_password"] = client.config.ConcoursePassword
-	}
-
-	if client.config.GithubAuthIsSet {
-		vmap["github_client_id"] = client.config.GithubClientID
-		vmap["github_client_secret"] = client.config.GithubClientSecret
-	}
-
-	vs := vars(vmap)
-
 	flagFiles := []string{
 		"--deployment",
 		concourseDeploymentName,
@@ -133,9 +129,25 @@ func (client *Client) deployConcourse(creds []byte, detach bool) (newCreds []byt
 		"--vars-file",
 		concourseGrafanaPath,
 	}
+
+	if client.config.ConcoursePassword != "" {
+		vmap["atc_password"] = client.config.ConcoursePassword
+	}
+
 	if client.config.GithubAuthIsSet {
+		vmap["github_client_id"] = client.config.GithubClientID
+		vmap["github_client_secret"] = client.config.GithubClientSecret
 		flagFiles = append(flagFiles, "--ops-file", concourseGitHubAuthPath)
 	}
+
+	t, err1 := client.buildTagsYaml(vmap["project"], "concourse")
+	if err1 != nil {
+		return nil, err
+	}
+	vmap["tags"] = t
+	flagFiles = append(flagFiles, "--ops-file", extraTagsPath)
+
+	vs := vars(vmap)
 
 	err = client.director.RunAuthenticatedCommand(
 		client.stdout,
@@ -143,7 +155,7 @@ func (client *Client) deployConcourse(creds []byte, detach bool) (newCreds []byt
 		detach,
 		append(flagFiles, vs...)...,
 	)
-	newCreds, err1 := ioutil.ReadFile(credsPath)
+	newCreds, err1 = ioutil.ReadFile(credsPath)
 	if err == nil {
 		err = err1
 	}
@@ -155,6 +167,10 @@ func vars(vars map[string]interface{}) []string {
 	for k, v := range vars {
 		switch v.(type) {
 		case string:
+			if k == "tags" {
+				x = append(x, "--var", fmt.Sprintf("%s=%s", k, v))
+				continue
+			}
 			x = append(x, "--var", fmt.Sprintf("%s=%q", k, v))
 		case int:
 			x = append(x, "--var", fmt.Sprintf("%s=%d", k, v))
@@ -165,10 +181,30 @@ func vars(vars map[string]interface{}) []string {
 	return x
 }
 
+func (client *Client) buildTagsYaml(project interface{}, component string) (string, error) {
+	var b strings.Builder
+
+	if client.config.TagsIsSet {
+		for _, e := range client.config.Tags {
+			kv := strings.Join(strings.Split(e, "="), ": ")
+			_, err := fmt.Fprintf(&b, "%s,", kv)
+			if err != nil {
+				return "", err
+			}
+		}
+	}
+	cProjectTag := fmt.Sprintf("concourse-up-project: %v,", project)
+	b.WriteString(cProjectTag)
+	cComponentTag := fmt.Sprintf("concourse-up-component: %s", component)
+	b.WriteString(cComponentTag)
+	return fmt.Sprintf("{%s}", b.String()), nil
+}
+
 //go:generate go-bindata -pkg $GOPACKAGE  assets/... ../../concourse-up-ops/...
 var awsConcourseGrafana = MustAsset("assets/grafana_dashboard.yml")
 var awsConcourseCompatibility = MustAsset("assets/ops/cup_compatibility.yml")
 var awsConcourseGitHubAuth = MustAsset("assets/ops/github-auth.yml")
+var extraTags = MustAsset("assets/ops/extra_tags.yml")
 var awsConcourseManifest = MustAsset("../../concourse-up-ops/manifest.yml")
 var awsConcourseVersions = MustAsset("../../concourse-up-ops/ops/versions.json")
 var awsConcourseSHAs = MustAsset("../../concourse-up-ops/ops/shas.json")

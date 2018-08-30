@@ -189,6 +189,10 @@ func (client *Client) LoadOrCreate(deployArgs *DeployArgs) (Config, bool, error)
 		config.GithubClientSecret = deployArgs.GithubAuthClientSecret
 		config.GithubAuthIsSet = deployArgs.GithubAuthIsSet
 	}
+	if deployArgs.TagsIsSet {
+		config.Tags = deployArgs.Tags
+		config.TagsIsSet = deployArgs.TagsIsSet
+	}
 	return config, createdNewFile, nil
 }
 

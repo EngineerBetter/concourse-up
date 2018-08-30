@@ -106,11 +106,11 @@ var deployFlags = []cli.Flag{
 		EnvVar:      "GITHUB_AUTH_CLIENT_SECRET",
 		Destination: &deployArgs.GithubAuthClientSecret,
 	},
-	// cli.StringSliceFlag{
-	// 	Name:  "add-tag",
-	// 	Usage: "(optional) Key=Value pair to tag EC2 instances with - Multiple tags can be applied with multiple uses of this flag",
-	// 	Value: &deployArgs.Tags,
-	// },
+	cli.StringSliceFlag{
+		Name:  "add-tag",
+		Usage: "(optional) Key=Value pair to tag EC2 instances with - Multiple tags can be applied with multiple uses of this flag",
+		Value: &deployArgs.Tags,
+	},
 }
 
 var deploy = cli.Command{
@@ -127,6 +127,7 @@ var deploy = cli.Command{
 
 		deployArgs.DBSizeIsSet = c.IsSet("db-size")
 		deployArgs.GithubAuthIsSet = c.IsSet("github-auth-client-id") && c.IsSet("github-auth-client-secret")
+		deployArgs.TagsIsSet = c.IsSet("add-tag")
 		if err := deployArgs.Validate(); err != nil {
 			return err
 		}
