@@ -24,8 +24,6 @@ chmod +x ./cup
 echo "DEPLOY WITH TAGS"
 
 ./cup deploy $deployment \
-  --github-auth-client-id "$GITHUB_AUTH_CLIENT_ID" \
-  --github-auth-client-secret "$GITHUB_AUTH_CLIENT_SECRET" \
   --add-tag "unique-tag=special-value" \
   --add-tag "yet-another-tag=some-value"
 
