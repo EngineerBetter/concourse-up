@@ -33,29 +33,44 @@ echo "DEPLOY OLD VERSION"
 # Otherwise terraform state can get into an invalid state
 # Also wait to make sure the BOSH lock is not taken before
 # starting deploy
-sleep 60
+echo "Waiting for 30 seconds to give old deploy time to settle"
+sleep 30
 
 eval "$(./cup-old info --env $deployment)"
+config="$(./cup-old info --json $deployment)"
+domain=$(echo "$config" | jq -r '.config.domain')
 
+echo "Waiting for bosh lock to become available"
 wait_time=0
-while :
-do
+until [[ $(bosh locks --json | jq -r '.Tables[].Rows | length') -eq 0 ]]; do
   (( ++wait_time ))
   if [[ $wait_time -ge 10 ]]; then
     echo "Waited too long for lock" && exit 1
   fi
-  locks=$(bosh locks --json | jq -r '.Tables[].Rows | length')
-  if [[ $locks -eq 0 ]]; then
-    break;
-  else
-    echo "waiting for bosh lock"
-    sleep 30
-  fi
+  printf '.'
+  sleep 30
 done
+echo "Bosh lock available - Proceeding"
 
 echo "UPDATE TO NEW VERSION"
-
+export SELF_UPDATE=true
 ./cup-new deploy $deployment
+
+echo "Waiting for 30 seconds to let detached upgrade start"
+sleep 30
+
+echo "Waiting for update to complete"
+wait_time=0
+# shellcheck disable=SC2091
+until $(curl -skIfo/dev/null "https://$domain"); do
+  (( ++wait_time ))
+  if [[ $wait_time -ge 10 ]]; then
+    echo "Waited too long for deployment" && exit 1
+  fi
+  printf '.'
+  sleep 30
+done
+echo "Update complete - Proceeding"
 
 sleep 60
 
