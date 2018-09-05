@@ -1,9 +1,13 @@
 module github.com/EngineerBetter/concourse-up
 
 require (
-	github.com/DATA-DOG/go-sqlmock v1.3.0
 	github.com/asaskevich/govalidator v0.0.0-20171111151018-521b25f4b05f
 	github.com/aws/aws-sdk-go v1.12.59
+	github.com/bmatcuk/doublestar v1.1.1 // indirect
+	github.com/charlievieth/fs v0.0.0-20170613215519-7dc373669fa1 // indirect
+	github.com/cloudfoundry/bosh-cli v5.2.2+incompatible
+	github.com/cloudfoundry/bosh-utils v0.0.0-20180725223622-407dd7546455 // indirect
+	github.com/cppforlife/go-patch v0.0.0-20171006213518-250da0e0e68c
 	github.com/davecgh/go-spew v1.1.0 // indirect
 	github.com/fatih/color v1.5.0
 	github.com/ghodss/yaml v1.0.0
@@ -17,6 +21,7 @@ require (
 	github.com/mattn/go-colorable v0.0.9 // indirect
 	github.com/mattn/go-isatty v0.0.3 // indirect
 	github.com/miekg/dns v1.0.3 // indirect
+	github.com/nu7hatch/gouuid v0.0.0-20131221200532-179d4d0c4d8d // indirect
 	github.com/onsi/ginkgo v1.4.0
 	github.com/onsi/gomega v1.3.0
 	github.com/pmezard/go-difflib v1.0.0 // indirect

@@ -1,17 +1,13 @@
 package bosh
 
 import (
-	"log"
-	"os"
-	"strconv"
+	"fmt"
+	"strings"
 
 	"github.com/EngineerBetter/concourse-up/bosh/internal/aws"
-	"github.com/EngineerBetter/concourse-up/bosh/internal/cli"
+	"github.com/EngineerBetter/concourse-up/bosh/internal/boshenv"
 	"github.com/EngineerBetter/concourse-up/db"
 )
-
-const pemFilename = "director.pem"
-const directorManifestFilename = "director.yml"
 
 // Deploy deploys a new Bosh director or converges an existing deployment
 // Returns new contents of bosh state file
@@ -41,14 +37,6 @@ func (client *Client) Deploy(state, creds []byte, detach bool) (newState, newCre
 	return state, creds, err
 }
 
-func touch(name string) error {
-	f, err := os.OpenFile(name, os.O_CREATE|os.O_RDONLY, 0666)
-	if err != nil {
-		return err
-	}
-	return f.Close()
-}
-
 type temporaryStore map[string][]byte
 
 func (s temporaryStore) Set(key string, value []byte) error {
@@ -60,21 +48,33 @@ func (s temporaryStore) Get(key string) ([]byte, error) {
 	return s[key], nil
 }
 
+func splitTags(ts []string) (map[string]string, error) {
+	m := make(map[string]string)
+	for _, t := range ts {
+		ss := strings.SplitN(t, "=", 2)
+		if len(ss) != 2 {
+			return nil, fmt.Errorf("could not split tag %q", t)
+		}
+		m[ss[0]] = ss[1]
+	}
+	return m, nil
+}
+
 func (client *Client) createEnv(state, creds []byte) (newState, newCreds []byte, err error) {
+	tags, err := splitTags(client.config.Tags)
+	if err != nil {
+		return state, creds, err
+	}
 	//TODO(px): pull up this so that we use aws.Store
 	store := temporaryStore{
 		"vars.yaml":  creds,
 		"state.json": state,
 	}
-	bosh, err := cli.New()
+	bosh, err := boshenv.New()
 	if err != nil {
 		return store["state.json"], store["vars.yaml"], err
 	}
-	dbPort, err := strconv.Atoi(client.metadata.BoshDBPort.Value)
-	if err != nil {
-		return store["state.json"], store["vars.yaml"], err
-	}
-	err = bosh.CreateEnv(store, &aws.Config{
+	err = bosh.CreateEnv(store, aws.Environment{
 		InternalCIDR:    "10.0.0.0/24",
 		InternalGateway: "10.0.0.1",
 		InternalIP:      "10.0.0.6",
@@ -98,12 +98,11 @@ func (client *Client) createEnv(state, creds []byte) (newState, newCreds []byte,
 		DBHost:               client.metadata.BoshDBAddress.Value,
 		DBName:               client.config.RDSDefaultDatabaseName,
 		DBPassword:           client.config.RDSPassword,
-		DBPort:               dbPort,
+		DBPort:               client.metadata.BoshDBPort.Value,
 		DBUsername:           client.config.RDSUsername,
 		S3AWSAccessKeyID:     client.metadata.BlobstoreUserAccessKeyID.Value,
 		S3AWSSecretAccessKey: client.metadata.BlobstoreSecretAccessKey.Value,
-	}, client.config.DirectorPassword, client.config.DirectorCert, client.config.DirectorKey, client.config.DirectorCACert)
-	log.Printf("---->\n%s\n%s\n%s\n%s\n%s<----\n", client.config.DirectorPassword, client.config.PrivateKey, client.metadata.DirectorPublicIP.Value, client.config.DirectorCACert, store["vars.yaml"])
+	}, client.config.DirectorPassword, client.config.DirectorCert, client.config.DirectorKey, client.config.DirectorCACert, tags)
 	return store["state.json"], store["vars.yaml"], err
 }
 

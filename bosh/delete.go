@@ -1,10 +1,9 @@
 package bosh
 
 import (
-	"bytes"
-	"errors"
-	"io"
-	"strings"
+	"github.com/EngineerBetter/concourse-up/bosh/internal/aws"
+	"github.com/EngineerBetter/concourse-up/bosh/internal/boshenv"
+	"github.com/EngineerBetter/concourse-up/db"
 )
 
 // Delete deletes a bosh director
@@ -21,41 +20,42 @@ func (client *Client) Delete(stateFileBytes []byte) ([]byte, error) {
 		return nil, err
 	}
 
-	stateFilePath, err := client.saveStateFile(stateFileBytes)
+	//TODO(px): pull up this so that we use aws.Store
+	store := temporaryStore{
+		"state.json": stateFileBytes,
+	}
+	bosh, err := boshenv.New()
 	if err != nil {
-		return stateFileBytes, err
+		return store["state.json"], err
 	}
-
-	_, err = client.director.SaveFileToWorkingDir(pemFilename, []byte(client.config.PrivateKey))
-	if err != nil {
-		return stateFileBytes, err
-	}
-	directorManifestBytes, err := generateBoshInitManifest(client.config, client.metadata, pemFilename)
-	if err != nil {
-		return stateFileBytes, err
-	}
-
-	directorManifestPath, err := client.director.SaveFileToWorkingDir(directorManifestFilename, directorManifestBytes)
-	if err != nil {
-		return stateFileBytes, err
-	}
-
-	output := bytes.NewBuffer(nil)
-	stdout := io.MultiWriter(client.stdout, output)
-	if err := client.director.RunCommand(
-		stdout,
-		client.stderr,
-		"delete-env",
-		directorManifestPath,
-		"--state",
-		stateFilePath,
-	); err != nil {
-		return stateFileBytes, err
-	}
-
-	if !strings.Contains(output.String(), "Finished deleting deployment") {
-		return nil, errors.New("Couldn't find string `Finished deleting deployment` in bosh stdout/stderr output")
-	}
-
-	return nil, nil
+	err = bosh.CreateEnv(store, aws.Environment{
+		InternalCIDR:    "10.0.0.0/24",
+		InternalGateway: "10.0.0.1",
+		InternalIP:      "10.0.0.6",
+		AccessKeyID:     client.metadata.BoshUserAccessKeyID.Value,
+		SecretAccessKey: client.metadata.BoshSecretAccessKey.Value,
+		Region:          client.config.Region,
+		AZ:              client.config.AvailabilityZone,
+		DefaultKeyName:  client.metadata.DirectorKeyPair.Value,
+		DefaultSecurityGroups: []string{
+			client.metadata.DirectorSecurityGroupID.Value,
+			client.metadata.VMsSecurityGroupID.Value,
+		},
+		PrivateKey:           client.config.PrivateKey,
+		PublicSubnetID:       client.metadata.PublicSubnetID.Value,
+		PrivateSubnetID:      client.metadata.PrivateSubnetID.Value,
+		ExternalIP:           client.metadata.DirectorPublicIP.Value,
+		ATCSecurityGroup:     client.metadata.ATCSecurityGroupID.Value,
+		VMSecurityGroup:      client.metadata.VMsSecurityGroupID.Value,
+		BlobstoreBucket:      client.metadata.BlobstoreBucket.Value,
+		DBCACert:             db.RDSRootCert,
+		DBHost:               client.metadata.BoshDBAddress.Value,
+		DBName:               client.config.RDSDefaultDatabaseName,
+		DBPassword:           client.config.RDSPassword,
+		DBPort:               client.metadata.BoshDBPort.Value,
+		DBUsername:           client.config.RDSUsername,
+		S3AWSAccessKeyID:     client.metadata.BlobstoreUserAccessKeyID.Value,
+		S3AWSSecretAccessKey: client.metadata.BlobstoreSecretAccessKey.Value,
+	}, client.config.DirectorPassword, client.config.DirectorCert, client.config.DirectorKey, client.config.DirectorCACert, nil)
+	return store["state.json"], err
 }

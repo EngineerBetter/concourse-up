@@ -1,4 +1,4 @@
-package cli
+package boshenv
 
 import "os/exec"
 
