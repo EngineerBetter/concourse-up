@@ -27,27 +27,45 @@ type Config struct {
 	ExternalIP            string
 	ATCSecurityGroup      string
 	VMSecurityGroup       string
+	BlobstoreBucket       string
+	DBCACert              string
+	DBHost                string
+	DBName                string
+	DBPassword            string
+	DBPort                int
+	DBUsername            string
+	S3AWSAccessKeyID      string
+	S3AWSSecretAccessKey  string
 }
 
 func (c *Config) Operations() []string {
-	return []string{cpiOperation, exernalIPOperation}
+	return []string{cpiOperation, exernalIPOperation, concourseSpecifics}
 }
 
 func (c *Config) Vars() map[string]interface{} {
 	return map[string]interface{}{
-		"director_name":           "bosh",
-		"internal_cidr":           c.InternalCIDR,
-		"internal_gw":             c.InternalGateway,
-		"internal_ip":             c.InternalIP,
-		"access_key_id":           c.AccessKeyID,
-		"secret_access_key":       c.SecretAccessKey,
-		"region":                  c.Region,
-		"az":                      c.AZ,
-		"default_key_name":        c.DefaultKeyName,
-		"default_security_groups": c.DefaultSecurityGroups,
-		"private_key":             c.PrivateKey,
-		"subnet_id":               c.PublicSubnetID,
-		"external_ip":             c.ExternalIP,
+		"director_name":            "bosh",
+		"internal_cidr":            c.InternalCIDR,
+		"internal_gw":              c.InternalGateway,
+		"internal_ip":              c.InternalIP,
+		"access_key_id":            c.AccessKeyID,
+		"secret_access_key":        c.SecretAccessKey,
+		"region":                   c.Region,
+		"az":                       c.AZ,
+		"default_key_name":         c.DefaultKeyName,
+		"default_security_groups":  c.DefaultSecurityGroups,
+		"private_key":              c.PrivateKey,
+		"subnet_id":                c.PublicSubnetID,
+		"external_ip":              c.ExternalIP,
+		"blobstore_bucket":         c.BlobstoreBucket,
+		"db_ca_cert":               c.DBCACert,
+		"db_host":                  c.DBHost,
+		"db_name":                  c.DBName,
+		"db_password":              c.DBPassword,
+		"db_port":                  c.DBPort,
+		"db_username":              c.DBUsername,
+		"s3_aws_access_key_id":     c.S3AWSAccessKeyID,
+		"s3_aws_secret_access_key": c.S3AWSSecretAccessKey,
 	}
 }
 
@@ -242,6 +260,103 @@ const exernalIPOperation = `---
 - type: replace
   path: /variables/name=director_ssl/options/alternative_names/-
   value: ((external_ip))`
+
+const concourseSpecifics = `---
+- type: replace
+  path: /disk_pools/name=disks/disk_size
+  value: 20000
+
+- type: replace
+  path: /instance_groups/name=bosh/properties/blobstore
+  value:
+    access_key_id: ((s3_aws_access_key_id))
+    bucket_name: ((blobstore_bucket))
+    provider: s3
+    s3_region: ((region))
+    secret_access_key: ((s3_aws_secret_access_key))
+
+- type: replace
+  path: /instance_groups/name=bosh/properties/director/db
+  value:
+    adapter: postgres
+    database: ((db_name))
+    host: ((db_host))
+    password: ((db_password))
+    port: ((db_port))
+    user: ((db_username))
+
+- type: replace
+  path: /instance_groups/name=bosh/properties/director/max_threads?
+  value: 10
+
+- type: replace
+  path: /instance_groups/name=bosh/properties/director/trusted_certs?
+  value: ((db_ca_cert))
+
+- type: replace
+  path: /instance_groups/name=bosh/properties/postgres
+  value:
+    adapter: postgres
+    database: ((db_name))
+    host: ((db_host))
+    password: ((db_password))
+    port: ((db_port))
+    user: ((db_username))
+
+- type: replace
+  path: /instance_groups/name=bosh/properties/registry/db
+  value:
+    adapter: postgres
+    database: ((db_name))
+    host: ((db_host))
+    password: ((db_password))
+    port: ((db_port))
+    user: ((db_username))
+
+- type: replace
+  path: /instance_groups/name=bosh/properties/registry/http/user
+  value: admin
+
+- type: replace
+  path: /instance_groups/name=bosh/properties/registry/username
+  value: admin
+
+- type: replace
+  path: /resource_pools/name=vms/cloud_properties/instance_type
+  value: t2.small
+
+- type: replace
+  path: /resource_pools/name=vms/env/bosh/password
+  value: "$6$4gDD3aV0rdqlrKC$2axHCxGKIObs6tAmMTqYCspcdvQXh3JJcvWOY2WGb4SrdXtnCyNaWlrf3WEqvYR2MYizEGp3kMmbpwBC6jsHt0"
+
+- type: remove
+  path: /instance_groups/name=bosh/properties/agent/env
+
+- type: remove
+  path: /variables/name=blobstore_ca
+
+- type: remove
+  path: /variables/name=blobstore_server_tls
+
+- type: remove
+  path: /instance_groups/name=bosh/jobs/name=postgres-9.4
+
+- type: remove
+  path: /instance_groups/name=bosh/jobs/name=blobstore
+
+- type: remove
+  path: /cloud_provider/cert
+
+- type: remove
+  path: /resource_pools/name=vms/env/bosh/mbus
+
+- type: remove
+  path: /variables/name=mbus_bootstrap_ssl
+
+- type: remove
+  path: /instance_groups/name=bosh/properties/director/workers
+
+`
 
 const cloudConfig = `---
 azs:

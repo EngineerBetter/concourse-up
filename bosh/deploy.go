@@ -1,8 +1,13 @@
 package bosh
 
 import (
-	"io/ioutil"
+	"log"
 	"os"
+	"strconv"
+
+	"github.com/EngineerBetter/concourse-up/bosh/internal/aws"
+	"github.com/EngineerBetter/concourse-up/bosh/internal/cli"
+	"github.com/EngineerBetter/concourse-up/db"
 )
 
 const pemFilename = "director.pem"
@@ -44,79 +49,62 @@ func touch(name string) error {
 	return f.Close()
 }
 
+type temporaryStore map[string][]byte
+
+func (s temporaryStore) Set(key string, value []byte) error {
+	s[key] = value
+	return nil
+}
+
+func (s temporaryStore) Get(key string) ([]byte, error) {
+	return s[key], nil
+}
+
 func (client *Client) createEnv(state, creds []byte) (newState, newCreds []byte, err error) {
-	stateFilePath, err := client.saveStateFile(state)
+	//TODO(px): pull up this so that we use aws.Store
+	store := temporaryStore{
+		"vars.yaml":  creds,
+		"state.json": state,
+	}
+	bosh, err := cli.New()
 	if err != nil {
-		return state, creds, err
+		return store["state.json"], store["vars.yaml"], err
 	}
-	credsFilePath, err := client.saveCredsFile(creds)
+	dbPort, err := strconv.Atoi(client.metadata.BoshDBPort.Value)
 	if err != nil {
-		return state, creds, err
+		return store["state.json"], store["vars.yaml"], err
 	}
-
-	_, err = client.director.SaveFileToWorkingDir(pemFilename, []byte(client.config.PrivateKey))
-	if err != nil {
-		return state, creds, err
-	}
-
-	directorManifestBytes, err := generateBoshInitManifest(client.config, client.metadata, pemFilename)
-	if err != nil {
-		return state, creds, err
-	}
-
-	directorManifestPath, err := client.director.SaveFileToWorkingDir(directorManifestFilename, directorManifestBytes)
-	if err != nil {
-		return state, creds, err
-	}
-
-	extraTagsPath, err := client.director.SaveFileToWorkingDir(extraTagsFilename, extraTags)
-	if err != nil {
-		return state, creds, err
-	}
-
-	err = touch(credsFilePath)
-	if err != nil {
-		return state, creds, err
-	}
-
-	flagFiles := []string{
-		"create-env",
-		directorManifestPath,
-		"--state",
-		stateFilePath,
-		"--vars-store",
-		credsFilePath,
-	}
-
-	t, err1 := client.buildTagsYaml(client.config.Project, "director")
-	if err1 != nil {
-		return state, creds, err
-	}
-	vmap := map[string]interface{}{
-		"tags": t,
-	}
-	vs := vars(vmap)
-	flagFiles = append(flagFiles, "--ops-file", extraTagsPath)
-	flagFiles = append(flagFiles, vs...)
-
-	if err = client.director.RunCommand(
-		client.stdout,
-		client.stderr,
-		flagFiles...,
-	); err != nil {
-		// Even if deploy does not work, try and save the state file
-		// This prevents issues with re-trying
-		state, _ = ioutil.ReadFile(stateFilePath)
-		creds, _ = ioutil.ReadFile(credsFilePath)
-		return state, creds, err
-	}
-
-	state, err = ioutil.ReadFile(stateFilePath)
-	if err != nil {
-		return state, creds, err
-	}
-	creds, err = ioutil.ReadFile(credsFilePath)
-	return state, creds, err
+	err = bosh.CreateEnv(store, &aws.Config{
+		InternalCIDR:    "10.0.0.0/24",
+		InternalGateway: "10.0.0.1",
+		InternalIP:      "10.0.0.6",
+		AccessKeyID:     client.metadata.BoshUserAccessKeyID.Value,
+		SecretAccessKey: client.metadata.BoshSecretAccessKey.Value,
+		Region:          client.config.Region,
+		AZ:              client.config.AvailabilityZone,
+		DefaultKeyName:  client.metadata.DirectorKeyPair.Value,
+		DefaultSecurityGroups: []string{
+			client.metadata.DirectorSecurityGroupID.Value,
+			client.metadata.VMsSecurityGroupID.Value,
+		},
+		PrivateKey:           client.config.PrivateKey,
+		PublicSubnetID:       client.metadata.PublicSubnetID.Value,
+		PrivateSubnetID:      client.metadata.PrivateSubnetID.Value,
+		ExternalIP:           client.metadata.DirectorPublicIP.Value,
+		ATCSecurityGroup:     client.metadata.ATCSecurityGroupID.Value,
+		VMSecurityGroup:      client.metadata.VMsSecurityGroupID.Value,
+		BlobstoreBucket:      client.metadata.BlobstoreBucket.Value,
+		DBCACert:             db.RDSRootCert,
+		DBHost:               client.metadata.BoshDBAddress.Value,
+		DBName:               client.config.RDSDefaultDatabaseName,
+		DBPassword:           client.config.RDSPassword,
+		DBPort:               dbPort,
+		DBUsername:           client.config.RDSUsername,
+		S3AWSAccessKeyID:     client.metadata.BlobstoreUserAccessKeyID.Value,
+		S3AWSSecretAccessKey: client.metadata.BlobstoreSecretAccessKey.Value,
+	}, client.config.DirectorPassword, client.config.DirectorCert, client.config.DirectorKey, client.config.DirectorCACert)
+	log.Printf("---->\n%s\n%s\n%s\n%s\n%s<----\n", client.config.DirectorPassword, client.config.PrivateKey, client.metadata.DirectorPublicIP.Value, client.config.DirectorCACert, store["vars.yaml"])
+	return store["state.json"], store["vars.yaml"], err
 }
 
 func (client *Client) updateCloudConfig() error {

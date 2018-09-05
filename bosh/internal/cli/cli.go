@@ -57,56 +57,42 @@ func (e Environment) env() []string {
 	)
 }
 
-func (c *BOSHCLI) CreateEnv(store Store, config IAASConfig) (Environment, error) {
+func (c *BOSHCLI) CreateEnv(store Store, config IAASConfig, password, cert, key, ca string) error {
 	const stateFilename = "state.json"
 	const varsFilename = "vars.yaml"
-	interpolatedManifest, err := Interpolate(directorManifest, config.Operations(), config.Vars())
+	vars := config.Vars()
+	vars["admin_password"] = password
+	vars["director_ssl.certificate"] = cert
+	vars["director_ssl.private_key"] = key
+	vars["director_ssl.ca"] = ca
+	interpolatedManifest, err := Interpolate(directorManifest, config.Operations(), vars)
 	if err != nil {
-		return Environment{}, err
+		return err
 	}
 	err = initJSON(store, stateFilename)
 	if err != nil {
-		return Environment{}, err
+		return err
 	}
 	statePath, uploadState, err := writeToDisk(store, stateFilename)
 	if err != nil {
-		return Environment{}, err
+		return err
 	}
 	defer uploadState()
 	varsPath, uploadVars, err := writeToDisk(store, varsFilename)
 	if err != nil {
-		return Environment{}, err
+		return err
 	}
 	defer uploadVars()
 	manifestPath, err := writeTempFile([]byte(interpolatedManifest))
 	if err != nil {
-		return Environment{}, err
+		return err
 	}
 	defer os.Remove(manifestPath)
+	// cmd := c.execCmd("bosh", "create-env", "--state="+statePath, "--vars-store="+varsPath, manifestPath)
 	cmd := c.execCmd("bosh", "create-env", "--state="+statePath, "--vars-store="+varsPath, manifestPath)
 	cmd.Stderr = os.Stderr
-	err = cmd.Run()
-	if err != nil {
-		return Environment{}, err
-	}
-	vars, err := readYAML(varsPath)
-	if err != nil {
-		return Environment{}, err
-	}
-	password, err := getKey(vars, []string{"admin_password"})
-	if err != nil {
-		return Environment{}, err
-	}
-	caCert, err := getKey(vars, []string{"director_ssl", "ca"})
-	if err != nil {
-		return Environment{}, err
-	}
-	return Environment{
-		Address:  config.Address(),
-		Username: "admin",
-		Password: password,
-		CACert:   caCert,
-	}, nil
+	cmd.Stdout = os.Stdout
+	return cmd.Run()
 }
 
 func readYAML(path string) (map[string]interface{}, error) {
