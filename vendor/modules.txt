@@ -1,5 +1,3 @@
-# github.com/DATA-DOG/go-sqlmock v1.3.0
-github.com/DATA-DOG/go-sqlmock
 # github.com/asaskevich/govalidator v0.0.0-20171111151018-521b25f4b05f
 github.com/asaskevich/govalidator
 # github.com/aws/aws-sdk-go v1.12.59
@@ -32,10 +30,24 @@ github.com/aws/aws-sdk-go/aws/credentials/ec2rolecreds
 github.com/aws/aws-sdk-go/aws/credentials/endpointcreds
 github.com/aws/aws-sdk-go/aws/ec2metadata
 github.com/aws/aws-sdk-go/private/protocol/query/queryutil
+# github.com/bmatcuk/doublestar v1.1.1
+github.com/bmatcuk/doublestar
+# github.com/charlievieth/fs v0.0.0-20170613215519-7dc373669fa1
+github.com/charlievieth/fs
+# github.com/cloudfoundry/bosh-cli v5.2.2+incompatible
+github.com/cloudfoundry/bosh-cli/director/template
+# github.com/cloudfoundry/bosh-utils v0.0.0-20180725223622-407dd7546455
+github.com/cloudfoundry/bosh-utils/errors
+github.com/cloudfoundry/bosh-utils/system
+github.com/cloudfoundry/bosh-utils/logger
+# github.com/cppforlife/go-patch v0.0.0-20171006213518-250da0e0e68c
+github.com/cppforlife/go-patch/patch
 # github.com/davecgh/go-spew v1.1.0
 github.com/davecgh/go-spew/spew
 # github.com/fatih/color v1.5.0
 github.com/fatih/color
+# github.com/ghodss/yaml v1.0.0
+github.com/ghodss/yaml
 # github.com/go-ini/ini v1.32.0
 github.com/go-ini/ini
 # github.com/jmespath/go-jmespath v0.0.0-20160202185014-0b12d6b521d8
