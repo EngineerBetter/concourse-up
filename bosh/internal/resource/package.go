@@ -28,11 +28,16 @@ var (
 )
 
 var (
-	DirectorManifest  = file.MustAssetString("director/director-manifest.yml")
-	AWSCPIOps         = file.MustAssetString("director/aws-cpi.yml")
-	ExternalIPOps     = file.MustAssetString("director/external-ip.yml")
-	DirectorCustomOps = file.MustAssetString("director/custom-ops.yml")
+	DirectorManifest  = mustAssetString("director/director-manifest.yml")
+	AWSCPIOps         = mustAssetString("director/aws-cpi.yml")
+	ExternalIPOps     = mustAssetString("director/external-ip.yml")
+	DirectorCustomOps = mustAssetString("director/custom-ops.yml")
 )
+
+// NOTE(px) remove this in a later version of github.com/mattn/go-bindata
+func mustAssetString(name string) string {
+	return string(file.MustAsset(name))
+}
 
 func Get(id ResourceID) Resource {
 	r, ok := resources[id.name]
