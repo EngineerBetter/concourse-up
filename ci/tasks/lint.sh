@@ -17,6 +17,7 @@ gometalinter \
 --enable=vetshadow \
 --enable=golint \
 --exclude=bindata \
+--exclude=bosh/internal/resource/internal/file \
 --vendor \
 --enable-gc \
 ./...
