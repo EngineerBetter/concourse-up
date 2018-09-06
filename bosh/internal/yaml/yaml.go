@@ -15,6 +15,7 @@ func newOpsFromString(ops string) (patch.Op, error) {
 	return patch.NewOpsFromDefinitions(opDefs)
 }
 
+// Interpolate returns an interpolated string using vars
 func Interpolate(s string, ops string, vars map[string]interface{}) (string, error) {
 	t := template.NewTemplate([]byte(s))
 	op, err := newOpsFromString(ops)

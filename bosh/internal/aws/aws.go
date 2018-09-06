@@ -12,6 +12,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3/s3iface"
 )
 
+// Environment holds all the parameters AWS IAAS needs
 type Environment struct {
 	InternalCIDR          string
 	InternalGateway       string
@@ -41,6 +42,8 @@ type Environment struct {
 
 var allOperations = resource.AWSCPIOps + resource.ExternalIPOps + resource.DirectorCustomOps
 
+// ConfigureDirectorManifestCPI interpolates all the Environment parameters and
+// required release versions into ready to use Director manifest
 func (e Environment) ConfigureDirectorManifestCPI(manifest string) (string, error) {
 	cpiResource := resource.Get(resource.AWSCPI)
 	stemcellResource := resource.Get(resource.AWSStemcell)
@@ -74,11 +77,13 @@ func (e Environment) ConfigureDirectorManifestCPI(manifest string) (string, erro
 	})
 }
 
+// Store holds the abstraction of a aws storage artifact
 type Store struct {
 	s3     s3iface.S3API
 	bucket string
 }
 
+// NewStore returns a reference to a new Store
 func NewStore(s3 s3iface.S3API, bucket string) *Store {
 	return &Store{
 		s3:     s3,
@@ -86,6 +91,7 @@ func NewStore(s3 s3iface.S3API, bucket string) *Store {
 	}
 }
 
+// Get returns the contents of a Store element identified with a key
 func (s *Store) Get(key string) ([]byte, error) {
 	result, err := s.s3.GetObject(&s3.GetObjectInput{
 		Bucket: aws.String(s.bucket),
@@ -101,6 +107,7 @@ func (s *Store) Get(key string) ([]byte, error) {
 	return ioutil.ReadAll(result.Body)
 }
 
+// Set stores the contents of a Store element identified with a key
 func (s *Store) Set(key string, value []byte) error {
 	_, err := s.s3.PutObject(&s3.PutObjectInput{
 		Body:   bytes.NewReader(value),

@@ -8,6 +8,7 @@ import (
 
 //go:generate go-bindata -o internal/file/file.go -ignore (\.go$)|(\.git) -nometadata -pkg file -prefix=../../../../concourse-up-ops . ../../../../concourse-up-ops/...
 
+// Resource safely exposes the json parameters of a resource
 type Resource struct {
 	URL     string `json:"url"`
 	Version string `json:"version"`
@@ -16,21 +17,30 @@ type Resource struct {
 
 var resources map[string]Resource
 
-type ResourceID struct {
+// ID defines the name of a resource in a safer way
+type ID struct {
 	name string
 }
 
 var (
-	AWSCPI      = ResourceID{"cpi"}
-	AWSStemcell = ResourceID{"stemcell"}
-	BOSHRelease = ResourceID{"bosh"}
-	BPMRelease  = ResourceID{"bpm"}
+	// AWSCPI statically defines cpi string
+	AWSCPI = ID{"cpi"}
+	// AWSStemcell statically defines stemcell string
+	AWSStemcell = ID{"stemcell"}
+	// BOSHRelease statically defines bosh string
+	BOSHRelease = ID{"bosh"}
+	// BPMRelease statically defines bpm string
+	BPMRelease = ID{"bpm"}
 )
 
 var (
-	DirectorManifest  = mustAssetString("director/director-manifest.yml")
-	AWSCPIOps         = mustAssetString("director/aws-cpi.yml")
-	ExternalIPOps     = mustAssetString("director/external-ip.yml")
+	// DirectorManifest statically defines director-manifest.yml contents
+	DirectorManifest = mustAssetString("director/director-manifest.yml")
+	// AWSCPIOps statically defines aws-cpi.yml contents
+	AWSCPIOps = mustAssetString("director/aws-cpi.yml")
+	// ExternalIPOps statically defines external-ip.yml contents
+	ExternalIPOps = mustAssetString("director/external-ip.yml")
+	// DirectorCustomOps statically defines custom-ops.yml contents
 	DirectorCustomOps = mustAssetString("director/custom-ops.yml")
 )
 
@@ -39,7 +49,8 @@ func mustAssetString(name string) string {
 	return string(file.MustAsset(name))
 }
 
-func Get(id ResourceID) Resource {
+// Get returns an Resource in a safe way
+func Get(id ID) Resource {
 	r, ok := resources[id.name]
 	if !ok {
 		panic("resource " + id.name + " not found")

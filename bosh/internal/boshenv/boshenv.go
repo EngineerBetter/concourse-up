@@ -10,12 +10,15 @@ import (
 	"github.com/EngineerBetter/concourse-up/bosh/internal/yaml"
 )
 
+// BOSHCLI struct holds the abstraction of execCmd
 type BOSHCLI struct {
 	execCmd func(string, ...string) *exec.Cmd
 }
 
+// Option defines the arbitary element of Options for New
 type Option func(*BOSHCLI) error
 
+// New provides a new BOSHCLI
 func New(ops ...Option) (*BOSHCLI, error) {
 	c := &BOSHCLI{
 		execCmd: exec.Command,
@@ -28,10 +31,12 @@ func New(ops ...Option) (*BOSHCLI, error) {
 	return c, nil
 }
 
+// IAASEnvironment exposes ConfigureDirectorManifestCPI
 type IAASEnvironment interface {
 	ConfigureDirectorManifestCPI(string) (string, error)
 }
 
+// Store exposes its methods
 type Store interface {
 	Set(key string, value []byte) error
 	// Get must return a zero length byte slice and a nil error when the key is not present in the store
@@ -87,10 +92,12 @@ func (c *BOSHCLI) xEnv(action string, store Store, config IAASEnvironment, passw
 	return cmd.Run()
 }
 
+// DeleteEnv deletes a bosh env
 func (c *BOSHCLI) DeleteEnv(store Store, config IAASEnvironment, password, cert, key, ca string, tags map[string]string) error {
 	return c.xEnv("delete-env", store, config, password, cert, key, ca, tags)
 }
 
+// CreateEnv creates a bosh env
 func (c *BOSHCLI) CreateEnv(store Store, config IAASEnvironment, password, cert, key, ca string, tags map[string]string) error {
 	return c.xEnv("create-env", store, config, password, cert, key, ca, tags)
 
