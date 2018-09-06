@@ -6,7 +6,7 @@ import (
 	"github.com/EngineerBetter/concourse-up/bosh/internal/resource/internal/file"
 )
 
-//go:generate go-bindata -o internal/file/files.go -ignore \.git -nometadata -pkg file -prefix=../../../../concourse-up-ops ../../../../concourse-up-ops/...
+//go:generate go-bindata -o internal/file/files.go -ignore (\.go$)|(\.git) -nometadata -pkg file -prefix=../../../../concourse-up-ops . ../../../../concourse-up-ops/...
 
 type Resource struct {
 	URL     string `json:"url"`
@@ -28,8 +28,8 @@ var (
 )
 
 var (
-	DirectorManifest  = file.MustAssetString("director/manifest.yml")
-	AWSCPIOps         = file.MustAssetString("director/aws/cpi.yml")
+	DirectorManifest  = file.MustAssetString("director/director-manifest.yml")
+	AWSCPIOps         = file.MustAssetString("director/aws-cpi.yml")
 	ExternalIPOps     = file.MustAssetString("director/external-ip.yml")
 	DirectorCustomOps = file.MustAssetString("director/custom-ops.yml")
 )
