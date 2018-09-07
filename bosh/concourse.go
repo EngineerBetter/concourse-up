@@ -200,7 +200,7 @@ func (client *Client) buildTagsYaml(project interface{}, component string) (stri
 	return fmt.Sprintf("{%s}", b.String()), nil
 }
 
-//go:generate go-bindata -pkg $GOPACKAGE  assets/... ../../concourse-up-ops/...
+//go:generate go-bindata -pkg $GOPACKAGE -ignore \.git assets/... ../../concourse-up-ops/...
 var awsConcourseGrafana = MustAsset("assets/grafana_dashboard.yml")
 var awsConcourseCompatibility = MustAsset("assets/ops/cup_compatibility.yml")
 var awsConcourseGitHubAuth = MustAsset("assets/ops/github-auth.yml")
