@@ -21,7 +21,7 @@ func Download(url string) (string, error) {
 		return "", err
 	}
 	path = filepath.Join(path, hash(url))
-	if _, err := os.Stat(path); !os.IsNotExist(err) {
+	if _, err = os.Stat(path); !os.IsNotExist(err) {
 		return path, nil
 	}
 	f, err := os.OpenFile(path, os.O_CREATE|os.O_EXCL|os.O_WRONLY, 0700)

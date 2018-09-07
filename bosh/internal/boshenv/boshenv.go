@@ -19,6 +19,7 @@ type BOSHCLI struct {
 // Option defines the arbitary element of Options for New
 type Option func(*BOSHCLI) error
 
+// BOSHPath returns the path of the bosh-cli as an Option
 func BOSHPath(path string) Option {
 	return func(c *BOSHCLI) error {
 		c.boshPath = path
@@ -26,6 +27,7 @@ func BOSHPath(path string) Option {
 	}
 }
 
+// DownloadBOSH returns the dowloaded boshcli path Option
 func DownloadBOSH() Option {
 	return func(c *BOSHCLI) error {
 		path, err := resource.BOSHCLIPath()
