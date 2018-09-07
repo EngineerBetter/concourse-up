@@ -65,6 +65,8 @@ func (client *Client) createEnv(state, creds []byte) (newState, newCreds []byte,
 	if err != nil {
 		return state, creds, err
 	}
+	tags["concourse-up-project"] = client.config.Project
+	tags["concourse-up-component"] = "concourse"
 	//TODO(px): pull up this so that we use aws.Store
 	store := temporaryStore{
 		"vars.yaml":  creds,
