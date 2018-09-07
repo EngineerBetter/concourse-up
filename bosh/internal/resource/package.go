@@ -8,7 +8,7 @@ import (
 	"github.com/EngineerBetter/concourse-up/bosh/internal/resource/internal/file"
 )
 
-//go:generate go-bindata -o internal/file/file.go -ignore (\.go$)|(\.git) -nometadata -pkg file -prefix=../../../../concourse-up-ops . ../../../../concourse-up-ops/...
+//go:generate go-bindata -o internal/file/file.go -ignore (\.go$)|(\.git)|(bosh/assets) -nometadata -pkg file -prefix=../../../../concourse-up-ops . ../../../../concourse-up-ops/...
 
 // Resource safely exposes the json parameters of a resource
 type Resource struct {
