@@ -2,7 +2,9 @@ package resource
 
 import (
 	"encoding/json"
+	"runtime"
 
+	"github.com/EngineerBetter/concourse-up/bosh/internal/bincache"
 	"github.com/EngineerBetter/concourse-up/bosh/internal/resource/internal/file"
 )
 
@@ -64,4 +66,35 @@ func init() {
 	if err != nil {
 		panic(err)
 	}
+	err = json.Unmarshal(p, &binaries)
+	if err != nil {
+		panic(err)
+	}
+}
+
+var binaries map[string]binaryPaths
+
+type binaryPaths struct {
+	Windows string `json:"windows"`
+	Mac     string `json:"mac"`
+	Linux   string `json:"linux"`
+}
+
+func (p binaryPaths) path() string {
+	switch runtime.GOOS {
+	case "windows":
+		return p.Windows
+	case "darwin":
+		return p.Mac
+	case "linux":
+		return p.Linux
+	default:
+		panic("OS not supported")
+	}
+}
+
+// BOSHCLIPath returns the path of the downloaded bosh-cli
+func BOSHCLIPath() (string, error) {
+	p := binaries["bosh-cli"].path()
+	return bincache.Download(p)
 }

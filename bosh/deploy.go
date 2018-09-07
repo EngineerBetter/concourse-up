@@ -72,7 +72,10 @@ func (client *Client) createEnv(state, creds []byte) (newState, newCreds []byte,
 		"vars.yaml":  creds,
 		"state.json": state,
 	}
-	bosh, err := boshenv.New()
+	bosh, err := boshenv.New(boshenv.DownloadBOSH())
+	if err != nil {
+		return state, creds, err
+	}
 	if err != nil {
 		return store["state.json"], store["vars.yaml"], err
 	}

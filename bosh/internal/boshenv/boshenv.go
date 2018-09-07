@@ -12,16 +12,33 @@ import (
 
 // BOSHCLI struct holds the abstraction of execCmd
 type BOSHCLI struct {
-	execCmd func(string, ...string) *exec.Cmd
+	execCmd  func(string, ...string) *exec.Cmd
+	boshPath string
 }
 
 // Option defines the arbitary element of Options for New
 type Option func(*BOSHCLI) error
 
+func BOSHPath(path string) Option {
+	return func(c *BOSHCLI) error {
+		c.boshPath = path
+		return nil
+	}
+}
+
+func DownloadBOSH() Option {
+	return func(c *BOSHCLI) error {
+		path, err := resource.BOSHCLIPath()
+		c.boshPath = path
+		return err
+	}
+}
+
 // New provides a new BOSHCLI
 func New(ops ...Option) (*BOSHCLI, error) {
 	c := &BOSHCLI{
-		execCmd: exec.Command,
+		execCmd:  exec.Command,
+		boshPath: "bosh",
 	}
 	for _, op := range ops {
 		if err := op(c); err != nil {
@@ -86,7 +103,8 @@ func (c *BOSHCLI) xEnv(action string, store Store, config IAASEnvironment, passw
 		return err
 	}
 	defer os.Remove(manifestPath)
-	cmd := c.execCmd("bosh", action, "--state="+statePath, "--vars-store="+varsPath, manifestPath)
+
+	cmd := c.execCmd(c.boshPath, action, "--state="+statePath, "--vars-store="+varsPath, manifestPath)
 	cmd.Stderr = os.Stderr
 	cmd.Stdout = os.Stdout
 	return cmd.Run()
