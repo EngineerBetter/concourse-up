@@ -58,6 +58,8 @@ vm_types:
 - name: concourse-medium
   cloud_properties:
     instance_type: t2.medium
+<% if .Spot %>    spot_bid_price: 0.0567 # on-demand price: 0.0464 <% end %>
+    spot_ondemand_fallback: true
     ephemeral_disk:
       size: 200_000
       type: gp2
