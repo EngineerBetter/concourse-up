@@ -48,6 +48,12 @@ var infoFlags = []cli.Flag{
 		Hidden:      true,
 		Destination: &infoArgs.IAAS,
 	},
+	cli.StringFlag{
+		Name:        "namespace",
+		Usage:       "(optional) Specify a namespace for deployments in order to group them in a meaningful way",
+		EnvVar:      "NAMESPACE",
+		Destination: &infoArgs.Namespace,
+	},
 }
 
 var info = cli.Command{
@@ -73,7 +79,7 @@ var info = cli.Command{
 			bosh.NewClient,
 			fly.New,
 			certs.Generate,
-			config.New(awsClient, name),
+			config.New(awsClient, name, ""),
 			nil,
 			os.Stdout,
 			os.Stderr,

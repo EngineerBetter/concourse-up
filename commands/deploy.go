@@ -117,6 +117,12 @@ var deployFlags = []cli.Flag{
 		Usage: "(optional) Key=Value pair to tag EC2 instances with - Multiple tags can be applied with multiple uses of this flag",
 		Value: &deployArgs.Tags,
 	},
+	cli.StringFlag{
+		Name:        "namespace",
+		Usage:       "(optional) Specify a namespace for deployments in order to group them in a meaningful way",
+		EnvVar:      "NAMESPACE",
+		Destination: &deployArgs.Namespace,
+	},
 }
 
 var deploy = cli.Command{
@@ -134,6 +140,7 @@ var deploy = cli.Command{
 		deployArgs.DBSizeIsSet = c.IsSet("db-size")
 		deployArgs.GithubAuthIsSet = c.IsSet("github-auth-client-id") && c.IsSet("github-auth-client-secret")
 		deployArgs.TagsIsSet = c.IsSet("add-tag")
+		deployArgs = deployArgs.SanitiseNamespace()
 		if err := deployArgs.Validate(); err != nil {
 			return err
 		}
@@ -149,7 +156,7 @@ var deploy = cli.Command{
 			bosh.NewClient,
 			fly.New,
 			certs.Generate,
-			config.New(awsClient, name),
+			config.New(awsClient, name, deployArgs.Namespace),
 			&deployArgs,
 			os.Stdout,
 			os.Stderr,

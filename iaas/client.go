@@ -11,7 +11,8 @@ type IClient interface {
 	DeleteVersionedBucket(name string) error
 	DeleteVMsInVPC(vpcID string) ([]*string, error)
 	DeleteVolumes(volumesToDelete []*string, deleteVolume func(ec2Client IEC2, volumeID *string) error) error
-	EnsureBucketExists(name string) error
+	CreateBucket(name string) error
+	BucketExists(name string) (bool, error)
 	EnsureFileExists(bucket, path string, defaultContents []byte) ([]byte, bool, error)
 	FindLongestMatchingHostedZone(subdomain string) (string, string, error)
 	HasFile(bucket, path string) (bool, error)

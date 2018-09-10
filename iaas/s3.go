@@ -63,20 +63,10 @@ func (client *AWSClient) DeleteVersionedBucket(name string) error {
 	return err
 }
 
-// EnsureBucketExists checks if the named bucket exists and creates it if it doesn't
-func (client *AWSClient) EnsureBucketExists(name string) error {
+// CreateBucket checks if the named bucket exists and creates it if it doesn't
+func (client *AWSClient) CreateBucket(name string) error {
 
 	s3Client := s3.New(client.sess)
-
-	_, err := s3Client.HeadBucket(&s3.HeadBucketInput{Bucket: &name})
-	if err == nil {
-		return nil
-	}
-
-	awsErrCode := err.(awserr.Error).Code()
-	if awsErrCode != awsErrCodeNotFound && awsErrCode != awsErrCodeNoSuchBucket {
-		return err
-	}
 
 	bucketInput := &s3.CreateBucketInput{
 		Bucket: &name,
@@ -89,8 +79,26 @@ func (client *AWSClient) EnsureBucketExists(name string) error {
 		}
 	}
 
-	_, err = s3Client.CreateBucket(bucketInput)
+	_, err := s3Client.CreateBucket(bucketInput)
 	return err
+}
+
+// BucketExists checks if the named bucket exists and creates it if it doesn't
+func (client *AWSClient) BucketExists(name string) (bool, error) {
+
+	s3Client := s3.New(client.sess)
+
+	_, err := s3Client.HeadBucket(&s3.HeadBucketInput{Bucket: &name})
+	if err == nil {
+		return true, nil
+	}
+
+	awsErrCode := err.(awserr.Error).Code()
+	if awsErrCode != awsErrCodeNotFound && awsErrCode != awsErrCodeNoSuchBucket {
+		return false, err
+	}
+
+	return false, nil
 }
 
 // WriteFile writes the specified S3 object

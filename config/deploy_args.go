@@ -20,6 +20,7 @@ type DeployArgs struct {
 	WebSize     string
 	SelfUpdate  bool
 	DBSize      string
+	Namespace   string
 	// DBSizeIsSet is true if the user has manually specified the db-size (ie, it's not the default)
 	DBSizeIsSet            bool
 	AllowIPs               string
@@ -54,6 +55,15 @@ func (args *DeployArgs) ModifyGithub(GithubAuthClientID, GithubAuthClientSecret 
 	args.GithubAuthClientID = GithubAuthClientID
 	args.GithubAuthClientSecret = GithubAuthClientSecret
 	args.GithubAuthIsSet = GithubAuthIsSet
+}
+
+// SanitiseNamespace sanitises namespace
+func (args DeployArgs) SanitiseNamespace() DeployArgs {
+	a := args
+	if a.Namespace == "" {
+		a.Namespace = a.AWSRegion
+	}
+	return a
 }
 
 // Validate validates that flag interdependencies

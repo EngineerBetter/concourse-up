@@ -19,14 +19,17 @@ var _ = Describe("Client", func() {
 			FakeRegion: func() string {
 				return "eu-west-1"
 			},
-			FakeEnsureBucketExists: func(name string) error {
+			FakeCreateBucket: func(name string) error {
 				return nil
+			},
+			FakeBucketExists: func(name string) (bool, error) {
+				return false, nil
 			},
 			FakeEnsureFileExists: func(bucket, path string, defaultContents []byte) ([]byte, bool, error) {
 				return defaultContents, true, nil
 			},
 		}
-		client = New(iaasClient, "test")
+		client = New(iaasClient, "test", "namespace")
 
 		deployArgs = &DeployArgs{
 			IAAS:        "AWS",

@@ -6,4 +6,5 @@ type InfoArgs struct {
 	JSON      bool
 	IAAS      string
 	Env       bool
+	Namespace string
 }

@@ -73,8 +73,9 @@ func (client *Client) FetchInfo() (*Info, error) {
 }
 
 const infoTemplate = `Deployment:
-	IAAS:   aws
-	Region: {{.Config.Region}}
+	Namespace: {{.Config.Namespace}}
+	IAAS:      aws
+	Region:    {{.Config.Region}}
 
 Workers:
 	Count:              {{.Config.ConcourseWorkerCount}}
@@ -159,6 +160,7 @@ export CREDHUB_SERVER={{.Config.CredhubURL}}
 export CREDHUB_CA_CERT='{{.Config.CredhubCACert}}'
 export CREDHUB_CLIENT=credhub_admin
 export CREDHUB_SECRET={{.Config.CredhubAdminClientSecret}}
+export NAMESPACE={{.Config.Namespace}}
 `))
 
 // Env returns a string that is suitable for a shell to evaluate that sets environment

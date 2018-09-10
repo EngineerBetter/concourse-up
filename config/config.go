@@ -61,9 +61,10 @@ type Config struct {
 	TFStatePath               string   `json:"tf_state_path"`
 	AllowIPs                  string   `json:"allow_ips"`
 	Spot                      bool     `json:"spot"`
+	Namespace                 string   `json:"namespace"`
 }
 
-func generateDefaultConfig(iaas, project, deployment, configBucket, region string) (Config, error) {
+func generateDefaultConfig(iaas, project, deployment, configBucket, region, namespace string) (Config, error) {
 	privateKey, publicKey, _, err := util.GenerateSSHKeyPair()
 	if err != nil {
 		return Config{}, err
@@ -93,6 +94,7 @@ func generateDefaultConfig(iaas, project, deployment, configBucket, region strin
 		RDSUsername:              "admin" + util.GeneratePassword(),
 		Region:                   region,
 		TFStatePath:              terraformStateFileName,
+		Namespace:                namespace,
 	}
 
 	return conf, nil

@@ -19,7 +19,8 @@ type FakeAWSClient struct {
 	FakeDeleteVolumes                 func(volumesToDelete []*string, deleteVolume func(ec2Client iaas.IEC2, volumeID *string) error) error
 	FakeDeleteFile                    func(bucket, path string) error
 	FakeDeleteVersionedBucket         func(name string) error
-	FakeEnsureBucketExists            func(name string) error
+	FakeCreateBucket                  func(name string) error
+	FakeBucketExists                  func(name string) (bool, error)
 	FakeEnsureFileExists              func(bucket, path string, defaultContents []byte) ([]byte, bool, error)
 	FakeFindLongestMatchingHostedZone func(subdomain string) (string, string, error)
 	FakeHasFile                       func(bucket, path string) (bool, error)
@@ -64,9 +65,14 @@ func (client *FakeAWSClient) DeleteVersionedBucket(name string) error {
 	return client.FakeDeleteVersionedBucket(name)
 }
 
-// EnsureBucketExists delegates to FakeEnsureBucketExists which is dynamically set by the tests
-func (client *FakeAWSClient) EnsureBucketExists(name string) error {
-	return client.FakeEnsureBucketExists(name)
+// CreateBucket delegates to FakeCreateBucket which is dynamically set by the tests
+func (client *FakeAWSClient) CreateBucket(name string) error {
+	return client.FakeCreateBucket(name)
+}
+
+// BucketExists delegates to FakeBucketExists which is dynamically set by the tests
+func (client *FakeAWSClient) BucketExists(name string) (bool, error) {
+	return client.FakeBucketExists(name)
 }
 
 // EnsureFileExists delegates to FakeEnsureFileExists which is dynamically set by the tests

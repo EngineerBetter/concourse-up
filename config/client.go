@@ -27,15 +27,19 @@ type IClient interface {
 
 // Client is a client for loading the config file  from S3
 type Client struct {
-	iaas    iaas.IClient
-	project string
+	iaas       iaas.IClient
+	project    string
+	namespace  string
+	bucketName string
 }
 
 // New instantiates a new client
-func New(iaas iaas.IClient, project string) *Client {
+func New(iaas iaas.IClient, project, namespace string) *Client {
 	return &Client{
 		iaas,
 		project,
+		namespace,
+		"",
 	}
 }
 
@@ -143,8 +147,42 @@ func (b cidrBlocks) String() (string, error) {
 	return buf.String(), nil
 }
 
+func (client *Client) determineBucketName() (string, bool, error) {
+	regionBucketName := client.createBucketName(client.iaas.Region())
+	namespaceBucketName := client.createBucketName(client.namespace)
+
+	foundRegionNamedBucket, err := client.iaas.BucketExists(regionBucketName)
+	if err != nil {
+		return "", false, err
+	}
+	foundNamespacedBucket, err := client.iaas.BucketExists(namespaceBucketName)
+	if err != nil {
+		return "", false, err
+	}
+
+	foundOne := foundRegionNamedBucket || foundNamespacedBucket
+
+	switch {
+	case !foundRegionNamedBucket && foundNamespacedBucket:
+		return namespaceBucketName, foundOne, nil
+	case foundRegionNamedBucket && !foundNamespacedBucket:
+		return regionBucketName, foundOne, nil
+	case foundRegionNamedBucket && foundNamespacedBucket:
+		return "", foundOne, fmt.Errorf("found both region %q and namespaced %q buckets for %q deployment", regionBucketName, namespaceBucketName, client.project)
+	default:
+		return namespaceBucketName, foundOne, nil
+	}
+}
+
 // LoadOrCreate loads an existing config file from S3, or creates a default if one doesn't already exist
 func (client *Client) LoadOrCreate(deployArgs *DeployArgs) (Config, bool, error) {
+
+	bucketName, foundOne, err := client.determineBucketName()
+	if err != nil {
+		return Config{}, false, err
+	}
+
+	client.bucketName = bucketName
 
 	config, err := generateDefaultConfig(
 		deployArgs.IAAS,
@@ -152,6 +190,7 @@ func (client *Client) LoadOrCreate(deployArgs *DeployArgs) (Config, bool, error)
 		client.deployment(),
 		client.configBucket(),
 		deployArgs.AWSRegion,
+		deployArgs.Namespace,
 	)
 	if err != nil {
 		return Config{}, false, err
@@ -160,15 +199,20 @@ func (client *Client) LoadOrCreate(deployArgs *DeployArgs) (Config, bool, error)
 	if err != nil {
 		return Config{}, false, err
 	}
-	err = client.iaas.EnsureBucketExists(client.configBucket())
-	if err != nil {
-		return Config{}, false, err
+
+	if !foundOne {
+		err = client.iaas.CreateBucket(client.configBucket())
+		if err != nil {
+			return Config{}, false, err
+		}
 	}
+
 	configBytes, createdNewFile, err := client.iaas.EnsureFileExists(
 		client.configBucket(),
 		configFilePath,
 		defaultConfigBytes,
 	)
+
 	if err != nil {
 		return Config{}, createdNewFile, err
 	}
@@ -202,5 +246,9 @@ func (client *Client) deployment() string {
 }
 
 func (client *Client) configBucket() string {
-	return fmt.Sprintf("%s-%s-config", client.deployment(), client.iaas.Region())
+	return client.bucketName
+}
+
+func (client *Client) createBucketName(extension string) string {
+	return fmt.Sprintf("%s-%s-config", client.deployment(), extension)
 }
