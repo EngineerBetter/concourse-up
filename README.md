@@ -269,8 +269,14 @@ If you'd like to run concourse-up with it's own IAM account, create a user with 
 
 To build and test you'll need:
 
-* Golang 1.10
-* to have installed `github.com/a-urth/go-bindata`
+* Golang 1.10+
+* to have installed `github.com/mattn/go-bindata`
+
+### Building locally
+
+`concourse-up` uses [golang compile-time variables](https://github.com/golang/go/wiki/GcToolchainTricks#including-build-information-in-the-executable) to set the release versions it uses. To build locally use the `build_local.sh` script, rather than running `go build`.
+
+You will also need to clone [`concourse-up-ops`](https://github.com/EngineerBetter/concourse-up-ops) to the same level as `concourse-up` to get the manifest and ops files necessary for building. Check the latest release of `concourse-up` for the appropriate tag of `concourse-up-ops`
 
 ### Tests
 
@@ -283,11 +289,6 @@ $ go get github.com/onsi/ginkgo/ginkgo
 $ ginkgo -r
 ```
 
-### Building locally
-
-`concourse-up` uses [golang compile-time variables](https://github.com/golang/go/wiki/GcToolchainTricks#including-build-information-in-the-executable) to set the release versions it uses. To build locally use the `build_local.sh` script, rather than running `go build`.
-
-You will also need to clone [`concourse-up-ops`](https://github.com/EngineerBetter/concourse-up-ops) to the same level as `concourse-up` to get the manifest and ops files necessary for building. Check the latest release of `concourse-up` for the appropriate tag of `concourse-up-ops`
 
 ### Bumping Manifest/Ops File versions
 
