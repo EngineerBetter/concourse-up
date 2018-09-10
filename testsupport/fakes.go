@@ -9,20 +9,19 @@ import (
 	"github.com/EngineerBetter/concourse-up/config"
 	"github.com/EngineerBetter/concourse-up/iaas"
 	"github.com/EngineerBetter/concourse-up/terraform"
-	"github.com/aws/aws-sdk-go/service/route53"
 	"github.com/xenolf/lego/acme"
 )
 
 // FakeAWSClient implements iaas.IClient for testing
 type FakeAWSClient struct {
-	FakeCheckForWhitelistedIP         func(ip, securityGroup string, newEC2Client func() (iaas.IEC2, error)) (bool, error)
+	FakeCheckForWhitelistedIP         func(ip, securityGroup string) (bool, error)
 	FakeDeleteVMsInVPC                func(vpcID string) ([]*string, error)
-	FakeDeleteVolumes                 func(volumesToDelete []*string, deleteVolume func(ec2Client iaas.IEC2, volumeID *string) error, newEC2Client func() (iaas.IEC2, error)) error
+	FakeDeleteVolumes                 func(volumesToDelete []*string, deleteVolume func(ec2Client iaas.IEC2, volumeID *string) error) error
 	FakeDeleteFile                    func(bucket, path string) error
 	FakeDeleteVersionedBucket         func(name string) error
 	FakeEnsureBucketExists            func(name string) error
 	FakeEnsureFileExists              func(bucket, path string, defaultContents []byte) ([]byte, bool, error)
-	FakeFindLongestMatchingHostedZone func(subdomain string, listHostedZones func() ([]*route53.HostedZone, error)) (string, string, error)
+	FakeFindLongestMatchingHostedZone func(subdomain string) (string, string, error)
 	FakeHasFile                       func(bucket, path string) (bool, error)
 	FakeLoadFile                      func(bucket, path string) ([]byte, error)
 	FakeNewEC2Client                  func() (iaas.IEC2, error)
@@ -41,8 +40,8 @@ func (client *FakeAWSClient) Region() string {
 }
 
 // CheckForWhitelistedIP delegates to FakeCheckForWhitelistedIP which is dynamically set by the tests
-func (client *FakeAWSClient) CheckForWhitelistedIP(ip, securityGroup string, newEC2Client func() (iaas.IEC2, error)) (bool, error) {
-	return client.FakeCheckForWhitelistedIP(ip, securityGroup, newEC2Client)
+func (client *FakeAWSClient) CheckForWhitelistedIP(ip, securityGroup string) (bool, error) {
+	return client.FakeCheckForWhitelistedIP(ip, securityGroup)
 }
 
 // DeleteVMsInVPC delegates to FakeDeleteVMsInVPC which is dynamically set by the tests
@@ -51,8 +50,8 @@ func (client *FakeAWSClient) DeleteVMsInVPC(vpcID string) ([]*string, error) {
 }
 
 // DeleteVolumes delegates to FakeDeleteVolumes which is dynamically set by the tests
-func (client *FakeAWSClient) DeleteVolumes(volumesToDelete []*string, deleteVolume func(ec2Client iaas.IEC2, volumeID *string) error, newEC2Client func() (iaas.IEC2, error)) error {
-	return client.FakeDeleteVolumes(volumesToDelete, deleteVolume, newEC2Client)
+func (client *FakeAWSClient) DeleteVolumes(volumesToDelete []*string, deleteVolume func(ec2Client iaas.IEC2, volumeID *string) error) error {
+	return client.FakeDeleteVolumes(volumesToDelete, deleteVolume)
 }
 
 // DeleteFile delegates to FakeDeleteFile which is dynamically set by the tests
@@ -76,8 +75,8 @@ func (client *FakeAWSClient) EnsureFileExists(bucket, path string, defaultConten
 }
 
 // FindLongestMatchingHostedZone delegates to FakeFindLongestMatchingHostedZone which is dynamically set by the tests
-func (client *FakeAWSClient) FindLongestMatchingHostedZone(subdomain string, listHostedZones func() ([]*route53.HostedZone, error)) (string, string, error) {
-	return client.FakeFindLongestMatchingHostedZone(subdomain, listHostedZones)
+func (client *FakeAWSClient) FindLongestMatchingHostedZone(subdomain string) (string, string, error) {
+	return client.FakeFindLongestMatchingHostedZone(subdomain)
 }
 
 // HasFile delegates to FakeHasFile which is dynamically set by the tests

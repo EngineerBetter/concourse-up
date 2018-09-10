@@ -1,9 +1,7 @@
 package iaas
 
 import (
-	"errors"
 	"fmt"
-	"os"
 	"strings"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -14,7 +12,7 @@ import (
 
 // AWSClient is the concrete implementation of IClient on AWS
 type AWSClient struct {
-	region string
+	sess *session.Session
 }
 
 // IEC2 only implements functions used in the iaas package
@@ -25,20 +23,18 @@ type IEC2 interface {
 }
 
 func newAWS(region string) (IClient, error) {
-	if os.Getenv("AWS_ACCESS_KEY_ID") == "" {
-		return nil, errors.New("env var AWS_ACCESS_KEY_ID not found")
+	sess, err := session.NewSession(&aws.Config{
+		Region: aws.String(region),
+	})
+	if err != nil {
+		return nil, err
 	}
-
-	if os.Getenv("AWS_SECRET_ACCESS_KEY") == "" {
-		return nil, errors.New("env var AWS_SECRET_ACCESS_KEY not found")
-	}
-
-	return &AWSClient{region}, nil
+	return &AWSClient{sess}, nil
 }
 
 // Region returns the region to operate against
 func (client *AWSClient) Region() string {
-	return client.region
+	return *client.sess.Config.Region
 }
 
 // IAAS returns the iaas to operate against
@@ -46,25 +42,12 @@ func (client *AWSClient) IAAS() string {
 	return "AWS"
 }
 
-// NewEC2Client creates a new EC2 client
-func (client *AWSClient) NewEC2Client() (IEC2, error) {
-	sess, err := session.NewSession(aws.NewConfig().WithCredentialsChainVerboseErrors(true))
-	if err != nil {
-		return nil, err
-	}
-	ec2Client := ec2.New(sess, &aws.Config{Region: &client.region})
-	return ec2Client, nil
-}
-
 // CheckForWhitelistedIP checks if the specified IP is whitelisted in the security group
-func (client *AWSClient) CheckForWhitelistedIP(ip, securityGroup string, newEC2Client func() (IEC2, error)) (bool, error) {
+func (client *AWSClient) CheckForWhitelistedIP(ip, securityGroup string) (bool, error) {
 
 	cidr := fmt.Sprintf("%s/32", ip)
 
-	ec2Client, err := newEC2Client()
-	if err != nil {
-		return false, err
-	}
+	ec2Client := ec2.New(client.sess)
 
 	securityGroupsOutput, err := ec2Client.DescribeSecurityGroups(&ec2.DescribeSecurityGroupsInput{
 		GroupIds: []*string{
@@ -105,15 +88,12 @@ func checkPorts(sgCidr, cidr string, port22, port6868, port25555 *bool, fromPort
 }
 
 // DeleteVolumes deletes the specified EBS volumes
-func (client *AWSClient) DeleteVolumes(volumes []*string, deleteVolume func(ec2Client IEC2, volumeID *string) error, newEC2Client func() (IEC2, error)) error {
+func (client *AWSClient) DeleteVolumes(volumes []*string, deleteVolume func(ec2Client IEC2, volumeID *string) error) error {
 	if len(volumes) == 0 {
 		return nil
 	}
 
-	ec2Client, err := newEC2Client()
-	if err != nil {
-		return err
-	}
+	ec2Client := ec2.New(client.sess)
 
 	volumesOutput, err := ec2Client.DescribeVolumes(&ec2.DescribeVolumesInput{
 		Filters: []*ec2.Filter{
@@ -157,13 +137,9 @@ func DeleteVolume(ec2Client IEC2, volumeID *string) error {
 
 // DeleteVMsInVPC deletes all the VMs in the given VPC
 func (client *AWSClient) DeleteVMsInVPC(vpcID string) ([]*string, error) {
-	sess, err := session.NewSession(aws.NewConfig().WithCredentialsChainVerboseErrors(true))
-	if err != nil {
-		return nil, err
-	}
 
 	filterName := "vpc-id"
-	ec2Client := ec2.New(sess, &aws.Config{Region: &client.region})
+	ec2Client := ec2.New(client.sess)
 
 	resp, err := ec2Client.DescribeInstances(&ec2.DescribeInstancesInput{
 		Filters: []*ec2.Filter{
@@ -206,15 +182,11 @@ func (client *AWSClient) DeleteVMsInVPC(vpcID string) ([]*string, error) {
 }
 
 // ListHostedZones returns a list of hosted zones
-func ListHostedZones() ([]*route53.HostedZone, error) {
-	sess, err := session.NewSession(aws.NewConfig().WithCredentialsChainVerboseErrors(true))
-	if err != nil {
-		return nil, err
-	}
+func (client *AWSClient) ListHostedZones() ([]*route53.HostedZone, error) {
 
-	r53Client := route53.New(sess)
+	r53Client := route53.New(client.sess)
 	hostedZones := []*route53.HostedZone{}
-	err = r53Client.ListHostedZonesPages(&route53.ListHostedZonesInput{}, func(output *route53.ListHostedZonesOutput, _ bool) bool {
+	err := r53Client.ListHostedZonesPages(&route53.ListHostedZonesInput{}, func(output *route53.ListHostedZonesOutput, _ bool) bool {
 		hostedZones = append(hostedZones, output.HostedZones...)
 		return true
 	})
@@ -226,8 +198,8 @@ func ListHostedZones() ([]*route53.HostedZone, error) {
 }
 
 // FindLongestMatchingHostedZone finds the longest hosted zone that matches the given subdomain
-func (client *AWSClient) FindLongestMatchingHostedZone(subdomain string, listHostedZones func() ([]*route53.HostedZone, error)) (string, string, error) {
-	hostedZones, err := listHostedZones()
+func (client *AWSClient) FindLongestMatchingHostedZone(subdomain string) (string, string, error) {
+	hostedZones, err := client.ListHostedZones()
 	if err != nil {
 		return "", "", err
 	}

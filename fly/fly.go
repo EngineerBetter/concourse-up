@@ -3,7 +3,6 @@ package fly
 import (
 	"bytes"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -13,6 +12,8 @@ import (
 	"runtime"
 	"strings"
 	"time"
+
+	"github.com/aws/aws-sdk-go/aws/session"
 
 	"github.com/EngineerBetter/concourse-up/config"
 	"github.com/EngineerBetter/concourse-up/util"
@@ -275,19 +276,19 @@ func getFlyURL(versionFile []byte) (string, error) {
 }
 
 func (client *Client) buildDefaultPipelineParams(deployArgs *config.DeployArgs, config config.Config) (*defaultPipelineParams, error) {
-	awsAccessKeyID := os.Getenv("AWS_ACCESS_KEY_ID")
-	if awsAccessKeyID == "" {
-		return nil, errors.New("env var AWS_ACCESS_KEY_ID not found")
+	sess, err := session.NewSession()
+	if err != nil {
+		return nil, err
 	}
 
-	awsSecretAccessKey := os.Getenv("AWS_SECRET_ACCESS_KEY")
-	if awsSecretAccessKey == "" {
-		return nil, errors.New("env var AWS_SECRET_ACCESS_KEY not found")
+	creds, err := sess.Config.Credentials.Get()
+	if err != nil {
+		return nil, err
 	}
 
 	return &defaultPipelineParams{
-		AWSAccessKeyID:       awsAccessKeyID,
-		AWSSecretAccessKey:   awsSecretAccessKey,
+		AWSAccessKeyID:       creds.AccessKeyID,
+		AWSSecretAccessKey:   creds.SecretAccessKey,
 		Deployment:           strings.TrimPrefix(config.Deployment, "concourse-up-"),
 		FlagAWSRegion:        deployArgs.AWSRegion,
 		FlagDomain:           deployArgs.Domain,

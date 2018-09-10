@@ -2,23 +2,20 @@ package iaas
 
 import (
 	"fmt"
-
-	"github.com/aws/aws-sdk-go/service/route53"
 )
 
 // IClient represents actions taken against AWS
 type IClient interface {
-	CheckForWhitelistedIP(ip, securityGroup string, newEC2Client func() (IEC2, error)) (bool, error)
+	CheckForWhitelistedIP(ip, securityGroup string) (bool, error)
 	DeleteFile(bucket, path string) error
 	DeleteVersionedBucket(name string) error
 	DeleteVMsInVPC(vpcID string) ([]*string, error)
-	DeleteVolumes(volumesToDelete []*string, deleteVolume func(ec2Client IEC2, volumeID *string) error, newEC2Client func() (IEC2, error)) error
+	DeleteVolumes(volumesToDelete []*string, deleteVolume func(ec2Client IEC2, volumeID *string) error) error
 	EnsureBucketExists(name string) error
 	EnsureFileExists(bucket, path string, defaultContents []byte) ([]byte, bool, error)
-	FindLongestMatchingHostedZone(subdomain string, listHostedZones func() ([]*route53.HostedZone, error)) (string, string, error)
+	FindLongestMatchingHostedZone(subdomain string) (string, string, error)
 	HasFile(bucket, path string) (bool, error)
 	LoadFile(bucket, path string) ([]byte, error)
-	NewEC2Client() (IEC2, error)
 	WriteFile(bucket, path string, contents []byte) error
 	Region() string
 	IAAS() string
