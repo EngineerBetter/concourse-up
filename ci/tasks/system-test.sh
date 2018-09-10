@@ -51,6 +51,7 @@ if [ "$rds_instance_class" != "db.t2.small" ]; then
 fi
 
 # Check worker is a spot instance
+# shellcheck disable=SC2016
 instance_lifecycle=$(aws --region eu-west-1 ec2 describe-instances | jq -r --arg deployment "$deployment" '.Reservations[0].Instances[0] | select(any(.Tags[]; .Key == "concourse-up-project" and .Value == $deployment) and any(.Tags[]; .Key == "job" and .Value == "worker")) | .InstanceLifecycle')
 if [ "$instance_lifecycle" != "spot" ]; then
   echo "Unexpected worker instance lifecycle: $instance_lifecycle"
@@ -117,7 +118,7 @@ if [ "$rds_instance_class" != "db.t2.small" ]; then
   exit 1
 fi
 
-
+# shellcheck disable=SC2016
 instance_lifecycle=$(aws --region eu-west-1 ec2 describe-instances | jq -r --arg deployment "$deployment" '.Reservations[0].Instances[0] | select(any(.Tags[]; .Key == "concourse-up-project" and .Value == $deployment) and any(.Tags[]; .Key == "job" and .Value == "worker")) | .InstanceLifecycle')
 if [ "$instance_lifecycle" != "" ]; then
   echo "Unexpected worker instance lifecycle: $instance_lifecycle"
