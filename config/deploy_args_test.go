@@ -17,17 +17,18 @@ func TestDeployArgs_Validate(t *testing.T) {
 		Domain:                 "",
 		GithubAuthClientID:     "",
 		GithubAuthClientSecret: "",
-		IAAS:        "AWS",
-		SelfUpdate:  false,
-		TLSCert:     "",
-		TLSKey:      "",
-		WebSize:     "small",
-		WorkerCount: 1,
-		WorkerSize:  "xlarge",
+		IAAS:                   "AWS",
+		SelfUpdate:             false,
+		TLSCert:                "",
+		TLSKey:                 "",
+		WebSize:                "small",
+		WorkerCount:            1,
+		WorkerSize:             "xlarge",
 	}
 	tests := []struct {
 		name         string
 		modification func() DeployArgs
+		outcomeCheck func(DeployArgs) bool
 		wantErr      bool
 		expectedErr  string
 	}{
@@ -170,6 +171,11 @@ func TestDeployArgs_Validate(t *testing.T) {
 				if err != nil {
 					t.Errorf("DeployArgs.Validate() %v test failed.\nFailed with error = %v,\nExpected error = %v,\nShould fail %v\nWith args: %#v", tt.name, err.Error(), tt.expectedErr, tt.wantErr, args)
 				} else {
+					t.Errorf("DeployArgs.Validate() %v test failed.\nShould fail %v\nWith args: %#v", tt.name, tt.wantErr, args)
+				}
+			}
+			if tt.outcomeCheck != nil {
+				if tt.outcomeCheck(args) {
 					t.Errorf("DeployArgs.Validate() %v test failed.\nShould fail %v\nWith args: %#v", tt.name, tt.wantErr, args)
 				}
 			}
