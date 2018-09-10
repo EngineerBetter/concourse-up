@@ -52,7 +52,7 @@ fi
 
 # Check worker is a spot instance
 
-instance_lifecycle=$(aws ec2 describe-instances --query 'Reservations[].Instances[? Tags[? Key == `$deployment` && Value == `ebci`] && Tags[? Key == `job` && Value == `worker`] ][] | [0].InstanceLifecycle' --output text)
+instance_lifecycle=$(aws ec2 describe-instances --query 'Reservations[].Instances[? Tags[? Key == `'"$deployment"'` && Value == `ebci`] && Tags[? Key == `job` && Value == `worker`] ][] | [0].InstanceLifecycle' --output text)
 if [ "$instance_lifecycle" != "spot" ]; then
   echo "Unexpected worker instance lifecycle: $instance_lifecycle"
   exit 1
@@ -119,7 +119,7 @@ if [ "$rds_instance_class" != "db.t2.small" ]; then
 fi
 
 
-instance_lifecycle=$(aws ec2 describe-instances --query 'Reservations[].Instances[? Tags[? Key == `$deployment` && Value == `ebci`] && Tags[? Key == `job` && Value == `worker`] ][] | [0].InstanceLifecycle' --output text)
+instance_lifecycle=$(aws ec2 describe-instances --query 'Reservations[].Instances[? Tags[? Key == `'"$deployment"'` && Value == `ebci`] && Tags[? Key == `job` && Value == `worker`] ][] | [0].InstanceLifecycle' --output text)
 if [ "$instance_lifecycle" != "None" ]; then
   echo "Unexpected worker instance lifecycle: $instance_lifecycle"
   exit 1
