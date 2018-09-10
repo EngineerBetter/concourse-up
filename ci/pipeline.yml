@@ -419,9 +419,7 @@ jobs:
   - put: slack-alert
     params:
       channel: "#integrations"
-      text: |
-        <!channel> Concourse Up $TEXT_FILE_CONTENT published to Github
-      text_file: version/version
+      text_file: release-vars/slackmsg
 
 - name: patch
   serial: true
@@ -465,9 +463,7 @@ jobs:
   - put: slack-alert
     params:
       channel: "#integrations"
-      text: |
-        <!channel> Concourse Up $TEXT_FILE_CONTENT published to Github
-      text_file: version/version
+      text_file: release-vars/slackmsg
 
 - name: minor
   serial: true
@@ -511,9 +507,7 @@ jobs:
   - put: slack-alert
     params:
       channel: "#integrations"
-      text: |
-        <!channel> Concourse Up $TEXT_FILE_CONTENT published to Github
-      text_file: version/version
+      text_file: release-vars/slackmsg
 
 - name: major
   serial: true
@@ -557,9 +551,7 @@ jobs:
   - put: slack-alert
     params:
       channel: "#integrations"
-      text: |
-        <!channel> Concourse Up $TEXT_FILE_CONTENT published to Github
-      text_file: version/version
+      text_file: release-vars/slackmsg
 
 - name: cleanup
   serial: true
