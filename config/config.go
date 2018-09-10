@@ -60,6 +60,7 @@ type Config struct {
 	TagsIsSet                 bool     `json:"tags_is_set"`
 	TFStatePath               string   `json:"tf_state_path"`
 	AllowIPs                  string   `json:"allow_ips"`
+	Spot                      bool     `json:"spot"`
 }
 
 func generateDefaultConfig(iaas, project, deployment, configBucket, region string) (Config, error) {

@@ -68,7 +68,7 @@ vm_types:
 - name: concourse-large
   cloud_properties:
     instance_type: m4.large
-    spot_bid_price: 0.13 # on-demand price: 0.111
+<% if .Spot %>    spot_bid_price: 0.13 # on-demand price: 0.111 <% end %>
     spot_ondemand_fallback: true
     ephemeral_disk:
       size: 200_000
@@ -80,7 +80,7 @@ vm_types:
 - name: concourse-xlarge
   cloud_properties:
     instance_type: m4.xlarge
-    spot_bid_price: 0.27 # on-demand price: 0.222
+<% if .Spot %>    spot_bid_price: 0.27 # on-demand price: 0.222 <% end %>
     spot_ondemand_fallback: true
     ephemeral_disk:
       size: 200_000
@@ -92,7 +92,7 @@ vm_types:
 - name: concourse-2xlarge
   cloud_properties:
     instance_type: m4.2xlarge
-    spot_bid_price: 0.53 # on-demand price: 0.444
+<% if .Spot %>    spot_bid_price: 0.53 # on-demand price: 0.444 <% end %>
     spot_ondemand_fallback: true
     ephemeral_disk:
       size: 200_000
@@ -104,7 +104,7 @@ vm_types:
 - name: concourse-4xlarge
   cloud_properties:
     instance_type: m4.4xlarge
-    spot_bid_price: 1.07 # on-demand price: 0.888
+<% if .Spot %>    spot_bid_price: 1.07 # on-demand price: 0.888 <% end %>
     spot_ondemand_fallback: true
     ephemeral_disk:
       size: 200_000
@@ -116,7 +116,7 @@ vm_types:
 - name: concourse-10xlarge
   cloud_properties:
     instance_type: m4.10xlarge
-    spot_bid_price: 2.67 # on-demand price: 2.22
+<% if .Spot %>    spot_bid_price: 2.67 # on-demand price: 2.22 <% end %>
     spot_ondemand_fallback: true
     ephemeral_disk:
       size: 200_000
@@ -128,7 +128,7 @@ vm_types:
 - name: concourse-16xlarge
   cloud_properties:
     instance_type: m4.16xlarge
-    spot_bid_price: 4.26 # on-demand price: 3.55
+<% if .Spot %>    spot_bid_price: 4.26 # on-demand price: 3.55 <% end %>
     spot_ondemand_fallback: true
     ephemeral_disk:
       size: 200_000
@@ -140,7 +140,7 @@ vm_types:
 - name: compilation
   cloud_properties:
     instance_type: m4.large
-    spot_bid_price: 0.13 # on-demand price: 0.111
+<% if .Spot %>    spot_bid_price: 0.13 # on-demand price: 0.111 <% end %>
     spot_ondemand_fallback: true
     ephemeral_disk:
       size: 5_000

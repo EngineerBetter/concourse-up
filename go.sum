@@ -2,6 +2,8 @@ github.com/asaskevich/govalidator v0.0.0-20171111151018-521b25f4b05f h1:xHxhygLk
 github.com/asaskevich/govalidator v0.0.0-20171111151018-521b25f4b05f/go.mod h1:lB+ZfQJz7igIIfQNfa7Ml4HSf2uFQQRzpGGRXenZAgY=
 github.com/aws/aws-sdk-go v1.12.59 h1:cK5i4s5L/UF8HU2udC3ZCh2EehUjhZ6fVaWi7PPIyEA=
 github.com/aws/aws-sdk-go v1.12.59/go.mod h1:ZRmQr0FajVIyZ4ZzBYKG5P3ZqPz9IHG41ZoMu1ADI3k=
+github.com/aws/aws-sdk-go v1.15.31 h1:ExgD8W8QDeD8Y4CPVlcP/laumxvikDbkVWB+VCHgXxA=
+github.com/aws/aws-sdk-go v1.15.31/go.mod h1:mFuSZ37Z9YOHbQEwBWztmVzqXrEkub65tZoCYDt7FT0=
 github.com/bmatcuk/doublestar v1.1.1 h1:YroD6BJCZBYx06yYFEWvUuKVWQn3vLLQAVmDmvTSaiQ=
 github.com/bmatcuk/doublestar v1.1.1/go.mod h1:UD6OnuiIn0yFxxA2le/rnRU1G4RaI4UvFv1sNto9p6w=
 github.com/charlievieth/fs v0.0.0-20170613215519-7dc373669fa1 h1:vTlpHKxJqykyKdW9bkrDJNWeKNuSIAJ0TP/K4lRsz/Q=
@@ -18,6 +20,7 @@ github.com/fatih/color v1.5.0 h1:vBh+kQp8lg9XPr56u1CPrWjFXtdphMoGWVHr9/1c+A0=
 github.com/fatih/color v1.5.0/go.mod h1:Zm6kSWBoL9eyXnKyktHP6abPY2pDugNf5KwzbycvMj4=
 github.com/ghodss/yaml v1.0.0 h1:wQHKEahhL6wmXdzwWG11gIVCkOv05bNOh+Rxn0yngAk=
 github.com/ghodss/yaml v1.0.0/go.mod h1:4dBDuWmgqj2HViK6kFavaiC9ZROes6MMH2rRYeMEF04=
+github.com/go-ini/ini v1.25.4/go.mod h1:ByCAeIL28uOIIG0E3PJtZPDL8WnHpFKFOtgjp+3Ies8=
 github.com/go-ini/ini v1.32.0 h1:/MArBHSS0TFR28yPPDK1vPIjt4wUnPBfb81i6iiyKvA=
 github.com/go-ini/ini v1.32.0/go.mod h1:ByCAeIL28uOIIG0E3PJtZPDL8WnHpFKFOtgjp+3Ies8=
 github.com/golang/protobuf v1.1.0 h1:0iH4Ffd/meGoXqF2lSAhZHt8X+cPgkfn/cb6Cce5Vpc=

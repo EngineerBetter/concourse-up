@@ -87,6 +87,12 @@ var deployFlags = []cli.Flag{
 		Value:       "small",
 		Destination: &deployArgs.DBSize,
 	},
+	cli.BoolTFlag{
+		Name:        "spot",
+		Usage:       "(optional) Use spot instances for workers",
+		EnvVar:      "SPOT",
+		Destination: &deployArgs.Spot,
+	},
 	cli.StringFlag{
 		Name:        "allow-ips",
 		Usage:       "(optional) Comma separated list of IP addresses or CIDR ranges to allow access to",

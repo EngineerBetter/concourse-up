@@ -143,6 +143,7 @@ All flags are optional
 * `--github-auth-client-id value`      Client ID for a github OAuth application - Used for Github Auth [$GITHUB_AUTH_CLIENT_ID]
 * `--github-auth-client-secret value`  Client Secret for a github OAuth application - Used for Github Auth [$GITHUB_AUTH_CLIENT_SECRET]
 * `--add-tag key=value` Add a tag to the VMs that form your `concourse-up` deployment. Can be used multiple times in a single `deploy` command.
+* `--spot=false` Do not use spot instances for worker VM's.
 
 ### Info
 

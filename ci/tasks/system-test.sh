@@ -50,6 +50,15 @@ if [ "$rds_instance_class" != "db.t2.small" ]; then
   exit 1
 fi
 
+# Check worker is a spot instance
+
+instance_lifecycle=$(aws ec2 describe-instances --query 'Reservations[].Instances[? Tags[? Key == `$deployment` && Value == `ebci`] && Tags[? Key == `job` && Value == `worker`] ][] | [0].InstanceLifecycle' --output text)
+if [ "$instance_lifecycle" != "spot" ]; then
+  echo "Unexpected worker instance lifecycle: $instance_lifecycle"
+  exit 1
+fi
+
+
 fly --target system-test login \
   --ca-cert generated-ca-cert.pem \
   --concourse-url "https://$domain" \
@@ -72,7 +81,7 @@ fly --target system-test trigger-job \
   --job hello/hello \
   --watch
 
-echo "DEPLOY WITH USER PROVIDED CERT, 2 LARGE WORKERS, FIREWALLED TO MY IP"
+echo "DEPLOY WITH USER PROVIDED CERT, 2 LARGE WORKERS, FIREWALLED TO MY IP, NO SPOT"
 
 custom_domain="$deployment-user.concourse-up.engineerbetter.com"
 
@@ -97,6 +106,7 @@ certstrap sign "$custom_domain" --CA "$deployment"
   --tls-key "$(cat out/$custom_domain.key)" \
   --allow-ips "$(dig +short myip.opendns.com @resolver1.opendns.com)" \
   --workers 2 \
+  --spot false
   --worker-size large
 
 sleep 60
@@ -105,6 +115,13 @@ sleep 60
 rds_instance_class=$(aws --region eu-west-1 rds describe-db-instances | jq -r ".DBInstances[] | select(.DBSubnetGroup.DBSubnetGroupName==\"concourse-up-$deployment\") | .DBInstanceClass")
 if [ "$rds_instance_class" != "db.t2.small" ]; then
   echo "Unexpected DB instance class: $rds_instance_class"
+  exit 1
+fi
+
+
+instance_lifecycle=$(aws ec2 describe-instances --query 'Reservations[].Instances[? Tags[? Key == `$deployment` && Value == `ebci`] && Tags[? Key == `job` && Value == `worker`] ][] | [0].InstanceLifecycle' --output text)
+if [ "$instance_lifecycle" != "None" ]; then
+  echo "Unexpected worker instance lifecycle: $instance_lifecycle"
   exit 1
 fi
 

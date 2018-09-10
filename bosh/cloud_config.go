@@ -12,6 +12,7 @@ type awsCloudConfigParams struct {
 	ATCSecurityGroupID string
 	PublicSubnetID     string
 	PrivateSubnetID    string
+	Spot               bool
 }
 
 func generateCloudConfig(conf config.Config, metadata *terraform.Metadata) ([]byte, error) {
@@ -21,6 +22,7 @@ func generateCloudConfig(conf config.Config, metadata *terraform.Metadata) ([]by
 		ATCSecurityGroupID: metadata.ATCSecurityGroupID.Value,
 		PublicSubnetID:     metadata.PublicSubnetID.Value,
 		PrivateSubnetID:    metadata.PrivateSubnetID.Value,
+		Spot:               conf.Spot,
 	}
 
 	return util.RenderTemplate(awsCloudConfigtemplate, templateParams)

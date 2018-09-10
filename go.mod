@@ -2,7 +2,7 @@ module github.com/EngineerBetter/concourse-up
 
 require (
 	github.com/asaskevich/govalidator v0.0.0-20171111151018-521b25f4b05f
-	github.com/aws/aws-sdk-go v1.12.59
+	github.com/aws/aws-sdk-go v1.15.31
 	github.com/bmatcuk/doublestar v1.1.1 // indirect
 	github.com/charlievieth/fs v0.0.0-20170613215519-7dc373669fa1 // indirect
 	github.com/cloudfoundry/bosh-cli v5.2.2+incompatible
@@ -14,7 +14,6 @@ require (
 	github.com/go-ini/ini v1.32.0 // indirect
 	github.com/golang/protobuf v1.1.0 // indirect
 	github.com/gopherjs/gopherjs v0.0.0-20180628210949-0892b62f0d9f // indirect
-	github.com/jmespath/go-jmespath v0.0.0-20160202185014-0b12d6b521d8 // indirect
 	github.com/jtolds/gls v4.2.1+incompatible // indirect
 	github.com/kr/pretty v0.1.0 // indirect
 	github.com/lib/pq v0.0.0-20171126050459-83612a56d3dd

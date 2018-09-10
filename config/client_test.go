@@ -36,6 +36,7 @@ var _ = Describe("Client", func() {
 			DBSize:      "medium",
 			DBSizeIsSet: false,
 			AllowIPs:    "0.0.0.0",
+			Spot:        true,
 		}
 	})
 
@@ -160,6 +161,10 @@ var _ = Describe("Client", func() {
 
 				It("Sets the default value for the TFStatePath", func() {
 					Expect(conf.TFStatePath).To(Equal("terraform.tfstate"))
+				})
+
+				It("Sets the Spot field", func() {
+					Expect(conf.Spot).To(Equal(true))
 				})
 			})
 			Describe("github auth flags are present", func() {

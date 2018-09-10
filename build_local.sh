@@ -4,7 +4,7 @@ set -eu
 
 version=dev
 go generate github.com/EngineerBetter/concourse-up/...
-go build -ldflags "
+go build -mod=vendor -ldflags "
   -X github.com/EngineerBetter/concourse-up/fly.ConcourseUpVersion=$version
   -X main.ConcourseUpVersion=$version
 " -o concourse-up

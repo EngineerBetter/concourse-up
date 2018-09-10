@@ -30,6 +30,7 @@ type DeployArgs struct {
 	Tags            cli.StringSlice
 	// TagsIsSet is true if the user has specified tags using --tags
 	TagsIsSet bool
+	Spot      bool
 }
 
 // WorkerSizes are the permitted concourse worker sizes
