@@ -107,7 +107,7 @@ certstrap sign "$custom_domain" --CA "$deployment"
   --tls-key "$(cat out/$custom_domain.key)" \
   --allow-ips "$(dig +short myip.opendns.com @resolver1.opendns.com)" \
   --workers 2 \
-  --spot false
+  --spot=false \
   --worker-size large
 
 sleep 60
@@ -119,8 +119,10 @@ if [ "$rds_instance_class" != "db.t2.small" ]; then
   exit 1
 fi
 
+aws --region eu-west-1 ec2 describe-instances | tee instance_list
+# Check worker is a spot instance
 # shellcheck disable=SC2016
-instance_lifecycle=$(aws --region eu-west-1 ec2 describe-instances | jq -r --arg deployment "$deployment" '.Reservations[].Instances[0] | select(any(.Tags[]; .Key == "concourse-up-project" and .Value == $deployment) and any(.Tags[]; .Key == "job" and .Value == "worker")) | .InstanceLifecycle')
+instance_lifecycle=$(<instance_list jq -r --arg deployment mango '.Reservations[].Instances[0] | select(.State.Name == "running" and any(.Tags[]; .Key == "concourse-up-project" and .Value == $deployment) and any(.Tags[]; .Key == "job" and .Value == "worker")) | .InstanceLifecycle')
 if [ "$instance_lifecycle" != "" ]; then
   echo "Unexpected worker instance lifecycle: $instance_lifecycle"
   exit 1
