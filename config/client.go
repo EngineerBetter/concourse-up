@@ -213,7 +213,7 @@ func determineBucketName(iaas iaas.IClient, namespace, project string) (string, 
 		return namespaceBucketName, foundOne, nil
 	case foundRegionNamedBucket && !foundNamespacedBucket:
 		return regionBucketName, foundOne, nil
-	case foundRegionNamedBucket && foundNamespacedBucket:
+	case foundRegionNamedBucket && foundNamespacedBucket && iaas.Region() != namespace:
 		return "", foundOne, fmt.Errorf("found both region %q and namespaced %q buckets for %q deployment", regionBucketName, namespaceBucketName, project)
 	default:
 		return namespaceBucketName, foundOne, nil

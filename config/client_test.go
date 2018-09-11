@@ -321,6 +321,25 @@ func TestNew(t *testing.T) {
 				return true, nil
 			},
 		},
+		{
+			name: "with Namespace and bucket existing and namespace == region",
+			args: args{
+				iaas:      iaasClient,
+				project:   "aProject",
+				namespace: "eu-west-1",
+			},
+			want: &Client{
+				Iaas:         iaasClient,
+				Project:      "aProject",
+				Namespace:    "eu-west-1",
+				BucketName:   "concourse-up-aProject-eu-west-1-config",
+				BucketExists: true,
+				BucketError:  nil,
+			},
+			FakeBucketExists: func(name string) (bool, error) {
+				return true, nil
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
