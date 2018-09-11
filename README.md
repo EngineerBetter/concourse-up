@@ -40,10 +40,12 @@ providing you with a single command for getting your Concourse up and keeping it
 
 ## Prerequisites
 
-- Export the following [environment variables](http://docs.aws.amazon.com/cli/latest/userguide/cli-environment.html) before running `concourse-up`:
-    - `AWS_ACCESS_KEY_ID`
-    - `AWS_SECRET_ACCESS_KEY`
- - Ensure you have the correct local dependencies for [bootstrapping a BOSH VM](https://bosh.io/docs/cli-v2-install/#additional-dependencies)
+- One of:
+  - The environment variables `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` are set.
+  - Credentials for the default profile in `~/.aws/credentials` are present.
+  - Credentials for a profile in `~/.aws/credentials` are present.
+- Ensure your credentials are *long lived credentials* and not *temporary security credentials*
+- Ensure you have the correct local dependencies for [bootstrapping a BOSH VM](https://bosh.io/docs/cli-v2-install/#additional-dependencies)
 
 ## Install
 
