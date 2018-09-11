@@ -57,15 +57,6 @@ func (args *DeployArgs) ModifyGithub(GithubAuthClientID, GithubAuthClientSecret 
 	args.GithubAuthIsSet = GithubAuthIsSet
 }
 
-// SanitiseNamespace sanitises namespace
-func (args DeployArgs) SanitiseNamespace() DeployArgs {
-	a := args
-	if a.Namespace == "" {
-		a.Namespace = a.AWSRegion
-	}
-	return a
-}
-
 // Validate validates that flag interdependencies
 func (args DeployArgs) Validate() error {
 	if err := args.validateCertFields(); err != nil {

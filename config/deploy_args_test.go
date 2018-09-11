@@ -162,16 +162,6 @@ func TestDeployArgs_Validate(t *testing.T) {
 			wantErr:     true,
 			expectedErr: "`not a real tag` is not in the format `key=value`",
 		},
-		{
-			name: "Empty namespace becomes region",
-			modification: func() DeployArgs {
-				return defaultFields.SanitiseNamespace()
-			},
-			outcomeCheck: func(a DeployArgs) bool {
-				return a.AWSRegion != a.Namespace
-			},
-			wantErr: false,
-		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

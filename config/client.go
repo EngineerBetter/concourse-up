@@ -27,25 +27,32 @@ type IClient interface {
 
 // Client is a client for loading the config file  from S3
 type Client struct {
-	iaas       iaas.IClient
-	project    string
-	namespace  string
-	bucketName string
+	Iaas         iaas.IClient
+	Project      string
+	Namespace    string
+	BucketName   string
+	BucketExists bool
+	BucketError  error
 }
 
 // New instantiates a new client
 func New(iaas iaas.IClient, project, namespace string) *Client {
+	namespace = determineNamespace(namespace, iaas.Region())
+	bucketName, exists, err := determineBucketName(iaas, namespace, project)
+
 	return &Client{
 		iaas,
 		project,
 		namespace,
-		"",
+		bucketName,
+		exists,
+		err,
 	}
 }
 
 // StoreAsset stores an associated configuration file
 func (client *Client) StoreAsset(filename string, contents []byte) error {
-	return client.iaas.WriteFile(client.configBucket(),
+	return client.Iaas.WriteFile(client.configBucket(),
 		filename,
 		contents,
 	)
@@ -53,7 +60,7 @@ func (client *Client) StoreAsset(filename string, contents []byte) error {
 
 // LoadAsset loads an associated configuration file
 func (client *Client) LoadAsset(filename string) ([]byte, error) {
-	return client.iaas.LoadFile(
+	return client.Iaas.LoadFile(
 		client.configBucket(),
 		filename,
 	)
@@ -61,7 +68,7 @@ func (client *Client) LoadAsset(filename string) ([]byte, error) {
 
 // DeleteAsset deletes an associated configuration file
 func (client *Client) DeleteAsset(filename string) error {
-	return client.iaas.DeleteFile(
+	return client.Iaas.DeleteFile(
 		client.configBucket(),
 		filename,
 	)
@@ -69,7 +76,7 @@ func (client *Client) DeleteAsset(filename string) error {
 
 // HasAsset returns true if an associated configuration file exists
 func (client *Client) HasAsset(filename string) (bool, error) {
-	return client.iaas.HasFile(
+	return client.Iaas.HasFile(
 		client.configBucket(),
 		filename,
 	)
@@ -82,17 +89,20 @@ func (client *Client) Update(config Config) error {
 		return err
 	}
 
-	return client.iaas.WriteFile(client.configBucket(), configFilePath, bytes)
+	return client.Iaas.WriteFile(client.configBucket(), configFilePath, bytes)
 }
 
 // DeleteAll deletes the entire configuration bucket
 func (client *Client) DeleteAll(config Config) error {
-	return client.iaas.DeleteVersionedBucket(config.ConfigBucket)
+	return client.Iaas.DeleteVersionedBucket(config.ConfigBucket)
 }
 
 // Load loads an existing config file from S3
 func (client *Client) Load() (Config, error) {
-	configBytes, err := client.iaas.LoadFile(
+	if client.BucketError != nil {
+		return Config{}, client.BucketError
+	}
+	configBytes, err := client.Iaas.LoadFile(
 		client.configBucket(),
 		configFilePath,
 	)
@@ -106,6 +116,108 @@ func (client *Client) Load() (Config, error) {
 	}
 
 	return conf, nil
+}
+
+// LoadOrCreate loads an existing config file from S3, or creates a default if one doesn't already exist
+func (client *Client) LoadOrCreate(deployArgs *DeployArgs) (Config, bool, error) {
+	if client.BucketError != nil {
+		return Config{}, false, client.BucketError
+	}
+
+	config, err := generateDefaultConfig(
+		deployArgs.IAAS,
+		client.Project,
+		deployment(client.Project),
+		client.configBucket(),
+		deployArgs.AWSRegion,
+		deployArgs.Namespace,
+	)
+	if err != nil {
+		return Config{}, false, err
+	}
+	defaultConfigBytes, err := json.Marshal(&config)
+	if err != nil {
+		return Config{}, false, err
+	}
+
+	if !client.BucketExists {
+		err = client.Iaas.CreateBucket(client.configBucket())
+		if err != nil {
+			return Config{}, false, err
+		}
+	}
+
+	configBytes, createdNewFile, err := client.Iaas.EnsureFileExists(
+		client.configBucket(),
+		configFilePath,
+		defaultConfigBytes,
+	)
+
+	if err != nil {
+		return Config{}, createdNewFile, err
+	}
+	err = json.Unmarshal(configBytes, &config)
+	if err != nil {
+		return Config{}, createdNewFile, err
+	}
+	allow, err := parseCIDRBlocks(deployArgs.AllowIPs)
+	if err != nil {
+		return Config{}, createdNewFile, err
+	}
+	config, err = updateAllowedIPs(config, DBSizes[deployArgs.DBSize], allow)
+	if err != nil {
+		return Config{}, createdNewFile, err
+	}
+	if deployArgs.GithubAuthIsSet {
+		config.GithubClientID = deployArgs.GithubAuthClientID
+		config.GithubClientSecret = deployArgs.GithubAuthClientSecret
+		config.GithubAuthIsSet = deployArgs.GithubAuthIsSet
+	}
+	config.Spot = deployArgs.Spot
+	if deployArgs.TagsIsSet {
+		config.Tags = deployArgs.Tags
+		config.TagsIsSet = deployArgs.TagsIsSet
+	}
+	return config, createdNewFile, nil
+}
+
+func (client *Client) configBucket() string {
+	return client.BucketName
+}
+
+func deployment(project string) string {
+	return fmt.Sprintf("concourse-up-%s", project)
+}
+
+func createBucketName(deployment, extension string) string {
+	return fmt.Sprintf("%s-%s-config", deployment, extension)
+}
+
+func determineBucketName(iaas iaas.IClient, namespace, project string) (string, bool, error) {
+	regionBucketName := createBucketName(deployment(project), iaas.Region())
+	namespaceBucketName := createBucketName(deployment(project), namespace)
+
+	foundRegionNamedBucket, err := iaas.BucketExists(regionBucketName)
+	if err != nil {
+		return "", false, err
+	}
+	foundNamespacedBucket, err := iaas.BucketExists(namespaceBucketName)
+	if err != nil {
+		return "", false, err
+	}
+
+	foundOne := foundRegionNamedBucket || foundNamespacedBucket
+
+	switch {
+	case !foundRegionNamedBucket && foundNamespacedBucket:
+		return namespaceBucketName, foundOne, nil
+	case foundRegionNamedBucket && !foundNamespacedBucket:
+		return regionBucketName, foundOne, nil
+	case foundRegionNamedBucket && foundNamespacedBucket:
+		return "", foundOne, fmt.Errorf("found both region %q and namespaced %q buckets for %q deployment", regionBucketName, namespaceBucketName, project)
+	default:
+		return namespaceBucketName, foundOne, nil
+	}
 }
 
 type cidrBlocks []*net.IPNet
@@ -147,108 +259,9 @@ func (b cidrBlocks) String() (string, error) {
 	return buf.String(), nil
 }
 
-func (client *Client) determineBucketName() (string, bool, error) {
-	regionBucketName := client.createBucketName(client.iaas.Region())
-	namespaceBucketName := client.createBucketName(client.namespace)
-
-	foundRegionNamedBucket, err := client.iaas.BucketExists(regionBucketName)
-	if err != nil {
-		return "", false, err
+func determineNamespace(namespace, region string) string {
+	if namespace == "" {
+		return region
 	}
-	foundNamespacedBucket, err := client.iaas.BucketExists(namespaceBucketName)
-	if err != nil {
-		return "", false, err
-	}
-
-	foundOne := foundRegionNamedBucket || foundNamespacedBucket
-
-	switch {
-	case !foundRegionNamedBucket && foundNamespacedBucket:
-		return namespaceBucketName, foundOne, nil
-	case foundRegionNamedBucket && !foundNamespacedBucket:
-		return regionBucketName, foundOne, nil
-	case foundRegionNamedBucket && foundNamespacedBucket:
-		return "", foundOne, fmt.Errorf("found both region %q and namespaced %q buckets for %q deployment", regionBucketName, namespaceBucketName, client.project)
-	default:
-		return namespaceBucketName, foundOne, nil
-	}
-}
-
-// LoadOrCreate loads an existing config file from S3, or creates a default if one doesn't already exist
-func (client *Client) LoadOrCreate(deployArgs *DeployArgs) (Config, bool, error) {
-
-	bucketName, foundOne, err := client.determineBucketName()
-	if err != nil {
-		return Config{}, false, err
-	}
-
-	client.bucketName = bucketName
-
-	config, err := generateDefaultConfig(
-		deployArgs.IAAS,
-		client.project,
-		client.deployment(),
-		client.configBucket(),
-		deployArgs.AWSRegion,
-		deployArgs.Namespace,
-	)
-	if err != nil {
-		return Config{}, false, err
-	}
-	defaultConfigBytes, err := json.Marshal(&config)
-	if err != nil {
-		return Config{}, false, err
-	}
-
-	if !foundOne {
-		err = client.iaas.CreateBucket(client.configBucket())
-		if err != nil {
-			return Config{}, false, err
-		}
-	}
-
-	configBytes, createdNewFile, err := client.iaas.EnsureFileExists(
-		client.configBucket(),
-		configFilePath,
-		defaultConfigBytes,
-	)
-
-	if err != nil {
-		return Config{}, createdNewFile, err
-	}
-	err = json.Unmarshal(configBytes, &config)
-	if err != nil {
-		return Config{}, createdNewFile, err
-	}
-	allow, err := parseCIDRBlocks(deployArgs.AllowIPs)
-	if err != nil {
-		return Config{}, createdNewFile, err
-	}
-	config, err = updateAllowedIPs(config, DBSizes[deployArgs.DBSize], allow)
-	if err != nil {
-		return Config{}, createdNewFile, err
-	}
-	if deployArgs.GithubAuthIsSet {
-		config.GithubClientID = deployArgs.GithubAuthClientID
-		config.GithubClientSecret = deployArgs.GithubAuthClientSecret
-		config.GithubAuthIsSet = deployArgs.GithubAuthIsSet
-	}
-	config.Spot = deployArgs.Spot
-	if deployArgs.TagsIsSet {
-		config.Tags = deployArgs.Tags
-		config.TagsIsSet = deployArgs.TagsIsSet
-	}
-	return config, createdNewFile, nil
-}
-
-func (client *Client) deployment() string {
-	return fmt.Sprintf("concourse-up-%s", client.project)
-}
-
-func (client *Client) configBucket() string {
-	return client.bucketName
-}
-
-func (client *Client) createBucketName(extension string) string {
-	return fmt.Sprintf("%s-%s-config", client.deployment(), extension)
+	return namespace
 }
