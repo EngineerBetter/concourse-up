@@ -64,7 +64,9 @@ EOF
 
 cat <<EOF > release-vars/slackmsg
 <!channel> Concourse Up $(cat version/version) published to Github
-$(diff release-vars/body <(curl -Ss https://api.github.com/repos/EngineerBetter/concourse-up/releases/latest | jq -r .body) || true)
+```
+$(diff --suppress-common-lines release-vars/body <(curl -Ss https://api.github.com/repos/EngineerBetter/concourse-up/releases/latest | jq -r .body) || true)
+```
 EOF
 
 pushd concourse-up
