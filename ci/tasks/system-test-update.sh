@@ -52,7 +52,6 @@ until [[ $(bosh locks --json | jq -r '.Tables[].Rows | length') -eq 0 ]]; do
 done
 echo "Bosh lock available - Proceeding"
 
-exit 1
 echo "UPDATE TO NEW VERSION"
 export SELF_UPDATE=true
 ./cup-new deploy $deployment
