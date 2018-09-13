@@ -58,7 +58,7 @@ sleep 5
 
 pkill -9 fly
 
-url="$(grep redirect fly_out | sed 's/ //g')"
+url=$(grep redirect fly_out | sed 's/ //g')
 
 curl -sL "$url" | grep -q '/sky/issuer/auth/github'
 

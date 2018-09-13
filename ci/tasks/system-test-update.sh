@@ -37,7 +37,7 @@ echo "Waiting for 30 seconds to give old deploy time to settle"
 sleep 30
 
 eval "$(./cup-old info --env $deployment)"
-config="$(./cup-old info --json $deployment)"
+config=$(./cup-old info --json $deployment)
 domain=$(echo "$config" | jq -r '.config.domain')
 
 echo "Waiting for bosh lock to become available"
@@ -75,7 +75,7 @@ echo "Update complete - Proceeding"
 
 sleep 60
 
-config="$(./cup-new info --json $deployment)"
+config=$(./cup-new info --json $deployment)
 domain=$(echo "$config" | jq -r '.config.domain')
 username=$(echo "$config" | jq -r '.config.concourse_username')
 password=$(echo "$config" | jq -r '.config.concourse_password')
