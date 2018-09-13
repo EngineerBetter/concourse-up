@@ -35,6 +35,12 @@ var destroyFlags = []cli.Flag{
 		Hidden:      true,
 		Destination: &destroyArgs.IAAS,
 	},
+	cli.StringFlag{
+		Name:        "namespace",
+		Usage:       "(optional) Specify a namespace for deployments in order to group them in a meaningful way",
+		EnvVar:      "NAMESPACE",
+		Destination: &destroyArgs.Namespace,
+	},
 }
 
 var destroy = cli.Command{

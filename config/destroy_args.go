@@ -4,4 +4,5 @@ package config
 type DestroyArgs struct {
 	AWSRegion string
 	IAAS      string
+	Namespace string
 }
