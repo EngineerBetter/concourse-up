@@ -78,7 +78,7 @@ var destroy = cli.Command{
 			bosh.NewClient,
 			fly.New,
 			certs.Generate,
-			config.New(iaasClient, name, ""),
+			config.New(iaasClient, name, destroyArgs.Namespace),
 			nil,
 			os.Stdout,
 			os.Stderr,
