@@ -301,6 +301,7 @@ func (client *Client) buildDefaultPipelineParams(deployArgs *config.DeployArgs, 
 		FlagWorkers:          deployArgs.WorkerCount,
 		ConcourseUpVersion:   ConcourseUpVersion,
 		Tags:                 tagsStringer(config.Tags),
+		Namespace:            config.Namespace,
 	}, nil
 }
 
@@ -320,6 +321,7 @@ type defaultPipelineParams struct {
 	FlagWorkers          int
 	ConcourseUpVersion   string
 	Tags                 string
+	Namespace            string
 }
 
 // Indent is a helper function to indent the field a given number of spaces
@@ -364,6 +366,7 @@ jobs:
       AWS_ACCESS_KEY_ID: "<% .AWSAccessKeyID %>"
       AWS_SECRET_ACCESS_KEY: "<% .AWSSecretAccessKey %>"
       SELF_UPDATE: true
+	  NAMESPACE: <% .Namespace %>
     config:
       platform: linux
       image_resource:
@@ -406,7 +409,8 @@ jobs:
       GITHUB_AUTH_CLIENT_SECRET: "<% .FlagGithubAuthSecret %>"
       AWS_ACCESS_KEY_ID: "<% .AWSAccessKeyID %>"
       AWS_SECRET_ACCESS_KEY: "<% .AWSSecretAccessKey %>"
-      SELF_UPDATE: true
+	  SELF_UPDATE: true
+	  NAMESPACE: <% .Namespace %>
     config:
       platform: linux
       image_resource:
@@ -424,5 +428,5 @@ jobs:
 
           cd concourse-up-release
           chmod +x concourse-up-linux-amd64
-          ./concourse-up-linux-amd64 deploy $DEPLOYMENT <% .Tags %>
+          ./concourse-up-linux-amd64 deploy $DEPLOYMENT <% .Tags %> 
 `
