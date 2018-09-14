@@ -366,7 +366,7 @@ jobs:
       AWS_ACCESS_KEY_ID: "<% .AWSAccessKeyID %>"
       AWS_SECRET_ACCESS_KEY: "<% .AWSSecretAccessKey %>"
       SELF_UPDATE: true
-	  NAMESPACE: <% .Namespace %>
+      NAMESPACE: <% .Namespace %>
     config:
       platform: linux
       image_resource:
@@ -409,8 +409,8 @@ jobs:
       GITHUB_AUTH_CLIENT_SECRET: "<% .FlagGithubAuthSecret %>"
       AWS_ACCESS_KEY_ID: "<% .AWSAccessKeyID %>"
       AWS_SECRET_ACCESS_KEY: "<% .AWSSecretAccessKey %>"
-	  SELF_UPDATE: true
-	  NAMESPACE: <% .Namespace %>
+      SELF_UPDATE: true
+      NAMESPACE: <% .Namespace %>
     config:
       platform: linux
       image_resource:
