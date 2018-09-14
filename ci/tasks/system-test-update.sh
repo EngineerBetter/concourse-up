@@ -53,7 +53,7 @@ done
 echo "Bosh lock available - Proceeding"
 
 echo "UPDATE TO NEW VERSION"
-export SELF_UPDATE=true
+# export SELF_UPDATE=true
 ./cup-new deploy $deployment
 
 echo "Waiting for 30 seconds to let detached upgrade start"
