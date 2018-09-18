@@ -79,7 +79,7 @@ var info = cli.Command{
 			bosh.NewClient,
 			fly.New,
 			certs.Generate,
-			config.New(awsClient, name, ""),
+			config.New(awsClient, name, infoArgs.Namespace),
 			nil,
 			os.Stdout,
 			os.Stderr,

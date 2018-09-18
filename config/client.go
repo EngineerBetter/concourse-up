@@ -130,7 +130,7 @@ func (client *Client) LoadOrCreate(deployArgs *DeployArgs) (Config, bool, error)
 		deployment(client.Project),
 		client.configBucket(),
 		deployArgs.AWSRegion,
-		deployArgs.Namespace,
+		client.Namespace,
 	)
 	if err != nil {
 		return Config{}, false, err
