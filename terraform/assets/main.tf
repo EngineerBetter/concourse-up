@@ -83,7 +83,7 @@ resource "aws_key_pair" "default" {
 }
 
 resource "aws_s3_bucket" "blobstore" {
-  bucket        = "${var.deployment}-${var.region}-blobstore"
+  bucket        = "${var.deployment}-<% .Namespace %>-blobstore"
   force_destroy = true
   region = "<% .Region %>"
 
@@ -95,16 +95,16 @@ resource "aws_s3_bucket" "blobstore" {
 }
 
 resource "aws_iam_user" "blobstore" {
-  name = "${var.deployment}-${var.region}-blobstore"
+  name = "${var.deployment}-<% .Namespace %>-blobstore"
 }
 
 resource "aws_iam_access_key" "blobstore" {
-  user = "${var.deployment}-${var.region}-blobstore"
+  user = "${var.deployment}-<% .Namespace %>-blobstore"
   depends_on = ["aws_iam_user.blobstore"]
 }
 
 resource "aws_iam_user_policy" "blobstore" {
-  name = "${var.deployment}-${var.region}-blobstore"
+  name = "${var.deployment}-<% .Namespace %>-blobstore"
   user = "${aws_iam_user.blobstore.name}"
 
   policy = <<EOF
