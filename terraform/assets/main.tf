@@ -430,6 +430,7 @@ resource "aws_security_group" "atc" {
   name        = "${var.deployment}-atc"
   description = "Concourse UP ATC security group"
   vpc_id      = "${aws_vpc.default.id}"
+  depends_on = ["aws_eip.nat", "aws_eip.atc"]
 
   tags {
     Name = "${var.deployment}-atc"
@@ -479,8 +480,6 @@ resource "aws_security_group" "atc" {
     protocol    = "tcp"
     cidr_blocks = ["${aws_eip.nat.public_ip}/32", "${aws_eip.atc.public_ip}/32", <% .AllowIPs %>]
   }
-
-  depends_on = ["aws_eip.nat", "aws_eip.atc"] 
 }
 
 resource "aws_route_table" "rds" {
