@@ -303,25 +303,6 @@ func TestNew(t *testing.T) {
 			},
 		},
 		{
-			name: "with Namespace and both buckets",
-			args: args{
-				iaas:      iaasClient,
-				project:   "aProject",
-				namespace: "someNamespace",
-			},
-			want: &Client{
-				Iaas:         iaasClient,
-				Project:      "aProject",
-				Namespace:    "someNamespace",
-				BucketName:   "",
-				BucketExists: true,
-				BucketError:  fmt.Errorf("found both region %q and namespaced %q buckets for %q deployment", "concourse-up-aProject-eu-west-1-config", "concourse-up-aProject-someNamespace-config", "aProject"),
-			},
-			FakeBucketExists: func(name string) (bool, error) {
-				return true, nil
-			},
-		},
-		{
 			name: "with Namespace and bucket existing and namespace == region",
 			args: args{
 				iaas:      iaasClient,
