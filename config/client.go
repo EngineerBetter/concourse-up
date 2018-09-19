@@ -152,22 +152,25 @@ func (client *Client) LoadOrCreate(deployArgs *DeployArgs) (Config, bool, error)
 		configFilePath,
 		defaultConfigBytes,
 	)
-
 	if err != nil {
 		return Config{}, createdNewFile, err
 	}
+
 	err = json.Unmarshal(configBytes, &config)
 	if err != nil {
 		return Config{}, createdNewFile, err
 	}
+
 	allow, err := parseCIDRBlocks(deployArgs.AllowIPs)
 	if err != nil {
 		return Config{}, createdNewFile, err
 	}
+
 	config, err = updateAllowedIPs(config, DBSizes[deployArgs.DBSize], allow)
 	if err != nil {
 		return Config{}, createdNewFile, err
 	}
+
 	if deployArgs.GithubAuthIsSet {
 		config.GithubClientID = deployArgs.GithubAuthClientID
 		config.GithubClientSecret = deployArgs.GithubAuthClientSecret
@@ -213,8 +216,6 @@ func determineBucketName(iaas iaas.IClient, namespace, project string) (string, 
 		return namespaceBucketName, foundOne, nil
 	case foundRegionNamedBucket && !foundNamespacedBucket:
 		return regionBucketName, foundOne, nil
-	case foundRegionNamedBucket && foundNamespacedBucket && iaas.Region() != namespace:
-		return "", foundOne, fmt.Errorf("found both region %q and namespaced %q buckets for %q deployment", regionBucketName, namespaceBucketName, project)
 	default:
 		return namespaceBucketName, foundOne, nil
 	}
