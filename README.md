@@ -147,6 +147,8 @@ All flags are optional
 * `--add-tag key=value` Add a tag to the VMs that form your `concourse-up` deployment. Can be used multiple times in a single `deploy` command.
 * `--spot=false` Do not use spot instances for worker VM's.
 
+> Concourse Up uses spot instances for workers as a cost saving measure. Users requiring lower risk may switch this feature off by setting --spot=false.
+
 * `--namespace value` Any valid string that provides a meaningful namespace of the deployment - Used as part of the configuration bucket name [$NAMESPACE]. 
     >Note that if namespace has been provided in the initial `deploy` it will be required for any subsequent `concourse-up` calls against the same deployment.
      

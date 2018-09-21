@@ -89,7 +89,7 @@ var deployFlags = []cli.Flag{
 	},
 	cli.BoolTFlag{
 		Name:        "spot",
-		Usage:       "(optional) Use spot instances for workers",
+		Usage:       "(optional) Use spot instances for workers. Can be true/false (default: true)",
 		EnvVar:      "SPOT",
 		Destination: &deployArgs.Spot,
 	},
