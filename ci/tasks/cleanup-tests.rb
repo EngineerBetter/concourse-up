@@ -17,6 +17,8 @@ buckets.each_line do |bucket|
   deployment = bucket.split('-')[0..4].join('-')
   region = bucket.split('-')[5..7].join('-')
 
+  aws_region_cmd = "aws --region #{region}"
+
   `aws s3 ls s3://#{bucket} > /dev/null`
   if $?.success?
     contents = `aws s3 ls s3://#{bucket}`
@@ -28,12 +30,18 @@ buckets.each_line do |bucket|
       puts '==================================================================='
       puts "MANUAL CLEANUP MAY BE REQUIRED FOR #{bucket}"
       puts '==================================================================='
-      vpc_id = `aws ec2 describe-vpcs --filters 'Name=tag:Name,Values=#{deployment}' --region #{region} | jq -r '.Vpcs[0].VpcId'`
+      vpc_id = `#{aws_region_cmd} ec2 describe-vpcs --filters 'Name=tag:Name,Values=#{deployment}' | jq -r '.Vpcs[0].VpcId'`
       if vpc_id
-        `aws --region #{region} ec2 delete-vpc --vpc-id #{vpc_id}`
+        rds_instance = `#{aws_region_cmd} rds describe-db-instances | jq -r '.DBInstances[] | select(.DBSubnetGroup.VpcId == "#{vpc_id}") | .DBInstanceIdentifier'`
+        if rds_instance
+          `#{aws_region_cmd} rds delete-db-instance --db-instance-identifier "#{rds_instance}" --skip-final-snapshot true`
+          `#{aws_region_cmd} rds wait db-instance-deleted --db-instance-identifier "#{rds_instance}"`
+        end
+        `#{aws_region_cmd} ec2 delete-vpc --vpc-id #{vpc_id}`
       else
         puts "vpc for #{deployment} not found"
       end
+      `aws s3 rb s3://#{bucket} --force`
     end
   else
     printf "#{bucket} doesn't really exist\n"
