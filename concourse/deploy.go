@@ -150,7 +150,7 @@ func (client *Client) deployBoshAndPipeline(c config.Config, metadata *terraform
 	}
 	defer flyClient.Cleanup()
 
-	if err := flyClient.SetDefaultPipeline(client.deployArgs, c, false); err != nil {
+	if err := flyClient.SetDefaultPipeline(c, false); err != nil {
 		return bp, err
 	}
 
@@ -206,7 +206,7 @@ func (client *Client) updateBoshAndPipeline(c config.Config, metadata *terraform
 	}
 
 	// Allow a fly version discrepancy since we might be targetting an older Concourse
-	if err = flyClient.SetDefaultPipeline(client.deployArgs, c, true); err != nil {
+	if err = flyClient.SetDefaultPipeline(c, true); err != nil {
 		return bp, err
 	}
 
@@ -584,7 +584,7 @@ fly --target {{.Project}} login{{if not .ConcourseUserProvidedCert}} --insecure{
 Metrics available at https://{{.Domain}}:3000 using the same username and password
 
 Log into credhub with:
-eval "$(concourse-up info {{.Project}} --region {{.Region}} --namespace {{.Namespace}} --env)"
+eval "$(concourse-up info {{.Project}} --region {{.Region}} --env)"
 `
 
 func writeDeploySuccessMessage(config config.Config, metadata *terraform.Metadata, stdout io.Writer) error {

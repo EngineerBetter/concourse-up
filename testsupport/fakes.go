@@ -107,14 +107,14 @@ func (client *FakeAWSClient) WriteFile(bucket, path string, contents []byte) err
 
 // FakeFlyClient implements fly.IClient for testing
 type FakeFlyClient struct {
-	FakeSetDefaultPipeline func(deployAgs *config.DeployArgs, config config.Config, allowFlyVersionDiscrepancy bool) error
+	FakeSetDefaultPipeline func(config config.Config, allowFlyVersionDiscrepancy bool) error
 	FakeCleanup            func() error
 	FakeCanConnect         func() (bool, error)
 }
 
 // SetDefaultPipeline delegates to FakeSetDefaultPipeline which is dynamically set by the tests
-func (client *FakeFlyClient) SetDefaultPipeline(deployArgs *config.DeployArgs, config config.Config, allowFlyVersionDiscrepancy bool) error {
-	return client.FakeSetDefaultPipeline(deployArgs, config, allowFlyVersionDiscrepancy)
+func (client *FakeFlyClient) SetDefaultPipeline(config config.Config, allowFlyVersionDiscrepancy bool) error {
+	return client.FakeSetDefaultPipeline(config, allowFlyVersionDiscrepancy)
 }
 
 // Cleanup delegates to FakeCleanup which is dynamically set by the tests

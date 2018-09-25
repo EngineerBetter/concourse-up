@@ -63,7 +63,7 @@ var _ = Describe("Client", func() {
 	}
 
 	fakeFlyClient := &testsupport.FakeFlyClient{
-		FakeSetDefaultPipeline: func(deployArgs *config.DeployArgs, config config.Config, allowFlyVersionDiscrepancy bool) error {
+		FakeSetDefaultPipeline: func(config config.Config, allowFlyVersionDiscrepancy bool) error {
 			actions = append(actions, "setting default pipeline")
 			return nil
 		},

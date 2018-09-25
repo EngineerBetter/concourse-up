@@ -25,7 +25,7 @@ var ConcourseUpVersion = "COMPILE_TIME_VARIABLE_fly_concourse_up_version"
 // IClient represents an interface for a client
 type IClient interface {
 	CanConnect() (bool, error)
-	SetDefaultPipeline(deployArgs *config.DeployArgs, config config.Config, allowFlyVersionDiscrepancy bool) error
+	SetDefaultPipeline(config config.Config, allowFlyVersionDiscrepancy bool) error
 	Cleanup() error
 }
 
@@ -153,7 +153,7 @@ func tagsStringer(tags []string) string {
 }
 
 // SetDefaultPipeline sets the default pipeline against a given concourse
-func (client *Client) SetDefaultPipeline(deployArgs *config.DeployArgs, config config.Config, allowFlyVersionDiscrepancy bool) error {
+func (client *Client) SetDefaultPipeline(config config.Config, allowFlyVersionDiscrepancy bool) error {
 	if err := client.login(); err != nil {
 		return err
 	}
@@ -170,7 +170,7 @@ func (client *Client) SetDefaultPipeline(deployArgs *config.DeployArgs, config c
 	pipelinePath := client.tempDir.Path("default-pipeline.yml")
 	pipelineName := "concourse-up-self-update"
 
-	if err := client.writePipelineConfig(pipelinePath, deployArgs, config); err != nil {
+	if err := client.writePipelineConfig(pipelinePath, config); err != nil {
 		return err
 	}
 
@@ -189,14 +189,14 @@ func (client *Client) SetDefaultPipeline(deployArgs *config.DeployArgs, config c
 	return client.run("unpause-pipeline", "--pipeline", pipelineName)
 }
 
-func (client *Client) writePipelineConfig(pipelinePath string, deployArgs *config.DeployArgs, config config.Config) error {
+func (client *Client) writePipelineConfig(pipelinePath string, config config.Config) error {
 	fileHandler, err := os.Create(pipelinePath)
 	if err != nil {
 		return err
 	}
 	defer fileHandler.Close()
 
-	params, err := client.buildDefaultPipelineParams(deployArgs, config)
+	params, err := client.buildDefaultPipelineParams(config)
 	if err != nil {
 		return err
 	}
@@ -275,7 +275,7 @@ func getFlyURL(versionFile []byte) (string, error) {
 	}
 }
 
-func (client *Client) buildDefaultPipelineParams(deployArgs *config.DeployArgs, config config.Config) (*defaultPipelineParams, error) {
+func (client *Client) buildDefaultPipelineParams(config config.Config) (*defaultPipelineParams, error) {
 	sess, err := session.NewSession()
 	if err != nil {
 		return nil, err
@@ -290,15 +290,15 @@ func (client *Client) buildDefaultPipelineParams(deployArgs *config.DeployArgs, 
 		AWSAccessKeyID:       creds.AccessKeyID,
 		AWSSecretAccessKey:   creds.SecretAccessKey,
 		Deployment:           strings.TrimPrefix(config.Deployment, "concourse-up-"),
-		FlagAWSRegion:        deployArgs.AWSRegion,
-		FlagDomain:           deployArgs.Domain,
-		FlagGithubAuthID:     deployArgs.GithubAuthClientID,
-		FlagGithubAuthSecret: deployArgs.GithubAuthClientSecret,
-		FlagTLSCert:          deployArgs.TLSCert,
-		FlagTLSKey:           deployArgs.TLSKey,
-		FlagWebSize:          deployArgs.WebSize,
-		FlagWorkerSize:       deployArgs.WorkerSize,
-		FlagWorkers:          deployArgs.WorkerCount,
+		FlagAWSRegion:        config.Region,
+		FlagDomain:           config.Domain,
+		FlagGithubAuthID:     config.GithubClientID,
+		FlagGithubAuthSecret: config.GithubClientSecret,
+		FlagTLSCert:          config.ConcourseCert,
+		FlagTLSKey:           config.ConcourseKey,
+		FlagWebSize:          config.ConcourseWebSize,
+		FlagWorkerSize:       config.ConcourseWorkerSize,
+		FlagWorkers:          config.ConcourseWorkerCount,
 		ConcourseUpVersion:   ConcourseUpVersion,
 		Tags:                 tagsStringer(config.Tags),
 		Namespace:            config.Namespace,
