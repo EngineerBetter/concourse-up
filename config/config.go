@@ -96,6 +96,7 @@ func generateDefaultConfig(iaas, project, deployment, configBucket, region, name
 		Region:                   region,
 		TFStatePath:              terraformStateFileName,
 		Namespace:                namespace,
+		Version:                  "placeholder for version",
 	}
 
 	return conf, nil
