@@ -125,6 +125,16 @@ var deployFlags = []cli.Flag{
 	},
 }
 
+func setRunningArgs(c *cli.Context) []string {
+	var flags []string
+	for _, f := range c.FlagNames() {
+		if c.IsSet(f) {
+			flags = append(flags, f)
+		}
+	}
+	return flags
+}
+
 var deploy = cli.Command{
 	Name:      "deploy",
 	Aliases:   []string{"d"},
@@ -136,6 +146,8 @@ var deploy = cli.Command{
 		if name == "" {
 			return errors.New("Usage is `concourse-up deploy <name>`")
 		}
+
+		config.RunningArgs = setRunningArgs(c)
 
 		deployArgs.DBSizeIsSet = c.IsSet("db-size")
 		deployArgs.GithubAuthIsSet = c.IsSet("github-auth-client-id") && c.IsSet("github-auth-client-secret")

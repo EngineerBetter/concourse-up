@@ -34,6 +34,9 @@ type DeployArgs struct {
 	Spot      bool
 }
 
+// RunningArgs are storing the names of the arguments used while running the binary
+var RunningArgs []string
+
 // WorkerSizes are the permitted concourse worker sizes
 var WorkerSizes = []string{"medium", "large", "xlarge", "2xlarge", "4xlarge", "10xlarge", "16xlarge"}
 

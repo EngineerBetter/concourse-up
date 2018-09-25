@@ -15,6 +15,7 @@ import (
 	"github.com/EngineerBetter/concourse-up/config"
 	"github.com/EngineerBetter/concourse-up/fly"
 	"github.com/EngineerBetter/concourse-up/terraform"
+	"gopkg.in/yaml.v2"
 )
 
 // BoshParams represents the params used and produced by a BOSH deploy
