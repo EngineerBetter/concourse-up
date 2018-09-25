@@ -62,6 +62,7 @@ type Config struct {
 	AllowIPs                  string   `json:"allow_ips"`
 	Spot                      bool     `json:"spot"`
 	Namespace                 string   `json:"namespace"`
+	Verson                    string   `json:"version"`
 }
 
 func generateDefaultConfig(iaas, project, deployment, configBucket, region, namespace string) (Config, error) {

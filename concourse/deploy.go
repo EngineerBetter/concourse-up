@@ -8,8 +8,6 @@ import (
 	"text/template"
 	"time"
 
-	"gopkg.in/yaml.v2"
-
 	"strings"
 
 	"github.com/EngineerBetter/concourse-up/bosh"
@@ -68,6 +66,8 @@ func (client *Client) Deploy() (config.Config, error) {
 	if err != nil {
 		return c, err
 	}
+
+	c.Version = "placeholder for version number"
 
 	cr, err := client.checkPreDeployConfigRequirements(client.acmeClientConstructor, isDomainUpdated, c, metadata)
 	if err != nil {
