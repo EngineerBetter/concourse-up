@@ -111,6 +111,9 @@ Bosh credentials:
 	CA Cert:
 		{{ .Config.DirectorCACert | replace "\n" "\n\t\t"}}
 
+Concourse-Up:
+    version: {{.Config.Version}}
+
 Built by {{"EngineerBetter http://engineerbetter.com" | blue}}
 `
 
