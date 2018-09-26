@@ -10,32 +10,88 @@ import (
 
 // DeployArgs are arguments passed to the deploy command
 type DeployArgs struct {
-	IAAS        string
-	AWSRegion   string
-	Domain      string
-	TLSCert     string
-	TLSKey      string
-	WorkerCount int
-	WorkerSize  string
-	WebSize     string
-	SelfUpdate  bool
-	DBSize      string
-	Namespace   string
+	IAAS             string
+	IAASIsSet        bool
+	AWSRegion        string
+	AWSRegionIsSet   bool
+	Domain           string
+	DomainIsSet      bool
+	TLSCert          string
+	TLSCertIsSet     bool
+	TLSKey           string
+	TLSKeyIsSet      bool
+	WorkerCount      int
+	WorkerCountIsSet bool
+	WorkerSize       string
+	WorkerSizeIsSet  bool
+	WebSize          string
+	WebSizeIsSet     bool
+	SelfUpdate       bool
+	SelfUpdateIsSet  bool
+	DBSize           string
 	// DBSizeIsSet is true if the user has manually specified the db-size (ie, it's not the default)
-	DBSizeIsSet            bool
-	AllowIPs               string
-	GithubAuthClientID     string
-	GithubAuthClientSecret string
+	DBSizeIsSet                 bool
+	Namespace                   string
+	NamespaceIsSet              bool
+	AllowIPs                    string
+	AllowIPsIsSet               bool
+	GithubAuthClientID          string
+	GithubAuthClientIDIsSet     bool
+	GithubAuthClientSecret      string
+	GithubAuthClientSecretIsSet bool
 	// GithubAuthIsSet is true if the user has specified both the --github-auth-client-secret and --github-auth-client-id flags
 	GithubAuthIsSet bool
 	Tags            cli.StringSlice
 	// TagsIsSet is true if the user has specified tags using --tags
 	TagsIsSet bool
 	Spot      bool
+	SpotIsSet bool
 }
 
-// RunningArgs are storing the names of the arguments used while running the binary
-var RunningArgs []string
+// MarkSetFlags is marking the IsSet DeployArgs
+func (a DeployArgs) MarkSetFlags(c *cli.Context) error {
+	for _, f := range c.FlagNames() {
+		if c.IsSet(f) {
+			switch f {
+			case "region":
+				a.AWSRegionIsSet = true
+			case "domain":
+				a.DomainIsSet = true
+			case "tls-cert":
+				a.TLSCertIsSet = true
+			case "tls-key":
+				a.TLSKeyIsSet = true
+			case "workers":
+				a.WorkerCountIsSet = true
+			case "worker-size":
+				a.WorkerSizeIsSet = true
+			case "web-size":
+				a.WebSizeIsSet = true
+			case "iaas":
+				a.IAASIsSet = true
+			case "self-update":
+				a.SelfUpdateIsSet = true
+			case "db-size":
+				a.DBSizeIsSet = true
+			case "spot":
+				a.SpotIsSet = true
+			case "allow-ips":
+				a.AllowIPsIsSet = true
+			case "github-auth-client-id":
+				a.GithubAuthClientIDIsSet = true
+			case "github-auth-client-secret":
+				a.GithubAuthClientSecretIsSet = true
+			case "add-tag":
+				a.TagsIsSet = true
+			case "namespace":
+				a.NamespaceIsSet = true
+			default:
+				return fmt.Errorf("flag %q is not supported by deployment flags", f)
+			}
+		}
+	}
+	return nil
+}
 
 // WorkerSizes are the permitted concourse worker sizes
 var WorkerSizes = []string{"medium", "large", "xlarge", "2xlarge", "4xlarge", "10xlarge", "16xlarge"}
@@ -54,98 +110,98 @@ var DBSizes = map[string]string{
 }
 
 // ModifyGithub allows mutation of github related fields
-func (args *DeployArgs) ModifyGithub(GithubAuthClientID, GithubAuthClientSecret string, GithubAuthIsSet bool) {
-	args.GithubAuthClientID = GithubAuthClientID
-	args.GithubAuthClientSecret = GithubAuthClientSecret
-	args.GithubAuthIsSet = GithubAuthIsSet
+func (a *DeployArgs) ModifyGithub(GithubAuthClientID, GithubAuthClientSecret string, GithubAuthIsSet bool) {
+	a.GithubAuthClientID = GithubAuthClientID
+	a.GithubAuthClientSecret = GithubAuthClientSecret
+	a.GithubAuthIsSet = GithubAuthIsSet
 }
 
 // Validate validates that flag interdependencies
-func (args DeployArgs) Validate() error {
-	if err := args.validateCertFields(); err != nil {
+func (a DeployArgs) Validate() error {
+	if err := a.validateCertFields(); err != nil {
 		return err
 	}
 
-	if err := args.validateWorkerFields(); err != nil {
+	if err := a.validateWorkerFields(); err != nil {
 		return err
 	}
 
-	if err := args.validateWebFields(); err != nil {
+	if err := a.validateWebFields(); err != nil {
 		return err
 	}
 
-	if err := args.validateDBFields(); err != nil {
+	if err := a.validateDBFields(); err != nil {
 		return err
 	}
 
-	if err := args.validateGithubFields(); err != nil {
+	if err := a.validateGithubFields(); err != nil {
 		return err
 	}
 
-	if err := args.validateTags(); err != nil {
+	if err := a.validateTags(); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func (args DeployArgs) validateCertFields() error {
-	if args.TLSKey != "" && args.TLSCert == "" {
+func (a DeployArgs) validateCertFields() error {
+	if a.TLSKey != "" && a.TLSCert == "" {
 		return errors.New("--tls-key requires --tls-cert to also be provided")
 	}
-	if args.TLSCert != "" && args.TLSKey == "" {
+	if a.TLSCert != "" && a.TLSKey == "" {
 		return errors.New("--tls-cert requires --tls-key to also be provided")
 	}
-	if (args.TLSKey != "" || args.TLSCert != "") && args.Domain == "" {
+	if (a.TLSKey != "" || a.TLSCert != "") && a.Domain == "" {
 		return errors.New("custom certificates require --domain to be provided")
 	}
 
 	return nil
 }
 
-func (args DeployArgs) validateWorkerFields() error {
-	if args.WorkerCount < 1 {
+func (a DeployArgs) validateWorkerFields() error {
+	if a.WorkerCount < 1 {
 		return errors.New("minimum number of workers is 1")
 	}
 
 	for _, size := range WorkerSizes {
-		if size == args.WorkerSize {
+		if size == a.WorkerSize {
 			return nil
 		}
 	}
-	return fmt.Errorf("unknown worker size: `%s`. Valid sizes are: %v", args.WorkerSize, WorkerSizes)
+	return fmt.Errorf("unknown worker size: `%s`. Valid sizes are: %v", a.WorkerSize, WorkerSizes)
 }
 
-func (args DeployArgs) validateWebFields() error {
+func (a DeployArgs) validateWebFields() error {
 	for _, size := range WebSizes {
-		if size == args.WebSize {
+		if size == a.WebSize {
 			return nil
 		}
 	}
-	return fmt.Errorf("unknown web node size: `%s`. Valid sizes are: %v", args.WebSize, WebSizes)
+	return fmt.Errorf("unknown web node size: `%s`. Valid sizes are: %v", a.WebSize, WebSizes)
 }
 
-func (args DeployArgs) validateDBFields() error {
-	if _, ok := DBSizes[args.DBSize]; !ok {
-		return fmt.Errorf("unknown DB size: `%s`. Valid sizes are: %v", args.DBSize, DBSizes)
+func (a DeployArgs) validateDBFields() error {
+	if _, ok := DBSizes[a.DBSize]; !ok {
+		return fmt.Errorf("unknown DB size: `%s`. Valid sizes are: %v", a.DBSize, DBSizes)
 	}
 
 	return nil
 }
 
-func (args DeployArgs) validateGithubFields() error {
-	if args.GithubAuthClientID != "" && args.GithubAuthClientSecret == "" {
+func (a DeployArgs) validateGithubFields() error {
+	if a.GithubAuthClientID != "" && a.GithubAuthClientSecret == "" {
 		return errors.New("--github-auth-client-id requires --github-auth-client-secret to also be provided")
 	}
-	if args.GithubAuthClientID == "" && args.GithubAuthClientSecret != "" {
+	if a.GithubAuthClientID == "" && a.GithubAuthClientSecret != "" {
 		return errors.New("--github-auth-client-secret requires --github-auth-client-id to also be provided")
 	}
 
 	return nil
 }
 
-func (args DeployArgs) validateTags() error {
-	for _, tag := range args.Tags {
+func (a DeployArgs) validateTags() error {
+	for _, tag := range a.Tags {
 		m, err := regexp.MatchString(`\w+=\w+`, tag)
 		if err != nil {
 			return err

@@ -234,6 +234,7 @@ func TestNew(t *testing.T) {
 				BucketName:   "concourse-up-aProject-eu-west-1-config",
 				BucketExists: false,
 				BucketError:  nil,
+				Config:       &Config{},
 			},
 			FakeBucketExists: func(name string) (bool, error) {
 				return false, nil
@@ -253,6 +254,7 @@ func TestNew(t *testing.T) {
 				BucketName:   "concourse-up-aProject-someNamespace-config",
 				BucketExists: false,
 				BucketError:  nil,
+				Config:       &Config{},
 			},
 			FakeBucketExists: func(name string) (bool, error) {
 				return false, nil
@@ -272,6 +274,7 @@ func TestNew(t *testing.T) {
 				BucketName:   "concourse-up-aProject-eu-west-1-config",
 				BucketExists: true,
 				BucketError:  nil,
+				Config:       &Config{},
 			},
 			FakeBucketExists: func(name string) (bool, error) {
 				if name == "concourse-up-aProject-eu-west-1-config" {
@@ -294,6 +297,7 @@ func TestNew(t *testing.T) {
 				BucketName:   "concourse-up-aProject-someNamespace-config",
 				BucketExists: true,
 				BucketError:  nil,
+				Config:       &Config{},
 			},
 			FakeBucketExists: func(name string) (bool, error) {
 				if name == "concourse-up-aProject-someNamespace-config" {
@@ -316,6 +320,7 @@ func TestNew(t *testing.T) {
 				BucketName:   "concourse-up-aProject-eu-west-1-config",
 				BucketExists: true,
 				BucketError:  nil,
+				Config:       &Config{},
 			},
 			FakeBucketExists: func(name string) (bool, error) {
 				return true, nil
@@ -365,6 +370,7 @@ func TestClient_Load(t *testing.T) {
 					BucketName:   "",
 					BucketExists: false,
 					BucketError:  fmt.Errorf("some error"),
+					Config:       &Config{},
 				}
 			},
 			want:    Config{},
@@ -380,6 +386,7 @@ func TestClient_Load(t *testing.T) {
 					BucketName:   "",
 					BucketExists: false,
 					BucketError:  nil,
+					Config:       &Config{},
 				}
 			},
 			want:    Config{},

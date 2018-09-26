@@ -35,24 +35,33 @@ type BoshParams struct {
 
 // DeployAction runs Deploy
 func (client *Client) DeployAction() error {
-	_, err := client.Deploy()
+	err := client.Deploy()
 	return err
 }
 
 // Deploy deploys a concourse instance
-func (client *Client) Deploy() (config.Config, error) {
-	c, err := client.loadConfig()
+func (client *Client) Deploy() error {
+	c, createdNewConfig, err := client.configClient.LoadOrCreate(client.deployArgs)
 	if err != nil {
-		return config.Config{}, err
+		return err
 	}
+
+	if !createdNewConfig {
+		if err = writeConfigLoadedSuccessMessage(client.stdout); err != nil {
+			return err
+		}
+	}
+
 	isDomainUpdated := client.deployArgs.Domain != c.Domain
 
 	r, err := client.checkPreTerraformConfigRequirements(c)
 	if err != nil {
-		return c, err
+		return err
+	}
+	if client.deployArgs.DBSizeIsSet {
+		c.RDSInstanceClass = config.DBSizes[client.deployArgs.DBSize]
 	}
 	c.Region = r.Region
-	c.RDSInstanceClass = r.RDSInstanceClass
 	c.SourceAccessIP = r.SourceAccessIP
 	c.HostedZoneID = r.HostedZoneID
 	c.HostedZoneRecordPrefix = r.HostedZoneRecordPrefix
@@ -60,12 +69,12 @@ func (client *Client) Deploy() (config.Config, error) {
 
 	metadata, err := client.applyTerraform(c)
 	if err != nil {
-		return c, err
+		return err
 	}
 
 	err = client.configClient.Update(c)
 	if err != nil {
-		return c, err
+		return err
 	}
 
 	c.Tags = append([]string{fmt.Sprintf("version=%s", client.version)}, c.Tags...)
@@ -74,7 +83,7 @@ func (client *Client) Deploy() (config.Config, error) {
 
 	cr, err := client.checkPreDeployConfigRequirements(client.acmeClientConstructor, isDomainUpdated, c, metadata)
 	if err != nil {
-		return c, err
+		return err
 	}
 
 	c.Domain = cr.Domain
@@ -97,7 +106,7 @@ func (client *Client) Deploy() (config.Config, error) {
 		bp, err = client.deployBoshAndPipeline(c, metadata)
 	}
 	if err != nil {
-		return c, err
+		return err
 	}
 
 	c.CredhubPassword = bp.CredhubPassword
@@ -112,7 +121,7 @@ func (client *Client) Deploy() (config.Config, error) {
 	c.DirectorPassword = bp.DirectorPassword
 	c.DirectorCACert = bp.DirectorCACert
 
-	return c, client.configClient.Update(c)
+	return client.configClient.Update(c)
 }
 
 func (client *Client) deployBoshAndPipeline(c config.Config, metadata *terraform.Metadata) (BoshParams, error) {
@@ -226,7 +235,6 @@ func (client *Client) updateBoshAndPipeline(c config.Config, metadata *terraform
 // TerraformRequirements represents the required values for running terraform
 type TerraformRequirements struct {
 	Region                 string
-	RDSInstanceClass       string
 	SourceAccessIP         string
 	HostedZoneID           string
 	HostedZoneRecordPrefix string
@@ -236,14 +244,13 @@ type TerraformRequirements struct {
 func (client *Client) checkPreTerraformConfigRequirements(conf config.Config) (TerraformRequirements, error) {
 	r := TerraformRequirements{
 		Region:                 conf.Region,
-		RDSInstanceClass:       conf.RDSInstanceClass,
 		SourceAccessIP:         conf.SourceAccessIP,
 		HostedZoneID:           conf.HostedZoneID,
 		HostedZoneRecordPrefix: conf.HostedZoneRecordPrefix,
 		Domain:                 conf.Domain,
 	}
 
-	region := client.deployArgs.AWSRegion
+	region := client.iaasClient.Region()
 
 	if conf.Region != "" {
 		if conf.Region != region {
@@ -252,10 +259,6 @@ func (client *Client) checkPreTerraformConfigRequirements(conf config.Config) (T
 	}
 
 	r.Region = region
-
-	if client.deployArgs.DBSizeIsSet {
-		r.RDSInstanceClass = config.DBSizes[client.deployArgs.DBSize]
-	}
 
 	// When in self-update mode do not override the user IP, since we already have access to the worker
 	if !client.deployArgs.SelfUpdate {
@@ -512,20 +515,6 @@ func (client *Client) deployBosh(config config.Config, metadata *terraform.Metad
 	}
 
 	return bp, nil
-}
-
-func (client *Client) loadConfig() (config.Config, error) {
-	cfg, createdNewConfig, err := client.configClient.LoadOrCreate(client.deployArgs)
-	if err != nil {
-		return config.Config{}, err
-	}
-
-	if !createdNewConfig {
-		if err = writeConfigLoadedSuccessMessage(client.stdout); err != nil {
-			return config.Config{}, err
-		}
-	}
-	return cfg, nil
 }
 
 func (client *Client) setUserIP(c config.Config) (string, error) {
