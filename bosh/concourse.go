@@ -184,13 +184,11 @@ func vars(vars map[string]interface{}) []string {
 func (client *Client) buildTagsYaml(project interface{}, component string) (string, error) {
 	var b strings.Builder
 
-	if client.config.TagsIsSet {
-		for _, e := range client.config.Tags {
-			kv := strings.Join(strings.Split(e, "="), ": ")
-			_, err := fmt.Fprintf(&b, "%s,", kv)
-			if err != nil {
-				return "", err
-			}
+	for _, e := range client.config.Tags {
+		kv := strings.Join(strings.Split(e, "="), ": ")
+		_, err := fmt.Fprintf(&b, "%s,", kv)
+		if err != nil {
+			return "", err
 		}
 	}
 	cProjectTag := fmt.Sprintf("concourse-up-project: %v,", project)

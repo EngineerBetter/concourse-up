@@ -68,6 +68,8 @@ func (client *Client) Deploy() (config.Config, error) {
 		return c, err
 	}
 
+	c.Tags = append([]string{fmt.Sprintf("version=%s", client.version)}, c.Tags...)
+
 	c.Version = client.version
 
 	cr, err := client.checkPreDeployConfigRequirements(client.acmeClientConstructor, isDomainUpdated, c, metadata)

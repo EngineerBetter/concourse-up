@@ -178,8 +178,7 @@ func (client *Client) LoadOrCreate(deployArgs *DeployArgs) (Config, bool, error)
 	}
 	config.Spot = deployArgs.Spot
 	if deployArgs.TagsIsSet {
-		config.Tags = deployArgs.Tags
-		config.TagsIsSet = deployArgs.TagsIsSet
+		config.Tags = append(config.Tags, deployArgs.Tags...)
 	}
 	return config, createdNewFile, nil
 }

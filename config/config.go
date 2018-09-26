@@ -57,7 +57,6 @@ type Config struct {
 	Region                    string   `json:"region"`
 	SourceAccessIP            string   `json:"source_access_ip"`
 	Tags                      []string `json:"tags"`
-	TagsIsSet                 bool     `json:"tags_is_set"`
 	TFStatePath               string   `json:"tf_state_path"`
 	AllowIPs                  string   `json:"allow_ips"`
 	Spot                      bool     `json:"spot"`
