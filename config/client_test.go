@@ -407,3 +407,52 @@ func TestClient_Load(t *testing.T) {
 		})
 	}
 }
+
+func TestClient_LoadOrCreate(t *testing.T) {
+	type fields struct {
+		Iaas         iaas.IClient
+		Project      string
+		Namespace    string
+		BucketName   string
+		BucketExists bool
+		BucketError  error
+		Config       *Config
+	}
+	type args struct {
+		deployArgs *DeployArgs
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		args    args
+		want    Config
+		want1   bool
+		wantErr bool
+	}{
+		// TODO: Add test cases.
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			client := &Client{
+				Iaas:         tt.fields.Iaas,
+				Project:      tt.fields.Project,
+				Namespace:    tt.fields.Namespace,
+				BucketName:   tt.fields.BucketName,
+				BucketExists: tt.fields.BucketExists,
+				BucketError:  tt.fields.BucketError,
+				Config:       tt.fields.Config,
+			}
+			got, got1, err := client.LoadOrCreate(tt.args.deployArgs)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Client.LoadOrCreate() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("Client.LoadOrCreate() got = %v, want %v", got, tt.want)
+			}
+			if got1 != tt.want1 {
+				t.Errorf("Client.LoadOrCreate() got1 = %v, want %v", got1, tt.want1)
+			}
+		})
+	}
+}

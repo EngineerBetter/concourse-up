@@ -166,15 +166,34 @@ func (client *Client) LoadOrCreate(deployArgs *DeployArgs) (Config, bool, error)
 		return Config{}, createdNewFile, err
 	}
 
-	config, err = updateAllowedIPs(config, DBSizes[deployArgs.DBSize], allow)
+	config, err = updateAllowedIPs(config, allow)
 	if err != nil {
 		return Config{}, createdNewFile, err
 	}
 
-	if deployArgs.GithubAuthIsSet {
+	if createdNewFile {
+		config.RDSInstanceClass = DBSizes[deployArgs.DBSize]
+		config.ConcourseWorkerCount = deployArgs.WorkerCount
+		config.ConcourseWorkerSize = deployArgs.WorkerSize
+		config.ConcourseWebSize = deployArgs.WebSize
 		config.GithubClientID = deployArgs.GithubAuthClientID
 		config.GithubClientSecret = deployArgs.GithubAuthClientSecret
 		config.GithubAuthIsSet = deployArgs.GithubAuthIsSet
+	} else {
+		switch {
+		case deployArgs.WorkerCountIsSet:
+			config.ConcourseWorkerCount = deployArgs.WorkerCount
+		case deployArgs.WorkerSizeIsSet:
+			config.ConcourseWorkerSize = deployArgs.WorkerSize
+		case deployArgs.WebSizeIsSet:
+			config.ConcourseWebSize = deployArgs.WebSize
+		case deployArgs.DBSizeIsSet:
+			config.RDSInstanceClass = DBSizes[deployArgs.DBSize]
+		case deployArgs.GithubAuthIsSet:
+			config.GithubClientID = deployArgs.GithubAuthClientID
+			config.GithubClientSecret = deployArgs.GithubAuthClientSecret
+			config.GithubAuthIsSet = deployArgs.GithubAuthIsSet
+		}
 	}
 
 	config.Spot = deployArgs.Spot

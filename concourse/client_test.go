@@ -352,19 +352,6 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 			})
 		})
 
-		Context("When a custom DB instance size is provided", func() {
-			It("Deploys that instance type to TF", func() {
-				args.DBSize = "large"
-				args.DBSizeIsSet = true
-
-				client := buildClient()
-				err := client.Deploy()
-				Expect(err).ToNot(HaveOccurred())
-
-				Expect(actions).To(ContainElement("applying terraform, db size: db.m4.large"))
-			})
-		})
-
 		Context("When a custom DB instance size is not provided", func() {
 			It("Does not override the existing DB size", func() {
 				args.DBSize = "small"

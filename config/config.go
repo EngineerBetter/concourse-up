@@ -100,12 +100,11 @@ func generateDefaultConfig(project, deployment, configBucket, region, namespace 
 	return conf, nil
 }
 
-func updateAllowedIPs(c Config, rdsInstanceClass string, ingressAddresses cidrBlocks) (Config, error) {
+func updateAllowedIPs(c Config, ingressAddresses cidrBlocks) (Config, error) {
 	addr, err := ingressAddresses.String()
 	if err != nil {
 		return c, err
 	}
-	c.RDSInstanceClass = rdsInstanceClass
 	c.AllowIPs = addr
 	return c, nil
 }

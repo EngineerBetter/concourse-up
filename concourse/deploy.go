@@ -54,12 +54,9 @@ func (client *Client) Deploy() error {
 
 	isDomainUpdated := client.deployArgs.Domain != c.Domain
 
-	r, err := client.checkPreTerraformConfigRequirements(c)
+	r, err := client.checkPreTerraformConfigRequirements(c, client.deployArgs.SelfUpdate, client.deployArgs.Domain)
 	if err != nil {
 		return err
-	}
-	if client.deployArgs.DBSizeIsSet {
-		c.RDSInstanceClass = config.DBSizes[client.deployArgs.DBSize]
 	}
 	c.Region = r.Region
 	c.SourceAccessIP = r.SourceAccessIP
@@ -87,9 +84,6 @@ func (client *Client) Deploy() error {
 	}
 
 	c.Domain = cr.Domain
-	c.ConcourseWorkerCount = cr.ConcourseWorkerCount
-	c.ConcourseWorkerSize = cr.ConcourseWorkerSize
-	c.ConcourseWebSize = cr.ConcourseWebSize
 	c.DirectorPublicIP = cr.DirectorPublicIP
 	c.DirectorCACert = cr.DirectorCerts.DirectorCACert
 	c.DirectorCert = cr.DirectorCerts.DirectorCert
@@ -241,7 +235,7 @@ type TerraformRequirements struct {
 	Domain                 string
 }
 
-func (client *Client) checkPreTerraformConfigRequirements(conf config.Config) (TerraformRequirements, error) {
+func (client *Client) checkPreTerraformConfigRequirements(conf config.Config, selfUpdate bool, domain string) (TerraformRequirements, error) {
 	r := TerraformRequirements{
 		Region:                 conf.Region,
 		SourceAccessIP:         conf.SourceAccessIP,
@@ -251,7 +245,6 @@ func (client *Client) checkPreTerraformConfigRequirements(conf config.Config) (T
 	}
 
 	region := client.iaasClient.Region()
-
 	if conf.Region != "" {
 		if conf.Region != region {
 			return r, fmt.Errorf("found previous deployment in %s. Refusing to deploy to %s as changing regions for existing deployments is not supported", conf.Region, region)
@@ -261,7 +254,7 @@ func (client *Client) checkPreTerraformConfigRequirements(conf config.Config) (T
 	r.Region = region
 
 	// When in self-update mode do not override the user IP, since we already have access to the worker
-	if !client.deployArgs.SelfUpdate {
+	if !selfUpdate {
 		var err error
 		r.SourceAccessIP, err = client.setUserIP(conf)
 		if err != nil {
@@ -269,7 +262,7 @@ func (client *Client) checkPreTerraformConfigRequirements(conf config.Config) (T
 		}
 	}
 
-	zone, err := client.setHostedZone(conf)
+	zone, err := client.setHostedZone(conf, domain)
 	if err != nil {
 		return r, err
 	}
@@ -297,22 +290,16 @@ type Certs struct {
 
 // Requirements represents the pre deployment requirements of a Concourse
 type Requirements struct {
-	Domain               string
-	ConcourseWorkerCount int
-	ConcourseWorkerSize  string
-	ConcourseWebSize     string
-	DirectorPublicIP     string
-	DirectorCerts        DirectorCerts
-	Certs                Certs
+	Domain           string
+	DirectorPublicIP string
+	DirectorCerts    DirectorCerts
+	Certs            Certs
 }
 
 func (client *Client) checkPreDeployConfigRequirements(c func(u *certs.User) (certs.AcmeClient, error), isDomainUpdated bool, cfg config.Config, metadata *terraform.Metadata) (Requirements, error) {
 	cr := Requirements{
-		Domain:               cfg.Domain,
-		ConcourseWorkerCount: cfg.ConcourseWorkerCount,
-		ConcourseWorkerSize:  cfg.ConcourseWorkerSize,
-		ConcourseWebSize:     cfg.ConcourseWebSize,
-		DirectorPublicIP:     cfg.DirectorPublicIP,
+		Domain:           cfg.Domain,
+		DirectorPublicIP: cfg.DirectorPublicIP,
 	}
 
 	if client.deployArgs.Domain == "" {
@@ -346,9 +333,6 @@ func (client *Client) checkPreDeployConfigRequirements(c func(u *certs.User) (ce
 
 	cr.Certs = cc
 
-	cr.ConcourseWorkerCount = client.deployArgs.WorkerCount
-	cr.ConcourseWorkerSize = client.deployArgs.WorkerSize
-	cr.ConcourseWebSize = client.deployArgs.WebSize
 	cr.DirectorPublicIP = metadata.DirectorPublicIP.Value
 
 	return cr, nil
@@ -543,14 +527,13 @@ type HostedZone struct {
 	Domain                 string
 }
 
-func (client *Client) setHostedZone(c config.Config) (HostedZone, error) {
+func (client *Client) setHostedZone(c config.Config, domain string) (HostedZone, error) {
 	zone := HostedZone{
 		HostedZoneID:           c.HostedZoneID,
 		HostedZoneRecordPrefix: c.HostedZoneRecordPrefix,
 		Domain:                 c.Domain,
 	}
-	domain := client.deployArgs.Domain
-	if client.deployArgs.Domain == "" {
+	if domain == "" {
 		return zone, nil
 	}
 
