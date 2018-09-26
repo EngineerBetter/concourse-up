@@ -41,7 +41,7 @@ func New(iaas iaas.IClient, project, namespace string) *Client {
 	namespace = determineNamespace(namespace, iaas.Region())
 	bucketName, exists, err := determineBucketName(iaas, namespace, project)
 
-	if !exists && err != nil {
+	if !exists && err == nil {
 		err = iaas.CreateBucket(bucketName)
 	}
 
