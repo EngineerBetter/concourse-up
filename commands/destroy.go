@@ -84,6 +84,7 @@ var destroy = cli.Command{
 			os.Stderr,
 			util.FindUserIP,
 			certs.NewAcmeClient,
+			c.App.Version,
 		)
 
 		return client.Destroy()

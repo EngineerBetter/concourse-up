@@ -26,6 +26,7 @@ type Client struct {
 	ipChecker              func() (string, error)
 	acmeClientConstructor  func(u *certs.User) (certs.AcmeClient, error)
 	versionFile            []byte
+	version                string
 }
 
 // IClient represents a concourse-up client
@@ -49,7 +50,8 @@ func NewClient(
 	deployArgs *config.DeployArgs,
 	stdout, stderr io.Writer,
 	ipChecker func() (string, error),
-	acmeClientConstructor func(u *certs.User) (certs.AcmeClient, error)) *Client {
+	acmeClientConstructor func(u *certs.User) (certs.AcmeClient, error),
+	version string) *Client {
 	return &Client{
 		iaasClient:             iaasClient,
 		terraformClientFactory: terraformClientFactory,
@@ -63,6 +65,7 @@ func NewClient(
 		ipChecker:              ipChecker,
 		acmeClientConstructor:  acmeClientConstructor,
 		versionFile:            versionFile,
+		version:                version,
 	}
 }
 

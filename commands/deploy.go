@@ -173,6 +173,7 @@ var deploy = cli.Command{
 			os.Stderr,
 			util.FindUserIP,
 			certs.NewAcmeClient,
+			c.App.Version,
 		)
 
 		return client.DeployAction()

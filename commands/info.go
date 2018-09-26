@@ -85,6 +85,7 @@ var info = cli.Command{
 			os.Stderr,
 			util.FindUserIP,
 			certs.NewAcmeClient,
+			c.App.Version,
 		)
 
 		info, err := client.FetchInfo()

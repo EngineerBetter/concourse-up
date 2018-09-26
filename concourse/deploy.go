@@ -68,7 +68,7 @@ func (client *Client) Deploy() (config.Config, error) {
 		return c, err
 	}
 
-	c.Version = "placeholder for version number"
+	c.Version = client.version
 
 	cr, err := client.checkPreDeployConfigRequirements(client.acmeClientConstructor, isDomainUpdated, c, metadata)
 	if err != nil {
