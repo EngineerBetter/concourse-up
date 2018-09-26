@@ -21,6 +21,7 @@ import (
 
 var _ = Describe("Client", func() {
 	var buildClient func() concourse.IClient
+	var buildClientOtherRegion func() concourse.IClient
 	var actions []string
 	var stdout *gbytes.Buffer
 	var stderr *gbytes.Buffer
@@ -59,6 +60,15 @@ var _ = Describe("Client", func() {
 		},
 		FakeDeleteVolumes: func(volumesToDelete []*string, deleteVolume func(ec2Client iaas.IEC2, volumeID *string) error) error {
 			return nil
+		},
+		FakeRegion: func() string {
+			return "eu-west-1"
+		},
+	}
+
+	otherRegionClient := &testsupport.FakeAWSClient{
+		FakeRegion: func() string {
+			return "eu-central-1"
 		},
 	}
 
@@ -250,12 +260,30 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 				"some version",
 			)
 		}
+
+		buildClientOtherRegion = func() concourse.IClient {
+			return concourse.NewClient(
+				otherRegionClient,
+				terraformClientFactory,
+				boshClientFactory,
+				func(fly.Credentials, io.Writer, io.Writer, []byte) (fly.IClient, error) {
+					return fakeFlyClient, nil
+				},
+				certGenerator,
+				configClient,
+				args,
+				stdout,
+				stderr,
+				ipChecker,
+				testsupport.NewFakeAcmeClient,
+			)
+		}
 	})
 
 	Describe("Deploy", func() {
 		It("Prints a warning about changing the sourceIP", func() {
 			client := buildClient()
-			_, err := client.Deploy()
+			err := client.Deploy()
 			Expect(err).ToNot(HaveOccurred())
 
 			Expect(stderr).To(gbytes.Say("WARNING: allowing access from local machine"))
@@ -266,7 +294,7 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 				args.Domain = "ci.google.com"
 
 				client := buildClient()
-				_, err := client.Deploy()
+				err := client.Deploy()
 				Expect(err).ToNot(HaveOccurred())
 
 				Expect(stderr).To(gbytes.Say("WARNING: adding record ci.google.com to Route53 hosted zone google.com ID: ABC123"))
@@ -275,7 +303,7 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 
 		It("Loads of creates config file", func() {
 			client := buildClient()
-			_, err := client.Deploy()
+			err := client.Deploy()
 			Expect(err).ToNot(HaveOccurred())
 
 			Expect(actions).To(ContainElement("loading or creating config file"))
@@ -283,7 +311,7 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 
 		It("Generates the correct terraform infrastructure", func() {
 			client := buildClient()
-			_, err := client.Deploy()
+			err := client.Deploy()
 			Expect(err).ToNot(HaveOccurred())
 
 			Expect(actions).To(ContainElement("applying terraform, db size: db.t2.medium"))
@@ -291,7 +319,7 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 
 		It("Cleans up the correct terraform client", func() {
 			client := buildClient()
-			_, err := client.Deploy()
+			err := client.Deploy()
 			Expect(err).ToNot(HaveOccurred())
 
 			Expect(actions).To(ContainElement("cleaning up terraform client"))
@@ -299,7 +327,7 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 
 		It("Generates certificates for bosh", func() {
 			client := buildClient()
-			_, err := client.Deploy()
+			err := client.Deploy()
 			Expect(err).ToNot(HaveOccurred())
 
 			Expect(actions).To(ContainElement("generating cert ca: concourse-up-happymeal, cn: [99.99.99.99 10.0.0.6]"))
@@ -307,26 +335,18 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 
 		It("Generates certificates for concourse", func() {
 			client := buildClient()
-			_, err := client.Deploy()
+			err := client.Deploy()
 			Expect(err).ToNot(HaveOccurred())
 
 			Expect(actions).To(ContainElement("generating cert ca: concourse-up-happymeal, cn: [77.77.77.77]"))
-		})
-
-		It("Sets the director public IP on the config", func() {
-			client := buildClient()
-			c, err := client.Deploy()
-			Expect(err).ToNot(HaveOccurred())
-
-			Expect(c.DirectorPublicIP).To(Equal("99.99.99.99"))
 		})
 
 		Context("When the user tries to change the region of an existing deployment", func() {
 			It("Returns a meaningful error message", func() {
 				args.AWSRegion = "eu-central-1"
 
-				client := buildClient()
-				_, err := client.Deploy()
+				client := buildClientOtherRegion()
+				err := client.Deploy()
 				Expect(err).To(MatchError("found previous deployment in eu-west-1. Refusing to deploy to eu-central-1 as changing regions for existing deployments is not supported"))
 			})
 		})
@@ -337,7 +357,7 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 				args.DBSizeIsSet = true
 
 				client := buildClient()
-				_, err := client.Deploy()
+				err := client.Deploy()
 				Expect(err).ToNot(HaveOccurred())
 
 				Expect(actions).To(ContainElement("applying terraform, db size: db.m4.large"))
@@ -350,7 +370,7 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 				args.DBSizeIsSet = false
 
 				client := buildClient()
-				_, err := client.Deploy()
+				err := client.Deploy()
 				Expect(err).ToNot(HaveOccurred())
 
 				Expect(actions).To(ContainElement("applying terraform, db size: db.t2.medium"))
@@ -362,7 +382,7 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 				args.Domain = "ci.google.com"
 
 				client := buildClient()
-				_, err := client.Deploy()
+				err := client.Deploy()
 				Expect(err).ToNot(HaveOccurred())
 
 				Expect(actions).To(ContainElement("generating cert ca: concourse-up-happymeal, cn: [ci.google.com]"))
@@ -371,7 +391,7 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 
 		It("Updates the config", func() {
 			client := buildClient()
-			_, err := client.Deploy()
+			err := client.Deploy()
 			Expect(err).ToNot(HaveOccurred())
 
 			Expect(actions).To(ContainElement("updating config file"))
@@ -379,7 +399,7 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 
 		It("Deploys the director", func() {
 			client := buildClient()
-			_, err := client.Deploy()
+			err := client.Deploy()
 			Expect(err).ToNot(HaveOccurred())
 
 			Expect(actions).To(ContainElement("deploying director"))
@@ -387,7 +407,7 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 
 		It("Sets the default pipeline, after deploying the bosh director", func() {
 			client := buildClient()
-			_, err := client.Deploy()
+			err := client.Deploy()
 			Expect(err).ToNot(HaveOccurred())
 
 			Expect(testsupport.CompareActions(actions, "deploying director", "setting default pipeline")).To(BeNumerically("<", 0))
@@ -401,7 +421,7 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 				args.SelfUpdate = true
 
 				client := buildClient()
-				_, err := client.Deploy()
+				err := client.Deploy()
 				Expect(err).ToNot(HaveOccurred())
 
 				Expect(actions[8]).To(Equal("deploying director in self-update mode"))
@@ -410,7 +430,7 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 
 		It("Saves the bosh state", func() {
 			client := buildClient()
-			_, err := client.Deploy()
+			err := client.Deploy()
 			Expect(err).ToNot(HaveOccurred())
 
 			Expect(actions).To(ContainElement("storing config asset: director-state.json"))
@@ -418,7 +438,7 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 
 		It("Cleans up the director", func() {
 			client := buildClient()
-			_, err := client.Deploy()
+			err := client.Deploy()
 			Expect(err).ToNot(HaveOccurred())
 
 			Expect(actions).To(ContainElement("cleaning up bosh init"))
@@ -426,7 +446,7 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 
 		It("Warns about access to local machine", func() {
 			client := buildClient()
-			_, err := client.Deploy()
+			err := client.Deploy()
 			Expect(err).ToNot(HaveOccurred())
 
 			Eventually(stderr).Should(gbytes.Say("WARNING: allowing access from local machine"))
@@ -434,7 +454,7 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 
 		It("Prints the bosh credentials", func() {
 			client := buildClient()
-			_, err := client.Deploy()
+			err := client.Deploy()
 			Expect(err).ToNot(HaveOccurred())
 			Eventually(stdout).Should(gbytes.Say("DEPLOY SUCCESSFUL"))
 			Eventually(stdout).Should(gbytes.Say("fly --target happymeal login --insecure --concourse-url https://77.77.77.77 --username admin --password s3cret"))
@@ -447,7 +467,7 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 				args.TLSKey = "--- KEY ---"
 
 				client := buildClient()
-				_, err := client.Deploy()
+				err := client.Deploy()
 				Expect(err).ToNot(HaveOccurred())
 				Eventually(stdout).Should(gbytes.Say("DEPLOY SUCCESSFUL"))
 				Eventually(stdout).Should(gbytes.Say("fly --target happymeal login --concourse-url https://ci.google.com --username admin --password s3cret"))
@@ -457,7 +477,7 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 		Context("When an existing config is loaded", func() {
 			It("Notifies the user", func() {
 				client := buildClient()
-				_, err := client.Deploy()
+				err := client.Deploy()
 				Expect(err).ToNot(HaveOccurred())
 
 				Eventually(stdout).Should(gbytes.Say("USING PREVIOUS DEPLOYMENT CONFIG"))
@@ -468,7 +488,7 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 			It("Returns an error", func() {
 				terraformMetadata.DirectorKeyPair = terraform.MetadataStringValue{Value: ""}
 				client := buildClient()
-				_, err := client.Deploy()
+				err := client.Deploy()
 				Expect(err).To(HaveOccurred())
 				Expect(err.Error()).To(ContainSubstring("director_key_pair"))
 				Expect(err.Error()).To(ContainSubstring("non zero value required"))

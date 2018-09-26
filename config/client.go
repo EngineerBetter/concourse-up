@@ -33,6 +33,7 @@ type Client struct {
 	BucketName   string
 	BucketExists bool
 	BucketError  error
+	Config       *Config
 }
 
 // New instantiates a new client
@@ -47,6 +48,7 @@ func New(iaas iaas.IClient, project, namespace string) *Client {
 		bucketName,
 		exists,
 		err,
+		&Config{},
 	}
 }
 
@@ -125,7 +127,6 @@ func (client *Client) LoadOrCreate(deployArgs *DeployArgs) (Config, bool, error)
 	}
 
 	config, err := generateDefaultConfig(
-		deployArgs.IAAS,
 		client.Project,
 		deployment(client.Project),
 		client.configBucket(),

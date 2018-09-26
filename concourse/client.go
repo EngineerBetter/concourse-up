@@ -31,7 +31,7 @@ type Client struct {
 
 // IClient represents a concourse-up client
 type IClient interface {
-	Deploy() (config.Config, error)
+	Deploy() error
 	Destroy() error
 	FetchInfo() (*Info, error)
 }

@@ -37,7 +37,7 @@ func Test_generateDefaultConfig(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := generateDefaultConfig(tt.args.iaas, tt.args.project, tt.args.deployment, tt.args.configBucket, tt.args.region, tt.args.namespace)
+			got, err := generateDefaultConfig(tt.args.project, tt.args.deployment, tt.args.configBucket, tt.args.region, tt.args.namespace)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("generateDefaultConfig() error = %v, wantErr %v", err, tt.wantErr)
 				return

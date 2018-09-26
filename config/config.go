@@ -65,7 +65,7 @@ type Config struct {
 	Version                   string   `json:"version"`
 }
 
-func generateDefaultConfig(iaas, project, deployment, configBucket, region, namespace string) (Config, error) {
+func generateDefaultConfig(project, deployment, configBucket, region, namespace string) (Config, error) {
 	privateKey, publicKey, _, err := util.GenerateSSHKeyPair()
 	if err != nil {
 		return Config{}, err
