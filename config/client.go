@@ -41,6 +41,10 @@ func New(iaas iaas.IClient, project, namespace string) *Client {
 	namespace = determineNamespace(namespace, iaas.Region())
 	bucketName, exists, err := determineBucketName(iaas, namespace, project)
 
+	if !exists && err != nil {
+		err = iaas.CreateBucket(bucketName)
+	}
+
 	return &Client{
 		iaas,
 		project,
@@ -104,6 +108,7 @@ func (client *Client) Load() (Config, error) {
 	if client.BucketError != nil {
 		return Config{}, client.BucketError
 	}
+
 	configBytes, err := client.Iaas.LoadFile(
 		client.configBucket(),
 		configFilePath,
@@ -130,22 +135,16 @@ func (client *Client) LoadOrCreate(deployArgs *DeployArgs) (Config, bool, error)
 		client.Project,
 		deployment(client.Project),
 		client.configBucket(),
-		deployArgs.AWSRegion,
+		client.Iaas.Region(),
 		client.Namespace,
 	)
 	if err != nil {
 		return Config{}, false, err
 	}
+
 	defaultConfigBytes, err := json.Marshal(&config)
 	if err != nil {
 		return Config{}, false, err
-	}
-
-	if !client.BucketExists {
-		err = client.Iaas.CreateBucket(client.configBucket())
-		if err != nil {
-			return Config{}, false, err
-		}
 	}
 
 	configBytes, createdNewFile, err := client.Iaas.EnsureFileExists(
@@ -177,6 +176,7 @@ func (client *Client) LoadOrCreate(deployArgs *DeployArgs) (Config, bool, error)
 		config.GithubClientSecret = deployArgs.GithubAuthClientSecret
 		config.GithubAuthIsSet = deployArgs.GithubAuthIsSet
 	}
+
 	config.Spot = deployArgs.Spot
 	if deployArgs.TagsIsSet {
 		config.Tags = deployArgs.Tags

@@ -41,10 +41,17 @@ func (client *Client) DeployAction() error {
 
 // Deploy deploys a concourse instance
 func (client *Client) Deploy() error {
-	c, err := client.loadConfig()
+	c, createdNewConfig, err := client.configClient.LoadOrCreate(client.deployArgs)
 	if err != nil {
 		return err
 	}
+
+	if !createdNewConfig {
+		if err = writeConfigLoadedSuccessMessage(client.stdout); err != nil {
+			return err
+		}
+	}
+
 	isDomainUpdated := client.deployArgs.Domain != c.Domain
 
 	r, err := client.checkPreTerraformConfigRequirements(c)
@@ -506,20 +513,6 @@ func (client *Client) deployBosh(config config.Config, metadata *terraform.Metad
 	}
 
 	return bp, nil
-}
-
-func (client *Client) loadConfig() (config.Config, error) {
-	cfg, createdNewConfig, err := client.configClient.LoadOrCreate(client.deployArgs)
-	if err != nil {
-		return config.Config{}, err
-	}
-
-	if !createdNewConfig {
-		if err = writeConfigLoadedSuccessMessage(client.stdout); err != nil {
-			return config.Config{}, err
-		}
-	}
-	return cfg, nil
 }
 
 func (client *Client) setUserIP(c config.Config) (string, error) {
