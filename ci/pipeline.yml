@@ -128,6 +128,11 @@ resources:
   source:
     url: ((slack_webhook))
 
+- name: cup-slack-alert
+  type: slack-notification
+  source:
+    url: ((cup_slack_webhook))
+
 - name: once-daily
   type: time
   source: {interval: 24h}
@@ -419,6 +424,10 @@ jobs:
   - put: slack-alert
     params:
       channel: "#integrations"
+      text_file: release-vars/slackmsg
+  - put: cup-slack-alert
+    params:
+      channel: ((cup_slack_channel))
       text_file: release-vars/slackmsg
 
 - name: patch
