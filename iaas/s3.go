@@ -144,7 +144,7 @@ func (client *AWSClient) EnsureFileExists(bucket, path string, defaultContents [
 		}
 
 		// Successfully loaded file
-		return contents, true, nil
+		return contents, false, nil
 	}
 
 	awsErrCode := err.(awserr.Error).Code()

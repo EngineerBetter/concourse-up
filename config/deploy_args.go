@@ -49,7 +49,7 @@ type DeployArgs struct {
 }
 
 // MarkSetFlags is marking the IsSet DeployArgs
-func (a DeployArgs) MarkSetFlags(c *cli.Context) error {
+func (a *DeployArgs) MarkSetFlags(c *cli.Context) error {
 	for _, f := range c.FlagNames() {
 		if c.IsSet(f) {
 			switch f {

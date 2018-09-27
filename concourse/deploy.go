@@ -33,6 +33,16 @@ type BoshParams struct {
 	DirectorCACert           string
 }
 
+func stripVersion(tags []string) []string {
+	output := []string{}
+	for _, tag := range tags {
+		if !strings.HasPrefix(tag, "concourse-up-version") {
+			output = append(output, tag)
+		}
+	}
+	return output
+}
+
 // DeployAction runs Deploy
 func (client *Client) DeployAction() error {
 	err := client.Deploy()
@@ -73,8 +83,8 @@ func (client *Client) Deploy() error {
 	if err != nil {
 		return err
 	}
-
-	c.Tags = append([]string{fmt.Sprintf("version=%s", client.version)}, c.Tags...)
+	c.Tags = stripVersion(c.Tags)
+	c.Tags = append([]string{fmt.Sprintf("concourse-up-version=%s", client.version)}, c.Tags...)
 
 	c.Version = client.version
 

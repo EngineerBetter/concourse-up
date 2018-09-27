@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
+	"regexp"
 	"runtime"
 	"strings"
 	"time"
@@ -275,6 +276,16 @@ func getFlyURL(versionFile []byte) (string, error) {
 	}
 }
 
+func validIP4(ipAddress string) bool {
+	ipAddress = strings.Trim(ipAddress, " ")
+
+	re, _ := regexp.Compile(`^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$`)
+	if re.MatchString(ipAddress) {
+		return true
+	}
+	return false
+}
+
 func (client *Client) buildDefaultPipelineParams(config config.Config) (*defaultPipelineParams, error) {
 	sess, err := session.NewSession()
 	if err != nil {
@@ -286,12 +297,17 @@ func (client *Client) buildDefaultPipelineParams(config config.Config) (*default
 		return nil, err
 	}
 
+	var domain string
+	if !validIP4(config.Domain) {
+		domain = config.Domain
+	}
+
 	return &defaultPipelineParams{
 		AWSAccessKeyID:       creds.AccessKeyID,
 		AWSSecretAccessKey:   creds.SecretAccessKey,
 		Deployment:           strings.TrimPrefix(config.Deployment, "concourse-up-"),
 		FlagAWSRegion:        config.Region,
-		FlagDomain:           config.Domain,
+		FlagDomain:           domain,
 		FlagGithubAuthID:     config.GithubClientID,
 		FlagGithubAuthSecret: config.GithubClientSecret,
 		FlagTLSCert:          config.ConcourseCert,

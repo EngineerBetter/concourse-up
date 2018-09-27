@@ -147,60 +147,55 @@ func (client *Client) LoadOrCreate(deployArgs *DeployArgs) (Config, bool, error)
 		return Config{}, false, err
 	}
 
-	configBytes, createdNewFile, err := client.Iaas.EnsureFileExists(
+	configBytes, newConfigCreated, err := client.Iaas.EnsureFileExists(
 		client.configBucket(),
 		configFilePath,
 		defaultConfigBytes,
 	)
 	if err != nil {
-		return Config{}, createdNewFile, err
+		return Config{}, newConfigCreated, err
 	}
 
 	err = json.Unmarshal(configBytes, &config)
 	if err != nil {
-		return Config{}, createdNewFile, err
+		return Config{}, newConfigCreated, err
 	}
 
 	allow, err := parseCIDRBlocks(deployArgs.AllowIPs)
 	if err != nil {
-		return Config{}, createdNewFile, err
+		return Config{}, newConfigCreated, err
 	}
 
 	config, err = updateAllowedIPs(config, allow)
 	if err != nil {
-		return Config{}, createdNewFile, err
+		return Config{}, newConfigCreated, err
 	}
 
-	if createdNewFile {
-		config.RDSInstanceClass = DBSizes[deployArgs.DBSize]
+	if newConfigCreated || deployArgs.WorkerCountIsSet {
 		config.ConcourseWorkerCount = deployArgs.WorkerCount
+	}
+	if newConfigCreated || deployArgs.WorkerSizeIsSet {
 		config.ConcourseWorkerSize = deployArgs.WorkerSize
+	}
+	if newConfigCreated || deployArgs.WebSizeIsSet {
 		config.ConcourseWebSize = deployArgs.WebSize
+	}
+	if newConfigCreated || deployArgs.DBSizeIsSet {
+		config.RDSInstanceClass = DBSizes[deployArgs.DBSize]
+	}
+	if newConfigCreated || deployArgs.GithubAuthIsSet {
 		config.GithubClientID = deployArgs.GithubAuthClientID
 		config.GithubClientSecret = deployArgs.GithubAuthClientSecret
 		config.GithubAuthIsSet = deployArgs.GithubAuthIsSet
-	} else {
-		switch {
-		case deployArgs.WorkerCountIsSet:
-			config.ConcourseWorkerCount = deployArgs.WorkerCount
-		case deployArgs.WorkerSizeIsSet:
-			config.ConcourseWorkerSize = deployArgs.WorkerSize
-		case deployArgs.WebSizeIsSet:
-			config.ConcourseWebSize = deployArgs.WebSize
-		case deployArgs.DBSizeIsSet:
-			config.RDSInstanceClass = DBSizes[deployArgs.DBSize]
-		case deployArgs.GithubAuthIsSet:
-			config.GithubClientID = deployArgs.GithubAuthClientID
-			config.GithubClientSecret = deployArgs.GithubAuthClientSecret
-			config.GithubAuthIsSet = deployArgs.GithubAuthIsSet
-		}
+	}
+	if newConfigCreated || deployArgs.TagsIsSet {
+		config.Tags = deployArgs.Tags
+	}
+	if newConfigCreated || deployArgs.SpotIsSet {
+		config.Spot = deployArgs.Spot
 	}
 
-	config.Spot = deployArgs.Spot
-	if deployArgs.TagsIsSet {
-		config.Tags = append(config.Tags, deployArgs.Tags...)
-	}
-	return config, createdNewFile, nil
+	return config, newConfigCreated, nil
 }
 
 func (client *Client) configBucket() string {
