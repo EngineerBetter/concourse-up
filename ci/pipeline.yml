@@ -473,6 +473,10 @@ jobs:
     params:
       channel: "#integrations"
       text_file: release-vars/slackmsg
+  - put: cup-slack-alert
+    params:
+      channel: ((cup_slack_channel))
+      text_file: release-vars/slackmsg
 
 - name: minor
   serial: true
@@ -517,6 +521,10 @@ jobs:
     params:
       channel: "#integrations"
       text_file: release-vars/slackmsg
+  - put: cup-slack-alert
+    params:
+      channel: ((cup_slack_channel))
+      text_file: release-vars/slackmsg
 
 - name: major
   serial: true
@@ -560,6 +568,10 @@ jobs:
   - put: slack-alert
     params:
       channel: "#integrations"
+      text_file: release-vars/slackmsg
+  - put: cup-slack-alert
+    params:
+      channel: ((cup_slack_channel))
       text_file: release-vars/slackmsg
 
 - name: cleanup
