@@ -524,6 +524,51 @@ func TestClient_LoadOrCreate(t *testing.T) {
 				return isValid, message
 			},
 		},
+		{
+			name: "default config can be overriden in a subsequent deployment by passing different values via flags",
+			fields: fields{
+				Iaas: &testsupport.FakeAWSClient{
+					FakeEnsureFileExists: func(bucket, path string, defaultContents []byte) ([]byte, bool, error) {
+						fakeConfig := Config{
+							Region:               "eu-west-3",
+							ConcourseWorkerCount: 2,
+							ConcourseWebSize:     "large",
+							ConcourseWorkerSize:  "medium",
+							RDSInstanceClass:     "db.m4.4xlarge",
+						}
+						jsonConfig, _ := json.Marshal(fakeConfig)
+						return jsonConfig, false, nil
+					},
+					FakeBucketExists: func(name string) (bool, error) {
+						return true, nil
+					},
+					FakeRegion: func() string {
+						return "eu-west-3"
+					},
+				},
+			},
+			args: args{
+				&DeployArgs{
+					AllowIPs:         "0.0.0.0",
+					WorkerCountIsSet: true,
+					WorkerCount:      1,
+					DBSizeIsSet:      true,
+					DBSize:           "small",
+				},
+			},
+			wantErr: false,
+			validate: func(c Config, newConfigCreated bool) (bool, string) {
+				isValidConfig :=
+					c.ConcourseWorkerCount == 1 &&
+						c.ConcourseWorkerSize == "medium" &&
+						c.ConcourseWebSize == "large" &&
+						c.RDSInstanceClass == "db.t2.small" &&
+						c.Region == "eu-west-3"
+				isValid := isValidConfig && !newConfigCreated
+				message := fmt.Sprintf("Config Key | Expected | \tReceived |\nConcourseWorkerCount| %v |\t%v|\nConcourseWorkerSize | %v |\t%v |\nConcourseWebSize | %v |\t%v \nRegion | %v | %v |\nRDSInstanceClass | %v | %v|\t", 1, c.ConcourseWorkerCount, "medium", c.ConcourseWorkerSize, "large", c.ConcourseWebSize, "eu-west-3", c.Region, "db.t2.small", c.RDSInstanceClass)
+				return isValid, message
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
