@@ -32,6 +32,7 @@ end
 release = File.read("release/version").strip
 
 output = ERB.new(<<-BLOCK).result(binding)
+
 Release <%= release %> of Concourse-Up is now available. 
 <% if !o.empty? %>
 The changes since last release are:

@@ -10,6 +10,9 @@ groups:
   - major
   - minor
   - patch
+- name: Notifications
+  jobs:
+  - detect-versions
 - name: Cleanup
   jobs:
   - cleanup
@@ -30,6 +33,11 @@ resource_types:
   type: docker-image
   source:
     repository: mastertinner/build-metadata-resource
+
+- name: bosh-io-release
+  type: docker-image
+  source:
+    repository: engineerbetter/bosh-io-release-resource
 
 resources:
 - name: this-pipeline
@@ -62,6 +70,15 @@ resources:
     - manifest.yml
     - director-versions.json
     - ops/versions.json
+
+- name: concourse-up-manifest
+  type: git
+  source:
+    uri: git@github.com:EngineerBetter/concourse-up-manifest.git
+    private_key: ((github_private_key))
+    paths:
+    - ops/versions.json
+    - ci/version-detector
 
 - name: pcf-ops
   type: docker-image
@@ -128,10 +145,10 @@ resources:
   source:
     url: ((slack_webhook))
 
-- name: cup-slack-alert
-  type: slack-notification
-  source:
-    url: ((cup_slack_webhook))
+# - name: cup-slack-alert
+#   type: slack-notification
+#   source:
+#     url: ((cup_slack_webhook))
 
 - name: once-daily
   type: time
@@ -139,6 +156,51 @@ resources:
 
 - name: build-metadata
   type: build-metadata
+
+- name: concourse-release
+  type: bosh-io-release
+  source:
+    repository: concourse/concourse
+
+- name: garden-runc-release
+  type: bosh-io-release
+  source:
+    repository: cloudfoundry/garden-runc-release
+
+- name: riemann-release
+  type: bosh-io-release
+  source:
+    repository: xoebus/riemann-boshrelease
+
+- name: grafana-release
+  type: bosh-io-release
+  source:
+    repository: vito/grafana-boshrelease
+
+- name: influxdb-release
+  type: bosh-io-release
+  source:
+    repository: vito/influxdb-boshrelease
+
+- name: credhub-release
+  type: bosh-io-release
+  source:
+    repository: pivotal-cf/credhub-release
+
+- name: uaa-release
+  type: bosh-io-release
+  source:
+    repository: cloudfoundry/uaa-release
+
+- name: postgres-release
+  type: bosh-io-release
+  source:
+    repository: cloudfoundry/postgres-release
+
+- name: aws-xenial-stemcell
+  type: bosh-io-stemcell
+  source:
+    name: bosh-aws-xen-hvm-ubuntu-xenial-go_agent
 
 jobs:
 - name: set-pipeline
@@ -425,10 +487,6 @@ jobs:
     params:
       channel: "#integrations"
       text_file: release-vars/slackmsg
-  - put: cup-slack-alert
-    params:
-      channel: ((cup_slack_channel))
-      text_file: release-vars/slackmsg
 
 - name: patch
   serial: true
@@ -472,10 +530,6 @@ jobs:
   - put: slack-alert
     params:
       channel: "#integrations"
-      text_file: release-vars/slackmsg
-  - put: cup-slack-alert
-    params:
-      channel: ((cup_slack_channel))
       text_file: release-vars/slackmsg
 
 - name: minor
@@ -521,10 +575,6 @@ jobs:
     params:
       channel: "#integrations"
       text_file: release-vars/slackmsg
-  - put: cup-slack-alert
-    params:
-      channel: ((cup_slack_channel))
-      text_file: release-vars/slackmsg
 
 - name: major
   serial: true
@@ -569,10 +619,68 @@ jobs:
     params:
       channel: "#integrations"
       text_file: release-vars/slackmsg
-  - put: cup-slack-alert
+
+- name: detect-versions
+  serial_groups: [deployment]
+  serial: true
+  plan:
+  - aggregate:
+    - get: release
+      trigger: true
+    - get: concourse-up
+    - get: concourse-up-manifest
+    - get: concourse-up-ops
+    - get: concourse-release
+    - get: garden-runc-release
+    - get: riemann-release
+    - get: grafana-release
+    - get: influxdb-release
+    - get: credhub-release
+    - get: uaa-release
+    - get: postgres-release
+    - get: aws-xenial-stemcell
+    - get: pcf-ops
+  - task: detect-majors
+    image: pcf-ops
+    config:
+      platform: linux
+      inputs:
+      - name: release
+      - name: concourse-up
+      - name: concourse-up-manifest
+      - name: concourse-up-ops
+      - name: concourse-release
+      - name: garden-runc-release
+      - name: riemann-release
+      - name: grafana-release
+      - name: influxdb-release
+      - name: credhub-release
+      - name: uaa-release
+      - name: postgres-release
+      - name: aws-xenial-stemcell
+      outputs:
+      - name: output
+      run:
+        path: bash
+        args:
+          - -xeuc
+          - |
+            touch output/message
+            cat concourse-up-ops/ops/versions.json | \
+            concourse-up/ci/tasks/get-versions.rb > \
+            output/message
+  - put: slack-alert
     params:
-      channel: ((cup_slack_channel))
-      text_file: release-vars/slackmsg
+      channel: "#integrations"
+      text: |
+        $TEXT_FILE_CONTENT
+      text_file: output/message
+  # - put: cup-slack-alert
+  #   params:
+  #     channel: ((cup_slack_channel))
+  #     text: |
+  #       $TEXT_FILE_CONTENT
+  #     text_file: output/message
 
 - name: cleanup
   serial: true
