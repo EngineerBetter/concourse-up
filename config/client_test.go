@@ -479,7 +479,48 @@ func TestClient_LoadOrCreate(t *testing.T) {
 						c.RDSInstanceClass == "db.t2.small" &&
 						c.Spot == false
 				isValid := isValidConfig && newConfigCreated
-				message := fmt.Sprintf("Config Key | Expected | \tReceived |\nConcourseWorkerCount| %v |\t%v|\nConcourseWorkerSize | %v |\t%v |\nConcourseWebSize | %v |\t| %v |\nRDSInstanceClass |%v |\t| %v |\n|Spot | %v |\t| %v |", 1, c.ConcourseWorkerCount, "xlarge", c.ConcourseWorkerSize, "small", c.ConcourseWebSize, "db.t2.small", c.RDSInstanceClass, false, c.Spot)
+				message := fmt.Sprintf("Config Key | Expected | \tReceived |\nConcourseWorkerCount| %v |\t%v|\nConcourseWorkerSize | %v |\t%v |\nConcourseWebSize | %v |\t %v |\nRDSInstanceClass |%v |\t| %v |\n|Spot | %v |\t| %v |", 1, c.ConcourseWorkerCount, "xlarge", c.ConcourseWorkerSize, "small", c.ConcourseWebSize, "db.t2.small", c.RDSInstanceClass, false, c.Spot)
+				return isValid, message
+			},
+		},
+		{
+			name: "a subsequent deployment retains previous config values",
+			fields: fields{
+				Iaas: &testsupport.FakeAWSClient{
+					FakeEnsureFileExists: func(bucket, path string, defaultContents []byte) ([]byte, bool, error) {
+						fakeConfig := Config{
+							Region:               "eu-west-3",
+							ConcourseWorkerCount: 2,
+							ConcourseWebSize:     "large",
+							ConcourseWorkerSize:  "medium",
+							RDSInstanceClass:     "db.m4.4xlarge",
+						}
+						jsonConfig, _ := json.Marshal(fakeConfig)
+						return jsonConfig, false, nil
+					},
+					FakeBucketExists: func(name string) (bool, error) {
+						return true, nil
+					},
+					FakeRegion: func() string {
+						return "eu-west-3"
+					},
+				},
+			},
+			args: args{
+				&DeployArgs{
+					AllowIPs: "0.0.0.0",
+				},
+			},
+			wantErr: false,
+			validate: func(c Config, newConfigCreated bool) (bool, string) {
+				isValidConfig :=
+					c.ConcourseWorkerCount == 2 &&
+						c.ConcourseWorkerSize == "medium" &&
+						c.ConcourseWebSize == "large" &&
+						c.Region == "eu-west-3" &&
+						c.RDSInstanceClass == "db.m4.4xlarge"
+				isValid := isValidConfig && !newConfigCreated
+				message := fmt.Sprintf("Config Key | Expected | \tReceived |\nConcourseWorkerCount| %v |\t%v|\nConcourseWorkerSize | %v |\t%v |\nConcourseWebSize | %v |\t%v \nRegion | %v | %v |\nRDSInstanceClass | %v | %v|\t", 2, c.ConcourseWorkerCount, "medium", c.ConcourseWorkerSize, "large", c.ConcourseWebSize, "eu-west-3", c.Region, "db.m4.4xlarge", c.RDSInstanceClass)
 				return isValid, message
 			},
 		},
