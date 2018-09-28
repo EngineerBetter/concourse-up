@@ -297,9 +297,19 @@ func (client *Client) buildDefaultPipelineParams(config config.Config) (*default
 		return nil, err
 	}
 
-	var domain string
+	var (
+		domain        string
+		concourseCert string
+		concourseKey  string
+	)
+
 	if !validIP4(config.Domain) {
 		domain = config.Domain
+	}
+
+	if domain != "" {
+		concourseCert = config.ConcourseCert
+		concourseKey = config.ConcourseKey
 	}
 
 	return &defaultPipelineParams{
@@ -310,8 +320,8 @@ func (client *Client) buildDefaultPipelineParams(config config.Config) (*default
 		FlagDomain:           domain,
 		FlagGithubAuthID:     config.GithubClientID,
 		FlagGithubAuthSecret: config.GithubClientSecret,
-		FlagTLSCert:          config.ConcourseCert,
-		FlagTLSKey:           config.ConcourseKey,
+		FlagTLSCert:          concourseCert,
+		FlagTLSKey:           concourseKey,
 		FlagWebSize:          config.ConcourseWebSize,
 		FlagWorkerSize:       config.ConcourseWorkerSize,
 		FlagWorkers:          config.ConcourseWorkerCount,
