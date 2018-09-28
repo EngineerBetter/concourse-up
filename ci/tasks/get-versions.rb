@@ -20,7 +20,7 @@ else
     filename = "#{k}/version"
     if File.exist? filename
       version = File.open(filename).read.strip
-      if version.split('.').first != v.split('.').first
+      if version != v
         o[k] = version
       end
     else
@@ -29,13 +29,16 @@ else
   end
 end
 
-if !o.empty?
-  output = ERB.new(<<-BLOCK).result(binding)
+release = File.read("release/version").strip
+
+output = ERB.new(<<-BLOCK).result(binding)
+Release <%= release %> of Concourse-Up is now available. 
+<% if !o.empty? %>
+The changes since last release are:
 <% o.each do |k,v| %>
-  Name: <%= k %>
-  From: <%= d[k] %>
-  To: <%= v %>
+- <%= k.sub("-release", "").capitalize %> <%= d[k] %> --> <%= k.sub("-release", "").capitalize %> <%= v %>
+<% end %>
 <% end %>
 BLOCK
-  puts output
-end
+
+puts output
