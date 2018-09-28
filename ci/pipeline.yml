@@ -145,10 +145,10 @@ resources:
   source:
     url: ((slack_webhook))
 
-# - name: cup-slack-alert
-#   type: slack-notification
-#   source:
-#     url: ((cup_slack_webhook))
+- name: cup-slack-alert
+  type: slack-notification
+  source:
+    url: ((cup_slack_webhook))
 
 - name: once-daily
   type: time
@@ -675,12 +675,12 @@ jobs:
       text: |
         $TEXT_FILE_CONTENT
       text_file: output/message
-  # - put: cup-slack-alert
-  #   params:
-  #     channel: ((cup_slack_channel))
-  #     text: |
-  #       $TEXT_FILE_CONTENT
-  #     text_file: output/message
+  - put: cup-slack-alert
+    params:
+      channel: ((cup_slack_channel))
+      text: |
+        $TEXT_FILE_CONTENT
+      text_file: output/message
 
 - name: cleanup
   serial: true
