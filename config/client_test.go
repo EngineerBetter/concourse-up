@@ -2,6 +2,7 @@ package config_test
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"reflect"
 	"testing"
@@ -410,7 +411,7 @@ func TestClient_Load(t *testing.T) {
 
 func TestClient_LoadOrCreate(t *testing.T) {
 	type fields struct {
-		Iaas         iaas.IClient
+		Iaas         *testsupport.FakeAWSClient
 		Project      string
 		Namespace    string
 		BucketName   string
@@ -421,15 +422,67 @@ func TestClient_LoadOrCreate(t *testing.T) {
 	type args struct {
 		deployArgs *DeployArgs
 	}
+	type returnVals struct {
+		config           Config
+		newConfigCreated bool
+	}
 	tests := []struct {
-		name    string
-		fields  fields
-		args    args
-		want    Config
-		want1   bool
-		wantErr bool
+		name     string
+		fields   fields
+		args     args
+		wantErr  bool
+		validate func(Config, bool) (bool, string)
 	}{
-		// TODO: Add test cases.
+		{
+			name: "failure- bucket error",
+			fields: fields{
+				BucketError: errors.New("a bucket error"),
+			},
+			validate: func(c Config, newConfigCreated bool) (bool, string) {
+				expected := returnVals{Config{}, false}
+				got := returnVals{c, newConfigCreated}
+				isValid := reflect.DeepEqual(expected, got)
+				return isValid, fmt.Sprintf("expected: %v\n received: %v\n", expected, got)
+			},
+			wantErr: true,
+		},
+		{
+			name: "first time deployment without flags- use deploy args to set config to defaults",
+			fields: fields{
+				Iaas: &testsupport.FakeAWSClient{
+					FakeEnsureFileExists: func(bucket, path string, defaultContents []byte) ([]byte, bool, error) {
+						return defaultContents, true, nil
+					},
+					FakeBucketExists: func(name string) (bool, error) {
+						return true, nil
+					},
+					FakeRegion: func() string {
+						return "eu-west-1"
+					},
+				},
+			},
+			args: args{
+				&DeployArgs{
+					AllowIPs:    "0.0.0.0",
+					WorkerCount: 1,
+					WorkerSize:  "xlarge",
+					WebSize:     "small",
+					DBSize:      "small",
+				},
+			},
+			wantErr: false,
+			validate: func(c Config, newConfigCreated bool) (bool, string) {
+				isValidConfig :=
+					c.ConcourseWorkerCount == 1 &&
+						c.ConcourseWorkerSize == "xlarge" &&
+						c.ConcourseWebSize == "small" &&
+						c.RDSInstanceClass == "db.t2.small" &&
+						c.Spot == false
+				isValid := isValidConfig && newConfigCreated
+				message := fmt.Sprintf("Config Key | Expected | \tReceived |\nConcourseWorkerCount| %v |\t%v|\nConcourseWorkerSize | %v |\t%v |\nConcourseWebSize | %v |\t| %v |\nRDSInstanceClass |%v |\t| %v |\n|Spot | %v |\t| %v |", 1, c.ConcourseWorkerCount, "xlarge", c.ConcourseWorkerSize, "small", c.ConcourseWebSize, "db.t2.small", c.RDSInstanceClass, false, c.Spot)
+				return isValid, message
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -442,16 +495,15 @@ func TestClient_LoadOrCreate(t *testing.T) {
 				BucketError:  tt.fields.BucketError,
 				Config:       tt.fields.Config,
 			}
-			got, got1, err := client.LoadOrCreate(tt.args.deployArgs)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("Client.LoadOrCreate() error = %v, wantErr %v", err, tt.wantErr)
+			config, newConfigCreated, err := client.LoadOrCreate(tt.args.deployArgs)
+			isValid, message := tt.validate(config, newConfigCreated)
+			if !isValid {
+				t.Errorf("ClientLoadOrCreate()\n %s\n", message)
+			}
+			gotErr := err != nil
+			if gotErr != tt.wantErr {
+				t.Errorf("Client.LoadOrCreate()\n expects an error: %v\n received error: %v", tt.wantErr, err)
 				return
-			}
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("Client.LoadOrCreate() got = %v, want %v", got, tt.want)
-			}
-			if got1 != tt.want1 {
-				t.Errorf("Client.LoadOrCreate() got1 = %v, want %v", got1, tt.want1)
 			}
 		})
 	}
