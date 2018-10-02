@@ -77,3 +77,21 @@ func expectPathNotToExistButBeWriteable(t testing.TB, path string) {
 	defer os.Remove(f.Name())
 	f.Close()
 }
+
+func TestBOSHCLI_UpdateCloudConfig(t *testing.T) {
+	e := fakeexec.New(t)
+	defer e.Finish()
+	c, err := boshenv.New(boshenv.FakeExec(e.Cmd()))
+	require.NoError(t, err)
+	config := mockIAASConfig{
+		f: func(s string) string {
+			return s
+		},
+	}
+	e.ExpectFunc(func(t testing.TB, command string, args ...string) {
+		require.Equal(t, "bosh", command)
+		require.Equal(t, "update-cloud-config", args[0])
+	})
+	err = c.UpdateCloudConfig(config, "password", "cert", "key", "ca")
+	require.NoError(t, err)
+}
