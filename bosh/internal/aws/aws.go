@@ -101,6 +101,9 @@ func (e Environment) ConfigureDirectorCloudConfig(cloudConfig string) (string, e
 	}
 
 	cc, err := util.RenderTemplate(cloudConfig, templateParams)
+	if cc == nil {
+		return "", err
+	}
 	return string(cc), err
 }
 
