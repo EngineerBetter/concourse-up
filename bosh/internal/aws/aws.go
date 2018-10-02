@@ -6,6 +6,7 @@ import (
 
 	"github.com/EngineerBetter/concourse-up/bosh/internal/resource"
 	"github.com/EngineerBetter/concourse-up/bosh/internal/yaml"
+	"github.com/EngineerBetter/concourse-up/util"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/service/s3"
@@ -38,6 +39,7 @@ type Environment struct {
 	DBUsername            string
 	S3AWSAccessKeyID      string
 	S3AWSSecretAccessKey  string
+	Spot                  bool
 }
 
 var allOperations = resource.AWSCPIOps + resource.ExternalIPOps + resource.DirectorCustomOps
@@ -75,6 +77,30 @@ func (e Environment) ConfigureDirectorManifestCPI(manifest string) (string, erro
 		"s3_aws_access_key_id":     e.S3AWSAccessKeyID,
 		"s3_aws_secret_access_key": e.S3AWSSecretAccessKey,
 	})
+}
+
+type awsCloudConfigParams struct {
+	AvailabilityZone   string
+	VMsSecurityGroupID string
+	ATCSecurityGroupID string
+	PublicSubnetID     string
+	PrivateSubnetID    string
+	Spot               bool
+}
+
+func (e Environment) ConfigureDirectorCloudConfig(cloudConfig string) (string, error) {
+
+	templateParams := awsCloudConfigParams{
+		AvailabilityZone:   e.AZ,
+		VMsSecurityGroupID: e.VMSecurityGroup,
+		ATCSecurityGroupID: e.ATCSecurityGroup,
+		PublicSubnetID:     e.PublicSubnetID,
+		PrivateSubnetID:    e.PrivateSubnetID,
+		Spot:               e.Spot,
+	}
+
+	cc, err := util.RenderTemplate(cloudConfig, templateParams)
+	return string(cc), err
 }
 
 // Store holds the abstraction of a aws storage artifact

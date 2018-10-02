@@ -38,8 +38,12 @@ var (
 var (
 	// DirectorManifest statically defines director-manifest.yml contents
 	DirectorManifest = mustAssetString("director/manifest.yml")
+
+	// AWSDirectorCloudConfig statically defines aws cloud-config.yml
+	AWSDirectorCloudConfig = mustAssetString("director/aws/cloud-config.yml")
 	// AWSCPIOps statically defines aws-cpi.yml contents
 	AWSCPIOps = mustAssetString("director/aws/cpi.yml")
+
 	// ExternalIPOps statically defines external-ip.yml contents
 	ExternalIPOps = mustAssetString("director/external-ip.yml")
 	// DirectorCustomOps statically defines custom-ops.yml contents

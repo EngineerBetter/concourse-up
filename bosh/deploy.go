@@ -107,28 +107,25 @@ func (client *Client) createEnv(state, creds []byte) (newState, newCreds []byte,
 		DBUsername:           client.config.RDSUsername,
 		S3AWSAccessKeyID:     client.metadata.BlobstoreUserAccessKeyID.Value,
 		S3AWSSecretAccessKey: client.metadata.BlobstoreSecretAccessKey.Value,
+		Spot:                 client.config.Spot,
 	}, client.config.DirectorPassword, client.config.DirectorCert, client.config.DirectorKey, client.config.DirectorCACert, tags)
 	return store["state.json"], store["vars.yaml"], err
 }
 
 func (client *Client) updateCloudConfig() error {
-	cloudConfigBytes, err := generateCloudConfig(client.config, client.metadata)
+	bosh, err := boshenv.New(boshenv.DownloadBOSH())
 	if err != nil {
 		return err
 	}
 
-	cloudConfigPath, err := client.director.SaveFileToWorkingDir(cloudConfigFilename, cloudConfigBytes)
-	if err != nil {
-		return err
-	}
-
-	return client.director.RunAuthenticatedCommand(
-		client.stdout,
-		client.stderr,
-		false,
-		"update-cloud-config",
-		cloudConfigPath,
-	)
+	return bosh.UpdateCloudConfig(aws.Environment{
+		AZ:               client.config.AvailabilityZone,
+		PublicSubnetID:   client.metadata.PublicSubnetID.Value,
+		PrivateSubnetID:  client.metadata.PrivateSubnetID.Value,
+		ATCSecurityGroup: client.metadata.ATCSecurityGroupID.Value,
+		VMSecurityGroup:  client.metadata.VMsSecurityGroupID.Value,
+		Spot:             client.config.Spot,
+	}, client.config.DirectorPassword, client.config.DirectorCert, client.config.DirectorKey, client.config.DirectorCACert)
 }
 
 func (client *Client) saveStateFile(bytes []byte) (string, error) {

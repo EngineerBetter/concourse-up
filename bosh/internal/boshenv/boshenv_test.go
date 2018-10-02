@@ -40,6 +40,10 @@ func (c mockIAASConfig) ConfigureDirectorManifestCPI(m string) (string, error) {
 	return c.f(m), nil
 }
 
+func (c mockIAASConfig) ConfigureDirectorCloudConfig(m string) (string, error) {
+	return c.f(m), nil
+}
+
 func TestBOSHCLI_CreateEnv(t *testing.T) {
 	e := fakeexec.New(t)
 	defer e.Finish()

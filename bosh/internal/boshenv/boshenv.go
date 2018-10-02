@@ -53,6 +53,7 @@ func New(ops ...Option) (*BOSHCLI, error) {
 // IAASEnvironment exposes ConfigureDirectorManifestCPI
 type IAASEnvironment interface {
 	ConfigureDirectorManifestCPI(string) (string, error)
+	ConfigureDirectorCloudConfig(string) (string, error)
 }
 
 // Store exposes its methods
@@ -107,6 +108,24 @@ func (c *BOSHCLI) xEnv(action string, store Store, config IAASEnvironment, passw
 	defer os.Remove(manifestPath)
 
 	cmd := c.execCmd(c.boshPath, action, "--state="+statePath, "--vars-store="+varsPath, manifestPath)
+	cmd.Stderr = os.Stderr
+	cmd.Stdout = os.Stdout
+	return cmd.Run()
+}
+
+func (c *BOSHCLI) UpdateCloudConfig(config IAASEnvironment, password, cert, key, ca string) error {
+	cloudConfig, err := config.ConfigureDirectorCloudConfig(resource.AWSDirectorCloudConfig)
+	if err != nil {
+		return err
+	}
+
+	cloudConfigPath, err := writeTempFile([]byte(cloudConfig))
+	if err != nil {
+		return err
+	}
+	defer os.Remove(cloudConfigPath)
+
+	cmd := c.execCmd(c.boshPath, "update-cloud-config", cloudConfigPath)
 	cmd.Stderr = os.Stderr
 	cmd.Stdout = os.Stdout
 	return cmd.Run()
