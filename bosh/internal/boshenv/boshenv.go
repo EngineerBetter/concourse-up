@@ -113,7 +113,7 @@ func (c *BOSHCLI) xEnv(action string, store Store, config IAASEnvironment, passw
 	return cmd.Run()
 }
 
-// Generate cloud config from template and use it to update bosh cloud config
+// UpdateCloudConfig generates cloud config from template and use it to update bosh cloud config
 func (c *BOSHCLI) UpdateCloudConfig(config IAASEnvironment, password, cert, key, ca string) error {
 	cloudConfig, err := config.ConfigureDirectorCloudConfig(resource.AWSDirectorCloudConfig)
 	if err != nil {
