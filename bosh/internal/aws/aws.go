@@ -88,6 +88,7 @@ type awsCloudConfigParams struct {
 	Spot               bool
 }
 
+// Inserts values from the environment into the config template passed as argument
 func (e Environment) ConfigureDirectorCloudConfig(cloudConfig string) (string, error) {
 
 	templateParams := awsCloudConfigParams{
