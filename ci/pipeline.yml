@@ -70,6 +70,7 @@ resources:
     - manifest.yml
     - director-versions.json
     - ops/versions.json
+    - director/aws/cloud-config.yml
 
 - name: concourse-up-manifest
   type: git
