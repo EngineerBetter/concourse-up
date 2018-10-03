@@ -28,7 +28,7 @@ func (client *Client) Delete(stateFileBytes []byte) ([]byte, error) {
 	if err != nil {
 		return store["state.json"], err
 	}
-	err = bosh.CreateEnv(store, aws.Environment{
+	err = bosh.DeleteEnv(store, aws.Environment{
 		InternalCIDR:    "10.0.0.0/24",
 		InternalGateway: "10.0.0.1",
 		InternalIP:      "10.0.0.6",
