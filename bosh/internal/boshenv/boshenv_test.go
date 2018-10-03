@@ -90,8 +90,14 @@ func TestBOSHCLI_UpdateCloudConfig(t *testing.T) {
 	}
 	e.ExpectFunc(func(t testing.TB, command string, args ...string) {
 		require.Equal(t, "bosh", command)
-		require.Equal(t, "update-cloud-config", args[0])
+
+		require.Equal(t, "--non-interactive", args[0])
+		require.Equal(t, "--environment", args[1])
+		require.Equal(t, "https://ip", args[2])
+		require.Equal(t, "--client-secret", args[7])
+		require.Equal(t, "password", args[8])
+		require.Equal(t, "update-cloud-config", args[9])
 	})
-	err = c.UpdateCloudConfig(config, "password", "cert", "key", "ca")
+	err = c.UpdateCloudConfig(config, "ip", "password", "cert", "ca")
 	require.NoError(t, err)
 }
