@@ -12,12 +12,17 @@ import (
 // Deploy deploys a new Bosh director or converges an existing deployment
 // Returns new contents of bosh state file
 func (client *Client) Deploy(state, creds []byte, detach bool) (newState, newCreds []byte, err error) {
-	state, creds, err = client.createEnv(state, creds)
+	bosh, err := boshenv.New(boshenv.DownloadBOSH())
 	if err != nil {
 		return state, creds, err
 	}
 
-	if err = client.updateCloudConfig(); err != nil {
+	state, creds, err = client.createEnv(bosh, state, creds)
+	if err != nil {
+		return state, creds, err
+	}
+
+	if err = client.updateCloudConfig(bosh); err != nil {
 		return state, creds, err
 	}
 
@@ -60,7 +65,7 @@ func splitTags(ts []string) (map[string]string, error) {
 	return m, nil
 }
 
-func (client *Client) createEnv(state, creds []byte) (newState, newCreds []byte, err error) {
+func (client *Client) createEnv(bosh *boshenv.BOSHCLI, state, creds []byte) (newState, newCreds []byte, err error) {
 	tags, err := splitTags(client.config.Tags)
 	if err != nil {
 		return state, creds, err
@@ -72,13 +77,7 @@ func (client *Client) createEnv(state, creds []byte) (newState, newCreds []byte,
 		"vars.yaml":  creds,
 		"state.json": state,
 	}
-	bosh, err := boshenv.New(boshenv.DownloadBOSH())
-	if err != nil {
-		return state, creds, err
-	}
-	if err != nil {
-		return store["state.json"], store["vars.yaml"], err
-	}
+
 	err = bosh.CreateEnv(store, aws.Environment{
 		InternalCIDR:    "10.0.0.0/24",
 		InternalGateway: "10.0.0.1",
@@ -109,15 +108,11 @@ func (client *Client) createEnv(state, creds []byte) (newState, newCreds []byte,
 		S3AWSSecretAccessKey: client.metadata.BlobstoreSecretAccessKey.Value,
 		Spot:                 client.config.Spot,
 	}, client.config.DirectorPassword, client.config.DirectorCert, client.config.DirectorKey, client.config.DirectorCACert, tags)
+
 	return store["state.json"], store["vars.yaml"], err
 }
 
-func (client *Client) updateCloudConfig() error {
-	bosh, err := boshenv.New(boshenv.DownloadBOSH())
-	if err != nil {
-		return err
-	}
-
+func (client *Client) updateCloudConfig(bosh *boshenv.BOSHCLI) error {
 	return bosh.UpdateCloudConfig(aws.Environment{
 		AZ:               client.config.AvailabilityZone,
 		PublicSubnetID:   client.metadata.PublicSubnetID.Value,
@@ -125,7 +120,8 @@ func (client *Client) updateCloudConfig() error {
 		ATCSecurityGroup: client.metadata.ATCSecurityGroupID.Value,
 		VMSecurityGroup:  client.metadata.VMsSecurityGroupID.Value,
 		Spot:             client.config.Spot,
-	}, client.config.DirectorPassword, client.config.DirectorCert, client.config.DirectorKey, client.config.DirectorCACert)
+		ExternalIP:       client.metadata.DirectorPublicIP.Value,
+	}, client.metadata.DirectorPublicIP.Value, client.config.DirectorPassword, client.config.DirectorCert, client.config.DirectorCACert)
 }
 
 func (client *Client) saveStateFile(bytes []byte) (string, error) {
