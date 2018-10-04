@@ -35,7 +35,7 @@ a=JSON.parse(fetched)
 h={}
 
 current_release = a[0]["url"]
-previous_release = a[7]["url"]
+previous_release = a[1]["url"]
 
 current_ops_link = fetch(current_release).match(/https:\/\/github\.com\/EngineerBetter\/concourse-up-ops\/tree\/\d+\.\d+\.\d+/i).to_s.gsub('tree','raw')
 previous_ops_link = fetch(previous_release).match(/https:\/\/github\.com\/EngineerBetter\/concourse-up-ops\/tree\/\d+\.\d+\.\d+/i).to_s.gsub('tree','raw')
