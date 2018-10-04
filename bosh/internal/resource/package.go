@@ -48,6 +48,9 @@ var (
 	ExternalIPOps = mustAssetString("director/external-ip.yml")
 	// DirectorCustomOps statically defines custom-ops.yml contents
 	DirectorCustomOps = mustAssetString("director/custom-ops.yml")
+
+	// ReleaseVersions carries all versions of releases
+	ReleaseVersions = mustAssetString("ops/versions.json")
 )
 
 // NOTE(px) remove this in a later version of github.com/mattn/go-bindata

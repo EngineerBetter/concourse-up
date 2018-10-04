@@ -1,8 +1,6 @@
 package bosh
 
 import (
-	"encoding/json"
-	"errors"
 	"fmt"
 	"io/ioutil"
 	"strings"
@@ -19,37 +17,6 @@ const concourseGrafanaFilename = "grafana_dashboard.yml"
 const concourseCompatibilityFilename = "cup_compatibility.yml"
 const concourseGitHubAuthFilename = "github-auth.yml"
 const extraTagsFilename = "extra_tags.yml"
-
-func (client *Client) uploadConcourseStemcell() error {
-	var ops []struct {
-		Path  string
-		Value json.RawMessage
-	}
-	err := json.Unmarshal(awsConcourseVersions, &ops)
-	if err != nil {
-		return err
-	}
-	var version string
-	for _, op := range ops {
-		if op.Path != "/stemcells/alias=xenial/version" {
-			continue
-		}
-		err := json.Unmarshal(op.Value, &version)
-		if err != nil {
-			return err
-		}
-	}
-	if version == "" {
-		return errors.New("did not find stemcell version in versions.json")
-	}
-	return client.director.RunAuthenticatedCommand(
-		client.stdout,
-		client.stderr,
-		false,
-		"upload-stemcell",
-		fmt.Sprintf("https://s3.amazonaws.com/bosh-aws-light-stemcells/light-bosh-stemcell-%s-aws-xen-hvm-ubuntu-xenial-go_agent.tgz", version),
-	)
-}
 
 func (client *Client) deployConcourse(creds []byte, detach bool) (newCreds []byte, err error) {
 

@@ -2,6 +2,9 @@ package aws
 
 import (
 	"bytes"
+	"encoding/json"
+	"errors"
+	"fmt"
 	"io/ioutil"
 
 	"github.com/EngineerBetter/concourse-up/bosh/internal/resource"
@@ -105,6 +108,32 @@ func (e Environment) ConfigureDirectorCloudConfig(cloudConfig string) (string, e
 		return "", err
 	}
 	return string(cc), err
+}
+
+// ConfigureConcourseStemcell returns the stemcell location string for an AWS specific stemcell for the required concourse version
+func (e Environment) ConfigureConcourseStemcell(versions string) (string, error) {
+	var ops []struct {
+		Path  string
+		Value json.RawMessage
+	}
+	err := json.Unmarshal([]byte(versions), &ops)
+	if err != nil {
+		return "", err
+	}
+	var version string
+	for _, op := range ops {
+		if op.Path != "/stemcells/alias=xenial/version" {
+			continue
+		}
+		err := json.Unmarshal(op.Value, &version)
+		if err != nil {
+			return "", err
+		}
+	}
+	if version == "" {
+		return "", errors.New("did not find stemcell version in versions.json")
+	}
+	return fmt.Sprintf("https://s3.amazonaws.com/bosh-aws-light-stemcells/light-bosh-stemcell-%s-aws-xen-hvm-ubuntu-xenial-go_agent.tgz", version), nil
 }
 
 // Store holds the abstraction of a aws storage artifact

@@ -26,7 +26,7 @@ func (client *Client) Deploy(state, creds []byte, detach bool) (newState, newCre
 		return state, creds, err
 	}
 
-	if err = client.uploadConcourseStemcell(); err != nil {
+	if err = client.uploadConcourseStemcell(bosh); err != nil {
 		return state, creds, err
 	}
 
@@ -121,7 +121,12 @@ func (client *Client) updateCloudConfig(bosh *boshenv.BOSHCLI) error {
 		VMSecurityGroup:  client.metadata.VMsSecurityGroupID.Value,
 		Spot:             client.config.Spot,
 		ExternalIP:       client.metadata.DirectorPublicIP.Value,
-	}, client.metadata.DirectorPublicIP.Value, client.config.DirectorPassword, client.config.DirectorCert, client.config.DirectorCACert)
+	}, client.metadata.DirectorPublicIP.Value, client.config.DirectorPassword, client.config.DirectorCACert)
+}
+func (client *Client) uploadConcourseStemcell(bosh *boshenv.BOSHCLI) error {
+	return bosh.UploadConcourseStemcell(aws.Environment{
+		ExternalIP: client.metadata.DirectorPublicIP.Value,
+	}, client.metadata.DirectorPublicIP.Value, client.config.DirectorPassword, client.config.DirectorCACert)
 }
 
 func (client *Client) saveStateFile(bytes []byte) (string, error) {

@@ -2,6 +2,7 @@ package aws
 
 import (
 	"errors"
+	"fmt"
 	"io/ioutil"
 	"reflect"
 	"strings"
@@ -206,6 +207,64 @@ func TestEnvironment_ConfigureDirectorCloudConfig(t *testing.T) {
 			}
 			if got != tt.want {
 				t.Errorf("Environment.ConfigureDirectorCloudConfig()\nexpected %v\nreceived %v", tt.want, got)
+			}
+		})
+	}
+}
+
+func TestEnvironment_ConfigureConcourseStemcell(t *testing.T) {
+	type args struct {
+		versions string
+	}
+	tests := []struct {
+		name    string
+		args    args
+		want    string
+		wantErr bool
+	}{
+		{
+			name: "parse versions and provide a valid stemcell url",
+			args: args{
+				versions: `[{
+					"type": "replace",
+					"path": "/stemcells/alias=xenial/version",
+					"value": "97.19"
+				  }]`,
+			},
+			want:    fmt.Sprintf("https://s3.amazonaws.com/bosh-aws-light-stemcells/light-bosh-stemcell-%s-aws-xen-hvm-ubuntu-xenial-go_agent.tgz", "97.19"),
+			wantErr: false,
+		},
+		{
+			name: "parse versions and fail if stemcell is not xenial",
+			args: args{
+				versions: `[{
+					"type": "replace",
+					"path": "/stemcells/alias=zenial/version",
+					"value": "97.19"
+				  }]`,
+			},
+			want:    "",
+			wantErr: true,
+		},
+		{
+			name: "fail if no xenial stemcell exists",
+			args: args{
+				versions: `[]`,
+			},
+			want:    "",
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			e := Environment{}
+			got, err := e.ConfigureConcourseStemcell(tt.args.versions)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Environment.ConfigureConcourseStemcell() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if got != tt.want {
+				t.Errorf("Environment.ConfigureConcourseStemcell() = %v, want %v", got, tt.want)
 			}
 		})
 	}

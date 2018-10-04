@@ -44,6 +44,10 @@ func (c mockIAASConfig) ConfigureDirectorCloudConfig(m string) (string, error) {
 	return c.f(m), nil
 }
 
+func (c mockIAASConfig) ConfigureConcourseStemcell(v string) (string, error) {
+	return c.f(v), nil
+}
+
 func TestBOSHCLI_CreateEnv(t *testing.T) {
 	e := fakeexec.New(t)
 	defer e.Finish()
@@ -98,6 +102,31 @@ func TestBOSHCLI_UpdateCloudConfig(t *testing.T) {
 		require.Equal(t, "password", args[8])
 		require.Equal(t, "update-cloud-config", args[9])
 	})
-	err = c.UpdateCloudConfig(config, "ip", "password", "cert", "ca")
+	err = c.UpdateCloudConfig(config, "ip", "password", "ca")
 	require.NoError(t, err)
+}
+
+func TestBOSHCLI_UploadConcourseStemcell(t *testing.T) {
+	e := fakeexec.New(t)
+	defer e.Finish()
+	c, err := boshenv.New(boshenv.FakeExec(e.Cmd()))
+	require.NoError(t, err)
+	config := mockIAASConfig{
+		f: func(s string) string {
+			return s
+		},
+	}
+	e.ExpectFunc(func(t testing.TB, command string, args ...string) {
+		require.Equal(t, "bosh", command)
+
+		require.Equal(t, "--non-interactive", args[0])
+		require.Equal(t, "--environment", args[1])
+		require.Equal(t, "https://ip", args[2])
+		require.Equal(t, "--client-secret", args[7])
+		require.Equal(t, "password", args[8])
+		require.Equal(t, "upload-stemcell", args[9])
+	})
+	err = c.UploadConcourseStemcell(config, "ip", "password", "ca")
+	require.NoError(t, err)
+
 }

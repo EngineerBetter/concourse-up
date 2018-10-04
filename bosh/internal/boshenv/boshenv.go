@@ -15,7 +15,6 @@ import (
 type BOSHCLI struct {
 	execCmd  func(string, ...string) *exec.Cmd
 	boshPath string
-	Env      []string
 }
 
 // Option defines the arbitary element of Options for New
@@ -56,6 +55,7 @@ func New(ops ...Option) (*BOSHCLI, error) {
 type IAASEnvironment interface {
 	ConfigureDirectorManifestCPI(string) (string, error)
 	ConfigureDirectorCloudConfig(string) (string, error)
+	ConfigureConcourseStemcell(string) (string, error)
 }
 
 // Store exposes its methods
@@ -116,7 +116,7 @@ func (c *BOSHCLI) xEnv(action string, store Store, config IAASEnvironment, passw
 }
 
 // UpdateCloudConfig generates cloud config from template and use it to update bosh cloud config
-func (c *BOSHCLI) UpdateCloudConfig(config IAASEnvironment, ip, password, cert, ca string) error {
+func (c *BOSHCLI) UpdateCloudConfig(config IAASEnvironment, ip, password, ca string) error {
 	cloudConfig, err := config.ConfigureDirectorCloudConfig(resource.AWSDirectorCloudConfig)
 	if err != nil {
 		return err
@@ -135,6 +135,25 @@ func (c *BOSHCLI) UpdateCloudConfig(config IAASEnvironment, ip, password, cert, 
 	defer os.Remove(caPath)
 	ip = fmt.Sprintf("https://%s", ip)
 	cmd := c.execCmd(c.boshPath, "--non-interactive", "--environment", ip, "--ca-cert", caPath, "--client", "admin", "--client-secret", password, "update-cloud-config", cloudConfigPath)
+	cmd.Stderr = os.Stderr
+	cmd.Stdout = os.Stdout
+	return cmd.Run()
+}
+
+// UploadConcourseStemcell uploads a stemcell for the chosen IAAS
+func (c *BOSHCLI) UploadConcourseStemcell(config IAASEnvironment, ip, password, ca string) error {
+	stemcell, err := config.ConfigureConcourseStemcell(resource.ReleaseVersions)
+	if err != nil {
+		return err
+	}
+
+	caPath, err := writeTempFile([]byte(ca))
+	if err != nil {
+		return err
+	}
+	defer os.Remove(caPath)
+	ip = fmt.Sprintf("https://%s", ip)
+	cmd := c.execCmd(c.boshPath, "--non-interactive", "--environment", ip, "--ca-cert", caPath, "--client", "admin", "--client-secret", password, "upload-stemcell", stemcell)
 	cmd.Stderr = os.Stderr
 	cmd.Stdout = os.Stdout
 	return cmd.Run()
