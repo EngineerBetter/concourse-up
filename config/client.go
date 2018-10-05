@@ -17,7 +17,7 @@ const configFilePath = "config.json"
 type IClient interface {
 	Load() (Config, error)
 	DeleteAll(config Config) error
-	LoadOrCreate(deployArgs *DeployArgs) (Config, bool, error)
+	LoadOrCreate(deployArgs *DeployArgs) (Config, bool, bool, error)
 	Update(Config) error
 	StoreAsset(filename string, contents []byte) error
 	HasAsset(filename string) (bool, error)
@@ -126,9 +126,12 @@ func (client *Client) Load() (Config, error) {
 }
 
 // LoadOrCreate loads an existing config file from S3, or creates a default if one doesn't already exist
-func (client *Client) LoadOrCreate(deployArgs *DeployArgs) (Config, bool, error) {
+func (client *Client) LoadOrCreate(deployArgs *DeployArgs) (Config, bool, bool, error) {
+
+	var isDomainUpdated bool
+
 	if client.BucketError != nil {
-		return Config{}, false, client.BucketError
+		return Config{}, false, false, client.BucketError
 	}
 
 	config, err := generateDefaultConfig(
@@ -139,12 +142,12 @@ func (client *Client) LoadOrCreate(deployArgs *DeployArgs) (Config, bool, error)
 		client.Namespace,
 	)
 	if err != nil {
-		return Config{}, false, err
+		return Config{}, false, false, err
 	}
 
 	defaultConfigBytes, err := json.Marshal(&config)
 	if err != nil {
-		return Config{}, false, err
+		return Config{}, false, false, err
 	}
 
 	configBytes, newConfigCreated, err := client.Iaas.EnsureFileExists(
@@ -153,22 +156,22 @@ func (client *Client) LoadOrCreate(deployArgs *DeployArgs) (Config, bool, error)
 		defaultConfigBytes,
 	)
 	if err != nil {
-		return Config{}, newConfigCreated, err
+		return Config{}, newConfigCreated, false, err
 	}
 
 	err = json.Unmarshal(configBytes, &config)
 	if err != nil {
-		return Config{}, newConfigCreated, err
+		return Config{}, newConfigCreated, false, err
 	}
 
 	allow, err := parseCIDRBlocks(deployArgs.AllowIPs)
 	if err != nil {
-		return Config{}, newConfigCreated, err
+		return Config{}, newConfigCreated, false, err
 	}
 
 	config, err = updateAllowedIPs(config, allow)
 	if err != nil {
-		return Config{}, newConfigCreated, err
+		return Config{}, newConfigCreated, false, err
 	}
 
 	if newConfigCreated || deployArgs.WorkerCountIsSet {
@@ -195,7 +198,13 @@ func (client *Client) LoadOrCreate(deployArgs *DeployArgs) (Config, bool, error)
 		config.Spot = deployArgs.Spot
 	}
 
-	return config, newConfigCreated, nil
+	if newConfigCreated || deployArgs.DomainIsSet {
+		if config.Domain != deployArgs.Domain {
+			isDomainUpdated = true
+		}
+		config.Domain = deployArgs.Domain
+	}
+	return config, newConfigCreated, isDomainUpdated, nil
 }
 
 func (client *Client) configBucket() string {

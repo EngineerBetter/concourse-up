@@ -51,7 +51,7 @@ func (client *Client) DeployAction() error {
 
 // Deploy deploys a concourse instance
 func (client *Client) Deploy() error {
-	c, createdNewConfig, err := client.configClient.LoadOrCreate(client.deployArgs)
+	c, createdNewConfig, isDomainUpdated, err := client.configClient.LoadOrCreate(client.deployArgs)
 	if err != nil {
 		return err
 	}
@@ -62,9 +62,7 @@ func (client *Client) Deploy() error {
 		}
 	}
 
-	isDomainUpdated := client.deployArgs.Domain != c.Domain
-
-	r, err := client.checkPreTerraformConfigRequirements(c, client.deployArgs.SelfUpdate, client.deployArgs.Domain)
+	r, err := client.checkPreTerraformConfigRequirements(c, client.deployArgs.SelfUpdate)
 	if err != nil {
 		return err
 	}
@@ -245,7 +243,7 @@ type TerraformRequirements struct {
 	Domain                 string
 }
 
-func (client *Client) checkPreTerraformConfigRequirements(conf config.Config, selfUpdate bool, domain string) (TerraformRequirements, error) {
+func (client *Client) checkPreTerraformConfigRequirements(conf config.Config, selfUpdate bool) (TerraformRequirements, error) {
 	r := TerraformRequirements{
 		Region:                 conf.Region,
 		SourceAccessIP:         conf.SourceAccessIP,
@@ -272,7 +270,7 @@ func (client *Client) checkPreTerraformConfigRequirements(conf config.Config, se
 		}
 	}
 
-	zone, err := client.setHostedZone(conf, domain)
+	zone, err := client.setHostedZone(conf, conf.Domain)
 	if err != nil {
 		return r, err
 	}
@@ -312,7 +310,7 @@ func (client *Client) checkPreDeployConfigRequirements(c func(u *certs.User) (ce
 		DirectorPublicIP: cfg.DirectorPublicIP,
 	}
 
-	if client.deployArgs.Domain == "" {
+	if cfg.Domain == "" {
 		cr.Domain = metadata.ATCPublicIP.Value
 	}
 
