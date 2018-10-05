@@ -33,7 +33,7 @@ fetched=fetch("https://api.github.com/repos/EngineerBetter/concourse-up/releases
 
 a=JSON.parse(fetched)
 h={}
-
+cup_latest_version = a[0]["tag_name"]
 current_release = a[0]["url"]
 previous_release = a[1]["url"]
 
@@ -67,6 +67,8 @@ h[0].each do |f|
         found[name]={version0: version0, version1: version1}
     end
 end
+
+puts "Concourse Up #{cup_latest_version} published to Github"
 
 if found.length > 0
     puts "The changes since last release are:"

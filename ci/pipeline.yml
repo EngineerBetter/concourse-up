@@ -72,15 +72,6 @@ resources:
     - ops/versions.json
     - director/aws/cloud-config.yml
 
-- name: concourse-up-manifest
-  type: git
-  source:
-    uri: git@github.com:EngineerBetter/concourse-up-manifest.git
-    private_key: ((github_private_key))
-    paths:
-    - ops/versions.json
-    - ci/version-detector
-
 - name: pcf-ops
   type: docker-image
   source:
@@ -157,51 +148,6 @@ resources:
 
 - name: build-metadata
   type: build-metadata
-
-- name: concourse-release
-  type: bosh-io-release
-  source:
-    repository: concourse/concourse
-
-- name: garden-runc-release
-  type: bosh-io-release
-  source:
-    repository: cloudfoundry/garden-runc-release
-
-- name: riemann-release
-  type: bosh-io-release
-  source:
-    repository: xoebus/riemann-boshrelease
-
-- name: grafana-release
-  type: bosh-io-release
-  source:
-    repository: vito/grafana-boshrelease
-
-- name: influxdb-release
-  type: bosh-io-release
-  source:
-    repository: vito/influxdb-boshrelease
-
-- name: credhub-release
-  type: bosh-io-release
-  source:
-    repository: pivotal-cf/credhub-release
-
-- name: uaa-release
-  type: bosh-io-release
-  source:
-    repository: cloudfoundry/uaa-release
-
-- name: postgres-release
-  type: bosh-io-release
-  source:
-    repository: cloudfoundry/postgres-release
-
-- name: aws-xenial-stemcell
-  type: bosh-io-stemcell
-  source:
-    name: bosh-aws-xen-hvm-ubuntu-xenial-go_agent
 
 jobs:
 - name: set-pipeline
@@ -629,17 +575,6 @@ jobs:
     - get: release
       trigger: true
     - get: concourse-up
-    - get: concourse-up-manifest
-    - get: concourse-up-ops
-    - get: concourse-release
-    - get: garden-runc-release
-    - get: riemann-release
-    - get: grafana-release
-    - get: influxdb-release
-    - get: credhub-release
-    - get: uaa-release
-    - get: postgres-release
-    - get: aws-xenial-stemcell
     - get: pcf-ops
   - task: detect-majors
     image: pcf-ops
@@ -648,17 +583,6 @@ jobs:
       inputs:
       - name: release
       - name: concourse-up
-      - name: concourse-up-manifest
-      - name: concourse-up-ops
-      - name: concourse-release
-      - name: garden-runc-release
-      - name: riemann-release
-      - name: grafana-release
-      - name: influxdb-release
-      - name: credhub-release
-      - name: uaa-release
-      - name: postgres-release
-      - name: aws-xenial-stemcell
       outputs:
       - name: output
       run:
@@ -667,9 +591,7 @@ jobs:
           - -xeuc
           - |
             touch output/message
-            cat concourse-up-ops/ops/versions.json | \
-            concourse-up/ci/tasks/get-versions.rb > \
-            output/message
+            concourse-up/ci/tasks/get-versions.rb > output/message
   - put: slack-alert
     params:
       channel: "#integrations"
