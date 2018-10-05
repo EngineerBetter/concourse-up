@@ -159,9 +159,9 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 		exampleDirectorCreds = []byte("atc_password: s3cret")
 
 		configClient := &testsupport.FakeConfigClient{
-			FakeLoadOrCreate: func(deployArgs *config.DeployArgs) (config.Config, bool, error) {
+			FakeLoadOrCreate: func(deployArgs *config.DeployArgs) (config.Config, bool, bool, error) {
 				actions = append(actions, "loading or creating config file")
-				return exampleConfig, false, nil
+				return exampleConfig, false, false, nil
 			},
 			FakeLoad: func() (config.Config, error) {
 				actions = append(actions, "loading config file")
@@ -292,7 +292,7 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 
 		Context("When a custom domain is required", func() {
 			It("Prints a warning about adding a DNS record", func() {
-				args.Domain = "ci.google.com"
+				exampleConfig.Domain = "ci.google.com"
 
 				client := buildClient()
 				err := client.Deploy()
@@ -367,7 +367,7 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 
 		Context("When a custom domain is required", func() {
 			It("Generates certificates for that domain and not the public IP", func() {
-				args.Domain = "ci.google.com"
+				exampleConfig.Domain = "ci.google.com"
 
 				client := buildClient()
 				err := client.Deploy()
@@ -450,7 +450,7 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 
 		Context("When a custom cert is provided", func() {
 			It("Prints the correct domain and not suggest using --insecure", func() {
-				args.Domain = "ci.google.com"
+				exampleConfig.Domain = "ci.google.com"
 				args.TLSCert = "--- CERTIFICATE ---"
 				args.TLSKey = "--- KEY ---"
 

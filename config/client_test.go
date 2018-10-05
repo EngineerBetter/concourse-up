@@ -68,7 +68,7 @@ var _ = Describe("Client", func() {
 
 			BeforeEach(func() {
 				var err error
-				conf, createdANewFile, err = client.LoadOrCreate(deployArgs)
+				conf, createdANewFile, _, err = client.LoadOrCreate(deployArgs)
 				Expect(err).To(Succeed())
 			})
 
@@ -180,7 +180,7 @@ var _ = Describe("Client", func() {
 			Describe("github auth flags are present", func() {
 				It("sets the github auth config fields", func() {
 					deployArgs.ModifyGithub("id", "secret", true)
-					conf, createdANewFile, err := client.LoadOrCreate(deployArgs)
+					conf, createdANewFile, _, err := client.LoadOrCreate(deployArgs)
 					Expect(err).To(Succeed())
 					Expect(createdANewFile).To(BeTrue())
 					Expect(conf.GithubClientID).To(Equal("id"))
@@ -425,22 +425,23 @@ func TestClient_LoadOrCreate(t *testing.T) {
 	type returnVals struct {
 		config           Config
 		newConfigCreated bool
+		isDomainUpdated  bool
 	}
 	tests := []struct {
 		name     string
 		fields   fields
 		args     args
 		wantErr  bool
-		validate func(Config, bool) (bool, string)
+		validate func(Config, bool, bool) (bool, string)
 	}{
 		{
 			name: "failure- bucket error",
 			fields: fields{
 				BucketError: errors.New("a bucket error"),
 			},
-			validate: func(c Config, newConfigCreated bool) (bool, string) {
-				expected := returnVals{Config{}, false}
-				got := returnVals{c, newConfigCreated}
+			validate: func(c Config, newConfigCreated, isDomainUpdated bool) (bool, string) {
+				expected := returnVals{Config{}, false, false}
+				got := returnVals{c, newConfigCreated, isDomainUpdated}
 				isValid := reflect.DeepEqual(expected, got)
 				return isValid, fmt.Sprintf("expected: %v\n received: %v\n", expected, got)
 			},
@@ -468,16 +469,18 @@ func TestClient_LoadOrCreate(t *testing.T) {
 					WorkerSize:  "xlarge",
 					WebSize:     "small",
 					DBSize:      "small",
+					Domain:      "FakeDomain",
 				},
 			},
 			wantErr: false,
-			validate: func(c Config, newConfigCreated bool) (bool, string) {
+			validate: func(c Config, newConfigCreated, isDomainUpdated bool) (bool, string) {
 				isValidConfig :=
 					c.ConcourseWorkerCount == 1 &&
 						c.ConcourseWorkerSize == "xlarge" &&
 						c.ConcourseWebSize == "small" &&
 						c.RDSInstanceClass == "db.t2.small" &&
-						c.Spot == false
+						c.Spot == false &&
+						c.Domain == "FakeDomain"
 				isValid := isValidConfig && newConfigCreated
 				message := fmt.Sprintf("Config Key | Expected | \tReceived |\nConcourseWorkerCount| %v |\t%v|\nConcourseWorkerSize | %v |\t%v |\nConcourseWebSize | %v |\t %v |\nRDSInstanceClass |%v |\t| %v |\n|Spot | %v |\t| %v |", 1, c.ConcourseWorkerCount, "xlarge", c.ConcourseWorkerSize, "small", c.ConcourseWebSize, "db.t2.small", c.RDSInstanceClass, false, c.Spot)
 				return isValid, message
@@ -494,6 +497,7 @@ func TestClient_LoadOrCreate(t *testing.T) {
 							ConcourseWebSize:     "large",
 							ConcourseWorkerSize:  "medium",
 							RDSInstanceClass:     "db.m4.4xlarge",
+							Domain:               "FakeDomain",
 						}
 						jsonConfig, _ := json.Marshal(fakeConfig)
 						return jsonConfig, false, nil
@@ -512,14 +516,15 @@ func TestClient_LoadOrCreate(t *testing.T) {
 				},
 			},
 			wantErr: false,
-			validate: func(c Config, newConfigCreated bool) (bool, string) {
+			validate: func(c Config, newConfigCreated, isDomainUpdated bool) (bool, string) {
 				isValidConfig :=
 					c.ConcourseWorkerCount == 2 &&
 						c.ConcourseWorkerSize == "medium" &&
 						c.ConcourseWebSize == "large" &&
 						c.Region == "eu-west-3" &&
-						c.RDSInstanceClass == "db.m4.4xlarge"
-				isValid := isValidConfig && !newConfigCreated
+						c.RDSInstanceClass == "db.m4.4xlarge" &&
+						c.Domain == "FakeDomain"
+				isValid := isValidConfig && !newConfigCreated && !isDomainUpdated
 				message := fmt.Sprintf("Config Key | Expected | \tReceived |\nConcourseWorkerCount| %v |\t%v|\nConcourseWorkerSize | %v |\t%v |\nConcourseWebSize | %v |\t%v \nRegion | %v | %v |\nRDSInstanceClass | %v | %v|\t", 2, c.ConcourseWorkerCount, "medium", c.ConcourseWorkerSize, "large", c.ConcourseWebSize, "eu-west-3", c.Region, "db.m4.4xlarge", c.RDSInstanceClass)
 				return isValid, message
 			},
@@ -535,6 +540,7 @@ func TestClient_LoadOrCreate(t *testing.T) {
 							ConcourseWebSize:     "large",
 							ConcourseWorkerSize:  "medium",
 							RDSInstanceClass:     "db.m4.4xlarge",
+							Domain:               "FakeDomainOne",
 						}
 						jsonConfig, _ := json.Marshal(fakeConfig)
 						return jsonConfig, false, nil
@@ -554,17 +560,20 @@ func TestClient_LoadOrCreate(t *testing.T) {
 					WorkerCount:      1,
 					DBSizeIsSet:      true,
 					DBSize:           "small",
+					Domain:           "FakeDomainTwo",
+					DomainIsSet:      true,
 				},
 			},
 			wantErr: false,
-			validate: func(c Config, newConfigCreated bool) (bool, string) {
+			validate: func(c Config, newConfigCreated, isDomainUpdated bool) (bool, string) {
 				isValidConfig :=
 					c.ConcourseWorkerCount == 1 &&
 						c.ConcourseWorkerSize == "medium" &&
 						c.ConcourseWebSize == "large" &&
 						c.RDSInstanceClass == "db.t2.small" &&
-						c.Region == "eu-west-3"
-				isValid := isValidConfig && !newConfigCreated
+						c.Region == "eu-west-3" &&
+						c.Domain == "FakeDomainTwo"
+				isValid := isValidConfig && !newConfigCreated && isDomainUpdated
 				message := fmt.Sprintf("Config Key | Expected | \tReceived |\nConcourseWorkerCount| %v |\t%v|\nConcourseWorkerSize | %v |\t%v |\nConcourseWebSize | %v |\t%v \nRegion | %v | %v |\nRDSInstanceClass | %v | %v|\t", 1, c.ConcourseWorkerCount, "medium", c.ConcourseWorkerSize, "large", c.ConcourseWebSize, "eu-west-3", c.Region, "db.t2.small", c.RDSInstanceClass)
 				return isValid, message
 			},
@@ -581,8 +590,8 @@ func TestClient_LoadOrCreate(t *testing.T) {
 				BucketError:  tt.fields.BucketError,
 				Config:       tt.fields.Config,
 			}
-			config, newConfigCreated, err := client.LoadOrCreate(tt.args.deployArgs)
-			isValid, message := tt.validate(config, newConfigCreated)
+			config, newConfigCreated, isDomainUpdated, err := client.LoadOrCreate(tt.args.deployArgs)
+			isValid, message := tt.validate(config, newConfigCreated, isDomainUpdated)
 			if !isValid {
 				t.Errorf("ClientLoadOrCreate()\n %s\n", message)
 			}
