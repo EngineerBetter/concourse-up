@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/EngineerBetter/concourse-up/iaas"
+	"github.com/asaskevich/govalidator"
 )
 
 const terraformStateFileName = "terraform.tfstate"
@@ -203,6 +204,10 @@ func (client *Client) LoadOrCreate(deployArgs *DeployArgs) (Config, bool, bool, 
 			isDomainUpdated = true
 		}
 		config.Domain = deployArgs.Domain
+	} else {
+		if govalidator.IsIPv4(config.Domain) {
+			config.Domain = ""
+		}
 	}
 	return config, newConfigCreated, isDomainUpdated, nil
 }
