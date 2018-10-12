@@ -80,7 +80,7 @@ A new deploy from scratch takes approximately 20 minutes.
 
 #### Flags
 
-All flags are optional
+All flags are optional. Configuration settings provided via flags will persist in later deployments unless explicitly overriden.
 
 * `--region value`       AWS region (default: "eu-west-1") [$AWS_REGION]
 * `--domain value`       Domain to use as endpoint for Concourse web interface (eg: ci.myproject.com) [$DOMAIN]
