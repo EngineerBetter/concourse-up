@@ -142,17 +142,6 @@ func (client *Client) CanConnect() (bool, error) {
 	return false, runErr
 }
 
-// tagsStringer constructs a string of --add-tag arguments ready to be used in concourse-up
-func tagsStringer(tags []string) string {
-	var output string
-
-	for _, tag := range tags {
-		output = fmt.Sprintf("%s --add-tag %q", output, tag)
-	}
-
-	return output
-}
-
 // SetDefaultPipeline sets the default pipeline against a given concourse
 func (client *Client) SetDefaultPipeline(config config.Config, allowFlyVersionDiscrepancy bool) error {
 	if err := client.login(); err != nil {
@@ -326,7 +315,6 @@ func (client *Client) buildDefaultPipelineParams(config config.Config) (*default
 		FlagWorkerSize:       config.ConcourseWorkerSize,
 		FlagWorkers:          config.ConcourseWorkerCount,
 		ConcourseUpVersion:   ConcourseUpVersion,
-		Tags:                 tagsStringer(config.Tags),
 		Namespace:            config.Namespace,
 	}, nil
 }
