@@ -247,14 +247,17 @@ resource "aws_route53_record" "concourse" {
 
 resource "aws_eip" "director" {
   vpc = true
+  depends_on = ["aws_internet_gateway.default"]
 }
 
 resource "aws_eip" "atc" {
   vpc = true
+  depends_on = ["aws_internet_gateway.default"]
 }
 
 resource "aws_eip" "nat" {
   vpc = true
+  depends_on = ["aws_internet_gateway.default"]
 }
 
 resource "aws_security_group" "director" {
