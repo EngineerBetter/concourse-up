@@ -35,10 +35,10 @@ variable "google_sql_database_instance" {
 #   type = "string"
 # 	default = "<% .AvailabilityZone %>"
 # }
-# variable "deployment" {
-#   type = "string"
-# 	default = "<% .Deployment %>"
-# }
+variable "deployment" {
+  type = "string"
+	default = "<% .Deployment %>"
+}
 # variable "rds_default_database_name" {
 #   type = "string"
 # 	default = "<% .RDSDefaultDatabaseName %>"
@@ -47,10 +47,10 @@ variable "google_sql_database_instance" {
 #   type = "string"
 # 	default = "<% .PublicKey %>"
 # }
-# variable "project" {
-#   type = "string"
-# 	default = "<% .Project %>"
-# }
+variable "project" {
+  type = "string"
+	default = "<% .Project %>"
+}
 # variable "multi_az_rds" {
 #   type = "string"
 #   default = <%if .MultiAZRDS %>true<%else%>false<%end%>
@@ -68,6 +68,7 @@ variable "google_sql_database_instance" {
 
 provider "google" {
   region = "<% .Region %>"
+  project = "concourse-up"
 }
 
 # resource "aws_key_pair" "default" {
@@ -75,8 +76,8 @@ provider "google" {
 # 	public_key      = "${var.public_key}"
 # }
 
-resource "google_storage_bucket" "blobstore" {
-  name          = "${var.deployment}-<% .Namespace %>-blobstore"
+resource "google_storage_bucket" "blobs" {
+  name          = "${var.deployment}-<% .Namespace %>-blobs"
   storage_class = "REGIONAL"
   location      = "<% .Region %>"
   force_destroy = true
@@ -88,98 +89,81 @@ resource "google_storage_bucket" "blobstore" {
   }
 }
 
-# resource "aws_iam_user" "blobstore" {
-#   name = "${var.deployment}-<% .Namespace %>-blobstore"
-# }
-# resource "aws_iam_access_key" "blobstore" {
-#   user = "${var.deployment}-<% .Namespace %>-blobstore"
-#   depends_on = ["aws_iam_user.blobstore"]
-# }
-# resource "aws_iam_user_policy" "blobstore" {
-#   name = "${var.deployment}-<% .Namespace %>-blobstore"
-#   user = "${aws_iam_user.blobstore.name}"
-#   policy = <<EOF
-# {
-#   "Version": "2012-10-17",
-#   "Statement": [
-#     {
-#       "Action": [
-#         "s3:*"
-#       ],
-#       "Effect": "Allow",
-#       "Resource": [
-#         "arn:aws:s3:::${aws_s3_bucket.blobstore.id}",
-#         "arn:aws:s3:::${aws_s3_bucket.blobstore.id}/*"
-#       ]
-#     }
-#   ]
-# }
-# EOF
-# }
-# resource "aws_iam_user" "bosh" {
-#   name = "${var.deployment}-${var.region}-bosh"
-# }
-# resource "aws_iam_access_key" "bosh" {
-#   user = "${var.deployment}-${var.region}-bosh"
-#   depends_on = ["aws_iam_user.bosh"]
-# }
-# resource "aws_iam_user_policy" "bosh" {
-#   name = "${var.deployment}-${var.region}-bosh"
-#   user = "${aws_iam_user.bosh.name}"
-#   policy = <<EOF
-# {
-#   "Version": "2012-10-17",
-#   "Statement": [
-#     {
-#       "Action": [
-#         "ec2:*",
-#         "elasticloadbalancing:*"
-#       ],
-#       "Effect": "Allow",
-#       "Resource": "*"
-#     }
-#   ]
-# }
-# EOF
-# }
-# resource "aws_vpc" "default" {
-#   cidr_block = "10.0.0.0/16"
-#   tags {
-#     Name = "${var.deployment}"
-#     concourse-up-project = "${var.project}"
-#     concourse-up-component = "bosh"
-#   }
-# }
-# resource "aws_internet_gateway" "default" {
-#   vpc_id = "${aws_vpc.default.id}"
-#   tags {
-#     Name = "${var.deployment}"
-#     concourse-up-project = "${var.project}"
-#     concourse-up-component = "bosh"
-#   }
-# }
-# resource "aws_route" "internet_access" {
-#   route_table_id         = "${aws_vpc.default.main_route_table_id}"
-#   destination_cidr_block = "0.0.0.0/0"
-#   gateway_id             = "${aws_internet_gateway.default.id}"
-# }
-#  resource "aws_nat_gateway" "default" {
-#   allocation_id = "${aws_eip.nat.id}"
-#   subnet_id     = "${aws_subnet.public.id}"
-#   depends_on = ["aws_internet_gateway.default"]
-# }
-# resource "aws_route_table" "private" {
-#   vpc_id = "${aws_vpc.default.id}"
-#   route {
-#     cidr_block = "0.0.0.0/0"
-#     nat_gateway_id = "${aws_nat_gateway.default.id}"
-#   }
-#   tags {
-#     Name = "${var.deployment}-private"
-#     concourse-up-project = "${var.project}"
-#     concourse-up-component = "bosh"
-#   }
-# }
+resource "google_service_account" "blobs" {
+  account_id   = "${var.deployment}-<% .Namespace %>-blobs"
+  display_name = "${var.deployment}-<% .Namespace %>-blobs"
+}
+
+resource "google_service_account_iam_policy" "blobs" {
+  service_account_id = "${google_service_account.blobs.account_id}"
+  policy_data = "${data.google_iam_policy.blobs.policy_data}"
+}
+
+data "google_iam_policy" "blobs" {
+  binding {
+    role = "roles/storage.admin"
+
+    members = [
+      "serviceAccount:${google_service_account.blobs.email}",
+    ]
+  }
+}
+
+resource "google_service_account_key" "blobs" {
+  service_account_id = "${google_service_account.blobs.account_id}"
+}
+
+resource "google_service_account" "bosh" {
+  account_id   = "${var.deployment}-<% .Namespace %>-bosh"
+  display_name = "${var.deployment}-<% .Namespace %>-bosh"
+}
+
+resource "google_service_account_iam_policy" "bosh" {
+  service_account_id = "${google_service_account.bosh.account_id}"
+  policy_data = "${data.google_iam_policy.bosh.policy_data}"
+}
+
+data "google_iam_policy" "bosh" {
+  binding {
+    role = "roles/compute.loadBalancerAdmin"
+
+    members = [
+      "serviceAccount:${google_service_account.bosh.email}",
+    ]
+  }
+  binding {
+    role = "roles/compute.instanceAdmin.v1"
+
+    members = [
+      "serviceAccount:${google_service_account.bosh.email}",
+    ]
+  }
+}
+
+resource "google_service_account_key" "bosh" {
+  service_account_id = "${google_service_account.bosh.account_id}"
+}
+
+resource "google_compute_network" "default" {
+  name                    = "${var.deployment}"
+  ipv4_range = "10.0.0.0/16"
+}
+
+resource "google_compute_subnetwork" "public" {
+  name          = "${var.deployment}-public}"
+  ip_cidr_range = "10.0.0.0/24"
+  region        = "<% .Region %>"
+  network       = "${google_compute_network.default.self_link}"
+}
+
+resource "google_compute_subnetwork" "private" {
+  name          = "${var.deployment}-private}"
+  ip_cidr_range = "10.0.1.0/24"
+  region        = "<% .Region %>"
+  network       = "${google_compute_network.default.self_link}"
+}
+
+
 # resource "aws_subnet" "public" {
 #   vpc_id                  = "${aws_vpc.default.id}"
 #   availability_zone       = "${var.availability_zone}"
@@ -519,14 +503,14 @@ resource "google_storage_bucket" "blobstore" {
 # output "private_subnet_id" {
 #   value = "${aws_subnet.private.id}"
 # }
-# output "blobstore_bucket" {
-#   value = "${aws_s3_bucket.blobstore.id}"
+# output "blobs_bucket" {
+#   value = "${aws_s3_bucket.blobs.id}"
 # }
-# output "blobstore_user_access_key_id" {
-#   value = "${aws_iam_access_key.blobstore.id}"
+# output "blobs_user_access_key_id" {
+#   value = "${aws_iam_access_key.blobs.id}"
 # }
-# output "blobstore_user_secret_access_key" {
-#   value     = "${aws_iam_access_key.blobstore.secret}"
+# output "blobs_user_secret_access_key" {
+#   value     = "${aws_iam_access_key.blobs.secret}"
 #   sensitive = true
 # }
 # output "bosh_user_access_key_id" {
@@ -539,6 +523,6 @@ resource "google_storage_bucket" "blobstore" {
 # output "bosh_db_port" {
 #   value = "${aws_db_instance.default.port}"
 # }
-output "bosh_db_address" {
-  value = "${aws_db_instance.default.address}"
-}
+# output "bosh_db_address" {
+#   value = "${aws_db_instance.default.address}"
+# }
