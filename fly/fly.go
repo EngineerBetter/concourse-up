@@ -334,7 +334,6 @@ type defaultPipelineParams struct {
 	FlagWorkerSize       string
 	FlagWorkers          int
 	ConcourseUpVersion   string
-	Tags                 string
 	Namespace            string
 }
 
@@ -398,7 +397,7 @@ jobs:
 
           cd concourse-up-release
           chmod +x concourse-up-linux-amd64
-          ./concourse-up-linux-amd64 deploy $DEPLOYMENT <% .Tags %>
+          ./concourse-up-linux-amd64 deploy $DEPLOYMENT
 - name: renew-cert
   serial_groups: [cup]
   serial: true
@@ -442,5 +441,5 @@ jobs:
 
           cd concourse-up-release
           chmod +x concourse-up-linux-amd64
-          ./concourse-up-linux-amd64 deploy $DEPLOYMENT <% .Tags %> 
+          ./concourse-up-linux-amd64 deploy $DEPLOYMENT
 `
