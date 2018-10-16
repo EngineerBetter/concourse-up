@@ -4,6 +4,7 @@ import (
 	"io"
 
 	"github.com/EngineerBetter/concourse-up/iaas"
+	"github.com/EngineerBetter/concourse-up/terraform"
 )
 
 // Destroy destroys a concourse instance
@@ -13,23 +14,43 @@ func (client *Client) Destroy() error {
 		return err
 	}
 
-	terraformClient, err := client.terraformClientFactory(client.iaasClient.IAAS(), conf, client.stdout, client.stderr, client.versionFile)
-	if err != nil {
-		return err
-	}
-	defer terraformClient.Cleanup()
-
-	metadata, err := terraformClient.Output()
+	tf, err := terraform.New(terraform.DownloadTerraform())
 	if err != nil {
 		return err
 	}
 
-	volumesToDelete, err := client.iaasClient.DeleteVMsInVPC(metadata.VPCID.Value)
+	var environment, metadata = tf.IAAS("AWS")
+	environment.Build(map[string]string{
+		"AllowIPs":               conf.AllowIPs,
+		"AvailabilityZone":       conf.AvailabilityZone,
+		"ConfigBucket":           conf.ConfigBucket,
+		"Deployment":             conf.Deployment,
+		"HostedZoneID":           conf.HostedZoneID,
+		"HostedZoneRecordPrefix": conf.HostedZoneRecordPrefix,
+		"Namespace":              conf.Namespace,
+		"Project":                conf.Project,
+		"PublicKey":              conf.PublicKey,
+		"RDSDefaultDatabaseName": conf.RDSDefaultDatabaseName,
+		"RDSInstanceClass":       conf.RDSInstanceClass,
+		"RDSPassword":            conf.RDSPassword,
+		"RDSUsername":            conf.RDSUsername,
+		"Region":                 conf.Region,
+		"SourceAccessIP":         conf.SourceAccessIP,
+		"TFStatePath":            conf.TFStatePath,
+	})
+
+	vpcID, err := metadata.Get("VPCID")
+	if err != nil {
+		return err
+	}
+	volumesToDelete, err := client.iaasClient.DeleteVMsInVPC(vpcID)
 	if err != nil {
 		return err
 	}
 
-	if err = terraformClient.Destroy(); err != nil {
+	// @Note change to Destroy
+	err = tf.Destroy(environment)
+	if err != nil {
 		return err
 	}
 

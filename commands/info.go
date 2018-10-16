@@ -11,7 +11,6 @@ import (
 	"github.com/EngineerBetter/concourse-up/config"
 	"github.com/EngineerBetter/concourse-up/fly"
 	"github.com/EngineerBetter/concourse-up/iaas"
-	"github.com/EngineerBetter/concourse-up/terraform"
 	"github.com/EngineerBetter/concourse-up/util"
 
 	"encoding/json"
@@ -75,7 +74,6 @@ var info = cli.Command{
 
 		client := concourse.NewClient(
 			awsClient,
-			terraform.NewClient,
 			bosh.NewClient,
 			fly.New,
 			certs.Generate,

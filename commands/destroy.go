@@ -11,7 +11,6 @@ import (
 	"github.com/EngineerBetter/concourse-up/config"
 	"github.com/EngineerBetter/concourse-up/fly"
 	"github.com/EngineerBetter/concourse-up/iaas"
-	"github.com/EngineerBetter/concourse-up/terraform"
 	"github.com/EngineerBetter/concourse-up/util"
 
 	"gopkg.in/urfave/cli.v1"
@@ -74,7 +73,6 @@ var destroy = cli.Command{
 
 		client := concourse.NewClient(
 			iaasClient,
-			terraform.NewClient,
 			bosh.NewClient,
 			fly.New,
 			certs.Generate,

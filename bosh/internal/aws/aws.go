@@ -7,9 +7,9 @@ import (
 	"fmt"
 	"io/ioutil"
 
-	"github.com/EngineerBetter/concourse-up/bosh/internal/resource"
-	"github.com/EngineerBetter/concourse-up/bosh/internal/yaml"
+	"github.com/EngineerBetter/concourse-up/resource"
 	"github.com/EngineerBetter/concourse-up/util"
+	"github.com/EngineerBetter/concourse-up/util/yaml"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/service/s3"

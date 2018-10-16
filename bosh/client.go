@@ -5,9 +5,10 @@ import (
 	"io"
 	"net"
 
+	"github.com/EngineerBetter/concourse-up/terraform"
+
 	"github.com/EngineerBetter/concourse-up/config"
 	"github.com/EngineerBetter/concourse-up/director"
-	"github.com/EngineerBetter/concourse-up/terraform"
 	"github.com/lib/pq"
 	"golang.org/x/crypto/ssh"
 )
@@ -23,7 +24,7 @@ const CredsFilename = "director-creds.yml"
 // Client is a concrete implementation of the IClient interface
 type Client struct {
 	config   config.Config
-	metadata *terraform.Metadata
+	metadata terraform.IAASMetadata
 	director director.IClient
 	db       Opener
 	stdout   io.Writer
@@ -39,11 +40,15 @@ type IClient interface {
 }
 
 // ClientFactory creates a new IClient
-type ClientFactory func(config config.Config, metadata *terraform.Metadata, director director.IClient, stdout, stderr io.Writer) (IClient, error)
+type ClientFactory func(config config.Config, metadata terraform.IAASMetadata, director director.IClient, stdout, stderr io.Writer) (IClient, error)
 
 // NewClient creates a new Client
-func NewClient(config config.Config, metadata *terraform.Metadata, director director.IClient, stdout, stderr io.Writer) (IClient, error) {
-	addr := net.JoinHostPort(metadata.DirectorPublicIP.Value, "22")
+func NewClient(config config.Config, metadata terraform.IAASMetadata, director director.IClient, stdout, stderr io.Writer) (IClient, error) {
+	directorPublicIP, err := metadata.Get("DirectorPublicIP")
+	if err != nil {
+		return nil, err
+	}
+	addr := net.JoinHostPort(directorPublicIP, "22")
 	key, err := ssh.ParsePrivateKey([]byte(config.PrivateKey))
 	if err != nil {
 		return nil, err
@@ -53,12 +58,21 @@ func NewClient(config config.Config, metadata *terraform.Metadata, director dire
 		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
 		Auth:            []ssh.AuthMethod{ssh.PublicKeys(key)},
 	}
+	boshDBAddress, err := metadata.Get("BoshDBAddress")
+	if err != nil {
+		return nil, err
+	}
+	boshDBPort, err := metadata.Get("BoshDBPort")
+	if err != nil {
+		return nil, err
+	}
+
 	db, err := newProxyOpener(addr, conf, &pq.Driver{},
 		fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=require",
 			config.RDSUsername,
 			config.RDSPassword,
-			metadata.BoshDBAddress.Value,
-			metadata.BoshDBPort.Value,
+			boshDBAddress,
+			boshDBPort,
 			config.RDSDefaultDatabaseName,
 		),
 	)

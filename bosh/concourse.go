@@ -59,6 +59,18 @@ func (client *Client) deployConcourse(creds []byte, detach bool) (newCreds []byt
 	if err != nil {
 		return nil, err
 	}
+	boshDBAddress, err := client.metadata.Get("BoshDBAddress")
+	if err != nil {
+		return nil, err
+	}
+	boshDBPort, err := client.metadata.Get("BoshDBPort")
+	if err != nil {
+		return nil, err
+	}
+	atcPublicIP, err := client.metadata.Get("ATCPublicIP")
+	if err != nil {
+		return nil, err
+	}
 
 	vmap := map[string]interface{}{
 		"deployment_name":          concourseDeploymentName,
@@ -66,15 +78,15 @@ func (client *Client) deployConcourse(creds []byte, detach bool) (newCreds []byt
 		"project":                  client.config.Project,
 		"web_network_name":         "public",
 		"worker_network_name":      "private",
-		"postgres_host":            client.metadata.BoshDBAddress.Value,
-		"postgres_port":            client.metadata.BoshDBPort.Value,
+		"postgres_host":            boshDBAddress,
+		"postgres_port":            boshDBPort,
 		"postgres_role":            client.config.RDSUsername,
 		"postgres_password":        client.config.RDSPassword,
 		"postgres_ca_cert":         db.RDSRootCert,
 		"web_vm_type":              "concourse-web-" + client.config.ConcourseWebSize,
 		"worker_vm_type":           "concourse-" + client.config.ConcourseWorkerSize,
 		"worker_count":             client.config.ConcourseWorkerCount,
-		"atc_eip":                  client.metadata.ATCPublicIP.Value,
+		"atc_eip":                  atcPublicIP,
 		"external_tls.certificate": client.config.ConcourseCert,
 		"external_tls.private_key": client.config.ConcourseKey,
 		"atc_encryption_key":       client.config.EncryptionKey,

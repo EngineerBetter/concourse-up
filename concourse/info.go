@@ -14,11 +14,17 @@ import (
 	"github.com/fatih/color"
 )
 
-// Info represents the terraform output and concourse-up config files
+// Info represents the compound fields for info templates
 type Info struct {
-	Terraform *terraform.Metadata `json:"terraform"`
-	Config    config.Config       `json:"config"`
-	Instances []bosh.Instance     `json:"instances"`
+	Terraform TerraformInfo   `json:"terraform"`
+	Config    config.Config   `json:"config"`
+	Instances []bosh.Instance `json:"instances"`
+}
+
+// TerraformInfo represents the terraform output fields needed for the info templates
+type TerraformInfo struct {
+	DirectorPublicIP string
+	NatGatewayIP     string
 }
 
 // FetchInfo fetches and builds the info
@@ -28,15 +34,47 @@ func (client *Client) FetchInfo() (*Info, error) {
 		return nil, err
 	}
 
-	terraformClient, err := client.terraformClientFactory(client.iaasClient.IAAS(), config, client.stdout, client.stderr, client.versionFile)
+	tf, err := terraform.New(terraform.DownloadTerraform())
 	if err != nil {
 		return nil, err
 	}
-	defer terraformClient.Cleanup()
 
-	metadata, err := terraformClient.Output()
+	var environment, metadata = tf.IAAS("AWS")
+	environment.Build(map[string]string{
+		"AllowIPs":               config.AllowIPs,
+		"AvailabilityZone":       config.AvailabilityZone,
+		"ConfigBucket":           config.ConfigBucket,
+		"Deployment":             config.Deployment,
+		"HostedZoneID":           config.HostedZoneID,
+		"HostedZoneRecordPrefix": config.HostedZoneRecordPrefix,
+		"Namespace":              config.Namespace,
+		"Project":                config.Project,
+		"PublicKey":              config.PublicKey,
+		"RDSDefaultDatabaseName": config.RDSDefaultDatabaseName,
+		"RDSInstanceClass":       config.RDSInstanceClass,
+		"RDSPassword":            config.RDSPassword,
+		"RDSUsername":            config.RDSUsername,
+		"Region":                 config.Region,
+		"SourceAccessIP":         config.SourceAccessIP,
+		"TFStatePath":            config.TFStatePath,
+	})
+	err = tf.BuildOutput(environment, metadata)
 	if err != nil {
 		return nil, err
+	}
+
+	directorPublicIP, err := metadata.Get("DirectorPublicIP")
+	if err != nil {
+		return nil, err
+	}
+	natGatewayIP, err := metadata.Get("NatGatewayIP")
+	if err != nil {
+		return nil, err
+	}
+
+	terraformInfo := TerraformInfo{
+		DirectorPublicIP: directorPublicIP,
+		NatGatewayIP:     natGatewayIP,
 	}
 
 	userIP, err := client.ipChecker()
@@ -44,7 +82,11 @@ func (client *Client) FetchInfo() (*Info, error) {
 		return nil, err
 	}
 
-	whitelisted, err := client.iaasClient.CheckForWhitelistedIP(userIP, metadata.DirectorSecurityGroupID.Value)
+	directorSecurityGroupID, err := metadata.Get("DirectorSecurityGroupID")
+	if err != nil {
+		return nil, err
+	}
+	whitelisted, err := client.iaasClient.CheckForWhitelistedIP(userIP, directorSecurityGroupID)
 	if err != nil {
 		return nil, err
 	}
@@ -66,7 +108,7 @@ func (client *Client) FetchInfo() (*Info, error) {
 	}
 
 	return &Info{
-		Terraform: metadata,
+		Terraform: terraformInfo,
 		Config:    config,
 		Instances: instances,
 	}, nil
@@ -80,7 +122,7 @@ const infoTemplate = `Deployment:
 Workers:
 	Count:              {{.Config.ConcourseWorkerCount}}
 	Size:               {{.Config.ConcourseWorkerSize}}
-	Outbound Public IP: {{.Terraform.NatGatewayIP.Value}}
+	Outbound Public IP: {{.Terraform.NatGatewayIP}}
 
 Instances:
 {{range .Instances}}
@@ -107,7 +149,7 @@ Grafana credentials:
 Bosh credentials:
 	username: {{.Config.DirectorUsername}}
 	password: {{.Config.DirectorPassword}}
-	IP:       {{.Terraform.DirectorPublicIP.Value}}
+	IP:       {{.Terraform.DirectorPublicIP}}
 	CA Cert:
 		{{ .Config.DirectorCACert | replace "\n" "\n\t\t"}}
 
@@ -150,13 +192,13 @@ func writeTempFile(data string) (name string, err error) {
 var envTemplate = template.Must(template.New("env").Funcs(template.FuncMap{
 	"to_file": writeTempFile,
 }).Parse(`
-export BOSH_CA_CERT='{{.Config.DirectorCACert}}'
 export BOSH_ENVIRONMENT={{.Terraform.DirectorPublicIP.Value}}
+export BOSH_GW_HOST={{.Terraform.DirectorPublicIP.Value}}
+export BOSH_CA_CERT='{{.Config.DirectorCACert}}'
 export BOSH_DEPLOYMENT=concourse
 export BOSH_CLIENT={{.Config.DirectorUsername}}
 export BOSH_CLIENT_SECRET={{.Config.DirectorPassword}}
 export BOSH_GW_USER=vcap
-export BOSH_GW_HOST={{.Terraform.DirectorPublicIP.Value}}
 export BOSH_GW_PRIVATE_KEY={{.Config.PrivateKey | to_file}}
 export CREDHUB_SERVER={{.Config.CredhubURL}}
 export CREDHUB_CA_CERT='{{.Config.CredhubCACert}}'

@@ -14,19 +14,18 @@ import (
 
 // Client is a concrete implementation of IClient interface
 type Client struct {
-	iaasClient             iaas.IClient
-	terraformClientFactory terraform.ClientFactory
-	boshClientFactory      bosh.ClientFactory
-	flyClientFactory       func(fly.Credentials, io.Writer, io.Writer, []byte) (fly.IClient, error)
-	certGenerator          func(constructor func(u *certs.User) (certs.AcmeClient, error), caName string, ip ...string) (*certs.Certs, error)
-	configClient           config.IClient
-	deployArgs             *config.DeployArgs
-	stdout                 io.Writer
-	stderr                 io.Writer
-	ipChecker              func() (string, error)
-	acmeClientConstructor  func(u *certs.User) (certs.AcmeClient, error)
-	versionFile            []byte
-	version                string
+	iaasClient            iaas.IClient
+	boshClientFactory     bosh.ClientFactory
+	flyClientFactory      func(fly.Credentials, io.Writer, io.Writer, []byte) (fly.IClient, error)
+	certGenerator         func(constructor func(u *certs.User) (certs.AcmeClient, error), caName string, ip ...string) (*certs.Certs, error)
+	configClient          config.IClient
+	deployArgs            *config.DeployArgs
+	stdout                io.Writer
+	stderr                io.Writer
+	ipChecker             func() (string, error)
+	acmeClientConstructor func(u *certs.User) (certs.AcmeClient, error)
+	versionFile           []byte
+	version               string
 }
 
 // IClient represents a concourse-up client
@@ -42,7 +41,6 @@ var versionFile = MustAsset("../../concourse-up-ops/director-versions.json")
 // NewClient returns a new Client
 func NewClient(
 	iaasClient iaas.IClient,
-	terraformClientFactory terraform.ClientFactory,
 	boshClientFactory bosh.ClientFactory,
 	flyClientFactory func(fly.Credentials, io.Writer, io.Writer, []byte) (fly.IClient, error),
 	certGenerator func(constructor func(u *certs.User) (certs.AcmeClient, error), caName string, ip ...string) (*certs.Certs, error),
@@ -53,27 +51,27 @@ func NewClient(
 	acmeClientConstructor func(u *certs.User) (certs.AcmeClient, error),
 	version string) *Client {
 	return &Client{
-		iaasClient:             iaasClient,
-		terraformClientFactory: terraformClientFactory,
-		boshClientFactory:      boshClientFactory,
-		flyClientFactory:       flyClientFactory,
-		configClient:           configClient,
-		certGenerator:          certGenerator,
-		deployArgs:             deployArgs,
-		stdout:                 stdout,
-		stderr:                 stderr,
-		ipChecker:              ipChecker,
-		acmeClientConstructor:  acmeClientConstructor,
-		versionFile:            versionFile,
-		version:                version,
+		iaasClient:            iaasClient,
+		boshClientFactory:     boshClientFactory,
+		flyClientFactory:      flyClientFactory,
+		configClient:          configClient,
+		certGenerator:         certGenerator,
+		deployArgs:            deployArgs,
+		stdout:                stdout,
+		stderr:                stderr,
+		ipChecker:             ipChecker,
+		acmeClientConstructor: acmeClientConstructor,
+		versionFile:           versionFile,
+		version:               version,
 	}
 }
 
-func (client *Client) buildBoshClient(config config.Config, metadata *terraform.Metadata) (bosh.IClient, error) {
+func (client *Client) buildBoshClient(config config.Config, metadata terraform.IAASMetadata) (bosh.IClient, error) {
+	directorPublicIP, err := metadata.Get("DirectorPublicIP")
 	director, err := director.NewClient(director.Credentials{
 		Username: config.DirectorUsername,
 		Password: config.DirectorPassword,
-		Host:     metadata.DirectorPublicIP.Value,
+		Host:     directorPublicIP,
 		CACert:   config.DirectorCACert,
 	}, versionFile)
 	if err != nil {

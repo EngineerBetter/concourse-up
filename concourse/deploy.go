@@ -72,7 +72,32 @@ func (client *Client) Deploy() error {
 	c.HostedZoneRecordPrefix = r.HostedZoneRecordPrefix
 	c.Domain = r.Domain
 
-	metadata, err := client.applyTerraform(c)
+	tf, err := terraform.New(terraform.DownloadTerraform())
+	if err != nil {
+		return err
+	}
+
+	var environment, metadata = tf.IAAS("AWS")
+	environment.Build(map[string]string{
+		"AllowIPs":               c.AllowIPs,
+		"AvailabilityZone":       c.AvailabilityZone,
+		"ConfigBucket":           c.ConfigBucket,
+		"Deployment":             c.Deployment,
+		"HostedZoneID":           c.HostedZoneID,
+		"HostedZoneRecordPrefix": c.HostedZoneRecordPrefix,
+		"Namespace":              c.Namespace,
+		"Project":                c.Project,
+		"PublicKey":              c.PublicKey,
+		"RDSDefaultDatabaseName": c.RDSDefaultDatabaseName,
+		"RDSInstanceClass":       c.RDSInstanceClass,
+		"RDSPassword":            c.RDSPassword,
+		"RDSUsername":            c.RDSUsername,
+		"Region":                 c.Region,
+		"SourceAccessIP":         c.SourceAccessIP,
+		"TFStatePath":            c.TFStatePath,
+	})
+
+	err = tf.Apply(environment, metadata, false)
 	if err != nil {
 		return err
 	}
@@ -126,7 +151,7 @@ func (client *Client) Deploy() error {
 	return client.configClient.Update(c)
 }
 
-func (client *Client) deployBoshAndPipeline(c config.Config, metadata *terraform.Metadata) (BoshParams, error) {
+func (client *Client) deployBoshAndPipeline(c config.Config, metadata terraform.IAASMetadata) (BoshParams, error) {
 	// When we are deploying for the first time rather than updating
 	// ensure that the pipeline is set _after_ the concourse is deployed
 
@@ -176,7 +201,7 @@ func (client *Client) deployBoshAndPipeline(c config.Config, metadata *terraform
 	return bp, writeDeploySuccessMessage(c, metadata, client.stdout)
 }
 
-func (client *Client) updateBoshAndPipeline(c config.Config, metadata *terraform.Metadata) (BoshParams, error) {
+func (client *Client) updateBoshAndPipeline(c config.Config, metadata terraform.IAASMetadata) (BoshParams, error) {
 	// If concourse is already running this is an update rather than a fresh deploy
 	// When updating we need to deploy the BOSH as the final step in order to
 	// Detach from the update, so the update job can exit
@@ -304,14 +329,18 @@ type Requirements struct {
 	Certs            Certs
 }
 
-func (client *Client) checkPreDeployConfigRequirements(c func(u *certs.User) (certs.AcmeClient, error), isDomainUpdated bool, cfg config.Config, metadata *terraform.Metadata) (Requirements, error) {
+func (client *Client) checkPreDeployConfigRequirements(c func(u *certs.User) (certs.AcmeClient, error), isDomainUpdated bool, cfg config.Config, metadata terraform.IAASMetadata) (Requirements, error) {
 	cr := Requirements{
 		Domain:           cfg.Domain,
 		DirectorPublicIP: cfg.DirectorPublicIP,
 	}
 
 	if cfg.Domain == "" {
-		cr.Domain = metadata.ATCPublicIP.Value
+		domain, err := metadata.Get("ATCPublicIP")
+		if err != nil {
+			return cr, err
+		}
+		cr.Domain = domain
 	}
 
 	dc := DirectorCerts{
@@ -334,19 +363,22 @@ func (client *Client) checkPreDeployConfigRequirements(c func(u *certs.User) (ce
 		ConcourseCACert:           cfg.ConcourseCACert,
 	}
 
-	cc, err = client.ensureConcourseCerts(c, isDomainUpdated, cc, cfg.Deployment, cr.Domain, metadata)
+	cc, err = client.ensureConcourseCerts(c, isDomainUpdated, cc, cfg.Deployment, cr.Domain)
 	if err != nil {
 		return cr, err
 	}
 
 	cr.Certs = cc
 
-	cr.DirectorPublicIP = metadata.DirectorPublicIP.Value
+	cr.DirectorPublicIP, err = metadata.Get("DirectorPublicIP")
+	if err != nil {
+		return cr, err
+	}
 
 	return cr, nil
 }
 
-func (client *Client) ensureDirectorCerts(c func(u *certs.User) (certs.AcmeClient, error), dc DirectorCerts, deployment string, metadata *terraform.Metadata) (DirectorCerts, error) {
+func (client *Client) ensureDirectorCerts(c func(u *certs.User) (certs.AcmeClient, error), dc DirectorCerts, deployment string, metadata terraform.IAASMetadata) (DirectorCerts, error) {
 	// If we already have director certificates, don't regenerate as changing them will
 	// force a bosh director re-deploy even if there are no other changes
 	certs := dc
@@ -354,8 +386,11 @@ func (client *Client) ensureDirectorCerts(c func(u *certs.User) (certs.AcmeClien
 		return certs, nil
 	}
 
-	ip := metadata.DirectorPublicIP.Value
-	_, err := client.stdout.Write(
+	ip, err := metadata.Get("DirectorPublicIP")
+	if err != nil {
+		return certs, err
+	}
+	_, err = client.stdout.Write(
 		[]byte(fmt.Sprintf("\nGENERATING BOSH DIRECTOR CERTIFICATE (%s, 10.0.0.6)\n", ip)))
 	if err != nil {
 		return certs, err
@@ -385,7 +420,7 @@ func timeTillExpiry(cert string) time.Duration {
 	return time.Until(c.NotAfter)
 }
 
-func (client *Client) ensureConcourseCerts(c func(u *certs.User) (certs.AcmeClient, error), domainUpdated bool, cc Certs, deployment, domain string, metadata *terraform.Metadata) (Certs, error) {
+func (client *Client) ensureConcourseCerts(c func(u *certs.User) (certs.AcmeClient, error), domainUpdated bool, cc Certs, deployment, domain string) (Certs, error) {
 	certs := cc
 
 	if client.deployArgs.TLSCert != "" {
@@ -415,30 +450,7 @@ func (client *Client) ensureConcourseCerts(c func(u *certs.User) (certs.AcmeClie
 	return certs, nil
 }
 
-func (client *Client) applyTerraform(c config.Config) (*terraform.Metadata, error) {
-	terraformClient, err := client.terraformClientFactory(client.iaasClient.IAAS(), c, client.stdout, client.stderr, client.versionFile)
-	if err != nil {
-		return nil, err
-	}
-	defer terraformClient.Cleanup()
-
-	if err = terraformClient.Apply(false); err != nil {
-		return nil, err
-	}
-
-	metadata, err := terraformClient.Output()
-	if err != nil {
-		return nil, err
-	}
-
-	if err = metadata.AssertValid(); err != nil {
-		return nil, err
-	}
-
-	return metadata, nil
-}
-
-func (client *Client) deployBosh(config config.Config, metadata *terraform.Metadata, detach bool) (BoshParams, error) {
+func (client *Client) deployBosh(config config.Config, metadata terraform.IAASMetadata, detach bool) (BoshParams, error) {
 	bp := BoshParams{
 		CredhubPassword:          config.CredhubPassword,
 		CredhubAdminClientSecret: config.CredhubAdminClientSecret,
@@ -570,7 +582,7 @@ Log into credhub with:
 eval "$(concourse-up info {{.Project}} --region {{.Region}} --env)"
 `
 
-func writeDeploySuccessMessage(config config.Config, metadata *terraform.Metadata, stdout io.Writer) error {
+func writeDeploySuccessMessage(config config.Config, metadata terraform.IAASMetadata, stdout io.Writer) error {
 	t := template.Must(template.New("deploy").Parse(deployMsg))
 	return t.Execute(stdout, config)
 }

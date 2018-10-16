@@ -4,11 +4,11 @@ import (
 	"encoding/json"
 	"runtime"
 
-	"github.com/EngineerBetter/concourse-up/bosh/internal/bincache"
-	"github.com/EngineerBetter/concourse-up/bosh/internal/resource/internal/file"
+	"github.com/EngineerBetter/concourse-up/resource/internal/file"
+	"github.com/EngineerBetter/concourse-up/util/bincache"
 )
 
-//go:generate go-bindata -o internal/file/file.go -ignore (\.go$)|(\.git)|(bosh/assets) -nometadata -pkg file -prefix=../../../../concourse-up-ops . ../../../../concourse-up-ops/...
+//go:generate go-bindata -o internal/file/file.go -ignore (\.go$)|(\.git)|(bosh/assets) -nometadata -pkg file -prefix=../../concourse-up-ops . ../../concourse-up-ops/...
 
 // Resource safely exposes the json parameters of a resource
 type Resource struct {
@@ -43,6 +43,9 @@ var (
 	AWSDirectorCloudConfig = mustAssetString("director/aws/cloud-config.yml")
 	// AWSCPIOps statically defines aws-cpi.yml contents
 	AWSCPIOps = mustAssetString("director/aws/cpi.yml")
+
+	// AWSTerraformConfig holds the terraform conf for AWS
+	AWSTerraformConfig = mustAssetString("director/aws/infrastructure.tf")
 
 	// ExternalIPOps statically defines external-ip.yml contents
 	ExternalIPOps = mustAssetString("director/external-ip.yml")
@@ -103,5 +106,11 @@ func (p binaryPaths) path() string {
 // BOSHCLIPath returns the path of the downloaded bosh-cli
 func BOSHCLIPath() (string, error) {
 	p := binaries["bosh-cli"].path()
+	return bincache.Download(p)
+}
+
+// TerraformCLIPath returns the path of the downloaded terraform-cli
+func TerraformCLIPath() (string, error) {
+	p := binaries["terraform"].path()
 	return bincache.Download(p)
 }

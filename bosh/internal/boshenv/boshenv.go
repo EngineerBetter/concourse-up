@@ -7,8 +7,8 @@ import (
 	"os/exec"
 	"path/filepath"
 
-	"github.com/EngineerBetter/concourse-up/bosh/internal/resource"
-	"github.com/EngineerBetter/concourse-up/bosh/internal/yaml"
+	"github.com/EngineerBetter/concourse-up/resource"
+	"github.com/EngineerBetter/concourse-up/util/yaml"
 )
 
 // BOSHCLI struct holds the abstraction of execCmd

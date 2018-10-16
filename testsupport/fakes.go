@@ -8,7 +8,6 @@ import (
 	"github.com/EngineerBetter/concourse-up/certs"
 	"github.com/EngineerBetter/concourse-up/config"
 	"github.com/EngineerBetter/concourse-up/iaas"
-	"github.com/EngineerBetter/concourse-up/terraform"
 	"github.com/xenolf/lego/acme"
 )
 
@@ -177,34 +176,6 @@ func (client *FakeConfigClient) DeleteAll(config config.Config) error {
 // HasAsset delegates to FakeHasAsset which is dynamically set by the tests
 func (client *FakeConfigClient) HasAsset(filename string) (bool, error) {
 	return client.FakeHasAsset(filename)
-}
-
-// FakeTerraformClient implements terraform.IClient for testing
-type FakeTerraformClient struct {
-	FakeOutput  func() (*terraform.Metadata, error)
-	FakeApply   func(dryrun bool) error
-	FakeDestroy func() error
-	FakeCleanup func() error
-}
-
-// Output delegates to FakeOutput which is dynamically set by the tests
-func (client *FakeTerraformClient) Output() (*terraform.Metadata, error) {
-	return client.FakeOutput()
-}
-
-// Apply delegates to FakeApply which is dynamically set by the tests
-func (client *FakeTerraformClient) Apply(dryrun bool) error {
-	return client.FakeApply(dryrun)
-}
-
-// Destroy delegates to FakeDestroy which is dynamically set by the tests
-func (client *FakeTerraformClient) Destroy() error {
-	return client.FakeDestroy()
-}
-
-// Cleanup delegates to FakeCleanup which is dynamically set by the tests
-func (client *FakeTerraformClient) Cleanup() error {
-	return client.FakeCleanup()
 }
 
 // FakeBoshClient implements bosh.IClient for testing
