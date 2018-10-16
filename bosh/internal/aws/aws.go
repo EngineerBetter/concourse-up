@@ -18,21 +18,9 @@ import (
 
 // Environment holds all the parameters AWS IAAS needs
 type Environment struct {
-	InternalCIDR          string
-	InternalGateway       string
-	InternalIP            string
 	AccessKeyID           string
-	SecretAccessKey       string
-	Region                string
-	AZ                    string
-	DefaultKeyName        string
-	DefaultSecurityGroups []string
-	PrivateKey            string
-	PublicSubnetID        string
-	PrivateSubnetID       string
-	ExternalIP            string
 	ATCSecurityGroup      string
-	VMSecurityGroup       string
+	AZ                    string
 	BlobstoreBucket       string
 	DBCACert              string
 	DBHost                string
@@ -40,9 +28,21 @@ type Environment struct {
 	DBPassword            string
 	DBPort                string
 	DBUsername            string
+	DefaultKeyName        string
+	DefaultSecurityGroups []string
+	ExternalIP            string
+	InternalCIDR          string
+	InternalGateway       string
+	InternalIP            string
+	PrivateKey            string
+	PrivateSubnetID       string
+	PublicSubnetID        string
+	Region                string
 	S3AWSAccessKeyID      string
 	S3AWSSecretAccessKey  string
+	SecretAccessKey       string
 	Spot                  bool
+	VMSecurityGroup       string
 }
 
 var allOperations = resource.AWSCPIOps + resource.ExternalIPOps + resource.DirectorCustomOps
@@ -83,12 +83,12 @@ func (e Environment) ConfigureDirectorManifestCPI(manifest string) (string, erro
 }
 
 type awsCloudConfigParams struct {
-	AvailabilityZone   string
-	VMsSecurityGroupID string
 	ATCSecurityGroupID string
-	PublicSubnetID     string
+	AvailabilityZone   string
 	PrivateSubnetID    string
+	PublicSubnetID     string
 	Spot               bool
+	VMsSecurityGroupID string
 }
 
 // ConfigureDirectorCloudConfig inserts values from the environment into the config template passed as argument

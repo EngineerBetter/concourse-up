@@ -9,23 +9,24 @@ import (
 
 // Config represents a concourse-up configuration file
 type Config struct {
+	AllowIPs                  string   `json:"allow_ips"`
 	AvailabilityZone          string   `json:"availability_zone"`
-	CredhubURL                string   `json:"credhub_url"`
-	CredhubUsername           string   `json:"credhub_username"`
-	CredhubPassword           string   `json:"credhub_password"`
-	CredhubAdminClientSecret  string   `json:"credhub_admin_client_secret"`
-	CredhubCACert             string   `json:"credhub_ca_cert"`
 	ConcourseCACert           string   `json:"concourse_ca_cert"`
 	ConcourseCert             string   `json:"concourse_cert"`
-	ConcourseKey              string   `json:"concourse_key"`
 	ConcourseDBName           string   `json:"concourse_db_name"`
+	ConcourseKey              string   `json:"concourse_key"`
 	ConcoursePassword         string   `json:"concourse_password"`
-	ConcourseUserProvidedCert bool     `json:"concourse_user_provided_cert"`
 	ConcourseUsername         string   `json:"concourse_username"`
+	ConcourseUserProvidedCert bool     `json:"concourse_user_provided_cert"`
 	ConcourseWebSize          string   `json:"concourse_web_size"`
 	ConcourseWorkerCount      int      `json:"concourse_worker_count"`
 	ConcourseWorkerSize       string   `json:"concourse_worker_size"`
 	ConfigBucket              string   `json:"config_bucket"`
+	CredhubAdminClientSecret  string   `json:"credhub_admin_client_secret"`
+	CredhubCACert             string   `json:"credhub_ca_cert"`
+	CredhubPassword           string   `json:"credhub_password"`
+	CredhubURL                string   `json:"credhub_url"`
+	CredhubUsername           string   `json:"credhub_username"`
 	Deployment                string   `json:"deployment"`
 	DirectorCACert            string   `json:"director_ca_cert"`
 	DirectorCert              string   `json:"director_cert"`
@@ -47,6 +48,7 @@ type Config struct {
 	HostedZoneID              string   `json:"hosted_zone_id"`
 	HostedZoneRecordPrefix    string   `json:"hosted_zone_record_prefix"`
 	MultiAZRDS                bool     `json:"multi_az_rds"`
+	Namespace                 string   `json:"namespace"`
 	PrivateKey                string   `json:"private_key"`
 	Project                   string   `json:"project"`
 	PublicKey                 string   `json:"public_key"`
@@ -56,11 +58,9 @@ type Config struct {
 	RDSUsername               string   `json:"rds_username"`
 	Region                    string   `json:"region"`
 	SourceAccessIP            string   `json:"source_access_ip"`
+	Spot                      bool     `json:"spot"`
 	Tags                      []string `json:"tags"`
 	TFStatePath               string   `json:"tf_state_path"`
-	AllowIPs                  string   `json:"allow_ips"`
-	Spot                      bool     `json:"spot"`
-	Namespace                 string   `json:"namespace"`
 	Version                   string   `json:"version"`
 }
 
