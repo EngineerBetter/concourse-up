@@ -43,18 +43,18 @@ func Download(url string) (string, error) {
 	var closer io.ReadCloser
 
 	if strings.HasSuffix(url, ".zip") {
-		body, err := ioutil.ReadAll(resp.Body)
-		if err != nil {
-			return "", err
+		body, errz := ioutil.ReadAll(resp.Body)
+		if errz != nil {
+			return "", errz
 		}
 
-		r, err := zip.NewReader(bytes.NewReader(body), resp.ContentLength)
-		if err != nil {
-			return "", err
+		r, errz := zip.NewReader(bytes.NewReader(body), resp.ContentLength)
+		if errz != nil {
+			return "", errz
 		}
-		firstFile, err := r.File[0].Open()
-		if err != nil {
-			return "", err
+		firstFile, errz := r.File[0].Open()
+		if errz != nil {
+			return "", errz
 		}
 		closer = firstFile
 	} else {
