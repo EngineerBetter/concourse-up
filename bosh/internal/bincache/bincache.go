@@ -1,12 +1,16 @@
 package bincache
 
 import (
+	"archive/zip"
+	"bytes"
 	"crypto/sha256"
 	"encoding/hex"
 	"io"
+	"io/ioutil"
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 // Download a file from url and check with a sha1
@@ -35,7 +39,28 @@ func Download(url string) (string, error) {
 		return "", err
 	}
 	defer resp.Body.Close()
-	_, err = io.Copy(f, resp.Body)
+
+	var closer io.ReadCloser
+
+	if strings.HasSuffix(url, ".zip") {
+		body, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			return "", err
+		}
+
+		r, err := zip.NewReader(bytes.NewReader(body), resp.ContentLength)
+		if err != nil {
+			return "", err
+		}
+		firstFile, err := r.File[0].Open()
+		if err != nil {
+			return "", err
+		}
+		closer = firstFile
+	} else {
+		closer = resp.Body
+	}
+	_, err = io.Copy(f, closer)
 	if err != nil {
 		os.Remove(path)
 		return "", err
