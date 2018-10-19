@@ -78,7 +78,7 @@ func (client *Client) Deploy() error {
 	}
 
 	var environment, metadata = tf.IAAS("AWS")
-	environment.Build(map[string]string{
+	err = environment.Build(map[string]interface{}{
 		"AllowIPs":               c.AllowIPs,
 		"AvailabilityZone":       c.AvailabilityZone,
 		"ConfigBucket":           c.ConfigBucket,
@@ -95,9 +95,17 @@ func (client *Client) Deploy() error {
 		"Region":                 c.Region,
 		"SourceAccessIP":         c.SourceAccessIP,
 		"TFStatePath":            c.TFStatePath,
+		"MultiAZRDS":             c.MultiAZRDS,
 	})
+	if err != nil {
+		return err
+	}
 
-	err = tf.Apply(environment, metadata, false)
+	err = tf.Apply(environment, false)
+	if err != nil {
+		return err
+	}
+	err = tf.BuildOutput(environment, metadata)
 	if err != nil {
 		return err
 	}

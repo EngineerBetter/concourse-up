@@ -20,7 +20,7 @@ func (client *Client) Destroy() error {
 	}
 
 	var environment, metadata = tf.IAAS("AWS")
-	environment.Build(map[string]string{
+	err = environment.Build(map[string]interface{}{
 		"AllowIPs":               conf.AllowIPs,
 		"AvailabilityZone":       conf.AvailabilityZone,
 		"ConfigBucket":           conf.ConfigBucket,
@@ -37,7 +37,15 @@ func (client *Client) Destroy() error {
 		"Region":                 conf.Region,
 		"SourceAccessIP":         conf.SourceAccessIP,
 		"TFStatePath":            conf.TFStatePath,
+		"MultiAZRDS":             conf.MultiAZRDS,
 	})
+	if err != nil {
+		return err
+	}
+	err = tf.BuildOutput(environment, metadata)
+	if err != nil {
+		return err
+	}
 
 	vpcID, err := metadata.Get("VPCID")
 	if err != nil {

@@ -12,10 +12,10 @@ import (
 	"github.com/EngineerBetter/concourse-up/resource"
 )
 
-// IAASEnvironment exposes ConfigureDirectorManifestCPI
-type IAASEnvironment interface {
+// TerraformInputVars exposes ConfigureDirectorManifestCPI
+type TerraformInputVars interface {
 	ConfigureTerraform(string) (string, error)
-	Build(map[string]string) error
+	Build(map[string]interface{}) error
 }
 
 // IAASMetadata holds IAAS specific terraform metadata
@@ -68,8 +68,8 @@ func New(ops ...Option) (*TerraformCLI, error) {
 }
 
 // IAAS is returning the IAAS specific metadata and environment
-func (c *TerraformCLI) IAAS(name string) (IAASEnvironment, IAASMetadata) {
-	return &aws.Environment{}, &aws.Metadata{}
+func (c *TerraformCLI) IAAS(name string) (TerraformInputVars, IAASMetadata) {
+	return &aws.InputVars{}, &aws.Metadata{}
 }
 
 // Store exposes its methods
@@ -79,7 +79,7 @@ type Store interface {
 	Get(string) ([]byte, error)
 }
 
-func (c *TerraformCLI) init(config IAASEnvironment) (string, error) {
+func (c *TerraformCLI) init(config TerraformInputVars) (string, error) {
 
 	tfConfig, err := config.ConfigureTerraform(resource.AWSTerraformConfig)
 	if err != nil {
@@ -89,19 +89,22 @@ func (c *TerraformCLI) init(config IAASEnvironment) (string, error) {
 	if err != nil {
 		return "", err
 	}
+	terraformConfigDir := path.Dir(terraformConfigPath)
 
 	cmd := c.execCmd(c.terraformPath, "init")
+	cmd.Dir = terraformConfigDir
+	cmd.Stderr = os.Stderr
+	cmd.Stdout = os.Stdout
 	err = cmd.Run()
 	if err != nil {
 		os.Remove(terraformConfigPath)
 		return "", err
 	}
-
 	return terraformConfigPath, nil
 }
 
 // Apply runs terraform apply for a given config
-func (c *TerraformCLI) Apply(config IAASEnvironment, metadata IAASMetadata, dryrun bool) error {
+func (c *TerraformCLI) Apply(config TerraformInputVars, dryrun bool) error {
 	terraformConfigPath, err := c.init(config)
 	if err != nil {
 		return err
@@ -115,23 +118,17 @@ func (c *TerraformCLI) Apply(config IAASEnvironment, metadata IAASMetadata, dryr
 		action = "plan"
 	}
 
-	stdoutBuffer := bytes.NewBuffer(nil)
 	cmd := c.execCmd(c.terraformPath, action, "-input=false", "-auto-approve")
 	cmd.Dir = terraformConfigDir
 
 	cmd.Stderr = os.Stderr
-	cmd.Stdout = stdoutBuffer
+	cmd.Stdout = os.Stdout
 
-	err = cmd.Run()
-	if err != nil {
-		return err
-	}
-
-	return metadata.Init(stdoutBuffer)
+	return cmd.Run()
 }
 
 // Destroy destroys terraform resources specified in a config file
-func (c *TerraformCLI) Destroy(config IAASEnvironment) error {
+func (c *TerraformCLI) Destroy(config TerraformInputVars) error {
 	terraformConfigPath, err := c.init(config)
 	if err != nil {
 		return err
@@ -153,7 +150,7 @@ func (c *TerraformCLI) Destroy(config IAASEnvironment) error {
 }
 
 // BuildOutput builds the terraform output/metadata
-func (c *TerraformCLI) BuildOutput(config IAASEnvironment, metadata IAASMetadata) error {
+func (c *TerraformCLI) BuildOutput(config TerraformInputVars, metadata IAASMetadata) error {
 	terraformConfigPath, err := c.init(config)
 	if err != nil {
 		return err
@@ -175,7 +172,7 @@ func (c *TerraformCLI) BuildOutput(config IAASEnvironment, metadata IAASMetadata
 }
 
 func writeTempFile(data []byte) (string, error) {
-	f, err := ioutil.TempFile("", "")
+	f, err := ioutil.TempFile("", "*.tf")
 	if err != nil {
 		return "", err
 	}

@@ -11,8 +11,8 @@ import (
 	"github.com/asaskevich/govalidator"
 )
 
-// Environment holds all the parameters AWS IAAS needs
-type Environment struct {
+// InputVars holds all the parameters AWS IAAS needs
+type InputVars struct {
 	AllowIPs               string
 	AvailabilityZone       string
 	ConfigBucket           string
@@ -29,35 +29,43 @@ type Environment struct {
 	Region                 string
 	SourceAccessIP         string
 	TFStatePath            string
+	MultiAZRDS             bool
 }
 
 // ConfigureTerraform interpolates terraform contents and returns terraform config
-func (e *Environment) ConfigureTerraform(terraformContents string) (string, error) {
-	cc, err := util.RenderTemplate(terraformContents, e)
+func (v *InputVars) ConfigureTerraform(terraformContents string) (string, error) {
+	cc, err := util.RenderTemplate(terraformContents, v)
 	if cc == nil {
 		return "", err
 	}
 	return string(cc), err
 }
 
-func (e *Environment) Build(data map[string]string) error {
-	e1 := *e
-	env := reflect.ValueOf(e1)
-	fmt.Printf("VALUE: %v\nTYPE %T", e1, e1)
+// Build fills the InputVars struct with values from the map input
+func (v *InputVars) Build(data map[string]interface{}) error {
+	en := reflect.ValueOf(v)
+	env := en.Elem()
 	t := env.Type()
 	for i := 0; i < env.NumField(); i++ {
-		v, ok := data[t.Field(i).Name]
+		value, ok := data[t.Field(i).Name]
 		if !ok {
 			return errors.New("terraform:aws field " + t.Field(i).Name + " should be provided")
 		}
 		if !env.Field(i).CanSet() {
 			return errors.New("terraform:aws field " + t.Field(i).Name + " cannot be set")
 		}
-		env.Field(i).SetString(v)
+		switch trueValue := value.(type) {
+		case string:
+			env.Field(i).SetString(trueValue)
+		case bool:
+			env.Field(i).SetBool(trueValue)
+		default:
+			return fmt.Errorf("Value: %v of type %T not supported", value, value)
+		}
 	}
 	i := env.Interface()
-	ie := i.(Environment)
-	e = &ie
+	ie := i.(InputVars)
+	v = &ie
 	return nil
 }
 
@@ -105,10 +113,12 @@ func (metadata *Metadata) Init(buffer *bytes.Buffer) error {
 
 // Get returns a the specified value from the metadata struct
 func (metadata *Metadata) Get(key string) (string, error) {
-	m := reflect.ValueOf(metadata)
+	mm := reflect.ValueOf(metadata)
+	m := mm.Elem()
 	mv := m.FieldByName(key)
 	if !mv.IsValid() {
 		return "", errors.New(key + " key not found")
 	}
+
 	return mv.FieldByName("Value").String(), nil
 }

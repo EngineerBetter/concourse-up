@@ -40,7 +40,7 @@ func (client *Client) FetchInfo() (*Info, error) {
 	}
 
 	var environment, metadata = tf.IAAS("AWS")
-	environment.Build(map[string]string{
+	err = environment.Build(map[string]interface{}{
 		"AllowIPs":               config.AllowIPs,
 		"AvailabilityZone":       config.AvailabilityZone,
 		"ConfigBucket":           config.ConfigBucket,
@@ -57,7 +57,11 @@ func (client *Client) FetchInfo() (*Info, error) {
 		"Region":                 config.Region,
 		"SourceAccessIP":         config.SourceAccessIP,
 		"TFStatePath":            config.TFStatePath,
+		"MultiAZRDS":             config.MultiAZRDS,
 	})
+	if err != nil {
+		return nil, err
+	}
 	err = tf.BuildOutput(environment, metadata)
 	if err != nil {
 		return nil, err
