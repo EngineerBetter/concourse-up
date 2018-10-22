@@ -2,6 +2,8 @@ package terraform
 
 import (
 	"bytes"
+	"crypto/rand"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"os/exec"
@@ -72,32 +74,23 @@ func (c *TerraformCLI) IAAS(name string) (TerraformInputVars, IAASMetadata) {
 	return &aws.InputVars{}, &aws.Metadata{}
 }
 
-// Store exposes its methods
-type Store interface {
-	Set(key string, value []byte) error
-	// Get must return a zero length byte slice and a nil error when the key is not present in the store
-	Get(string) ([]byte, error)
-}
-
 func (c *TerraformCLI) init(config TerraformInputVars) (string, error) {
 
 	tfConfig, err := config.ConfigureTerraform(resource.AWSTerraformConfig)
 	if err != nil {
 		return "", err
 	}
+
 	terraformConfigPath, err := writeTempFile([]byte(tfConfig))
 	if err != nil {
 		return "", err
 	}
-	terraformConfigDir := path.Dir(terraformConfigPath)
-
 	cmd := c.execCmd(c.terraformPath, "init")
-	cmd.Dir = terraformConfigDir
+	cmd.Dir = terraformConfigPath
 	cmd.Stderr = os.Stderr
-	cmd.Stdout = os.Stdout
 	err = cmd.Run()
 	if err != nil {
-		os.Remove(terraformConfigPath)
+		os.RemoveAll(terraformConfigPath)
 		return "", err
 	}
 	return terraformConfigPath, nil
@@ -110,8 +103,7 @@ func (c *TerraformCLI) Apply(config TerraformInputVars, dryrun bool) error {
 		return err
 	}
 
-	terraformConfigDir := path.Dir(terraformConfigPath)
-	defer os.Remove(terraformConfigPath)
+	defer os.RemoveAll(terraformConfigPath)
 
 	action := "apply"
 	if dryrun {
@@ -119,7 +111,7 @@ func (c *TerraformCLI) Apply(config TerraformInputVars, dryrun bool) error {
 	}
 
 	cmd := c.execCmd(c.terraformPath, action, "-input=false", "-auto-approve")
-	cmd.Dir = terraformConfigDir
+	cmd.Dir = terraformConfigPath
 
 	cmd.Stderr = os.Stderr
 	cmd.Stdout = os.Stdout
@@ -134,11 +126,10 @@ func (c *TerraformCLI) Destroy(config TerraformInputVars) error {
 		return err
 	}
 
-	terraformConfigDir := path.Dir(terraformConfigPath)
-	defer os.Remove(terraformConfigPath)
+	defer os.RemoveAll(terraformConfigPath)
 
 	cmd := c.execCmd(c.terraformPath, "destroy", "-auto-approve")
-	cmd.Dir = terraformConfigDir
+	cmd.Dir = terraformConfigPath
 	cmd.Stderr = os.Stderr
 	cmd.Stdout = os.Stdout
 	err = cmd.Run()
@@ -156,12 +147,11 @@ func (c *TerraformCLI) BuildOutput(config TerraformInputVars, metadata IAASMetad
 		return err
 	}
 
-	terraformConfigDir := path.Dir(terraformConfigPath)
-	defer os.Remove(terraformConfigPath)
+	defer os.RemoveAll(terraformConfigPath)
 
 	stdoutBuffer := bytes.NewBuffer(nil)
 	cmd := c.execCmd(c.terraformPath, "output", "-json")
-	cmd.Dir = terraformConfigDir
+	cmd.Dir = terraformConfigPath
 	cmd.Stderr = os.Stderr
 	cmd.Stdout = stdoutBuffer
 	if err := cmd.Run(); err != nil {
@@ -172,17 +162,34 @@ func (c *TerraformCLI) BuildOutput(config TerraformInputVars, metadata IAASMetad
 }
 
 func writeTempFile(data []byte) (string, error) {
-	f, err := ioutil.TempFile("", "*.tf")
+	mode := int(0740)
+	perm := os.FileMode(mode)
+	dirName := randomString()
+	filePath := path.Join(os.TempDir(), dirName)
+	err := os.MkdirAll(filePath, perm)
 	if err != nil {
 		return "", err
 	}
-	name := f.Name()
+	f, err := ioutil.TempFile(filePath, "*.tf")
+	if err != nil {
+		return "", err
+	}
 	_, err = f.Write(data)
 	if err1 := f.Close(); err == nil {
 		err = err1
 	}
 	if err != nil {
-		os.Remove(name)
+		os.RemoveAll(filePath)
+		return "", err
 	}
-	return name, err
+	return filePath, err
+}
+
+func randomString() string {
+	b := make([]byte, 8)
+	_, err := rand.Read(b)
+	if err != nil {
+		return ""
+	}
+	return fmt.Sprintf("%x%x%x%x", b[0:2], b[2:4], b[4:6], b[6:8])
 }
