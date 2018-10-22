@@ -8,7 +8,7 @@ import (
 	"os/exec"
 	"testing"
 
-	"github.com/EngineerBetter/concourse-up/bosh/internal/bincache"
+	"github.com/EngineerBetter/concourse-up/util/bincache"
 	"github.com/stretchr/testify/require"
 )
 

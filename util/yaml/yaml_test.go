@@ -4,7 +4,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/EngineerBetter/concourse-up/bosh/internal/yaml"
+	"github.com/EngineerBetter/concourse-up/util/yaml"
 	yamlenc "github.com/ghodss/yaml"
 )
 
