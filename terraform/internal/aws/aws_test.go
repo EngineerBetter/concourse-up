@@ -1,7 +1,11 @@
-package aws
+package aws_test
 
 import (
+	"bytes"
+	"reflect"
 	"testing"
+
+	"github.com/EngineerBetter/concourse-up/terraform/internal/aws"
 )
 
 func TestInputVars_ConfigureTerraform(t *testing.T) {
@@ -43,7 +47,7 @@ func TestInputVars_ConfigureTerraform(t *testing.T) {
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			v := &InputVars{
+			v := &aws.InputVars{
 				Deployment:     test.fakeInputVars.Deployment,
 				Project:        test.fakeInputVars.Project,
 				Region:         test.fakeInputVars.Region,
@@ -64,7 +68,7 @@ func TestInputVars_ConfigureTerraform(t *testing.T) {
 
 func TestMetadata_Get(t *testing.T) {
 	type fields struct {
-		VPCID MetadataStringValue
+		VPCID aws.MetadataStringValue
 	}
 	tests := []struct {
 		name    string
@@ -75,7 +79,7 @@ func TestMetadata_Get(t *testing.T) {
 	}{{
 		name: "Success",
 		fields: fields{
-			VPCID: MetadataStringValue{
+			VPCID: aws.MetadataStringValue{
 				Value: "fakeMetadataStringValue",
 			},
 		},
@@ -85,7 +89,7 @@ func TestMetadata_Get(t *testing.T) {
 		{
 			name: "Failure",
 			fields: fields{
-				VPCID: MetadataStringValue{
+				VPCID: aws.MetadataStringValue{
 					Value: "fakeMetadataStringValue",
 				},
 			},
@@ -96,7 +100,7 @@ func TestMetadata_Get(t *testing.T) {
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			metadata := &Metadata{
+			metadata := &aws.Metadata{
 				VPCID: test.fields.VPCID,
 			}
 			got, err := metadata.Get(test.fakeKey)
@@ -112,7 +116,7 @@ func TestMetadata_Get(t *testing.T) {
 
 func TestInputVars_Build(t *testing.T) {
 	tests := []struct {
-		fakeInputVars InputVars
+		fakeInputVars aws.InputVars
 		name          string
 		data          map[string]interface{}
 		wantErr       bool
@@ -138,7 +142,7 @@ func TestInputVars_Build(t *testing.T) {
 				"TFStatePath":            "tfstatepath",
 				"MultiAZRDS":             true,
 			},
-			fakeInputVars: InputVars{},
+			fakeInputVars: aws.InputVars{},
 		},
 		{
 			name: "Failure",
@@ -161,7 +165,7 @@ func TestInputVars_Build(t *testing.T) {
 				"MultiAZRDS":             true,
 			},
 			wantErr:       true,
-			fakeInputVars: InputVars{},
+			fakeInputVars: aws.InputVars{},
 		},
 	}
 	for _, test := range tests {
@@ -169,6 +173,48 @@ func TestInputVars_Build(t *testing.T) {
 			if err := test.fakeInputVars.Build(test.data); (err != nil) != test.wantErr {
 				t.Errorf("InputVars.Build() error = %v, wantErr %v", err, test.wantErr)
 			}
+		})
+	}
+}
+
+func TestMetadata_Init(t *testing.T) {
+	tests := []struct {
+		name          string
+		buffer        *bytes.Buffer
+		data          string
+		keyToSet      string
+		expectedValue string
+		wantErr       bool
+	}{
+		{
+			name:          "Success",
+			data:          `{"atc_public_ip":{"sensitive":false,"type": "string","value": "fakeIP"}}`,
+			keyToSet:      "ATCPublicIP",
+			expectedValue: "fakeIP",
+		},
+		{
+			name:          "Failure",
+			keyToSet:      "ATCPublicIP",
+			expectedValue: "",
+			wantErr:       true,
+		},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			metadata := &aws.Metadata{}
+			buffer := bytes.NewBuffer(nil)
+			buffer.WriteString(test.data)
+			if err := metadata.Init(buffer); (err != nil) != test.wantErr {
+				t.Errorf("Metadata.Init() error = %v, wantErr %v", err, test.wantErr)
+			}
+			mm := reflect.ValueOf(metadata)
+			m := mm.Elem()
+			mv := m.FieldByName(test.keyToSet)
+			value := mv.FieldByName("Value").String()
+			if value != test.expectedValue {
+				t.Errorf("Metadata.Init() test case %s\nfailed testing key %s\nexpected value %s\nreceived value %s\n", test.name, test.keyToSet, value, test.expectedValue)
+			}
+
 		})
 	}
 }
