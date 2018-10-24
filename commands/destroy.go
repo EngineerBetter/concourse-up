@@ -11,6 +11,7 @@ import (
 	"github.com/EngineerBetter/concourse-up/config"
 	"github.com/EngineerBetter/concourse-up/fly"
 	"github.com/EngineerBetter/concourse-up/iaas"
+	"github.com/EngineerBetter/concourse-up/terraform"
 	"github.com/EngineerBetter/concourse-up/util"
 
 	"gopkg.in/urfave/cli.v1"
@@ -70,9 +71,13 @@ var destroy = cli.Command{
 		if err != nil {
 			return err
 		}
-
+		terraformClient, err := terraform.New(terraform.DownloadTerraform())
+		if err != nil {
+			return err
+		}
 		client := concourse.NewClient(
 			iaasClient,
+			terraformClient,
 			bosh.NewClient,
 			fly.New,
 			certs.Generate,

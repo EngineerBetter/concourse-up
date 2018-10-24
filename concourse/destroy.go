@@ -4,7 +4,6 @@ import (
 	"io"
 
 	"github.com/EngineerBetter/concourse-up/iaas"
-	"github.com/EngineerBetter/concourse-up/terraform"
 )
 
 // Destroy destroys a concourse instance
@@ -14,12 +13,7 @@ func (client *Client) Destroy() error {
 		return err
 	}
 
-	tf, err := terraform.New(terraform.DownloadTerraform())
-	if err != nil {
-		return err
-	}
-
-	var environment, metadata = tf.IAAS("AWS")
+	var environment, metadata = client.tfCLI.IAAS("AWS")
 	err = environment.Build(map[string]interface{}{
 		"AllowIPs":               conf.AllowIPs,
 		"AvailabilityZone":       conf.AvailabilityZone,
@@ -42,7 +36,7 @@ func (client *Client) Destroy() error {
 	if err != nil {
 		return err
 	}
-	err = tf.BuildOutput(environment, metadata)
+	err = client.tfCLI.BuildOutput(environment, metadata)
 	if err != nil {
 		return err
 	}
@@ -57,7 +51,7 @@ func (client *Client) Destroy() error {
 	}
 
 	// @Note change to Destroy
-	err = tf.Destroy(environment)
+	err = client.tfCLI.Destroy(environment)
 	if err != nil {
 		return err
 	}

@@ -72,12 +72,7 @@ func (client *Client) Deploy() error {
 	c.HostedZoneRecordPrefix = r.HostedZoneRecordPrefix
 	c.Domain = r.Domain
 
-	tf, err := terraform.New(terraform.DownloadTerraform())
-	if err != nil {
-		return err
-	}
-
-	var environment, metadata = tf.IAAS("AWS")
+	var environment, metadata = client.tfCLI.IAAS("AWS")
 	err = environment.Build(map[string]interface{}{
 		"AllowIPs":               c.AllowIPs,
 		"AvailabilityZone":       c.AvailabilityZone,
@@ -101,11 +96,11 @@ func (client *Client) Deploy() error {
 		return err
 	}
 
-	err = tf.Apply(environment, false)
+	err = client.tfCLI.Apply(environment, false)
 	if err != nil {
 		return err
 	}
-	err = tf.BuildOutput(environment, metadata)
+	err = client.tfCLI.BuildOutput(environment, metadata)
 	if err != nil {
 		return err
 	}

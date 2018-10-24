@@ -10,7 +10,6 @@ import (
 
 	"github.com/EngineerBetter/concourse-up/bosh"
 	"github.com/EngineerBetter/concourse-up/config"
-	"github.com/EngineerBetter/concourse-up/terraform"
 	"github.com/fatih/color"
 )
 
@@ -34,12 +33,7 @@ func (client *Client) FetchInfo() (*Info, error) {
 		return nil, err
 	}
 
-	tf, err := terraform.New(terraform.DownloadTerraform())
-	if err != nil {
-		return nil, err
-	}
-
-	var environment, metadata = tf.IAAS("AWS")
+	var environment, metadata = client.tfCLI.IAAS("AWS")
 	err = environment.Build(map[string]interface{}{
 		"AllowIPs":               config.AllowIPs,
 		"AvailabilityZone":       config.AvailabilityZone,
@@ -62,7 +56,7 @@ func (client *Client) FetchInfo() (*Info, error) {
 	if err != nil {
 		return nil, err
 	}
-	err = tf.BuildOutput(environment, metadata)
+	err = client.tfCLI.BuildOutput(environment, metadata)
 	if err != nil {
 		return nil, err
 	}

@@ -4,6 +4,8 @@ import (
 	"errors"
 	"os"
 
+	"github.com/EngineerBetter/concourse-up/terraform"
+
 	"github.com/EngineerBetter/concourse-up/bosh"
 	"github.com/EngineerBetter/concourse-up/certs"
 	"github.com/EngineerBetter/concourse-up/concourse"
@@ -150,13 +152,18 @@ var deploy = cli.Command{
 		if err != nil {
 			return err
 		}
-
+		terraformClient, err := terraform.New(terraform.DownloadTerraform())
+		if err != nil {
+			return err
+		}
 		client := concourse.NewClient(
 			awsClient,
+			terraformClient,
 			bosh.NewClient,
 			fly.New,
 			certs.Generate,
 			config.New(awsClient, name, deployArgs.Namespace),
+
 			&deployArgs,
 			os.Stdout,
 			os.Stderr,
