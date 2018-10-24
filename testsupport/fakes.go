@@ -1,8 +1,11 @@
 package testsupport
 
 import (
+	"bytes"
 	"crypto"
 	"errors"
+
+	"github.com/EngineerBetter/concourse-up/terraform"
 
 	"github.com/EngineerBetter/concourse-up/bosh"
 	"github.com/EngineerBetter/concourse-up/certs"
@@ -10,6 +13,72 @@ import (
 	"github.com/EngineerBetter/concourse-up/iaas"
 	"github.com/xenolf/lego/acme"
 )
+
+// FakeTerraformInputVars implements terraform.TerraformInputVars for testing
+type FakeTerraformInputVars struct {
+	FakeConfigureTerraform func(config string) (string, error)
+	FakeBuild              func(data map[string]interface{}) error
+}
+
+// FakeIAASMetadata implements terraform.IAASMetadata for testing
+type FakeIAASMetadata struct {
+	FakeAssertValid func() error
+	FakeInit        func(*bytes.Buffer) error
+	FakeGet         func(string) (string, error)
+}
+
+// AssertValid delegates to FakeAssertValid which is dynamically set by the tests
+func (fakeIAASMetadata *FakeIAASMetadata) AssertValid() error {
+	return fakeIAASMetadata.FakeAssertValid()
+}
+
+// Init delegates to FakeInit which is dynamically set by the tests
+func (fakeIAASMetadata *FakeIAASMetadata) Init(data *bytes.Buffer) error {
+	return fakeIAASMetadata.FakeInit(data)
+}
+
+// Get delegates to FakeGet which is dynamically set by the tests
+func (fakeIAASMetadata *FakeIAASMetadata) Get(key string) (string, error) {
+	return fakeIAASMetadata.FakeGet(key)
+}
+
+// ConfigureTerraform delegates to FakeConfigureTerraform which is dynamically set by the tests
+func (fakeTerraformInputVars *FakeTerraformInputVars) ConfigureTerraform(config string) (string, error) {
+	return fakeTerraformInputVars.FakeConfigureTerraform(config)
+}
+
+// Build delegates to FakeBuild which is dynamically set by the tests
+func (fakeTerraformInputVars *FakeTerraformInputVars) Build(data map[string]interface{}) error {
+	return fakeTerraformInputVars.FakeBuild(data)
+}
+
+// FakeTerraformCLI implements terraform.TerraformCLI for testing
+type FakeTerraformCLI struct {
+	FakeIAAS        func(name string) (terraform.TerraformInputVars, terraform.IAASMetadata)
+	FakeApply       func(conf terraform.TerraformInputVars, dryrun bool) error
+	FakeDestroy     func(conf terraform.TerraformInputVars) error
+	FakeBuildOutput func(conf terraform.TerraformInputVars, metadata terraform.IAASMetadata) error
+}
+
+// IAAS delegates to FakeIAAS which is dynamically set by the tests
+func (client *FakeTerraformCLI) IAAS(name string) (terraform.TerraformInputVars, terraform.IAASMetadata) {
+	return client.FakeIAAS(name)
+}
+
+// Apply delegates to FakeApply which is dynamically set by the tests
+func (client *FakeTerraformCLI) Apply(conf terraform.TerraformInputVars, dryrun bool) error {
+	return client.FakeApply(conf, dryrun)
+}
+
+// Destroy delegates to FakeDestroy which is dynamically set by the tests
+func (client *FakeTerraformCLI) Destroy(conf terraform.TerraformInputVars) error {
+	return client.FakeDestroy(conf)
+}
+
+// BuildOutput delegates to FakeBuildOutput which is dynamically set by the tests
+func (client *FakeTerraformCLI) BuildOutput(conf terraform.TerraformInputVars, metadata terraform.IAASMetadata) error {
+	return client.FakeBuildOutput(conf, metadata)
+}
 
 // FakeAWSClient implements iaas.IClient for testing
 type FakeAWSClient struct {

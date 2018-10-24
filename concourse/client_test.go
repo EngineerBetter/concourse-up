@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"reflect"
 
 	"github.com/EngineerBetter/concourse-up/bosh"
 	"github.com/EngineerBetter/concourse-up/certs"
@@ -26,11 +27,31 @@ var _ = Describe("Client", func() {
 	var stdout *gbytes.Buffer
 	var stderr *gbytes.Buffer
 	var deleteBoshDirectorError error
-	var terraformMetadata *terraform.Metadata
 	var args *config.DeployArgs
 	var exampleConfig config.Config
 	var ipChecker func() (string, error)
 	var exampleDirectorCreds []byte
+
+	type TerraformMetadata struct {
+		ATCPublicIP              string
+		ATCSecurityGroupID       string
+		BlobstoreBucket          string
+		BlobstoreSecretAccessKey string
+		BlobstoreUserAccessKeyID string
+		BoshDBAddress            string
+		BoshDBPort               string
+		BoshSecretAccessKey      string
+		BoshUserAccessKeyID      string
+		DirectorKeyPair          string
+		DirectorPublicIP         string
+		DirectorSecurityGroupID  string
+		NatGatewayIP             string
+		PrivateSubnetID          string
+		PublicSubnetID           string
+		VMsSecurityGroupID       string
+		VPCID                    string
+	}
+	var terraformMetadata TerraformMetadata
 
 	certGenerator := func(c func(u *certs.User) (certs.AcmeClient, error), caName string, ip ...string) (*certs.Certs, error) {
 		actions = append(actions, fmt.Sprintf("generating cert ca: %s, cn: %s", caName, ip))
@@ -92,24 +113,24 @@ var _ = Describe("Client", func() {
 			DBSizeIsSet: false,
 		}
 
-		terraformMetadata = &terraform.Metadata{
-			ATCPublicIP:              terraform.MetadataStringValue{Value: "77.77.77.77"},
-			ATCSecurityGroupID:       terraform.MetadataStringValue{Value: "sg-999"},
-			BlobstoreBucket:          terraform.MetadataStringValue{Value: "blobs.aws.com"},
-			BlobstoreSecretAccessKey: terraform.MetadataStringValue{Value: "abc123"},
-			BlobstoreUserAccessKeyID: terraform.MetadataStringValue{Value: "abc123"},
-			BoshDBAddress:            terraform.MetadataStringValue{Value: "rds.aws.com"},
-			BoshDBPort:               terraform.MetadataStringValue{Value: "5432"},
-			BoshSecretAccessKey:      terraform.MetadataStringValue{Value: "abc123"},
-			BoshUserAccessKeyID:      terraform.MetadataStringValue{Value: "abc123"},
-			DirectorKeyPair:          terraform.MetadataStringValue{Value: "-- KEY --"},
-			DirectorPublicIP:         terraform.MetadataStringValue{Value: "99.99.99.99"},
-			DirectorSecurityGroupID:  terraform.MetadataStringValue{Value: "sg-123"},
-			NatGatewayIP:             terraform.MetadataStringValue{Value: "88.88.88.88"},
-			PrivateSubnetID:          terraform.MetadataStringValue{Value: "sn-private-123"},
-			PublicSubnetID:           terraform.MetadataStringValue{Value: "sn-public-123"},
-			VMsSecurityGroupID:       terraform.MetadataStringValue{Value: "sg-456"},
-			VPCID:                    terraform.MetadataStringValue{Value: "vpc-112233"},
+		terraformMetadata = TerraformMetadata{
+			ATCPublicIP:              "77.77.77.77",
+			ATCSecurityGroupID:       "sg-999",
+			BlobstoreBucket:          "blobs.aws.com",
+			BlobstoreSecretAccessKey: "abc123",
+			BlobstoreUserAccessKeyID: "abc123",
+			BoshDBAddress:            "rds.aws.com",
+			BoshDBPort:               "5432",
+			BoshSecretAccessKey:      "abc123",
+			BoshUserAccessKeyID:      "abc123",
+			DirectorKeyPair:          "-- KEY --",
+			DirectorPublicIP:         "99.99.99.99",
+			DirectorSecurityGroupID:  "sg-123",
+			NatGatewayIP:             "88.88.88.88",
+			PrivateSubnetID:          "sn-private-123",
+			PublicSubnetID:           "sn-public-123",
+			VMsSecurityGroupID:       "sg-456",
+			VPCID:                    "vpc-112233",
 		}
 
 		deleteBoshDirectorError = nil
@@ -187,30 +208,42 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 				return nil
 			},
 		}
-
-		terraformClientFactory := func(iaas string, config config.Config, stdout, stderr io.Writer, versionFile []byte) (terraform.IClient, error) {
-			return &testsupport.FakeTerraformClient{
-				FakeApply: func(dryrun bool) error {
-					Expect(dryrun).To(BeFalse())
-					actions = append(actions, fmt.Sprintf("applying terraform, db size: %s", config.RDSInstanceClass))
-					return nil
-				},
-				FakeDestroy: func() error {
-					actions = append(actions, "destroying terraform")
-					return nil
-				},
-				FakeOutput: func() (*terraform.Metadata, error) {
-					actions = append(actions, "fetching terraform metadata")
-					return terraformMetadata, nil
-				},
-				FakeCleanup: func() error {
-					actions = append(actions, "cleaning up terraform client")
-					return nil
-				},
-			}, nil
+		terraformCLI := &testsupport.FakeTerraformCLI{
+			FakeIAAS: func(name string) (terraform.TerraformInputVars, terraform.IAASMetadata) {
+				fakeInputVars := &testsupport.FakeTerraformInputVars{
+					FakeBuild: func(data map[string]interface{}) error {
+						return nil
+					},
+				}
+				fakeMetadata := &testsupport.FakeIAASMetadata{
+					FakeGet: func(key string) (string, error) {
+						mm := reflect.ValueOf(&terraformMetadata)
+						m := mm.Elem()
+						mv := m.FieldByName(key)
+						if !mv.IsValid() {
+							return "", errors.New(key + " key not found")
+						}
+						return mv.String(), nil
+					},
+				}
+				return fakeInputVars, fakeMetadata
+			},
+			FakeApply: func(conf terraform.TerraformInputVars, dryrun bool) error {
+				Expect(dryrun).To(BeFalse())
+				actions = append(actions, "applying terraform")
+				return nil
+			},
+			FakeDestroy: func(conf terraform.TerraformInputVars) error {
+				actions = append(actions, "destroying terraform")
+				return nil
+			},
+			FakeBuildOutput: func(conf terraform.TerraformInputVars, metadata terraform.IAASMetadata) error {
+				actions = append(actions, "fetching terraform metadata")
+				return nil
+			},
 		}
 
-		boshClientFactory := func(config config.Config, metadata *terraform.Metadata, director director.IClient, stdout, stderr io.Writer) (bosh.IClient, error) {
+		boshClientFactory := func(config config.Config, metadata terraform.IAASMetadata, director director.IClient, stdout, stderr io.Writer) (bosh.IClient, error) {
 			return &testsupport.FakeBoshClient{
 				FakeDeploy: func(stateFileBytes, credsFileBytes []byte, detach bool) ([]byte, []byte, error) {
 					if detach {
@@ -245,7 +278,7 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 		buildClient = func() concourse.IClient {
 			return concourse.NewClient(
 				awsClient,
-				terraformClientFactory,
+				terraformCLI,
 				boshClientFactory,
 				func(fly.Credentials, io.Writer, io.Writer, []byte) (fly.IClient, error) {
 					return fakeFlyClient, nil
@@ -264,7 +297,7 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 		buildClientOtherRegion = func() concourse.IClient {
 			return concourse.NewClient(
 				otherRegionClient,
-				terraformClientFactory,
+				terraformCLI,
 				boshClientFactory,
 				func(fly.Credentials, io.Writer, io.Writer, []byte) (fly.IClient, error) {
 					return fakeFlyClient, nil
@@ -315,15 +348,7 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 			err := client.Deploy()
 			Expect(err).ToNot(HaveOccurred())
 
-			Expect(actions).To(ContainElement("applying terraform, db size: db.t2.medium"))
-		})
-
-		It("Cleans up the correct terraform client", func() {
-			client := buildClient()
-			err := client.Deploy()
-			Expect(err).ToNot(HaveOccurred())
-
-			Expect(actions).To(ContainElement("cleaning up terraform client"))
+			Expect(actions).To(ContainElement("applying terraform"))
 		})
 
 		It("Generates certificates for bosh", func() {
@@ -361,7 +386,7 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 				err := client.Deploy()
 				Expect(err).ToNot(HaveOccurred())
 
-				Expect(actions).To(ContainElement("applying terraform, db size: db.t2.medium"))
+				Expect(actions).To(ContainElement("applying terraform"))
 			})
 		})
 
@@ -412,7 +437,7 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 				err := client.Deploy()
 				Expect(err).ToNot(HaveOccurred())
 
-				Expect(actions[8]).To(Equal("deploying director in self-update mode"))
+				Expect(actions).To(ContainElement("deploying director in self-update mode"))
 			})
 		})
 
@@ -471,17 +496,6 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 				Eventually(stdout).Should(gbytes.Say("USING PREVIOUS DEPLOYMENT CONFIG"))
 			})
 		})
-
-		Context("When a metadata field is missing", func() {
-			It("Returns an error", func() {
-				terraformMetadata.DirectorKeyPair = terraform.MetadataStringValue{Value: ""}
-				client := buildClient()
-				err := client.Deploy()
-				Expect(err).To(HaveOccurred())
-				Expect(err.Error()).To(ContainSubstring("director_key_pair"))
-				Expect(err.Error()).To(ContainSubstring("non zero value required"))
-			})
-		})
 	})
 
 	Describe("Destroy", func() {
@@ -507,14 +521,6 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 			Expect(err).ToNot(HaveOccurred())
 
 			Expect(actions).To(ContainElement("destroying terraform"))
-		})
-
-		It("Cleans up the terraform client", func() {
-			client := buildClient()
-			err := client.Destroy()
-			Expect(err).ToNot(HaveOccurred())
-
-			Expect(actions).To(ContainElement("cleaning up terraform client"))
 		})
 
 		It("Deletes the config", func() {
