@@ -27,6 +27,14 @@ type IAASMetadata interface {
 	Get(string) (string, error)
 }
 
+//TerraformCLIInterface is interface the abstraction of execCmd
+type TerraformCLIInterface interface {
+	IAAS(string) (TerraformInputVars, IAASMetadata)
+	Apply(TerraformInputVars, bool) error
+	Destroy(TerraformInputVars) error
+	BuildOutput(TerraformInputVars, IAASMetadata) error
+}
+
 // TerraformCLI struct holds the abstraction of execCmd
 type TerraformCLI struct {
 	execCmd       func(string, ...string) *exec.Cmd
