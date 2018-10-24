@@ -212,11 +212,13 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 			FakeIAAS: func(name string) (terraform.TerraformInputVars, terraform.IAASMetadata) {
 				fakeInputVars := &testsupport.FakeTerraformInputVars{
 					FakeBuild: func(data map[string]interface{}) error {
+						actions = append(actions, "building iaas environment")
 						return nil
 					},
 				}
 				fakeMetadata := &testsupport.FakeIAASMetadata{
 					FakeGet: func(key string) (string, error) {
+						actions = append(actions, fmt.Sprintf("looking for key %s", key))
 						mm := reflect.ValueOf(&terraformMetadata)
 						m := mm.Elem()
 						mv := m.FieldByName(key)
@@ -238,7 +240,7 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 				return nil
 			},
 			FakeBuildOutput: func(conf terraform.TerraformInputVars, metadata terraform.IAASMetadata) error {
-				actions = append(actions, "fetching terraform metadata")
+				actions = append(actions, "initializing terraform metadata")
 				return nil
 			},
 		}
@@ -334,8 +336,15 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 				Expect(stderr).To(gbytes.Say("WARNING: adding record ci.google.com to Route53 hosted zone google.com ID: ABC123"))
 			})
 		})
+		It("Builds IAAS environment", func() {
+			client := buildClient()
+			err := client.Deploy()
+			Expect(err).ToNot(HaveOccurred())
 
-		It("Loads of creates config file", func() {
+			Expect(actions).To(ContainElement("building iaas environment"))
+		})
+
+		It("Loads or creates config file", func() {
 			client := buildClient()
 			err := client.Deploy()
 			Expect(err).ToNot(HaveOccurred())
@@ -506,7 +515,27 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 
 			Expect(actions).To(ContainElement("loading config file"))
 		})
+		It("Builds IAAS environment", func() {
+			client := buildClient()
+			err := client.Destroy()
+			Expect(err).ToNot(HaveOccurred())
 
+			Expect(actions).To(ContainElement("building iaas environment"))
+		})
+		It("Loads terraform output", func() {
+			client := buildClient()
+			err := client.Destroy()
+			Expect(err).ToNot(HaveOccurred())
+
+			Expect(actions).To(ContainElement("initializing terraform metadata"))
+		})
+		It("Gets the vpc ID", func() {
+			client := buildClient()
+			err := client.Destroy()
+			Expect(err).ToNot(HaveOccurred())
+
+			Expect(actions).To(ContainElement("looking for key VPCID"))
+		})
 		It("Deletes the vms in the vpcs", func() {
 			client := buildClient()
 			err := client.Destroy()
@@ -560,15 +589,43 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 
 			Expect(actions).To(ContainElement("loading config file"))
 		})
+		It("Builds IAAS environment", func() {
+			client := buildClient()
+			err := client.Deploy()
+			Expect(err).ToNot(HaveOccurred())
+
+			Expect(actions).To(ContainElement("building iaas environment"))
+		})
 
 		It("Loads terraform output", func() {
 			client := buildClient()
 			_, err := client.FetchInfo()
 			Expect(err).ToNot(HaveOccurred())
 
-			Expect(actions).To(ContainElement("fetching terraform metadata"))
+			Expect(actions).To(ContainElement("initializing terraform metadata"))
 		})
 
+		It("Gets the director public IP", func() {
+			client := buildClient()
+			_, err := client.FetchInfo()
+			Expect(err).ToNot(HaveOccurred())
+
+			Expect(actions).To(ContainElement("looking for key DirectorPublicIP"))
+		})
+		It("Gets the nat gateway IP", func() {
+			client := buildClient()
+			_, err := client.FetchInfo()
+			Expect(err).ToNot(HaveOccurred())
+
+			Expect(actions).To(ContainElement("looking for key NatGatewayIP"))
+		})
+		It("Gets the director security group ID", func() {
+			client := buildClient()
+			_, err := client.FetchInfo()
+			Expect(err).ToNot(HaveOccurred())
+
+			Expect(actions).To(ContainElement("looking for key DirectorSecurityGroupID"))
+		})
 		It("Checks that the IP is whitelisted", func() {
 			client := buildClient()
 			_, err := client.FetchInfo()

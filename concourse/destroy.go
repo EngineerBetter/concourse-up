@@ -50,7 +50,6 @@ func (client *Client) Destroy() error {
 		return err
 	}
 
-	// @Note change to Destroy
 	err = client.tfCLI.Destroy(environment)
 	if err != nil {
 		return err
