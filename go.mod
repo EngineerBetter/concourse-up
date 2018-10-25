@@ -1,7 +1,7 @@
 module github.com/EngineerBetter/concourse-up
 
 require (
-	cloud.google.com/go v0.30.0
+	cloud.google.com/go v0.31.0
 	github.com/asaskevich/govalidator v0.0.0-20171111151018-521b25f4b05f
 	github.com/aws/aws-sdk-go v1.15.31
 	github.com/bmatcuk/doublestar v1.1.1 // indirect
