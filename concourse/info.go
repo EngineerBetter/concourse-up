@@ -65,6 +65,7 @@ func (client *Client) FetchInfo() (*Info, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	natGatewayIP, err := metadata.Get("NatGatewayIP")
 	if err != nil {
 		return nil, err
@@ -190,8 +191,8 @@ func writeTempFile(data string) (name string, err error) {
 var envTemplate = template.Must(template.New("env").Funcs(template.FuncMap{
 	"to_file": writeTempFile,
 }).Parse(`
-export BOSH_ENVIRONMENT={{.Terraform.DirectorPublicIP.Value}}
-export BOSH_GW_HOST={{.Terraform.DirectorPublicIP.Value}}
+export BOSH_ENVIRONMENT={{.Terraform.DirectorPublicIP}}
+export BOSH_GW_HOST={{.Terraform.DirectorPublicIP}}
 export BOSH_CA_CERT='{{.Config.DirectorCACert}}'
 export BOSH_DEPLOYMENT=concourse
 export BOSH_CLIENT={{.Config.DirectorUsername}}
@@ -209,7 +210,9 @@ export NAMESPACE={{.Config.Namespace}}
 // varibles which are used to log into bosh and credhub
 func (info *Info) Env() (string, error) {
 	var buf bytes.Buffer
-	err := envTemplate.Execute(&buf, info)
+	var i Info
+	i = *info
+	err := envTemplate.Execute(&buf, i)
 	if err != nil {
 		return "", err
 	}

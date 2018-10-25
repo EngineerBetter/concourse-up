@@ -1,6 +1,7 @@
 package commands
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"os"
@@ -13,8 +14,6 @@ import (
 	"github.com/EngineerBetter/concourse-up/iaas"
 	"github.com/EngineerBetter/concourse-up/terraform"
 	"github.com/EngineerBetter/concourse-up/util"
-
-	"encoding/json"
 
 	"gopkg.in/urfave/cli.v1"
 )
@@ -94,23 +93,24 @@ var info = cli.Command{
 			c.App.Version,
 		)
 
-		info, err := client.FetchInfo()
+		i, err := client.FetchInfo()
+
 		if err != nil {
 			return err
 		}
 
 		switch {
 		case infoArgs.JSON:
-			return json.NewEncoder(os.Stdout).Encode(info)
+			return json.NewEncoder(os.Stdout).Encode(i)
 		case infoArgs.Env:
-			env, err := info.Env()
+			env, err := i.Env()
 			if err != nil {
 				return err
 			}
 			_, err = os.Stdout.WriteString(env)
 			return err
 		default:
-			_, err := fmt.Fprint(os.Stdout, info)
+			_, err := fmt.Fprint(os.Stdout, i)
 			return err
 		}
 	},
