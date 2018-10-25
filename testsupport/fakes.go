@@ -52,31 +52,31 @@ func (fakeTerraformInputVars *FakeTerraformInputVars) Build(data map[string]inte
 	return fakeTerraformInputVars.FakeBuild(data)
 }
 
-// FakeTerraformCLI implements terraform.TerraformCLI for testing
-type FakeTerraformCLI struct {
-	FakeIAAS        func(name string) (terraform.TerraformInputVars, terraform.IAASMetadata)
-	FakeApply       func(conf terraform.TerraformInputVars, dryrun bool) error
-	FakeDestroy     func(conf terraform.TerraformInputVars) error
-	FakeBuildOutput func(conf terraform.TerraformInputVars, metadata terraform.IAASMetadata) error
+// FakeCLI implements terraform.CLI for testing
+type FakeCLI struct {
+	FakeIAAS        func(name string) (terraform.InputVars, terraform.IAASMetadata)
+	FakeApply       func(conf terraform.InputVars, dryrun bool) error
+	FakeDestroy     func(conf terraform.InputVars) error
+	FakeBuildOutput func(conf terraform.InputVars, metadata terraform.IAASMetadata) error
 }
 
 // IAAS delegates to FakeIAAS which is dynamically set by the tests
-func (client *FakeTerraformCLI) IAAS(name string) (terraform.TerraformInputVars, terraform.IAASMetadata) {
+func (client *FakeCLI) IAAS(name string) (terraform.InputVars, terraform.IAASMetadata) {
 	return client.FakeIAAS(name)
 }
 
 // Apply delegates to FakeApply which is dynamically set by the tests
-func (client *FakeTerraformCLI) Apply(conf terraform.TerraformInputVars, dryrun bool) error {
+func (client *FakeCLI) Apply(conf terraform.InputVars, dryrun bool) error {
 	return client.FakeApply(conf, dryrun)
 }
 
 // Destroy delegates to FakeDestroy which is dynamically set by the tests
-func (client *FakeTerraformCLI) Destroy(conf terraform.TerraformInputVars) error {
+func (client *FakeCLI) Destroy(conf terraform.InputVars) error {
 	return client.FakeDestroy(conf)
 }
 
 // BuildOutput delegates to FakeBuildOutput which is dynamically set by the tests
-func (client *FakeTerraformCLI) BuildOutput(conf terraform.TerraformInputVars, metadata terraform.IAASMetadata) error {
+func (client *FakeCLI) BuildOutput(conf terraform.InputVars, metadata terraform.IAASMetadata) error {
 	return client.FakeBuildOutput(conf, metadata)
 }
 

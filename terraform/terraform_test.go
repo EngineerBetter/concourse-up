@@ -29,10 +29,10 @@ func (mockInputVars *mockTerraformInputVars) ConfigureTerraform(terraformContent
 func (mockInputVars *mockTerraformInputVars) Build(data map[string]interface{}) error {
 	return nil
 }
-func TestTerraformCLI_Apply(t *testing.T) {
+func TestCLI_Apply(t *testing.T) {
 	e := fakeexec.New(t)
 	defer e.Finish()
-	mockTerraformClient, err := terraform.New(terraform.FakeExec(e.Cmd()))
+	mockCLIent, err := terraform.New(terraform.FakeExec(e.Cmd()))
 	require.NoError(t, err)
 
 	config := &mockTerraformInputVars{}
@@ -49,14 +49,14 @@ func TestTerraformCLI_Apply(t *testing.T) {
 		require.Equal(t, args[2], "-auto-approve")
 
 	})
-	err = mockTerraformClient.Apply(config, false)
+	err = mockCLIent.Apply(config, false)
 	require.NoError(t, err)
 }
 
-func TestTerraformCLI_ApplyPlan(t *testing.T) {
+func TestCLI_ApplyPlan(t *testing.T) {
 	e := fakeexec.New(t)
 	defer e.Finish()
-	mockTerraformClient, err := terraform.New(terraform.FakeExec(e.Cmd()))
+	mockCLIent, err := terraform.New(terraform.FakeExec(e.Cmd()))
 	require.NoError(t, err)
 
 	config := &mockTerraformInputVars{}
@@ -70,14 +70,14 @@ func TestTerraformCLI_ApplyPlan(t *testing.T) {
 		require.Equal(t, "terraform", command)
 		require.Equal(t, args[0], "plan")
 	})
-	err = mockTerraformClient.Apply(config, true)
+	err = mockCLIent.Apply(config, true)
 	require.NoError(t, err)
 }
 
-func TestTerraformCLI_Destroy(t *testing.T) {
+func TestCLI_Destroy(t *testing.T) {
 	e := fakeexec.New(t)
 	defer e.Finish()
-	mockTerraformClient, err := terraform.New(terraform.FakeExec(e.Cmd()))
+	mockCLIent, err := terraform.New(terraform.FakeExec(e.Cmd()))
 	require.NoError(t, err)
 
 	config := &mockTerraformInputVars{}
@@ -93,14 +93,14 @@ func TestTerraformCLI_Destroy(t *testing.T) {
 		require.Equal(t, args[1], "-auto-approve")
 
 	})
-	err = mockTerraformClient.Destroy(config)
+	err = mockCLIent.Destroy(config)
 	require.NoError(t, err)
 }
 
-func TestTerraformCLI_BuildOutput(t *testing.T) {
+func TestCLI_BuildOutput(t *testing.T) {
 	e := fakeexec.New(t)
 	defer e.Finish()
-	mockTerraformClient, err := terraform.New(terraform.FakeExec(e.Cmd()))
+	mockCLIent, err := terraform.New(terraform.FakeExec(e.Cmd()))
 	require.NoError(t, err)
 
 	config := &mockTerraformInputVars{}
@@ -117,6 +117,6 @@ func TestTerraformCLI_BuildOutput(t *testing.T) {
 		require.Equal(t, args[1], "-json")
 
 	})
-	err = mockTerraformClient.BuildOutput(config, metadata)
+	err = mockCLIent.BuildOutput(config, metadata)
 	require.NoError(t, err)
 }

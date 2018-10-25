@@ -208,8 +208,8 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 				return nil
 			},
 		}
-		terraformCLI := &testsupport.FakeTerraformCLI{
-			FakeIAAS: func(name string) (terraform.TerraformInputVars, terraform.IAASMetadata) {
+		terraformCLI := &testsupport.FakeCLI{
+			FakeIAAS: func(name string) (terraform.InputVars, terraform.IAASMetadata) {
 				fakeInputVars := &testsupport.FakeTerraformInputVars{
 					FakeBuild: func(data map[string]interface{}) error {
 						actions = append(actions, "building iaas environment")
@@ -230,16 +230,16 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 				}
 				return fakeInputVars, fakeMetadata
 			},
-			FakeApply: func(conf terraform.TerraformInputVars, dryrun bool) error {
+			FakeApply: func(conf terraform.InputVars, dryrun bool) error {
 				Expect(dryrun).To(BeFalse())
 				actions = append(actions, "applying terraform")
 				return nil
 			},
-			FakeDestroy: func(conf terraform.TerraformInputVars) error {
+			FakeDestroy: func(conf terraform.InputVars) error {
 				actions = append(actions, "destroying terraform")
 				return nil
 			},
-			FakeBuildOutput: func(conf terraform.TerraformInputVars, metadata terraform.IAASMetadata) error {
+			FakeBuildOutput: func(conf terraform.InputVars, metadata terraform.IAASMetadata) error {
 				actions = append(actions, "initializing terraform metadata")
 				return nil
 			},

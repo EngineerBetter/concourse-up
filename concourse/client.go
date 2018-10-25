@@ -15,7 +15,7 @@ import (
 // Client is a concrete implementation of IClient interface
 type Client struct {
 	iaasClient            iaas.IClient
-	tfCLI                 terraform.TerraformCLIInterface
+	tfCLI                 terraform.CLIInterface
 	boshClientFactory     bosh.ClientFactory
 	flyClientFactory      func(fly.Credentials, io.Writer, io.Writer, []byte) (fly.IClient, error)
 	certGenerator         func(constructor func(u *certs.User) (certs.AcmeClient, error), caName string, ip ...string) (*certs.Certs, error)
@@ -42,7 +42,7 @@ var versionFile = MustAsset("../../concourse-up-ops/director-versions.json")
 // NewClient returns a new Client
 func NewClient(
 	iaasClient iaas.IClient,
-	tfCLI terraform.TerraformCLIInterface,
+	tfCLI terraform.CLIInterface,
 	boshClientFactory bosh.ClientFactory,
 	flyClientFactory func(fly.Credentials, io.Writer, io.Writer, []byte) (fly.IClient, error),
 	certGenerator func(constructor func(u *certs.User) (certs.AcmeClient, error), caName string, ip ...string) (*certs.Certs, error),
@@ -71,6 +71,9 @@ func NewClient(
 
 func (client *Client) buildBoshClient(config config.Config, metadata terraform.IAASMetadata) (bosh.IClient, error) {
 	directorPublicIP, err := metadata.Get("DirectorPublicIP")
+	if err != nil {
+		return nil, err
+	}
 	director, err := director.NewClient(director.Credentials{
 		Username: config.DirectorUsername,
 		Password: config.DirectorPassword,

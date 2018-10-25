@@ -34,25 +34,25 @@ type InputVars struct {
 
 // ConfigureTerraform interpolates terraform contents and returns terraform config
 func (v *InputVars) ConfigureTerraform(terraformContents string) (string, error) {
-	cc, err := util.RenderTemplate(terraformContents, v)
-	if cc == nil {
+	terraformConfig, err := util.RenderTemplate(terraformContents, v)
+	if terraformConfig == nil {
 		return "", err
 	}
-	return string(cc), err
+	return string(terraformConfig), err
 }
 
 // Build fills the InputVars struct with values from the map input
 func (v *InputVars) Build(data map[string]interface{}) error {
-	en := reflect.ValueOf(v)
-	env := en.Elem()
-	t := env.Type()
+	reflectValue := reflect.ValueOf(v)
+	env := reflectValue.Elem()
+	reflectType := env.Type()
 	for i := 0; i < env.NumField(); i++ {
-		value, ok := data[t.Field(i).Name]
+		value, ok := data[reflectType.Field(i).Name]
 		if !ok {
-			return errors.New("terraform:aws field " + t.Field(i).Name + " should be provided")
+			return errors.New("terraform:aws field " + reflectType.Field(i).Name + " should be provided")
 		}
 		if !env.Field(i).CanSet() {
-			return errors.New("terraform:aws field " + t.Field(i).Name + " cannot be set")
+			return errors.New("terraform:aws field " + reflectType.Field(i).Name + " cannot be set")
 		}
 		switch trueValue := value.(type) {
 		case string:
@@ -64,8 +64,11 @@ func (v *InputVars) Build(data map[string]interface{}) error {
 		}
 	}
 	i := env.Interface()
-	ie := i.(InputVars)
-	v = &ie
+	tempStruct, ok := i.(InputVars)
+	if !ok {
+		return errors.New("could not Build terraform input data")
+	}
+	v = &tempStruct // nolint
 	return nil
 }
 
@@ -113,12 +116,12 @@ func (metadata *Metadata) Init(buffer *bytes.Buffer) error {
 
 // Get returns a the specified value from the metadata struct
 func (metadata *Metadata) Get(key string) (string, error) {
-	mm := reflect.ValueOf(metadata)
-	m := mm.Elem()
-	mv := m.FieldByName(key)
-	if !mv.IsValid() {
+	reflectValue := reflect.ValueOf(metadata)
+	reflectStruct := reflectValue.Elem()
+	value := reflectStruct.FieldByName(key)
+	if !value.IsValid() {
 		return "", errors.New(key + " key not found")
 	}
 
-	return mv.FieldByName("Value").String(), nil
+	return value.FieldByName("Value").String(), nil
 }

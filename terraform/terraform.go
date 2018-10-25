@@ -14,8 +14,8 @@ import (
 	"github.com/EngineerBetter/concourse-up/resource"
 )
 
-// TerraformInputVars exposes ConfigureDirectorManifestCPI
-type TerraformInputVars interface {
+// InputVars exposes ConfigureDirectorManifestCPI
+type InputVars interface {
 	ConfigureTerraform(string) (string, error)
 	Build(map[string]interface{}) error
 }
@@ -27,62 +27,62 @@ type IAASMetadata interface {
 	Get(string) (string, error)
 }
 
-//TerraformCLIInterface is interface the abstraction of execCmd
-type TerraformCLIInterface interface {
-	IAAS(string) (TerraformInputVars, IAASMetadata)
-	Apply(TerraformInputVars, bool) error
-	Destroy(TerraformInputVars) error
-	BuildOutput(TerraformInputVars, IAASMetadata) error
+//CLIInterface is interface the abstraction of execCmd
+type CLIInterface interface {
+	IAAS(string) (InputVars, IAASMetadata)
+	Apply(InputVars, bool) error
+	Destroy(InputVars) error
+	BuildOutput(InputVars, IAASMetadata) error
 }
 
-// TerraformCLI struct holds the abstraction of execCmd
-type TerraformCLI struct {
-	execCmd       func(string, ...string) *exec.Cmd
-	terraformPath string
+// CLI struct holds the abstraction of execCmd
+type CLI struct {
+	execCmd func(string, ...string) *exec.Cmd
+	Path    string
 }
 
 // Option defines the arbitary element of Options for New
-type Option func(*TerraformCLI) error
+type Option func(*CLI) error
 
-// TerraformPath returns the path of the terraform-cli as an Option
-func TerraformPath(path string) Option {
-	return func(c *TerraformCLI) error {
-		c.terraformPath = path
+// Path returns the path of the terraform-cli as an Option
+func Path(path string) Option {
+	return func(c *CLI) error {
+		c.Path = path
 		return nil
 	}
 }
 
-// DownloadTerraform returns the dowloaded TerraformCLI path Option
+// DownloadTerraform returns the dowloaded CLI path Option
 func DownloadTerraform() Option {
-	return func(c *TerraformCLI) error {
+	return func(c *CLI) error {
 		path, err := resource.TerraformCLIPath()
-		c.terraformPath = path
+		c.Path = path
 		return err
 	}
 }
 
-// New provides a new TerraformCLI
-func New(ops ...Option) (*TerraformCLI, error) {
+// New provides a new CLI
+func New(ops ...Option) (*CLI, error) {
 	// @Note: we will have to switch between IAASs at this point
 	// for the time being we are using directly AWS
-	c := &TerraformCLI{
-		execCmd:       exec.Command,
-		terraformPath: "terraform",
+	cli := &CLI{
+		execCmd: exec.Command,
+		Path:    "terraform",
 	}
 	for _, op := range ops {
-		if err := op(c); err != nil {
+		if err := op(cli); err != nil {
 			return nil, err
 		}
 	}
-	return c, nil
+	return cli, nil
 }
 
 // IAAS is returning the IAAS specific metadata and environment
-func (c *TerraformCLI) IAAS(name string) (TerraformInputVars, IAASMetadata) {
+func (c *CLI) IAAS(name string) (InputVars, IAASMetadata) {
 	return &aws.InputVars{}, &aws.Metadata{}
 }
 
-func (c *TerraformCLI) init(config TerraformInputVars) (string, error) {
+func (c *CLI) init(config InputVars) (string, error) {
 
 	tfConfig, err := config.ConfigureTerraform(resource.AWSTerraformConfig)
 	if err != nil {
@@ -93,7 +93,7 @@ func (c *TerraformCLI) init(config TerraformInputVars) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	cmd := c.execCmd(c.terraformPath, "init")
+	cmd := c.execCmd(c.Path, "init")
 	cmd.Dir = terraformConfigPath
 	cmd.Stderr = os.Stderr
 	err = cmd.Run()
@@ -105,7 +105,7 @@ func (c *TerraformCLI) init(config TerraformInputVars) (string, error) {
 }
 
 // Apply runs terraform apply for a given config
-func (c *TerraformCLI) Apply(config TerraformInputVars, dryrun bool) error {
+func (c *CLI) Apply(config InputVars, dryrun bool) error {
 	terraformConfigPath, err := c.init(config)
 	if err != nil {
 		return err
@@ -118,7 +118,7 @@ func (c *TerraformCLI) Apply(config TerraformInputVars, dryrun bool) error {
 		action = "plan"
 	}
 
-	cmd := c.execCmd(c.terraformPath, action, "-input=false", "-auto-approve")
+	cmd := c.execCmd(c.Path, action, "-input=false", "-auto-approve")
 	cmd.Dir = terraformConfigPath
 
 	cmd.Stderr = os.Stderr
@@ -128,7 +128,7 @@ func (c *TerraformCLI) Apply(config TerraformInputVars, dryrun bool) error {
 }
 
 // Destroy destroys terraform resources specified in a config file
-func (c *TerraformCLI) Destroy(config TerraformInputVars) error {
+func (c *CLI) Destroy(config InputVars) error {
 	terraformConfigPath, err := c.init(config)
 	if err != nil {
 		return err
@@ -136,20 +136,15 @@ func (c *TerraformCLI) Destroy(config TerraformInputVars) error {
 
 	defer os.RemoveAll(terraformConfigPath)
 
-	cmd := c.execCmd(c.terraformPath, "destroy", "-auto-approve")
+	cmd := c.execCmd(c.Path, "destroy", "-auto-approve")
 	cmd.Dir = terraformConfigPath
 	cmd.Stderr = os.Stderr
 	cmd.Stdout = os.Stdout
-	err = cmd.Run()
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return cmd.Run()
 }
 
 // BuildOutput builds the terraform output/metadata
-func (c *TerraformCLI) BuildOutput(config TerraformInputVars, metadata IAASMetadata) error {
+func (c *CLI) BuildOutput(config InputVars, metadata IAASMetadata) error {
 	terraformConfigPath, err := c.init(config)
 	if err != nil {
 		return err
@@ -158,7 +153,7 @@ func (c *TerraformCLI) BuildOutput(config TerraformInputVars, metadata IAASMetad
 	defer os.RemoveAll(terraformConfigPath)
 
 	stdoutBuffer := bytes.NewBuffer(nil)
-	cmd := c.execCmd(c.terraformPath, "output", "-json")
+	cmd := c.execCmd(c.Path, "output", "-json")
 	cmd.Dir = terraformConfigPath
 	cmd.Stderr = os.Stderr
 	cmd.Stdout = stdoutBuffer
