@@ -42,21 +42,20 @@ func Download(url string) (string, error) {
 
 	var closer io.ReadCloser
 
-	if strings.HasSuffix(url, ".zip") {
-		body, errz := ioutil.ReadAll(resp.Body)
-		if errz != nil {
-			return "", errz
-		}
+	// if strings.HasSuffix(url, ".zip") {
+	// 	closer, err = handleZipFile(resp)
+	// 	if err != nil {
+	// 		return "", nil
+	// 	}
+	// } else {
+	// 	closer = resp.Body
+	// }
 
-		r, errz := zip.NewReader(bytes.NewReader(body), resp.ContentLength)
-		if errz != nil {
-			return "", errz
+	if isZip(url, resp) {
+		closer, err = handleZipFile(resp)
+		if err != nil {
+			return "", nil
 		}
-		firstFile, errz := r.File[0].Open()
-		if errz != nil {
-			return "", errz
-		}
-		closer = firstFile
 	} else {
 		closer = resp.Body
 	}
@@ -66,6 +65,33 @@ func Download(url string) (string, error) {
 		return "", err
 	}
 	return path, nil
+}
+
+func handleZipFile(resp *http.Response) (io.ReadCloser, error) {
+	body, errz := ioutil.ReadAll(resp.Body)
+	if errz != nil {
+		return nil, errz
+	}
+	r, errz := zip.NewReader(bytes.NewReader(body), resp.ContentLength)
+	if errz != nil {
+		return nil, errz
+	}
+	firstFile, errz := r.File[0].Open()
+	if errz != nil {
+		return nil, errz
+	}
+	return firstFile, nil
+
+}
+
+func isZip(url string, resp *http.Response) bool {
+	if strings.HasSuffix(url, ".zip") {
+		return true
+	}
+	if resp.Header.Get("Content-Type") == "application/zip" {
+		return true
+	}
+	return false
 }
 
 func hash(s string) string {
