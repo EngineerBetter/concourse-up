@@ -2,21 +2,19 @@ package gcpclient
 
 import (
 	"errors"
-	"fmt"
 	"io"
 	"io/ioutil"
+	"log"
 	"os"
 
 	"cloud.google.com/go/storage"
 	"golang.org/x/net/context"
+	"google.golang.org/api/iterator"
 )
 
-var ctx = context.Background()
+// GCP authorisation requires that the environment variable $GOOGLE_APPLICATION_CREDENTIALS be set
 
-// StorageClient is the implementation of the GCP storage client
-type StorageClient struct {
-	client *storage.Client
-}
+var ctx = context.Background()
 
 // IAAS represents actions taken against GCP
 type IAAS interface {
@@ -30,22 +28,15 @@ type IAAS interface {
 	WriteFile(string, string) error
 }
 
-// NewGCP returns a new GCP client
-func NewGCP() (StorageClient, error) {
+// CreateBucket creates a GCP storage bucket with defaults of the US multi-regional location, and a storage class of Standard Storage
+func CreateBucket(bucketName, projectName string) error {
 
 	client, err := storage.NewClient(ctx)
-
 	if err != nil {
-		return StorageClient{}, err
+		log.Fatal(err)
 	}
 
-	return StorageClient{client}, err
-}
-
-// CreateBucket creates a GCP storage bucket with defaults of the us multi-regional location and a storage class of Standard Storage
-func (client *StorageClient) CreateBucket(bucketName string) error {
-
-	if err := client.client.Bucket(bucketName).Create(ctx, "my-project-name", nil); err != nil {
+	if err := client.Bucket(bucketName).Create(ctx, projectName, nil); err != nil {
 		return err
 	}
 
@@ -53,22 +44,46 @@ func (client *StorageClient) CreateBucket(bucketName string) error {
 }
 
 // BucketExists checks if the named bucket exists and creates it if it doesn't
-func (client *StorageClient) BucketExists(bucketName string) (bool, error) {
+func BucketExists(bucketName, projectName string) (bool, error) {
 
-	b := client.client.Bucket(bucketName)
-	_, err := b.Attrs(ctx)
-
+	client, err := storage.NewClient(ctx)
 	if err != nil {
+		log.Fatal(err)
+	}
+
+	var buckets []string
+	it := client.Buckets(ctx, projectName)
+
+	for {
+		battrs, err1 := it.Next()
+		if err1 == iterator.Done {
+			break
+		}
+		if err != nil {
+			return false, err
+		}
+		buckets = append(buckets, battrs.Name)
+		for _, vv := range buckets {
+			if vv == bucketName {
+				return true, nil
+			}
+		}
+
 		return false, err
 	}
 
-	return true, nil
+	return false, err
 }
 
 // DeleteBucket deletes a bucket and its content from GCP
-func (client *StorageClient) DeleteBucket(bucketName string) error {
+func DeleteBucket(bucketName string) error {
 
-	if err := client.client.Bucket(bucketName).Delete(ctx); err != nil {
+	client, err := storage.NewClient(ctx)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	if err := client.Bucket(bucketName).Delete(ctx); err != nil {
 		return err
 	}
 
@@ -76,16 +91,20 @@ func (client *StorageClient) DeleteBucket(bucketName string) error {
 }
 
 // WriteFile writes the specified file to GCP storage
-func (client *StorageClient) WriteFile(bucketName, objectName, filePath string) error {
+func WriteFile(bucketName, objectName, filePath string) error {
+
+	client, err := storage.NewClient(ctx)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	f, err := os.Open(filePath)
-
 	if err != nil {
 		return err
 	}
 	defer f.Close()
 
-	wc := client.client.Bucket(bucketName).Object(objectName).NewWriter(ctx)
+	wc := client.Bucket(bucketName).Object(objectName).NewWriter(ctx)
 	if _, err = io.Copy(wc, f); err != nil {
 		return err
 	}
@@ -98,16 +117,21 @@ func (client *StorageClient) WriteFile(bucketName, objectName, filePath string) 
 }
 
 // HasFile returns true if the specified GCP file exists
-func (client *StorageClient) HasFile(bucketName, objectName string) (bool, error) {
+func HasFile(bucketName, objectName string) (bool, error) {
 
-	o := client.client.Bucket(bucketName).Object(objectName)
+	client, err := storage.NewClient(ctx)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	o := client.Bucket(bucketName).Object(objectName)
 	attrs, err := o.Attrs(ctx)
 
 	if err != nil {
 		return false, err
 	}
 
-	if attrs.Name != fmt.Sprintf("Name: %v\n", objectName) {
+	if attrs.Name != objectName {
 		return false, errors.New("Specified file does not exist")
 	}
 
@@ -115,13 +139,19 @@ func (client *StorageClient) HasFile(bucketName, objectName string) (bool, error
 }
 
 // LoadFile loads a file from GCP bucket
-func (client *StorageClient) LoadFile(bucketName, objectName string) ([]byte, error) {
+func LoadFile(bucketName, objectName string) ([]byte, error) {
 
-	rc, err := client.client.Bucket(bucketName).Object(objectName).NewReader(ctx)
+	client, err := storage.NewClient(ctx)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	rc, err := client.Bucket(bucketName).Object(objectName).NewReader(ctx)
 
 	if err != nil {
 		return nil, err
 	}
+
 	defer rc.Close()
 
 	data, err := ioutil.ReadAll(rc)
@@ -133,46 +163,18 @@ func (client *StorageClient) LoadFile(bucketName, objectName string) ([]byte, er
 }
 
 // DeleteFile deletes a file from GCP bucket
-func (client *StorageClient) DeleteFile(bucketName, objectName string) error {
+func DeleteFile(bucketName, objectName string) error {
 
-	o := client.client.Bucket(bucketName).Object(objectName)
+	client, err := storage.NewClient(ctx)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	o := client.Bucket(bucketName).Object(objectName)
 
 	if err := o.Delete(ctx); err != nil {
 		return err
 	}
 
 	return nil
-}
-
-// EnsureFileExists checks for the named file in GCP and creates it if it doesn't exist
-func (client *StorageClient) EnsureFileExists(bucketName, objectName, file string) ([]byte, bool, error) {
-
-	o := client.client.Bucket(bucketName).Object(objectName)
-	attrs, err := o.Attrs(ctx)
-
-	if err != nil {
-		return nil, false, err
-	}
-
-	if attrs.Name != fmt.Sprintf("Name: %v\n", objectName) {
-
-		f, err := os.Open(file)
-
-		if err != nil {
-			return nil, false, err
-		}
-		defer f.Close()
-
-		wc := client.client.Bucket(bucketName).Object(objectName).NewWriter(ctx)
-		if _, err = io.Copy(wc, f); err != nil {
-			return nil, false, err
-		}
-
-		if err := wc.Close(); err != nil {
-			return nil, false, err
-		}
-	}
-
-	return nil, true, nil
-
 }
