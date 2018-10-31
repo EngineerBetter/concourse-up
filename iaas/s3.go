@@ -129,12 +129,13 @@ func (client *AWSProvider) HasFile(bucket, path string) (bool, error) {
 	return true, nil
 }
 
-// EnsureFileExists checks for the named file in S3 and creates it if it doesn't
+// EnsureFileExists checks for the named file in S3 and creates it if it doesn't exist
 // Second argument is true if new file was created
 func (client *AWSProvider) EnsureFileExists(bucket, path string, defaultContents []byte) ([]byte, bool, error) {
 
 	s3Client := s3.New(client.sess)
 
+	// Trying to get the Object
 	output, err := s3Client.GetObject(&s3.GetObjectInput{Bucket: &bucket, Key: &path})
 	if err == nil {
 		var contents []byte
@@ -143,15 +144,17 @@ func (client *AWSProvider) EnsureFileExists(bucket, path string, defaultContents
 			return nil, false, err
 		}
 
-		// Successfully loaded file
+		// Found an Object and returns its contents
 		return contents, false, nil
 	}
 
+	// Bubble up the error if it was irelevant of NotFound
 	awsErrCode := err.(awserr.Error).Code()
 	if awsErrCode != awsErrCodeNoSuchKey && awsErrCode != awsErrCodeNotFound {
 		return nil, false, err
 	}
 
+	// Create the file (path) in the bucket with defaultContents
 	_, err = s3Client.PutObject(&s3.PutObjectInput{
 		Bucket: &bucket,
 		Key:    &path,
@@ -161,7 +164,7 @@ func (client *AWSProvider) EnsureFileExists(bucket, path string, defaultContents
 		return nil, false, err
 	}
 
-	// Created file from given contents
+	// The file was created (new) and contains the defaultContents
 	return defaultContents, true, nil
 }
 

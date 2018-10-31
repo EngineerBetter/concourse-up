@@ -1,6 +1,7 @@
 package iaas
 
 import (
+	"errors"
 	"io/ioutil"
 
 	"cloud.google.com/go/storage"
@@ -11,13 +12,19 @@ import (
 // GCPProvider is the concrete implementation of GCP Provider
 type GCPProvider struct {
 	ctx     context.Context
-	storage *storage.Client
+	storage GCPStorageClient
 	region  string
 	project string
 }
 
 // GCPOption is the signature of the option function
 type GCPOption func(*GCPProvider) error
+
+// GCPStorageClient is the interface with GCP storage client
+type GCPStorageClient interface {
+	Bucket(name string) *storage.BucketHandle
+	Buckets(ctx context.Context, projectID string) *storage.BucketIterator
+}
 
 // GCPStorage returns an option function with storage initialised
 func GCPStorage() GCPOption {
@@ -43,10 +50,6 @@ func newGCP(region, project string, ops ...GCPOption) (Provider, error) {
 	return g, nil
 }
 
-func (g *GCPProvider) CheckForWhitelistedIP(ip, securityGroup string) (bool, error) {
-	return false, nil
-}
-
 // DeleteFile deletes a file from GCP bucket
 func (g *GCPProvider) DeleteFile(bucket, path string) error {
 	o := g.storage.Bucket(bucket).Object(path)
@@ -64,13 +67,6 @@ func (g *GCPProvider) DeleteVersionedBucket(name string) error {
 		return err
 	}
 
-	return nil
-}
-
-func (g *GCPProvider) DeleteVMsInVPC(vpcID string) ([]*string, error) {
-	return nil, nil
-}
-func (g *GCPProvider) DeleteVolumes(volumesToDelete []*string, deleteVolume func(ec2Client IEC2, volumeID *string) error) error {
 	return nil
 }
 
@@ -101,14 +97,6 @@ func (g *GCPProvider) BucketExists(name string) (bool, error) {
 	}
 
 	return false, nil
-}
-
-func (g *GCPProvider) EnsureFileExists(bucket, path string, defaultContents []byte) ([]byte, bool, error) {
-
-	return nil, false, nil
-}
-func (g *GCPProvider) FindLongestMatchingHostedZone(subdomain string) (string, string, error) {
-	return "", "", nil
 }
 
 // HasFile returns true if the specified GCP file exists
@@ -164,4 +152,54 @@ func (g *GCPProvider) Region() string {
 // IAAS returns the name of the Provider
 func (g *GCPProvider) IAAS() string {
 	return "GCP"
+}
+
+// EnsureFileExists checks for the named file in GCP storage and creates it if it doesn't exist
+// Second argument is true if new file was created
+func (g *GCPProvider) EnsureFileExists(bucket, path string, defaultContents []byte) ([]byte, bool, error) {
+	// Try to get the Object
+	contents, err := g.LoadFile(bucket, path)
+
+	// Bubble up the error if it was irelevant of NotFound
+	if err != storage.ErrObjectNotExist {
+		return nil, false, err
+	}
+
+	// If found the Object and returns its contents
+	if err == nil {
+		return contents, false, nil
+	}
+
+	// Create the file (path) in the bucket with defaultContents
+	err = g.WriteFile(bucket, path, defaultContents)
+	if err != nil {
+		return nil, false, err
+	}
+
+	// The file was created (new) and contains the defaultContents
+	return defaultContents, true, nil
+}
+
+// DeleteVolumes deletes the specified GCP storage volumes
+func (g *GCPProvider) DeleteVolumes(volumesToDelete []*string, deleteVolume func(ec2Client IEC2, volumeID *string) error) error {
+	// @note: This will be covered in a later iteration as we need a deployment to try it
+	return errors.New("DeleteVolumes Not Implemented Yet")
+}
+
+// CheckForWhitelistedIP checks if the specified IP is whitelisted in the security group
+func (g *GCPProvider) CheckForWhitelistedIP(ip, securityGroup string) (bool, error) {
+	// @note: This will be covered in a later iteration as we need a deployment to try it
+	return false, errors.New("CheckForWhitelistedIP Not Implemented Yet")
+}
+
+// DeleteVMsInVPC deletes all the VMs in the given VPC
+func (g *GCPProvider) DeleteVMsInVPC(vpcID string) ([]*string, error) {
+	// @note: This will be covered in a later iteration as we need a deployment to try it
+	return []*string{}, errors.New("DeleteVMsInVPC Not Implemented Yet")
+}
+
+// FindLongestMatchingHostedZone finds the longest hosted zone that matches the given subdomain
+func (g *GCPProvider) FindLongestMatchingHostedZone(subdomain string) (string, string, error) {
+	// @note: This will be covered in a later iteration as we need a deployment to try it
+	return "", "", errors.New("FindLongestMatchingHostedZone Not Implemented Yet")
 }
