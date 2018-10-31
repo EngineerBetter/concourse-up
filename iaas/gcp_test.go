@@ -1,4 +1,4 @@
-package gcpclient
+package iaas
 
 import (
 	"errors"
@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"testing"
 
 	"cloud.google.com/go/storage"
 	"golang.org/x/net/context"
@@ -26,21 +27,6 @@ type IAAS interface {
 	HasFile(string string) (bool, error)
 	LoadFile(string, string) ([]byte, error)
 	WriteFile(string, string) error
-}
-
-// CreateBucket creates a GCP storage bucket with defaults of the US multi-regional location, and a storage class of Standard Storage
-func CreateBucket(bucketName, projectName string) error {
-
-	client, err := storage.NewClient(ctx)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	if err := client.Bucket(bucketName).Create(ctx, projectName, nil); err != nil {
-		return err
-	}
-
-	return nil
 }
 
 // BucketExists checks if the named bucket exists and creates it if it doesn't
@@ -177,4 +163,93 @@ func DeleteFile(bucketName, objectName string) error {
 	}
 
 	return nil
+}
+
+func TestGCPProvider_IAAS(t *testing.T) {
+	type fields struct {
+		ctx     context.Context
+		storage *storage.Client
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		want   string
+	}{
+		{
+			name:   "returns the proper IAAS name",
+			fields: fields{},
+			want:   "GCP",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			g := &GCPProvider{
+				ctx:     tt.fields.ctx,
+				storage: tt.fields.storage,
+			}
+			if got := g.IAAS(); got != tt.want {
+				t.Errorf("GCPProvider.IAAS() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestGCPProvider_Region(t *testing.T) {
+	type fields struct {
+		ctx     context.Context
+		storage *storage.Client
+		region  string
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		want   string
+	}{{
+		name: "returns defined region",
+		fields: fields{
+			region: "aRegion",
+		},
+		want: "aRegion",
+	}}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			g := &GCPProvider{
+				ctx:     tt.fields.ctx,
+				storage: tt.fields.storage,
+				region:  tt.fields.region,
+			}
+			if got := g.Region(); got != tt.want {
+				t.Errorf("GCPProvider.Region() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestGCPProvider_CreateBucket(t *testing.T) {
+	type fields struct {
+		ctx     context.Context
+		storage *storage.Client
+		region  string
+	}
+	type args struct {
+		name string
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		args    args
+		wantErr bool
+	}{}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			g := &GCPProvider{
+				ctx:     tt.fields.ctx,
+				storage: tt.fields.storage,
+				region:  tt.fields.region,
+			}
+			if err := g.CreateBucket(tt.args.name); (err != nil) != tt.wantErr {
+				t.Errorf("GCPProvider.CreateBucket() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
 }

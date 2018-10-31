@@ -280,7 +280,7 @@ func (client *Client) checkPreTerraformConfigRequirements(conf config.Config, se
 		Domain:                 conf.Domain,
 	}
 
-	region := client.iaasClient.Region()
+	region := client.provider.Region()
 	if conf.Region != "" {
 		if conf.Region != region {
 			return r, fmt.Errorf("found previous deployment in %s. Refusing to deploy to %s as changing regions for existing deployments is not supported", conf.Region, region)
@@ -560,7 +560,7 @@ func (client *Client) setHostedZone(c config.Config, domain string) (HostedZone,
 		return zone, nil
 	}
 
-	hostedZoneName, hostedZoneID, err := client.iaasClient.FindLongestMatchingHostedZone(domain)
+	hostedZoneName, hostedZoneID, err := client.provider.FindLongestMatchingHostedZone(domain)
 	if err != nil {
 		return zone, err
 	}

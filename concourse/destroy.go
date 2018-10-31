@@ -45,7 +45,7 @@ func (client *Client) Destroy() error {
 	if err != nil {
 		return err
 	}
-	volumesToDelete, err := client.iaasClient.DeleteVMsInVPC(vpcID)
+	volumesToDelete, err := client.provider.DeleteVMsInVPC(vpcID)
 	if err != nil {
 		return err
 	}
@@ -59,7 +59,7 @@ func (client *Client) Destroy() error {
 		return err
 	}
 
-	if err = client.iaasClient.DeleteVolumes(volumesToDelete, iaas.DeleteVolume); err != nil {
+	if err = client.provider.DeleteVolumes(volumesToDelete, iaas.DeleteVolume); err != nil {
 		return err
 	}
 

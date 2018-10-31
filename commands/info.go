@@ -67,7 +67,7 @@ var info = cli.Command{
 			return errors.New("Usage is `concourse-up info <name>`")
 		}
 
-		awsClient, err := iaas.New(infoArgs.IAAS, infoArgs.AWSRegion)
+		provider, err := iaas.New(infoArgs.IAAS, infoArgs.AWSRegion, name)
 		if err != nil {
 			return err
 		}
@@ -78,13 +78,13 @@ var info = cli.Command{
 		}
 
 		client := concourse.NewClient(
-			awsClient,
+			provider,
 			terraformClient,
 			bosh.NewClient,
 			fly.New,
 
 			certs.Generate,
-			config.New(awsClient, name, infoArgs.Namespace),
+			config.New(provider, name, infoArgs.Namespace),
 			nil,
 			os.Stdout,
 			os.Stderr,

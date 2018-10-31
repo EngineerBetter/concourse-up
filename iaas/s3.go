@@ -31,7 +31,7 @@ const (
 )
 
 // DeleteVersionedBucket deletes and empties a versioned bucket
-func (client *AWSClient) DeleteVersionedBucket(name string) error {
+func (client *AWSProvider) DeleteVersionedBucket(name string) error {
 
 	s3Client := s3.New(client.sess)
 
@@ -64,7 +64,7 @@ func (client *AWSClient) DeleteVersionedBucket(name string) error {
 }
 
 // CreateBucket checks if the named bucket exists and creates it if it doesn't
-func (client *AWSClient) CreateBucket(name string) error {
+func (client *AWSProvider) CreateBucket(name string) error {
 
 	s3Client := s3.New(client.sess)
 
@@ -84,7 +84,7 @@ func (client *AWSClient) CreateBucket(name string) error {
 }
 
 // BucketExists checks if the named bucket exists and creates it if it doesn't
-func (client *AWSClient) BucketExists(name string) (bool, error) {
+func (client *AWSProvider) BucketExists(name string) (bool, error) {
 
 	s3Client := s3.New(client.sess)
 
@@ -102,7 +102,7 @@ func (client *AWSClient) BucketExists(name string) (bool, error) {
 }
 
 // WriteFile writes the specified S3 object
-func (client *AWSClient) WriteFile(bucket, path string, contents []byte) error {
+func (client *AWSProvider) WriteFile(bucket, path string, contents []byte) error {
 	s3Client := s3.New(client.sess)
 
 	_, err := s3Client.PutObject(&s3.PutObjectInput{
@@ -114,7 +114,7 @@ func (client *AWSClient) WriteFile(bucket, path string, contents []byte) error {
 }
 
 // HasFile returns true if the specified S3 object exists
-func (client *AWSClient) HasFile(bucket, path string) (bool, error) {
+func (client *AWSProvider) HasFile(bucket, path string) (bool, error) {
 	s3Client := s3.New(client.sess)
 
 	_, err := s3Client.HeadObject(&s3.HeadObjectInput{Bucket: &bucket, Key: &path})
@@ -131,7 +131,7 @@ func (client *AWSClient) HasFile(bucket, path string) (bool, error) {
 
 // EnsureFileExists checks for the named file in S3 and creates it if it doesn't
 // Second argument is true if new file was created
-func (client *AWSClient) EnsureFileExists(bucket, path string, defaultContents []byte) ([]byte, bool, error) {
+func (client *AWSProvider) EnsureFileExists(bucket, path string, defaultContents []byte) ([]byte, bool, error) {
 
 	s3Client := s3.New(client.sess)
 
@@ -166,7 +166,7 @@ func (client *AWSClient) EnsureFileExists(bucket, path string, defaultContents [
 }
 
 // LoadFile loads a file from S3
-func (client *AWSClient) LoadFile(bucket, path string) ([]byte, error) {
+func (client *AWSProvider) LoadFile(bucket, path string) ([]byte, error) {
 
 	s3Client := s3.New(client.sess)
 
@@ -179,7 +179,7 @@ func (client *AWSClient) LoadFile(bucket, path string) ([]byte, error) {
 }
 
 // DeleteFile deletes a file from S3
-func (client *AWSClient) DeleteFile(bucket, path string) error {
+func (client *AWSProvider) DeleteFile(bucket, path string) error {
 
 	s3Client := s3.New(client.sess)
 	_, err := s3Client.DeleteObject(&s3.DeleteObjectInput{

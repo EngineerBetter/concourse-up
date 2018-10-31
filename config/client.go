@@ -28,7 +28,7 @@ type IClient interface {
 
 // Client is a client for loading the config file  from S3
 type Client struct {
-	Iaas         iaas.IClient
+	Iaas         iaas.Provider
 	Project      string
 	Namespace    string
 	BucketName   string
@@ -38,7 +38,7 @@ type Client struct {
 }
 
 // New instantiates a new client
-func New(iaas iaas.IClient, project, namespace string) *Client {
+func New(iaas iaas.Provider, project, namespace string) *Client {
 	namespace = determineNamespace(namespace, iaas.Region())
 	bucketName, exists, err := determineBucketName(iaas, namespace, project)
 
@@ -224,7 +224,7 @@ func createBucketName(deployment, extension string) string {
 	return fmt.Sprintf("%s-%s-config", deployment, extension)
 }
 
-func determineBucketName(iaas iaas.IClient, namespace, project string) (string, bool, error) {
+func determineBucketName(iaas iaas.Provider, namespace, project string) (string, bool, error) {
 	regionBucketName := createBucketName(deployment(project), iaas.Region())
 	namespaceBucketName := createBucketName(deployment(project), namespace)
 

@@ -85,7 +85,7 @@ func (client *Client) FetchInfo() (*Info, error) {
 	if err != nil {
 		return nil, err
 	}
-	whitelisted, err := client.iaasClient.CheckForWhitelistedIP(userIP, directorSecurityGroupID)
+	whitelisted, err := client.provider.CheckForWhitelistedIP(userIP, directorSecurityGroupID)
 	if err != nil {
 		return nil, err
 	}

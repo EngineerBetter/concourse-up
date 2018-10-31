@@ -211,7 +211,7 @@ func TestNew(t *testing.T) {
 	}
 
 	type args struct {
-		iaas      iaas.IClient
+		iaas      iaas.Provider
 		project   string
 		namespace string
 	}

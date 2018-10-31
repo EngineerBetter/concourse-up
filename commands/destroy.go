@@ -67,7 +67,7 @@ var destroy = cli.Command{
 			}
 		}
 
-		iaasClient, err := iaas.New(destroyArgs.IAAS, destroyArgs.AWSRegion)
+		provider, err := iaas.New(destroyArgs.IAAS, destroyArgs.AWSRegion, name)
 		if err != nil {
 			return err
 		}
@@ -76,12 +76,12 @@ var destroy = cli.Command{
 			return err
 		}
 		client := concourse.NewClient(
-			iaasClient,
+			provider,
 			terraformClient,
 			bosh.NewClient,
 			fly.New,
 			certs.Generate,
-			config.New(iaasClient, name, destroyArgs.Namespace),
+			config.New(provider, name, destroyArgs.Namespace),
 			nil,
 			os.Stdout,
 			os.Stderr,

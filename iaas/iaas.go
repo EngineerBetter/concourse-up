@@ -2,10 +2,11 @@ package iaas
 
 import (
 	"fmt"
+	"strings"
 )
 
-// IClient represents actions taken against AWS
-type IClient interface {
+// Provider represents actions taken against AWS
+type Provider interface {
 	CheckForWhitelistedIP(ip, securityGroup string) (bool, error)
 	DeleteFile(bucket, path string) error
 	DeleteVersionedBucket(name string) error
@@ -23,9 +24,12 @@ type IClient interface {
 }
 
 // New returns a new IAAS client for a particular IAAS and region
-func New(iaas string, region string) (IClient, error) {
-	if iaas == "AWS" {
+func New(iaas, region, project string, gops ...GCPOption) (Provider, error) {
+	switch strings.ToUpper(iaas) {
+	case "AWS":
 		return newAWS(region)
+	case "GCP":
+		return newGCP(region, project, gops...)
 	}
 
 	return nil, fmt.Errorf("IAAS not supported: %s", iaas)

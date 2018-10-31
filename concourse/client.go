@@ -14,7 +14,7 @@ import (
 
 // Client is a concrete implementation of IClient interface
 type Client struct {
-	iaasClient            iaas.IClient
+	provider              iaas.Provider
 	tfCLI                 terraform.CLIInterface
 	boshClientFactory     bosh.ClientFactory
 	flyClientFactory      func(fly.Credentials, io.Writer, io.Writer, []byte) (fly.IClient, error)
@@ -41,7 +41,7 @@ var versionFile = MustAsset("../../concourse-up-ops/director-versions.json")
 
 // NewClient returns a new Client
 func NewClient(
-	iaasClient iaas.IClient,
+	provider iaas.Provider,
 	tfCLI terraform.CLIInterface,
 	boshClientFactory bosh.ClientFactory,
 	flyClientFactory func(fly.Credentials, io.Writer, io.Writer, []byte) (fly.IClient, error),
@@ -53,7 +53,7 @@ func NewClient(
 	acmeClientConstructor func(u *certs.User) (certs.AcmeClient, error),
 	version string) *Client {
 	return &Client{
-		iaasClient:            iaasClient,
+		provider:              provider,
 		tfCLI:                 tfCLI,
 		boshClientFactory:     boshClientFactory,
 		flyClientFactory:      flyClientFactory,
