@@ -83,7 +83,7 @@ func (client *AWSProvider) CreateBucket(name string) error {
 	return err
 }
 
-// BucketExists checks if the named bucket exists and creates it if it doesn't
+// BucketExists checks if the named bucket exists
 func (client *AWSProvider) BucketExists(name string) (bool, error) {
 
 	s3Client := s3.New(client.sess)
