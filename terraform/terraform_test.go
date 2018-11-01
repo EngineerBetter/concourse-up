@@ -2,7 +2,11 @@ package terraform_test
 
 import (
 	"bytes"
+	"reflect"
 	"testing"
+
+	"github.com/EngineerBetter/concourse-up/terraform/internal/aws"
+	"github.com/EngineerBetter/concourse-up/terraform/internal/gcp"
 
 	"github.com/EngineerBetter/concourse-up/internal/fakeexec"
 	"github.com/EngineerBetter/concourse-up/terraform"
@@ -119,4 +123,56 @@ func TestCLI_BuildOutput(t *testing.T) {
 	})
 	err = mockCLIent.BuildOutput(config, metadata)
 	require.NoError(t, err)
+}
+
+func TestCLI_IAAS(t *testing.T) {
+	tests := []struct {
+		name             string
+		args             string
+		wantInputVars    terraform.InputVars
+		wantIAASMetadata terraform.IAASMetadata
+		wantErr          bool
+	}{
+		{
+			name:             "return GCP provider hooks for GCP",
+			args:             "GCP",
+			wantInputVars:    &gcp.InputVars{},
+			wantIAASMetadata: &gcp.Metadata{},
+			wantErr:          false,
+		},
+		{
+			name:             "return AWS provider hooks for AWS",
+			args:             "AWS",
+			wantInputVars:    &aws.InputVars{},
+			wantIAASMetadata: &aws.Metadata{},
+			wantErr:          false,
+		},
+		{
+			name:             "return null provider hooks for unknown provider",
+			args:             "aProvider",
+			wantInputVars:    &terraform.NullInputVars{},
+			wantIAASMetadata: &terraform.NullMetadata{},
+			wantErr:          true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			e := fakeexec.New(t)
+			defer e.Finish()
+			c, err := terraform.New(terraform.FakeExec(e.Cmd()))
+			require.NoError(t, err)
+
+			gotInputVars, gotIAASMetadata, err := c.IAAS(tt.args)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("CLI.IAAS() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(gotInputVars, tt.wantInputVars) {
+				t.Errorf("CLI.IAAS() gotInputVars = %v, wantInputVars %v", gotInputVars, tt.wantInputVars)
+			}
+			if !reflect.DeepEqual(gotIAASMetadata, tt.wantIAASMetadata) {
+				t.Errorf("CLI.IAAS() gotIAASMetadata = %v, wantIAASMetadata %v", gotIAASMetadata, tt.wantIAASMetadata)
+			}
+		})
+	}
 }

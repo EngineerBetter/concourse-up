@@ -13,7 +13,10 @@ func (client *Client) Destroy() error {
 		return err
 	}
 
-	var environment, metadata = client.tfCLI.IAAS("AWS")
+	environment, metadata, err := client.tfCLI.IAAS("AWS")
+	if err != nil {
+		return err
+	}
 	err = environment.Build(map[string]interface{}{
 		"AllowIPs":               conf.AllowIPs,
 		"AvailabilityZone":       conf.AvailabilityZone,

@@ -72,7 +72,10 @@ func (client *Client) Deploy() error {
 	c.HostedZoneRecordPrefix = r.HostedZoneRecordPrefix
 	c.Domain = r.Domain
 
-	var environment, metadata = client.tfCLI.IAAS("AWS")
+	environment, metadata, err := client.tfCLI.IAAS("AWS")
+	if err != nil {
+		return err
+	}
 	err = environment.Build(map[string]interface{}{
 		"AllowIPs":               c.AllowIPs,
 		"AvailabilityZone":       c.AvailabilityZone,

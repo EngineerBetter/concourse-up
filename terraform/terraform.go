@@ -3,11 +3,15 @@ package terraform
 import (
 	"bytes"
 	"crypto/rand"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"os"
 	"os/exec"
 	"path"
+	"strings"
+
+	"github.com/EngineerBetter/concourse-up/terraform/internal/gcp"
 
 	"github.com/EngineerBetter/concourse-up/terraform/internal/aws"
 
@@ -29,7 +33,7 @@ type IAASMetadata interface {
 
 //CLIInterface is interface the abstraction of execCmd
 type CLIInterface interface {
-	IAAS(string) (InputVars, IAASMetadata)
+	IAAS(string) (InputVars, IAASMetadata, error)
 	Apply(InputVars, bool) error
 	Destroy(InputVars) error
 	BuildOutput(InputVars, IAASMetadata) error
@@ -77,9 +81,37 @@ func New(ops ...Option) (*CLI, error) {
 	return cli, nil
 }
 
+// NullInputVars exposes ConfigureDirectorManifestCPI
+type NullInputVars struct{}
+
+// ConfigureTerraform is a nullified function
+func (n *NullInputVars) ConfigureTerraform(string) (string, error) { return "", nil }
+
+// Build is a nullified function
+func (n *NullInputVars) Build(map[string]interface{}) error { return nil }
+
+// NullMetadata holds IAAS specific terraform metadata
+type NullMetadata struct{}
+
+// AssertValid is a nullified function
+func (n *NullMetadata) AssertValid() error { return nil }
+
+// Init is a nullified function
+func (n *NullMetadata) Init(*bytes.Buffer) error { return nil }
+
+// Get is a nullified function
+func (n *NullMetadata) Get(string) (string, error) { return "", nil }
+
 // IAAS is returning the IAAS specific metadata and environment
-func (c *CLI) IAAS(name string) (InputVars, IAASMetadata) {
-	return &aws.InputVars{}, &aws.Metadata{}
+func (c *CLI) IAAS(name string) (InputVars, IAASMetadata, error) {
+	switch strings.ToUpper(name) {
+	case "AWS":
+		return &aws.InputVars{}, &aws.Metadata{}, nil
+	case "GCP":
+		return &gcp.InputVars{}, &gcp.Metadata{}, nil
+	}
+	return &NullInputVars{}, &NullMetadata{}, errors.New("terraform: " + name + " not a valid iaas provider")
+
 }
 
 func (c *CLI) init(config InputVars) (string, error) {

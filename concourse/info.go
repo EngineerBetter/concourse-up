@@ -33,7 +33,10 @@ func (client *Client) FetchInfo() (*Info, error) {
 		return nil, err
 	}
 
-	var environment, metadata = client.tfCLI.IAAS("AWS")
+	environment, metadata, err := client.tfCLI.IAAS("AWS")
+	if err != nil {
+		return nil, err
+	}
 	err = environment.Build(map[string]interface{}{
 		"AllowIPs":               config.AllowIPs,
 		"AvailabilityZone":       config.AvailabilityZone,
