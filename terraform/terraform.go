@@ -43,6 +43,7 @@ type CLIInterface interface {
 type CLI struct {
 	execCmd func(string, ...string) *exec.Cmd
 	Path    string
+	iaas    string
 }
 
 // Option defines the arbitary element of Options for New
@@ -106,8 +107,10 @@ func (n *NullMetadata) Get(string) (string, error) { return "", nil }
 func (c *CLI) IAAS(name string) (InputVars, IAASMetadata, error) {
 	switch strings.ToUpper(name) {
 	case "AWS":
+		c.iaas = "AWS"
 		return &aws.InputVars{}, &aws.Metadata{}, nil
 	case "GCP":
+		c.iaas = "GCP"
 		return &gcp.InputVars{}, &gcp.Metadata{}, nil
 	}
 	return &NullInputVars{}, &NullMetadata{}, errors.New("terraform: " + name + " not a valid iaas provider")
@@ -115,10 +118,23 @@ func (c *CLI) IAAS(name string) (InputVars, IAASMetadata, error) {
 }
 
 func (c *CLI) init(config InputVars) (string, error) {
-
-	tfConfig, err := config.ConfigureTerraform(resource.AWSTerraformConfig)
-	if err != nil {
-		return "", err
+	var (
+		tfConfig string
+		err      error
+	)
+	switch c.iaas {
+	case "AWS":
+		tfConfig, err = config.ConfigureTerraform(resource.AWSTerraformConfig)
+		if err != nil {
+			return "", err
+		}
+	case "GCP":
+		tfConfig, err = config.ConfigureTerraform(resource.GCPTerraformConfig)
+		if err != nil {
+			return "", err
+		}
+	default:
+		return "", errors.New("terraform: init cannot choose a provider")
 	}
 
 	terraformConfigPath, err := writeTempFile([]byte(tfConfig))
@@ -138,6 +154,7 @@ func (c *CLI) init(config InputVars) (string, error) {
 
 // Apply runs terraform apply for a given config
 func (c *CLI) Apply(config InputVars, dryrun bool) error {
+	fmt.Printf("Apply got called with config %+v\n", config)
 	terraformConfigPath, err := c.init(config)
 	if err != nil {
 		return err

@@ -3,6 +3,7 @@ package concourse
 import (
 	"crypto/x509"
 	"encoding/pem"
+	"errors"
 	"fmt"
 	"io"
 	"text/template"
@@ -72,29 +73,44 @@ func (client *Client) Deploy() error {
 	c.HostedZoneRecordPrefix = r.HostedZoneRecordPrefix
 	c.Domain = r.Domain
 
-	environment, metadata, err := client.tfCLI.IAAS("AWS")
+	environment, metadata, err := client.tfCLI.IAAS(client.deployArgs.IAAS)
 	if err != nil {
 		return err
 	}
-	err = environment.Build(map[string]interface{}{
-		"AllowIPs":               c.AllowIPs,
-		"AvailabilityZone":       c.AvailabilityZone,
-		"ConfigBucket":           c.ConfigBucket,
-		"Deployment":             c.Deployment,
-		"HostedZoneID":           c.HostedZoneID,
-		"HostedZoneRecordPrefix": c.HostedZoneRecordPrefix,
-		"Namespace":              c.Namespace,
-		"Project":                c.Project,
-		"PublicKey":              c.PublicKey,
-		"RDSDefaultDatabaseName": c.RDSDefaultDatabaseName,
-		"RDSInstanceClass":       c.RDSInstanceClass,
-		"RDSPassword":            c.RDSPassword,
-		"RDSUsername":            c.RDSUsername,
-		"Region":                 c.Region,
-		"SourceAccessIP":         c.SourceAccessIP,
-		"TFStatePath":            c.TFStatePath,
-		"MultiAZRDS":             c.MultiAZRDS,
-	})
+	switch strings.ToUpper(client.deployArgs.IAAS) {
+	case "AWS":
+		err = environment.Build(map[string]interface{}{
+			"AllowIPs":               c.AllowIPs,
+			"AvailabilityZone":       c.AvailabilityZone,
+			"ConfigBucket":           c.ConfigBucket,
+			"Deployment":             c.Deployment,
+			"HostedZoneID":           c.HostedZoneID,
+			"HostedZoneRecordPrefix": c.HostedZoneRecordPrefix,
+			"Namespace":              c.Namespace,
+			"Project":                c.Project,
+			"PublicKey":              c.PublicKey,
+			"RDSDefaultDatabaseName": c.RDSDefaultDatabaseName,
+			"RDSInstanceClass":       c.RDSInstanceClass,
+			"RDSPassword":            c.RDSPassword,
+			"RDSUsername":            c.RDSUsername,
+			"Region":                 c.Region,
+			"SourceAccessIP":         c.SourceAccessIP,
+			"TFStatePath":            c.TFStatePath,
+			"MultiAZRDS":             c.MultiAZRDS,
+		})
+	case "GCP":
+		err = environment.Build(map[string]interface{}{
+			"Zone":               c.Region,
+			"Tags":               "",
+			"Project":            "concourse-up",
+			"GCPCredentialsJSON": "/Users/eb/workspace/irbe-test/gcp-creds.json",
+			"ExternalIP":         c.SourceAccessIP,
+			"Deployment":         c.Deployment,
+			"ConfigBucket":       c.ConfigBucket,
+		})
+	default:
+		return errors.New("concourse:deploy:unsupported iaas " + client.deployArgs.IAAS)
+	}
 	if err != nil {
 		return err
 	}

@@ -10,11 +10,11 @@ import (
 
 func TestInputVars_ConfigureTerraform(t *testing.T) {
 	type FakeInputVars struct {
-		Deployment     string
-		Project        string
-		Region         string
-		SourceAccessIP string
-		MultiAZRDS     bool
+		Zone               string
+		Tags               string
+		Project            string
+		GCPCredentialsJSON string
+		ExternalIP         string
 	}
 	type args struct {
 		terraformContents string
@@ -28,14 +28,14 @@ func TestInputVars_ConfigureTerraform(t *testing.T) {
 	}{
 		{name: "Success",
 			fakeInputVars: FakeInputVars{
-				Deployment:     "fakeDeployment",
-				Project:        "fakeProject",
-				Region:         "eu-west-1",
-				SourceAccessIP: "fakeSourceIP",
-				MultiAZRDS:     true,
+				Zone:               "",
+				Tags:               "",
+				Project:            "",
+				GCPCredentialsJSON: "",
+				ExternalIP:         "",
 			},
-			args:    "<% .Region %>\n <% .Deployment %>\n <% .Project %>\n <% .SourceAccessIP %>\n <% .MultiAZRDS %>\n",
-			want:    "eu-west-1\n fakeDeployment\n fakeProject\n fakeSourceIP\n true\n",
+			args:    "",
+			want:    "",
 			wantErr: false,
 		},
 		{name: "Failure",
@@ -48,11 +48,11 @@ func TestInputVars_ConfigureTerraform(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			v := &gcp.InputVars{
-				Deployment:     test.fakeInputVars.Deployment,
-				Project:        test.fakeInputVars.Project,
-				Region:         test.fakeInputVars.Region,
-				SourceAccessIP: test.fakeInputVars.SourceAccessIP,
-				MultiAZRDS:     test.fakeInputVars.MultiAZRDS,
+				Zone:               test.fakeInputVars.Zone,
+				Tags:               test.fakeInputVars.Tags,
+				Project:            test.fakeInputVars.Project,
+				GCPCredentialsJSON: test.fakeInputVars.GCPCredentialsJSON,
+				ExternalIP:         test.fakeInputVars.ExternalIP,
 			}
 			got, err := v.ConfigureTerraform(test.args)
 			if (err != nil) != test.wantErr {
@@ -68,7 +68,7 @@ func TestInputVars_ConfigureTerraform(t *testing.T) {
 
 func TestMetadata_Get(t *testing.T) {
 	type fields struct {
-		VPCID gcp.MetadataStringValue
+		InternalGW gcp.MetadataStringValue
 	}
 	tests := []struct {
 		name    string
@@ -79,7 +79,7 @@ func TestMetadata_Get(t *testing.T) {
 	}{{
 		name: "Success",
 		fields: fields{
-			VPCID: gcp.MetadataStringValue{
+			InternalGW: gcp.MetadataStringValue{
 				Value: "fakeMetadataStringValue",
 			},
 		},
@@ -89,7 +89,7 @@ func TestMetadata_Get(t *testing.T) {
 		{
 			name: "Failure",
 			fields: fields{
-				VPCID: gcp.MetadataStringValue{
+				InternalGW: gcp.MetadataStringValue{
 					Value: "fakeMetadataStringValue",
 				},
 			},
@@ -101,7 +101,7 @@ func TestMetadata_Get(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			metadata := &gcp.Metadata{
-				VPCID: test.fields.VPCID,
+				InternalGW: test.fields.InternalGW,
 			}
 			got, err := metadata.Get(test.fakeKey)
 			if (err != nil) != test.wantErr {

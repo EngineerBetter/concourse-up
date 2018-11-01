@@ -24,13 +24,16 @@ type Provider interface {
 }
 
 // New returns a new IAAS client for a particular IAAS and region
-func New(iaas, region, project string, gops ...GCPOption) (Provider, error) {
-	switch strings.ToUpper(iaas) {
+func New(iaasName, region, project string, gops ...GCPOption) (Provider, error) {
+	switch strings.ToUpper(iaasName) {
 	case "AWS":
 		return newAWS(region)
 	case "GCP":
+		if len(gops) == 0 {
+			gops = append(gops, GCPStorage())
+		}
 		return newGCP(region, project, gops...)
 	}
 
-	return nil, fmt.Errorf("IAAS not supported: %s", iaas)
+	return nil, fmt.Errorf("IAAS not supported: %s", iaasName)
 }

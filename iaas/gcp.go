@@ -81,7 +81,6 @@ func (g *GCPProvider) CreateBucket(name string) error {
 // BucketExists checks if the named bucket exists
 func (g *GCPProvider) BucketExists(name string) (bool, error) {
 	it := g.storage.Buckets(g.ctx, g.project)
-
 	for {
 		battrs, err := it.Next()
 		if err == iterator.Done {
@@ -123,7 +122,6 @@ func (g *GCPProvider) LoadFile(bucket, path string) ([]byte, error) {
 	}
 
 	defer rc.Close()
-
 	data, err := ioutil.ReadAll(rc)
 	if err != nil {
 		return nil, err
@@ -157,26 +155,20 @@ func (g *GCPProvider) IAAS() string {
 // EnsureFileExists checks for the named file in GCP storage and creates it if it doesn't exist
 // Second argument is true if new file was created
 func (g *GCPProvider) EnsureFileExists(bucket, path string, defaultContents []byte) ([]byte, bool, error) {
-	// Try to get the Object
 	contents, err := g.LoadFile(bucket, path)
 
-	// Bubble up the error if it was irelevant of NotFound
-	if err != storage.ErrObjectNotExist {
-		return nil, false, err
-	}
-
-	// If found the Object and returns its contents
 	if err == nil {
 		return contents, false, nil
 	}
 
-	// Create the file (path) in the bucket with defaultContents
+	if err != storage.ErrObjectNotExist {
+		return nil, false, err
+	}
+
 	err = g.WriteFile(bucket, path, defaultContents)
 	if err != nil {
 		return nil, false, err
 	}
-
-	// The file was created (new) and contains the defaultContents
 	return defaultContents, true, nil
 }
 

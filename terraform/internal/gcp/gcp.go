@@ -18,6 +18,8 @@ type InputVars struct {
 	Project            string
 	GCPCredentialsJSON string
 	ExternalIP         string
+	Deployment         string
+	ConfigBucket       string
 }
 
 // ConfigureTerraform interpolates terraform contents and returns terraform config

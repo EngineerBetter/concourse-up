@@ -47,6 +47,9 @@ var (
 	// AWSTerraformConfig holds the terraform conf for AWS
 	AWSTerraformConfig = mustAssetString("director/aws/infrastructure.tf")
 
+	// GCPTerraformConfig holds the terraform conf for GCP
+	GCPTerraformConfig = mustAssetString("director/gcp/infrastructure.tf")
+
 	// ExternalIPOps statically defines external-ip.yml contents
 	ExternalIPOps = mustAssetString("director/external-ip.yml")
 	// DirectorCustomOps statically defines custom-ops.yml contents

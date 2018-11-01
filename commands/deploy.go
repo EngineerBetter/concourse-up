@@ -71,7 +71,7 @@ var deployFlags = []cli.Flag{
 		Usage:       "(optional) IAAS, can be AWS or GCP",
 		EnvVar:      "IAAS",
 		Value:       "AWS",
-		Hidden:      true,
+		Hidden:      false,
 		Destination: &deployArgs.IAAS,
 	},
 	cli.BoolFlag{
@@ -148,7 +148,7 @@ var deploy = cli.Command{
 			return err
 		}
 
-		awsClient, err := iaas.New(deployArgs.IAAS, deployArgs.AWSRegion, name)
+		awsClient, err := iaas.New(deployArgs.IAAS, deployArgs.AWSRegion, "concourse-up")
 		if err != nil {
 			return err
 		}
