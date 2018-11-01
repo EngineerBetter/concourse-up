@@ -47,6 +47,7 @@ type Config struct {
 	GrafanaUsername           string   `json:"grafana_username"`
 	HostedZoneID              string   `json:"hosted_zone_id"`
 	HostedZoneRecordPrefix    string   `json:"hosted_zone_record_prefix"`
+	IAAS                      string   `json:"iaas"`
 	MultiAZRDS                bool     `json:"multi_az_rds"`
 	Namespace                 string   `json:"namespace"`
 	PrivateKey                string   `json:"private_key"`

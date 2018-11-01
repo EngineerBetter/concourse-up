@@ -6,6 +6,7 @@ import (
 
 	"github.com/EngineerBetter/concourse-up/bosh/internal/aws"
 	"github.com/EngineerBetter/concourse-up/bosh/internal/boshenv"
+	"github.com/EngineerBetter/concourse-up/bosh/internal/gcp"
 	"github.com/EngineerBetter/concourse-up/db"
 )
 
@@ -134,36 +135,77 @@ func (client *Client) createEnv(bosh *boshenv.BOSHCLI, state, creds []byte) (new
 	if err != nil {
 		return state, creds, err
 	}
-	err = bosh.CreateEnv(store, aws.Environment{
-		InternalCIDR:    "10.0.0.0/24",
-		InternalGateway: "10.0.0.1",
-		InternalIP:      "10.0.0.6",
-		AccessKeyID:     boshUserAccessKeyID,
-		SecretAccessKey: boshSecretAccessKey,
-		Region:          client.config.Region,
-		AZ:              client.config.AvailabilityZone,
-		DefaultKeyName:  directorKeyPair,
-		DefaultSecurityGroups: []string{
-			directorSecurityGroup,
-			vmSecurityGroupID,
-		},
-		PrivateKey:           client.config.PrivateKey,
-		PublicSubnetID:       publicSubnetID,
-		PrivateSubnetID:      privateSubnetID,
-		ExternalIP:           directorPublicIP,
-		ATCSecurityGroup:     atcSecurityGroupID,
-		VMSecurityGroup:      vmSecurityGroupID,
-		BlobstoreBucket:      blobstoreBucket,
-		DBCACert:             db.RDSRootCert,
-		DBHost:               boshDBAddress,
-		DBName:               client.config.RDSDefaultDatabaseName,
-		DBPassword:           client.config.RDSPassword,
-		DBPort:               boshDbPort,
-		DBUsername:           client.config.RDSUsername,
-		S3AWSAccessKeyID:     blobstoreUserAccessKeyID,
-		S3AWSSecretAccessKey: blobstoreSecretAccessKey,
-		Spot:                 client.config.Spot,
-	}, client.config.DirectorPassword, client.config.DirectorCert, client.config.DirectorKey, client.config.DirectorCACert, tags)
+	network, err := client.metadata.Get("VPCID")
+	if err != nil {
+		return state, creds, err
+	}
+	switch client.config.IAAS {
+	case "AWS":
+		err = bosh.CreateEnv(store, aws.Environment{
+			InternalCIDR:    "10.0.0.0/24",
+			InternalGateway: "10.0.0.1",
+			InternalIP:      "10.0.0.6",
+			AccessKeyID:     boshUserAccessKeyID,
+			SecretAccessKey: boshSecretAccessKey,
+			Region:          client.config.Region,
+			AZ:              client.config.AvailabilityZone,
+			DefaultKeyName:  directorKeyPair,
+			DefaultSecurityGroups: []string{
+				directorSecurityGroup,
+				vmSecurityGroupID,
+			},
+			PrivateKey:           client.config.PrivateKey,
+			PublicSubnetID:       publicSubnetID,
+			PrivateSubnetID:      privateSubnetID,
+			ExternalIP:           directorPublicIP,
+			ATCSecurityGroup:     atcSecurityGroupID,
+			VMSecurityGroup:      vmSecurityGroupID,
+			BlobstoreBucket:      blobstoreBucket,
+			DBCACert:             db.RDSRootCert,
+			DBHost:               boshDBAddress,
+			DBName:               client.config.RDSDefaultDatabaseName,
+			DBPassword:           client.config.RDSPassword,
+			DBPort:               boshDbPort,
+			DBUsername:           client.config.RDSUsername,
+			S3AWSAccessKeyID:     blobstoreUserAccessKeyID,
+			S3AWSSecretAccessKey: blobstoreSecretAccessKey,
+			Spot:                 client.config.Spot,
+		}, client.config.DirectorPassword, client.config.DirectorCert, client.config.DirectorKey, client.config.DirectorCACert, tags)
+	case "GCP":
+		err = bosh.CreateEnv(store, gcp.Environment{
+
+			InternalCIDR:    "10.0.0.0/24",
+			InternalGateway: "10.0.0.1",
+			InternalIP:      "10.0.0.6",
+			AccessKeyID:     boshUserAccessKeyID,
+			SecretAccessKey: boshSecretAccessKey,
+			Region:          client.config.Region,
+			Zone:            client.config.AvailabilityZone,
+			DefaultKeyName:  directorKeyPair,
+			DefaultSecurityGroups: []string{
+				directorSecurityGroup,
+				vmSecurityGroupID,
+			},
+			PrivateKey:           client.config.PrivateKey,
+			PublicSubnetID:       publicSubnetID,
+			PrivateSubnetID:      privateSubnetID,
+			ExternalIP:           directorPublicIP,
+			ATCSecurityGroup:     atcSecurityGroupID,
+			VMSecurityGroup:      vmSecurityGroupID,
+			BlobstoreBucket:      blobstoreBucket,
+			DBCACert:             db.RDSRootCert,
+			DBHost:               boshDBAddress,
+			DBName:               client.config.RDSDefaultDatabaseName,
+			DBPassword:           client.config.RDSPassword,
+			DBPort:               boshDbPort,
+			DBUsername:           client.config.RDSUsername,
+			S3AWSAccessKeyID:     blobstoreUserAccessKeyID,
+			S3AWSSecretAccessKey: blobstoreSecretAccessKey,
+			Preemptible:          client.config.Spot,
+			Network:              network,
+			Tags:                 client.config.Tags,
+		}, client.config.DirectorPassword, client.config.DirectorCert, client.config.DirectorKey, client.config.DirectorCACert, tags)
+	}
 
 	return store["state.json"], store["vars.yaml"], err
 }

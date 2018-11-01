@@ -175,6 +175,9 @@ func (client *Client) LoadOrCreate(deployArgs *DeployArgs) (Config, bool, bool, 
 		return Config{}, newConfigCreated, false, err
 	}
 
+	if newConfigCreated {
+		config.IAAS = deployArgs.IAAS
+	}
 	if newConfigCreated || deployArgs.WorkerCountIsSet {
 		config.ConcourseWorkerCount = deployArgs.WorkerCount
 	}
