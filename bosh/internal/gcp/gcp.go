@@ -50,50 +50,25 @@ type Environment struct {
 	Credentials           string
 }
 
-var allOperations = resource.AWSCPIOps + resource.ExternalIPOps + resource.DirectorCustomOps
+var allOperations = resource.AWSCPIOps + resource.ExternalIPOps
 
 // ConfigureDirectorManifestCPI interpolates all the Environment parameters and
 // required release versions into ready to use Director manifest
 func (e Environment) ConfigureDirectorManifestCPI(manifest string) (string, error) {
-	cpiResource := resource.Get(resource.AWSCPI)
-	stemcellResource := resource.Get(resource.AWSStemcell)
 	return yaml.Interpolate(manifest, allOperations, map[string]interface{}{
-		"zone":       e.Zone,
-		"network":    e.Network,
-		"subnetwork": e.PublicSubnetID,
-		"tags":       e.Tags,
-
-		"cpi_url":                  cpiResource.URL,
-		"cpi_version":              cpiResource.Version,
-		"cpi_sha1":                 cpiResource.SHA1,
-		"stemcell_url":             stemcellResource.URL,
-		"stemcell_sha1":            stemcellResource.SHA1,
-		"internal_cidr":            e.InternalCIDR,
-		"internal_gw":              e.InternalGateway,
-		"internal_ip":              e.InternalIP,
-		"access_key_id":            e.AccessKeyID,
-		"secret_access_key":        e.SecretAccessKey,
-		"region":                   e.Region,
-		"az":                       e.Zone,
-		"default_key_name":         e.DefaultKeyName,
-		"default_security_groups":  e.DefaultSecurityGroups,
-		"private_key":              e.PrivateKey,
-		"external_ip":              e.ExternalIP,
-		"blobstore_bucket":         e.BlobstoreBucket,
-		"db_ca_cert":               e.DBCACert,
-		"db_host":                  e.DBHost,
-		"db_name":                  e.DBName,
-		"db_password":              e.DBPassword,
-		"db_port":                  e.DBPort,
-		"db_username":              e.DBUsername,
-		"s3_aws_access_key_id":     e.S3AWSAccessKeyID,
-		"s3_aws_secret_access_key": e.S3AWSSecretAccessKey,
+		"external_ip":          e.ExternalIP,
+		"gcp_credentials_json": e.DefaultKeyName,
+		"network":              e.Network,
+		"project_id":           e.ProjectID,
+		"subnetwork":           e.PublicSubnetID,
+		"tags":                 e.Tags,
+		"zone":                 e.Zone,
 	})
 }
 
-type awsCloudConfigParams struct {
+type gcpCloudConfigParams struct {
 	ATCSecurityGroupID string
-	AvailabilityZone   string
+	Zone               string
 	PrivateSubnetID    string
 	PublicSubnetID     string
 	Preemptible        bool
@@ -103,13 +78,11 @@ type awsCloudConfigParams struct {
 // ConfigureDirectorCloudConfig inserts values from the environment into the config template passed as argument
 func (e Environment) ConfigureDirectorCloudConfig(cloudConfig string) (string, error) {
 
-	templateParams := awsCloudConfigParams{
-		AvailabilityZone:   e.Zone,
-		VMsSecurityGroupID: e.VMSecurityGroup,
-		ATCSecurityGroupID: e.ATCSecurityGroup,
-		PublicSubnetID:     e.PublicSubnetID,
-		PrivateSubnetID:    e.PrivateSubnetID,
-		Preemptible:        e.Preemptible,
+	templateParams := gcpCloudConfigParams{
+		Zone:            e.Zone,
+		PublicSubnetID:  e.PublicSubnetID,
+		PrivateSubnetID: e.PrivateSubnetID,
+		Preemptible:     e.Preemptible,
 	}
 
 	cc, err := util.RenderTemplate(cloudConfig, templateParams)
