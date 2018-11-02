@@ -154,7 +154,6 @@ func (c *CLI) init(config InputVars) (string, error) {
 
 // Apply runs terraform apply for a given config
 func (c *CLI) Apply(config InputVars, dryrun bool) error {
-	fmt.Printf("Apply got called with config %+v\n", config)
 	terraformConfigPath, err := c.init(config)
 	if err != nil {
 		return err

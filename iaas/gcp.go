@@ -186,9 +186,11 @@ func (g *GCPProvider) Region() string {
 	return g.region
 }
 
+//TODO: Choose an appropriate zone based on what zones the region has
+
 // Zone returns the zone used by the Provider
 func (g *GCPProvider) Zone() string {
-	return fmt.Sprintf("%s-a", g.region)
+	return fmt.Sprintf("%s-b", g.region)
 }
 
 // IAAS returns the name of the Provider
