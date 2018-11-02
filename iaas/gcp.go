@@ -1,8 +1,12 @@
 package iaas
 
 import (
+	"encoding/json"
 	"errors"
+	"fmt"
 	"io/ioutil"
+	"os"
+	"time"
 
 	"cloud.google.com/go/storage"
 	"golang.org/x/net/context"
@@ -14,7 +18,7 @@ type GCPProvider struct {
 	ctx     context.Context
 	storage GCPStorageClient
 	region  string
-	project string
+	attrs   map[string]string
 }
 
 // GCPOption is the signature of the option function
@@ -38,16 +42,33 @@ func GCPStorage() GCPOption {
 	}
 }
 
-func newGCP(region, project string, ops ...GCPOption) (Provider, error) {
+func newGCP(region string, ops ...GCPOption) (Provider, error) {
+	project, path, err := getCredentials()
+	if err != nil {
+		return nil, err
+	}
+	attrs := make(map[string]string)
+	attrs["project"] = project
+	attrs["path"] = path
+
 	ctx := context.Background()
 
-	g := &GCPProvider{ctx, &storage.Client{}, region, project}
+	g := &GCPProvider{ctx, &storage.Client{}, region, attrs}
 	for _, op := range ops {
 		if err := op(g); err != nil {
 			return nil, err
 		}
 	}
 	return g, nil
+}
+
+// Attr returns GCP specific attribute
+func (g *GCPProvider) Attr(key string) (string, error) {
+	v, ok := g.attrs[key]
+	if !ok {
+		return "", fmt.Errorf("iaas:gcp: key %s not found", key)
+	}
+	return v, nil
 }
 
 // DeleteFile deletes a file from GCP bucket
@@ -63,6 +84,15 @@ func (g *GCPProvider) DeleteFile(bucket, path string) error {
 
 // DeleteVersionedBucket deletes a bucket and its content from GCP
 func (g *GCPProvider) DeleteVersionedBucket(name string) error {
+	err := g.DeleteFile(name, "config.json")
+	if err != nil {
+		return err
+	}
+	err = g.DeleteFile(name, "default.tfstate")
+	if err != nil {
+		return err
+	}
+	time.Sleep(time.Second)
 	if err := g.storage.Bucket(name).Delete(g.ctx); err != nil {
 		return err
 	}
@@ -72,7 +102,11 @@ func (g *GCPProvider) DeleteVersionedBucket(name string) error {
 
 // CreateBucket creates a GCP storage bucket with defaults of the US multi-regional location, and a storage class of Standard Storage
 func (g *GCPProvider) CreateBucket(name string) error {
-	if err := g.storage.Bucket(name).Create(g.ctx, g.project, nil); err != nil {
+	project, err := g.Attr("project")
+	if err != nil {
+		return err
+	}
+	if err := g.storage.Bucket(name).Create(g.ctx, project, nil); err != nil {
 		return err
 	}
 	return nil
@@ -80,19 +114,24 @@ func (g *GCPProvider) CreateBucket(name string) error {
 
 // BucketExists checks if the named bucket exists
 func (g *GCPProvider) BucketExists(name string) (bool, error) {
-	it := g.storage.Buckets(g.ctx, g.project)
+	project, err := g.Attr("project")
+	if err != nil {
+		return false, err
+	}
+	it := g.storage.Buckets(g.ctx, project)
 	for {
 		battrs, err := it.Next()
 		if err == iterator.Done {
 			break
 		}
 		if err != nil {
+
 			return false, err
 		}
 		if battrs.Name == name {
+
 			return true, nil
 		}
-		return false, nil
 	}
 
 	return false, nil
@@ -147,6 +186,11 @@ func (g *GCPProvider) Region() string {
 	return g.region
 }
 
+// Zone returns the zone used by the Provider
+func (g *GCPProvider) Zone() string {
+	return fmt.Sprintf("%s-a", g.region)
+}
+
 // IAAS returns the name of the Provider
 func (g *GCPProvider) IAAS() string {
 	return "GCP"
@@ -194,4 +238,28 @@ func (g *GCPProvider) DeleteVMsInVPC(vpcID string) ([]*string, error) {
 func (g *GCPProvider) FindLongestMatchingHostedZone(subdomain string) (string, string, error) {
 	// @note: This will be covered in a later iteration as we need a deployment to try it
 	return "", "", errors.New("FindLongestMatchingHostedZone Not Implemented Yet")
+}
+func getCredentials() (string, string, error) {
+	credsStruct := make(map[string]interface{})
+
+	path, exists := os.LookupEnv("GOOGLE_APPLICATION_CREDENTIALS")
+	if !exists {
+		return "", "", fmt.Errorf("GOOGLE_APPLICATION_CREDENTIALS is not set")
+	}
+
+	jsonFile, err := os.Open(path)
+	if err != nil {
+		return "", "", fmt.Errorf("File %v not found", path)
+	}
+	defer jsonFile.Close()
+	byteValue, err := ioutil.ReadAll(jsonFile)
+	if err != nil {
+		return "", "", fmt.Errorf("Unable to read file %v", path)
+	}
+	json.Unmarshal(byteValue, &credsStruct)
+	projectID, ok := credsStruct["project_id"]
+	if !ok {
+		return "", "", fmt.Errorf("project_id not found in %v", path)
+	}
+	return projectID.(string), path, nil
 }

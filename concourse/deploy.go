@@ -73,11 +73,11 @@ func (client *Client) Deploy() error {
 	c.HostedZoneRecordPrefix = r.HostedZoneRecordPrefix
 	c.Domain = r.Domain
 
-	environment, metadata, err := client.tfCLI.IAAS(client.deployArgs.IAAS)
+	environment, metadata, err := client.tfCLI.IAAS(client.provider.IAAS())
 	if err != nil {
 		return err
 	}
-	switch strings.ToUpper(client.deployArgs.IAAS) {
+	switch client.provider.IAAS() {
 	case "AWS":
 		err = environment.Build(map[string]interface{}{
 			"AllowIPs":               c.AllowIPs,
@@ -99,11 +99,20 @@ func (client *Client) Deploy() error {
 			"MultiAZRDS":             c.MultiAZRDS,
 		})
 	case "GCP":
+		project, err := client.provider.Attr("project")
+		if err != nil {
+			return err
+		}
+		credentialspath, err := client.provider.Attr("path")
+		if err != nil {
+			return err
+		}
 		err = environment.Build(map[string]interface{}{
-			"Zone":               c.Region,
+			"Region":             client.provider.Region(),
+			"Zone":               client.provider.Zone(),
 			"Tags":               "",
-			"Project":            "concourse-up",
-			"GCPCredentialsJSON": "/Users/eb/workspace/irbe-test/gcp-creds.json",
+			"Project":            project,
+			"GCPCredentialsJSON": credentialspath,
 			"ExternalIP":         c.SourceAccessIP,
 			"Deployment":         c.Deployment,
 			"ConfigBucket":       c.ConfigBucket,

@@ -21,10 +21,12 @@ type Provider interface {
 	WriteFile(bucket, path string, contents []byte) error
 	Region() string
 	IAAS() string
+	Attr(string) (string, error)
+	Zone() string
 }
 
 // New returns a new IAAS client for a particular IAAS and region
-func New(iaasName, region, project string, gops ...GCPOption) (Provider, error) {
+func New(iaasName, region string, gops ...GCPOption) (Provider, error) {
 	switch strings.ToUpper(iaasName) {
 	case "AWS":
 		return newAWS(region)
@@ -32,7 +34,7 @@ func New(iaasName, region, project string, gops ...GCPOption) (Provider, error) 
 		if len(gops) == 0 {
 			gops = append(gops, GCPStorage())
 		}
-		return newGCP(region, project, gops...)
+		return newGCP(region, gops...)
 	}
 
 	return nil, fmt.Errorf("IAAS not supported: %s", iaasName)

@@ -67,7 +67,7 @@ var info = cli.Command{
 			return errors.New("Usage is `concourse-up info <name>`")
 		}
 
-		provider, err := iaas.New(infoArgs.IAAS, infoArgs.AWSRegion, name)
+		provider, err := iaas.New(infoArgs.IAAS, infoArgs.AWSRegion)
 		if err != nil {
 			return err
 		}

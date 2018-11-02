@@ -67,7 +67,7 @@ var destroy = cli.Command{
 			}
 		}
 
-		provider, err := iaas.New(destroyArgs.IAAS, destroyArgs.AWSRegion, name)
+		provider, err := iaas.New(destroyArgs.IAAS, destroyArgs.AWSRegion)
 		if err != nil {
 			return err
 		}

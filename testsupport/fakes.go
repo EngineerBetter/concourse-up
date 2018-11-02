@@ -96,11 +96,23 @@ type FakeAWSClient struct {
 	FakeNewEC2Client                  func() (iaas.IEC2, error)
 	FakeWriteFile                     func(bucket, path string, contents []byte) error
 	FakeRegion                        func() string
+	FakeAttr                          func(string) (string, error)
+	FakeZone                          func() string
 }
 
 // IAAS is here to implement iaas.IClient
 func (client *FakeAWSClient) IAAS() string {
 	return "AWS"
+}
+
+// IAAS is here to implement iaas.IClient
+func (client *FakeAWSClient) Attr(a string) (string, error) {
+	return client.FakeAttr(a)
+}
+
+// IAAS is here to implement iaas.IClient
+func (client *FakeAWSClient) Zone() string {
+	return client.FakeZone()
 }
 
 // Region delegates to FakeRegion which is dynamically set by the tests

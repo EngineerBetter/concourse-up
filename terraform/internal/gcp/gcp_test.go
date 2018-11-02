@@ -101,7 +101,7 @@ func TestMetadata_Get(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			metadata := &gcp.Metadata{
-				InternalGW: test.fields.InternalGW,
+				InternalGW: test.fields.InternalGW.Value,
 			}
 			got, err := metadata.Get(test.fakeKey)
 			if (err != nil) != test.wantErr {

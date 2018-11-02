@@ -13,6 +13,7 @@ import (
 
 // InputVars holds all the parameters GCP IAAS needs
 type InputVars struct {
+	Region             string
 	Zone               string
 	Tags               string
 	Project            string

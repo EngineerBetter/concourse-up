@@ -32,6 +32,16 @@ func newAWS(region string) (Provider, error) {
 	return &AWSProvider{sess}, nil
 }
 
+// Zone is a placeholder for Zone()
+func (a *AWSProvider) Zone() string {
+	return ""
+}
+
+// Attr returns an attribute of the provider
+func (client *AWSProvider) Attr(name string) (string, error) {
+	return "", nil
+}
+
 // Region returns the region to operate against
 func (client *AWSProvider) Region() string {
 	return *client.sess.Config.Region

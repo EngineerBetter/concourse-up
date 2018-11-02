@@ -33,29 +33,51 @@ func (client *Client) FetchInfo() (*Info, error) {
 		return nil, err
 	}
 
-	environment, metadata, err := client.tfCLI.IAAS("AWS")
+	environment, metadata, err := client.tfCLI.IAAS(client.provider.IAAS())
 	if err != nil {
 		return nil, err
 	}
-	err = environment.Build(map[string]interface{}{
-		"AllowIPs":               config.AllowIPs,
-		"AvailabilityZone":       config.AvailabilityZone,
-		"ConfigBucket":           config.ConfigBucket,
-		"Deployment":             config.Deployment,
-		"HostedZoneID":           config.HostedZoneID,
-		"HostedZoneRecordPrefix": config.HostedZoneRecordPrefix,
-		"Namespace":              config.Namespace,
-		"Project":                config.Project,
-		"PublicKey":              config.PublicKey,
-		"RDSDefaultDatabaseName": config.RDSDefaultDatabaseName,
-		"RDSInstanceClass":       config.RDSInstanceClass,
-		"RDSPassword":            config.RDSPassword,
-		"RDSUsername":            config.RDSUsername,
-		"Region":                 config.Region,
-		"SourceAccessIP":         config.SourceAccessIP,
-		"TFStatePath":            config.TFStatePath,
-		"MultiAZRDS":             config.MultiAZRDS,
-	})
+	switch client.provider.IAAS() {
+	case "AWS":
+		err = environment.Build(map[string]interface{}{
+			"AllowIPs":               config.AllowIPs,
+			"AvailabilityZone":       config.AvailabilityZone,
+			"ConfigBucket":           config.ConfigBucket,
+			"Deployment":             config.Deployment,
+			"HostedZoneID":           config.HostedZoneID,
+			"HostedZoneRecordPrefix": config.HostedZoneRecordPrefix,
+			"Namespace":              config.Namespace,
+			"Project":                config.Project,
+			"PublicKey":              config.PublicKey,
+			"RDSDefaultDatabaseName": config.RDSDefaultDatabaseName,
+			"RDSInstanceClass":       config.RDSInstanceClass,
+			"RDSPassword":            config.RDSPassword,
+			"RDSUsername":            config.RDSUsername,
+			"Region":                 config.Region,
+			"SourceAccessIP":         config.SourceAccessIP,
+			"TFStatePath":            config.TFStatePath,
+			"MultiAZRDS":             config.MultiAZRDS,
+		})
+	case "GCP":
+		project, err := client.provider.Attr("project")
+		if err != nil {
+			return nil, err
+		}
+		credentialspath, err := client.provider.Attr("path")
+		if err != nil {
+			return nil, err
+		}
+		err = environment.Build(map[string]interface{}{
+			"Region":             client.provider.Region(),
+			"Zone":               client.provider.Zone(),
+			"Tags":               "",
+			"Project":            project,
+			"GCPCredentialsJSON": credentialspath,
+			"ExternalIP":         config.SourceAccessIP,
+			"Deployment":         config.Deployment,
+			"ConfigBucket":       config.ConfigBucket,
+		})
+	}
 	if err != nil {
 		return nil, err
 	}

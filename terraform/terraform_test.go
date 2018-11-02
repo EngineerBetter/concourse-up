@@ -38,6 +38,7 @@ func TestCLI_Apply(t *testing.T) {
 	defer e.Finish()
 	mockCLIent, err := terraform.New(terraform.FakeExec(e.Cmd()))
 	require.NoError(t, err)
+	mockCLIent.IAAS("AWS")
 
 	config := &mockTerraformInputVars{}
 
@@ -62,6 +63,7 @@ func TestCLI_ApplyPlan(t *testing.T) {
 	defer e.Finish()
 	mockCLIent, err := terraform.New(terraform.FakeExec(e.Cmd()))
 	require.NoError(t, err)
+	mockCLIent.IAAS("AWS")
 
 	config := &mockTerraformInputVars{}
 
@@ -83,6 +85,7 @@ func TestCLI_Destroy(t *testing.T) {
 	defer e.Finish()
 	mockCLIent, err := terraform.New(terraform.FakeExec(e.Cmd()))
 	require.NoError(t, err)
+	mockCLIent.IAAS("AWS")
 
 	config := &mockTerraformInputVars{}
 
@@ -106,6 +109,7 @@ func TestCLI_BuildOutput(t *testing.T) {
 	defer e.Finish()
 	mockCLIent, err := terraform.New(terraform.FakeExec(e.Cmd()))
 	require.NoError(t, err)
+	mockCLIent.IAAS("AWS")
 
 	config := &mockTerraformInputVars{}
 	metadata := &mockIAASMetadata{}
