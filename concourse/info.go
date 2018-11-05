@@ -38,7 +38,7 @@ func (client *Client) FetchInfo() (*Info, error) {
 		return nil, err
 	}
 	switch client.provider.IAAS() {
-	case "AWS":
+	case "AWS": // nolint
 		err = environment.Build(map[string]interface{}{
 			"AllowIPs":               config.AllowIPs,
 			"AvailabilityZone":       config.AvailabilityZone,
@@ -58,16 +58,19 @@ func (client *Client) FetchInfo() (*Info, error) {
 			"TFStatePath":            config.TFStatePath,
 			"MultiAZRDS":             config.MultiAZRDS,
 		})
-	case "GCP":
-		project, err := client.provider.Attr("project")
 		if err != nil {
 			return nil, err
 		}
-		credentialspath, err := client.provider.Attr("path")
-		if err != nil {
-			return nil, err
+	case "GCP": // nolint
+		project, err1 := client.provider.Attr("project")
+		if err1 != nil {
+			return nil, err1
 		}
-		err = environment.Build(map[string]interface{}{
+		credentialspath, err1 := client.provider.Attr("path")
+		if err1 != nil {
+			return nil, err1
+		}
+		err1 = environment.Build(map[string]interface{}{
 			"Region":             client.provider.Region(),
 			"Zone":               client.provider.Zone(),
 			"Tags":               "",
@@ -77,9 +80,9 @@ func (client *Client) FetchInfo() (*Info, error) {
 			"Deployment":         config.Deployment,
 			"ConfigBucket":       config.ConfigBucket,
 		})
-	}
-	if err != nil {
-		return nil, err
+		if err1 != nil {
+			return nil, err1
+		}
 	}
 	err = client.tfCLI.BuildOutput(environment, metadata)
 	if err != nil {

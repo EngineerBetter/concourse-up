@@ -20,7 +20,7 @@ func (client *Client) Destroy() error {
 	}
 
 	switch client.provider.IAAS() {
-	case "AWS":
+	case "AWS": // nolint
 		err = environment.Build(map[string]interface{}{
 			"AllowIPs":               conf.AllowIPs,
 			"AvailabilityZone":       conf.AvailabilityZone,
@@ -48,29 +48,29 @@ func (client *Client) Destroy() error {
 			return err
 		}
 
-		vpcID, err := metadata.Get("VPCID")
-		if err != nil {
-			return err
+		vpcID, err1 := metadata.Get("VPCID")
+		if err1 != nil {
+			return err1
 		}
-		volumesToDelete, err := client.provider.DeleteVMsInVPC(vpcID)
-		if err != nil {
-			return err
-		}
-
-		if err = client.provider.DeleteVolumes(volumesToDelete, iaas.DeleteVolume); err != nil {
-			return err
+		volumesToDelete, err1 := client.provider.DeleteVMsInVPC(vpcID)
+		if err1 != nil {
+			return err1
 		}
 
-	case "GCP":
-		project, err := client.provider.Attr("project")
-		if err != nil {
-			return err
+		if err1 = client.provider.DeleteVolumes(volumesToDelete, iaas.DeleteVolume); err1 != nil {
+			return err1
 		}
-		credentialspath, err := client.provider.Attr("path")
-		if err != nil {
-			return err
+
+	case "GCP": // nolint
+		project, err1 := client.provider.Attr("project")
+		if err1 != nil {
+			return err1
 		}
-		err = environment.Build(map[string]interface{}{
+		credentialspath, err1 := client.provider.Attr("path")
+		if err1 != nil {
+			return err1
+		}
+		err1 = environment.Build(map[string]interface{}{
 			"Region":             client.provider.Region(),
 			"Zone":               client.provider.Zone(),
 			"Tags":               "",
@@ -80,8 +80,8 @@ func (client *Client) Destroy() error {
 			"Deployment":         conf.Deployment,
 			"ConfigBucket":       conf.ConfigBucket,
 		})
-		if err != nil {
-			return err
+		if err1 != nil {
+			return err1
 		}
 	}
 

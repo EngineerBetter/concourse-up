@@ -38,26 +38,26 @@ func (a *AWSProvider) Zone() string {
 }
 
 // Attr returns an attribute of the provider
-func (client *AWSProvider) Attr(name string) (string, error) {
+func (a *AWSProvider) Attr(name string) (string, error) {
 	return "", nil
 }
 
 // Region returns the region to operate against
-func (client *AWSProvider) Region() string {
-	return *client.sess.Config.Region
+func (a *AWSProvider) Region() string {
+	return *a.sess.Config.Region
 }
 
 // IAAS returns the iaas to operate against
-func (client *AWSProvider) IAAS() string {
+func (a *AWSProvider) IAAS() string {
 	return "AWS"
 }
 
 // CheckForWhitelistedIP checks if the specified IP is whitelisted in the security group
-func (client *AWSProvider) CheckForWhitelistedIP(ip, securityGroup string) (bool, error) {
+func (a *AWSProvider) CheckForWhitelistedIP(ip, securityGroup string) (bool, error) {
 
 	cidr := fmt.Sprintf("%s/32", ip)
 
-	ec2Client := ec2.New(client.sess)
+	ec2Client := ec2.New(a.sess)
 
 	securityGroupsOutput, err := ec2Client.DescribeSecurityGroups(&ec2.DescribeSecurityGroupsInput{
 		GroupIds: []*string{
@@ -98,12 +98,12 @@ func checkPorts(sgCidr, cidr string, port22, port6868, port25555 *bool, fromPort
 }
 
 // DeleteVolumes deletes the specified EBS volumes
-func (client *AWSProvider) DeleteVolumes(volumes []*string, deleteVolume func(ec2Client IEC2, volumeID *string) error) error {
+func (a *AWSProvider) DeleteVolumes(volumes []*string, deleteVolume func(ec2Client IEC2, volumeID *string) error) error {
 	if len(volumes) == 0 {
 		return nil
 	}
 
-	ec2Client := ec2.New(client.sess)
+	ec2Client := ec2.New(a.sess)
 
 	volumesOutput, err := ec2Client.DescribeVolumes(&ec2.DescribeVolumesInput{
 		Filters: []*ec2.Filter{
@@ -146,10 +146,10 @@ func DeleteVolume(ec2Client IEC2, volumeID *string) error {
 }
 
 // DeleteVMsInVPC deletes all the VMs in the given VPC
-func (client *AWSProvider) DeleteVMsInVPC(vpcID string) ([]*string, error) {
+func (a *AWSProvider) DeleteVMsInVPC(vpcID string) ([]*string, error) {
 
 	filterName := "vpc-id"
-	ec2Client := ec2.New(client.sess)
+	ec2Client := ec2.New(a.sess)
 
 	resp, err := ec2Client.DescribeInstances(&ec2.DescribeInstancesInput{
 		Filters: []*ec2.Filter{
@@ -192,9 +192,9 @@ func (client *AWSProvider) DeleteVMsInVPC(vpcID string) ([]*string, error) {
 }
 
 // ListHostedZones returns a list of hosted zones
-func (client *AWSProvider) ListHostedZones() ([]*route53.HostedZone, error) {
+func (a *AWSProvider) ListHostedZones() ([]*route53.HostedZone, error) {
 
-	r53Client := route53.New(client.sess)
+	r53Client := route53.New(a.sess)
 	hostedZones := []*route53.HostedZone{}
 	err := r53Client.ListHostedZonesPages(&route53.ListHostedZonesInput{}, func(output *route53.ListHostedZonesOutput, _ bool) bool {
 		hostedZones = append(hostedZones, output.HostedZones...)
@@ -208,8 +208,8 @@ func (client *AWSProvider) ListHostedZones() ([]*route53.HostedZone, error) {
 }
 
 // FindLongestMatchingHostedZone finds the longest hosted zone that matches the given subdomain
-func (client *AWSProvider) FindLongestMatchingHostedZone(subdomain string) (string, string, error) {
-	hostedZones, err := client.ListHostedZones()
+func (a *AWSProvider) FindLongestMatchingHostedZone(subdomain string) (string, string, error) {
+	hostedZones, err := a.ListHostedZones()
 	if err != nil {
 		return "", "", err
 	}

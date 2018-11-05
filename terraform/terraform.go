@@ -106,11 +106,11 @@ func (n *NullMetadata) Get(string) (string, error) { return "", nil }
 // IAAS is returning the IAAS specific metadata and environment
 func (c *CLI) IAAS(name string) (InputVars, IAASMetadata, error) {
 	switch strings.ToUpper(name) {
-	case "AWS":
-		c.iaas = "AWS"
+	case "AWS": // nolint
+		c.iaas = "AWS" // nolint
 		return &aws.InputVars{}, &aws.Metadata{}, nil
-	case "GCP":
-		c.iaas = "GCP"
+	case "GCP": // nolint
+		c.iaas = "GCP" // nolint
 		return &gcp.InputVars{}, &gcp.Metadata{}, nil
 	}
 	return &NullInputVars{}, &NullMetadata{}, errors.New("terraform: " + name + " not a valid iaas provider")
@@ -123,12 +123,12 @@ func (c *CLI) init(config InputVars) (string, error) {
 		err      error
 	)
 	switch c.iaas {
-	case "AWS":
+	case "AWS": // nolint
 		tfConfig, err = config.ConfigureTerraform(resource.AWSTerraformConfig)
 		if err != nil {
 			return "", err
 		}
-	case "GCP":
+	case "GCP": // nolint
 		tfConfig, err = config.ConfigureTerraform(resource.GCPTerraformConfig)
 		if err != nil {
 			return "", err

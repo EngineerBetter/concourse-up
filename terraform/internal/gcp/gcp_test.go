@@ -170,13 +170,13 @@ func TestMetadata_Init(t *testing.T) {
 	}{
 		{
 			name:          "Success",
-			data:          `{"external_ip":{"sensitive":false,"type": "string","value": "fakeIP"}}`,
-			keyToSet:      "ExternalIP",
+			data:          `{"director_public_ip":{"sensitive":false,"type": "string","value": "fakeIP"}}`,
+			keyToSet:      "DirectorPublicIP",
 			expectedValue: "fakeIP",
 		},
 		{
 			name:          "Failure",
-			keyToSet:      "ExternalIP",
+			keyToSet:      "DirectorPublicIP",
 			expectedValue: "",
 			wantErr:       true,
 		},

@@ -70,15 +70,16 @@ type MetadataStringValue struct {
 
 // Metadata represents output from terraform on GCP or GCP
 type Metadata struct {
-	Zone               MetadataStringValue `json:"zone" valid:"required"`
-	Tags               MetadataStringValue `json:"tags" valid:"required"`
-	Project            MetadataStringValue `json:"project" valid:"required"`
-	GCPCredentialsJSON MetadataStringValue `json:"gcp_credentials_json" valid:"required"`
-	ExternalIP         MetadataStringValue `json:"external_ip" valid:"required"`
-	Network            MetadataStringValue `json:"network" valid:"required"`
-	Subnetwork         MetadataStringValue `json:"subnetwork" valid:"required"`
-	InternalCIDR       MetadataStringValue `json:"internal_cidr" valid:"required"`
-	InternalGW         MetadataStringValue `json:"internal_gw" valid:"required"`
+	Network                    MetadataStringValue `json:"network" valid:"required"`
+	PrivateSubnetworkName      MetadataStringValue `json:"private_subnetwork_name" valid:"required"`
+	PublicSubnetworkName       MetadataStringValue `json:"public_subnetwork_name" valid:"required"`
+	PublicSubnetworkCidr       MetadataStringValue `json:"public_subnetwork_cidr" valid:"required"`
+	PrivateSubnetworkCidr      MetadataStringValue `json:"private_subnetwork_cidr" valid:"required"`
+	PrivateSubnetworInternalGw MetadataStringValue `json:"private_subnetwor_internal_gw" valid:"required"`
+	PublicSubnetworInternalGw  MetadataStringValue `json:"public_subnetwor_internal_gw" valid:"required"`
+	ATCPublicIP                MetadataStringValue `json:"atc_public_ip" valid:"required"`
+	DirectorAccountCreds       MetadataStringValue `json:"director_account_creds" valid:"required"`
+	DirectorPublicIP           MetadataStringValue `json:"director_public_ip" valid:"required"`
 }
 
 // AssertValid returns an error if the struct contains any missing fields

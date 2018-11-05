@@ -105,12 +105,12 @@ func (client *FakeAWSClient) IAAS() string {
 	return "AWS"
 }
 
-// IAAS is here to implement iaas.IClient
+// Attr is here to implement iaas.IClient
 func (client *FakeAWSClient) Attr(a string) (string, error) {
 	return client.FakeAttr(a)
 }
 
-// IAAS is here to implement iaas.IClient
+// Zone is here to implement iaas.IClient
 func (client *FakeAWSClient) Zone() string {
 	return client.FakeZone()
 }
