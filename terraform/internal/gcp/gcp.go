@@ -70,15 +70,15 @@ type MetadataStringValue struct {
 
 // Metadata represents output from terraform on GCP or GCP
 type Metadata struct {
-	Zone               string `json:"zone" valid:"required"`
-	Tags               string `json:"tags" valid:"required"`
-	Project            string `json:"project" valid:"required"`
-	GCPCredentialsJSON string `json:"gcp_credentials_json" valid:"required"`
-	ExternalIP         string `json:"external_ip" valid:"required"`
-	Network            string `json:"network" valid:"required"`
-	Subnetwork         string `json:"subnetwork" valid:"required"`
-	InternalCIDR       string `json:"internal_cidr" valid:"required"`
-	InternalGW         string `json:"internal_gw" valid:"required"`
+	Zone               MetadataStringValue `json:"zone" valid:"required"`
+	Tags               MetadataStringValue `json:"tags" valid:"required"`
+	Project            MetadataStringValue `json:"project" valid:"required"`
+	GCPCredentialsJSON MetadataStringValue `json:"gcp_credentials_json" valid:"required"`
+	ExternalIP         MetadataStringValue `json:"external_ip" valid:"required"`
+	Network            MetadataStringValue `json:"network" valid:"required"`
+	Subnetwork         MetadataStringValue `json:"subnetwork" valid:"required"`
+	InternalCIDR       MetadataStringValue `json:"internal_cidr" valid:"required"`
+	InternalGW         MetadataStringValue `json:"internal_gw" valid:"required"`
 }
 
 // AssertValid returns an error if the struct contains any missing fields

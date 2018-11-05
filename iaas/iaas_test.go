@@ -1,6 +1,8 @@
 package iaas
 
 import (
+	"io/ioutil"
+	"os"
 	"reflect"
 	"testing"
 )
@@ -22,6 +24,8 @@ func TestNew(t *testing.T) {
 		args    args
 		want    string
 		wantErr bool
+		setup   func(t *testing.T) string
+		cleanup func(t *testing.T, s string)
 	}{
 		{
 			name: "return aws provider",
@@ -31,6 +35,8 @@ func TestNew(t *testing.T) {
 			},
 			want:    "AWS",
 			wantErr: false,
+			setup:   func(t *testing.T) string { return "" },
+			cleanup: func(t *testing.T, s string) {},
 		}, {
 			name: "return gcp provider",
 			args: args{
@@ -39,6 +45,28 @@ func TestNew(t *testing.T) {
 			},
 			want:    "GCP",
 			wantErr: false,
+			setup: func(t *testing.T) string {
+				json := `{"project_id": "fake_id"}`
+				filePath, err := ioutil.TempFile("", "")
+				if err != nil {
+					t.Error("Could not create GCP credentials file")
+				}
+				_, err = filePath.WriteString(json)
+				if err != nil {
+					t.Error("Could not write in GCP credentials file")
+				}
+				filePath.Close()
+				err = os.Setenv("GOOGLE_APPLICATION_CREDENTIALS", filePath.Name())
+				if err != nil {
+					t.Errorf("cannot set %v", err)
+				}
+				return filePath.Name()
+			},
+			cleanup: func(t *testing.T, s string) {
+				if err := os.Remove(s); err != nil {
+					t.Error("Could not delete GCP credentials file")
+				}
+			},
 		},
 		{
 			name: "does not care about case",
@@ -48,11 +76,16 @@ func TestNew(t *testing.T) {
 			},
 			want:    "AWS",
 			wantErr: false,
+			setup:   func(t *testing.T) string { return "" },
+			cleanup: func(t *testing.T, s string) {},
 		},
 	}
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			tmp := tt.setup(t)
 			got, err := New(tt.args.iaas, tt.args.region, FakeGCPStorage())
+			tt.cleanup(t, tmp)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("New() error = %v, wantErr %v", err, tt.wantErr)
 				return

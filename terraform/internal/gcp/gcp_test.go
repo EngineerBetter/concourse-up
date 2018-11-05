@@ -68,7 +68,7 @@ func TestInputVars_ConfigureTerraform(t *testing.T) {
 
 func TestMetadata_Get(t *testing.T) {
 	type fields struct {
-		InternalGW gcp.MetadataStringValue
+		Network gcp.MetadataStringValue
 	}
 	tests := []struct {
 		name    string
@@ -79,17 +79,17 @@ func TestMetadata_Get(t *testing.T) {
 	}{{
 		name: "Success",
 		fields: fields{
-			InternalGW: gcp.MetadataStringValue{
-				Value: "fakeMetadataStringValue",
+			Network: gcp.MetadataStringValue{
+				Value: "fakeNetwork",
 			},
 		},
-		want:    "fakeMetadataStringValue",
-		fakeKey: "VPCID",
+		want:    "fakeNetwork",
+		fakeKey: "Network",
 	},
 		{
 			name: "Failure",
 			fields: fields{
-				InternalGW: gcp.MetadataStringValue{
+				Network: gcp.MetadataStringValue{
 					Value: "fakeMetadataStringValue",
 				},
 			},
@@ -101,7 +101,7 @@ func TestMetadata_Get(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			metadata := &gcp.Metadata{
-				InternalGW: test.fields.InternalGW.Value,
+				Network: test.fields.Network,
 			}
 			got, err := metadata.Get(test.fakeKey)
 			if (err != nil) != test.wantErr {
@@ -124,45 +124,27 @@ func TestInputVars_Build(t *testing.T) {
 		{
 			name: "Success",
 			data: map[string]interface{}{
-				"AllowIPs":               "allowips",
-				"AvailabilityZone":       "availabilityzone",
-				"ConfigBucket":           "configbucket",
-				"Deployment":             "deployment",
-				"HostedZoneID":           "hostedzoneid",
-				"HostedZoneRecordPrefix": "hostedzonerecordprefix",
-				"Namespace":              "namespace",
-				"Project":                "project",
-				"PublicKey":              "publickey",
-				"RDSDefaultDatabaseName": "rdsdefaultdatabasename",
-				"RDSInstanceClass":       "rdsinstanceclass",
-				"RDSPassword":            "rdspassword",
-				"RDSUsername":            "rdsusername",
-				"Region":                 "region",
-				"SourceAccessIP":         "sourceaccessip",
-				"TFStatePath":            "tfstatepath",
-				"MultiAZRDS":             true,
+				"Region":             "aRegion",
+				"Zone":               "aZone",
+				"Tags":               "someTags",
+				"Project":            "aProject",
+				"GCPCredentialsJSON": "aCredentialsJSONfile",
+				"ExternalIP":         "anExternalIP",
+				"Deployment":         "aDeployment",
+				"ConfigBucket":       "aConfigBucket",
 			},
 			fakeInputVars: gcp.InputVars{},
 		},
 		{
 			name: "Failure",
 			data: map[string]interface{}{
-				"AvailabilityZone":       "availabilityzone",
-				"ConfigBucket":           "configbucket",
-				"Deployment":             "deployment",
-				"HostedZoneID":           "hostedzoneid",
-				"HostedZoneRecordPrefix": "hostedzonerecordprefix",
-				"Namespace":              "namespace",
-				"Project":                "project",
-				"PublicKey":              "publickey",
-				"RDSDefaultDatabaseName": "rdsdefaultdatabasename",
-				"RDSInstanceClass":       "rdsinstanceclass",
-				"RDSPassword":            "rdspassword",
-				"RDSUsername":            "rdsusername",
-				"Region":                 "region",
-				"SourceAccessIP":         "sourceaccessip",
-				"TFStatePath":            "tfstatepath",
-				"MultiAZRDS":             true,
+				"Region":             "aRegion",
+				"Zone":               "aZone",
+				"Tags":               "someTags",
+				"Project":            "aProject",
+				"GCPCredentialsJSON": "aCredentialsJSONfile",
+				"ExternalIP":         "anExternalIP",
+				"Deployment":         "aDeployment",
 			},
 			wantErr:       true,
 			fakeInputVars: gcp.InputVars{},
@@ -188,13 +170,13 @@ func TestMetadata_Init(t *testing.T) {
 	}{
 		{
 			name:          "Success",
-			data:          `{"atc_public_ip":{"sensitive":false,"type": "string","value": "fakeIP"}}`,
-			keyToSet:      "ATCPublicIP",
+			data:          `{"external_ip":{"sensitive":false,"type": "string","value": "fakeIP"}}`,
+			keyToSet:      "ExternalIP",
 			expectedValue: "fakeIP",
 		},
 		{
 			name:          "Failure",
-			keyToSet:      "ATCPublicIP",
+			keyToSet:      "ExternalIP",
 			expectedValue: "",
 			wantErr:       true,
 		},
