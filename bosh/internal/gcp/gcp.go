@@ -79,10 +79,11 @@ type gcpCloudConfigParams struct {
 func (e Environment) ConfigureDirectorCloudConfig(cloudConfig string) (string, error) {
 
 	templateParams := gcpCloudConfigParams{
-		Zone:            e.Zone,
-		PublicSubnetID:  e.PublicSubnetID,
-		PrivateSubnetID: e.PrivateSubnetID,
-		Preemptible:     e.Preemptible,
+		ATCSecurityGroupID: e.ATCSecurityGroup,
+		Zone:               e.Zone,
+		PublicSubnetID:     e.PublicSubnetID,
+		PrivateSubnetID:    e.PrivateSubnetID,
+		Preemptible:        e.Preemptible,
 	}
 
 	cc, err := util.RenderTemplate(cloudConfig, templateParams)

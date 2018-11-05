@@ -157,12 +157,12 @@ func TestStore_Set(t *testing.T) {
 
 func TestEnvironment_ConfigureDirectorCloudConfig(t *testing.T) {
 	type fields struct {
-		AZ               string
+		Zone             string
 		PublicSubnetID   string
 		PrivateSubnetID  string
 		ATCSecurityGroup string
 		VMSecurityGroup  string
-		Spot             bool
+		Preemptible      bool
 	}
 	tests := []struct {
 		name        string
@@ -174,13 +174,14 @@ func TestEnvironment_ConfigureDirectorCloudConfig(t *testing.T) {
 		{
 			name: "Success- template rendered",
 			fields: fields{
-				AZ:               "eu-west-1",
+				Zone:             "europe-west1-b",
 				PublicSubnetID:   "12345",
 				PrivateSubnetID:  "67890",
 				ATCSecurityGroup: "00000",
+				Preemptible:      true,
 			},
-			cloudConfig: "availability_zone: <% .AvailabilityZone %>\n public_subnet_id: <% .PublicSubnetID %>\n private_subnet_id: <% .PrivateSubnetID %>\n atc_security_group: <% .ATCSecurityGroupID %>\n spot: <% .Spot %>",
-			want:        "availability_zone: eu-west-1\n public_subnet_id: 12345\n private_subnet_id: 67890\n atc_security_group: 00000\n spot: false",
+			cloudConfig: "zone: <% .Zone %>\n public_subnet_id: <% .PublicSubnetID %>\n private_subnet_id: <% .PrivateSubnetID %>\n atc_security_group: <% .ATCSecurityGroupID %>\n preemptible: <% .Preemptible %>",
+			want:        "zone: europe-west1-b\n public_subnet_id: 12345\n private_subnet_id: 67890\n atc_security_group: 00000\n preemptible: true",
 			wantErr:     false,
 		},
 		{
@@ -193,12 +194,12 @@ func TestEnvironment_ConfigureDirectorCloudConfig(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			e := Environment{
-				AZ:               tt.fields.AZ,
+				Zone:             tt.fields.Zone,
 				PublicSubnetID:   tt.fields.PublicSubnetID,
 				PrivateSubnetID:  tt.fields.PrivateSubnetID,
 				ATCSecurityGroup: tt.fields.ATCSecurityGroup,
 				VMSecurityGroup:  tt.fields.VMSecurityGroup,
-				Spot:             tt.fields.Spot,
+				Preemptible:      tt.fields.Preemptible,
 			}
 			got, err := e.ConfigureDirectorCloudConfig(tt.cloudConfig)
 			if (err != nil) != tt.wantErr {
