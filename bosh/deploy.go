@@ -81,63 +81,63 @@ func (client *Client) createEnv(bosh *boshenv.BOSHCLI, state, creds []byte) (new
 
 	switch client.provider.IAAS() {
 	case "AWS":
-		boshUserAccessKeyID, err := client.metadata.Get("BoshUserAccessKeyID")
-		if err != nil {
-			return state, creds, err
+		boshUserAccessKeyID, err1 := client.metadata.Get("BoshUserAccessKeyID")
+		if err1 != nil {
+			return state, creds, err1
 		}
-		boshSecretAccessKey, err := client.metadata.Get("BoshSecretAccessKey")
-		if err != nil {
-			return state, creds, err
+		boshSecretAccessKey, err1 := client.metadata.Get("BoshSecretAccessKey")
+		if err1 != nil {
+			return state, creds, err1
 		}
-		publicSubnetID, err := client.metadata.Get("PublicSubnetID")
-		if err != nil {
-			return state, creds, err
+		publicSubnetID, err1 := client.metadata.Get("PublicSubnetID")
+		if err1 != nil {
+			return state, creds, err1
 		}
-		privateSubnetID, err := client.metadata.Get("PrivateSubnetID")
-		if err != nil {
-			return state, creds, err
+		privateSubnetID, err1 := client.metadata.Get("PrivateSubnetID")
+		if err1 != nil {
+			return state, creds, err1
 		}
-		directorPublicIP, err := client.metadata.Get("DirectorPublicIP")
-		if err != nil {
-			return state, creds, err
+		directorPublicIP, err1 := client.metadata.Get("DirectorPublicIP")
+		if err1 != nil {
+			return state, creds, err1
 		}
-		atcSecurityGroupID, err := client.metadata.Get("ATCSecurityGroupID")
-		if err != nil {
-			return state, creds, err
+		atcSecurityGroupID, err1 := client.metadata.Get("ATCSecurityGroupID")
+		if err1 != nil {
+			return state, creds, err1
 		}
-		vmSecurityGroupID, err := client.metadata.Get("VMsSecurityGroupID")
-		if err != nil {
-			return state, creds, err
+		vmSecurityGroupID, err1 := client.metadata.Get("VMsSecurityGroupID")
+		if err1 != nil {
+			return state, creds, err1
 		}
-		blobstoreBucket, err := client.metadata.Get("BlobstoreBucket")
-		if err != nil {
-			return state, creds, err
+		blobstoreBucket, err1 := client.metadata.Get("BlobstoreBucket")
+		if err1 != nil {
+			return state, creds, err1
 		}
-		boshDBAddress, err := client.metadata.Get("BoshDBAddress")
-		if err != nil {
-			return state, creds, err
+		boshDBAddress, err1 := client.metadata.Get("BoshDBAddress")
+		if err1 != nil {
+			return state, creds, err1
 		}
-		boshDbPort, err := client.metadata.Get("BoshDBPort")
-		if err != nil {
-			return state, creds, err
+		boshDbPort, err1 := client.metadata.Get("BoshDBPort")
+		if err1 != nil {
+			return state, creds, err1
 		}
-		blobstoreUserAccessKeyID, err := client.metadata.Get("BlobstoreUserAccessKeyID")
-		if err != nil {
-			return state, creds, err
+		blobstoreUserAccessKeyID, err1 := client.metadata.Get("BlobstoreUserAccessKeyID")
+		if err1 != nil {
+			return state, creds, err1
 		}
-		blobstoreSecretAccessKey, err := client.metadata.Get("BlobstoreSecretAccessKey")
-		if err != nil {
-			return state, creds, err
+		blobstoreSecretAccessKey, err1 := client.metadata.Get("BlobstoreSecretAccessKey")
+		if err1 != nil {
+			return state, creds, err1
 		}
-		directorKeyPair, err := client.metadata.Get("DirectorKeyPair")
-		if err != nil {
-			return state, creds, err
+		directorKeyPair, err1 := client.metadata.Get("DirectorKeyPair")
+		if err1 != nil {
+			return state, creds, err1
 		}
-		directorSecurityGroup, err := client.metadata.Get("DirectorSecurityGroupID")
-		if err != nil {
-			return state, creds, err
+		directorSecurityGroup, err1 := client.metadata.Get("DirectorSecurityGroupID")
+		if err1 != nil {
+			return state, creds, err1
 		}
-		err = bosh.CreateEnv(store, aws.Environment{
+		err1 = bosh.CreateEnv(store, aws.Environment{
 			InternalCIDR:    "10.0.0.0/24",
 			InternalGateway: "10.0.0.1",
 			InternalIP:      "10.0.0.6",
@@ -167,8 +167,14 @@ func (client *Client) createEnv(bosh *boshenv.BOSHCLI, state, creds []byte) (new
 			S3AWSSecretAccessKey: blobstoreSecretAccessKey,
 			Spot:                 client.config.Spot,
 		}, client.config.DirectorPassword, client.config.DirectorCert, client.config.DirectorKey, client.config.DirectorCACert, tags)
+		if err1 != nil {
+			return store["state.json"], store["vars.yaml"], err1
+		}
 	case "GCP":
-		err = bosh.CreateEnv(store, gcp.Environment{}, client.config.DirectorPassword, client.config.DirectorCert, client.config.DirectorKey, client.config.DirectorCACert, tags)
+		err1 := bosh.CreateEnv(store, gcp.Environment{}, client.config.DirectorPassword, client.config.DirectorCert, client.config.DirectorKey, client.config.DirectorCACert, tags)
+		if err1 != nil {
+			return store["state.json"], store["vars.yaml"], err1
+		}
 	}
 	return store["state.json"], store["vars.yaml"], err
 }

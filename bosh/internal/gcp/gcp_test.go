@@ -157,12 +157,10 @@ func TestStore_Set(t *testing.T) {
 
 func TestEnvironment_ConfigureDirectorCloudConfig(t *testing.T) {
 	type fields struct {
-		Zone             string
-		PublicSubnetID   string
-		PrivateSubnetID  string
-		ATCSecurityGroup string
-		VMSecurityGroup  string
-		Preemptible      bool
+		Zone              string
+		PublicSubnetwork  string
+		PrivateSubnetwork string
+		Preemptible       bool
 	}
 	tests := []struct {
 		name        string
@@ -174,14 +172,13 @@ func TestEnvironment_ConfigureDirectorCloudConfig(t *testing.T) {
 		{
 			name: "Success- template rendered",
 			fields: fields{
-				Zone:             "europe-west1-b",
-				PublicSubnetID:   "12345",
-				PrivateSubnetID:  "67890",
-				ATCSecurityGroup: "00000",
-				Preemptible:      true,
+				Zone:              "europe-west1-b",
+				PublicSubnetwork:  "12345",
+				PrivateSubnetwork: "67890",
+				Preemptible:       true,
 			},
-			cloudConfig: "zone: <% .Zone %>\n public_subnet_id: <% .PublicSubnetID %>\n private_subnet_id: <% .PrivateSubnetID %>\n atc_security_group: <% .ATCSecurityGroupID %>\n preemptible: <% .Preemptible %>",
-			want:        "zone: europe-west1-b\n public_subnet_id: 12345\n private_subnet_id: 67890\n atc_security_group: 00000\n preemptible: true",
+			cloudConfig: "zone: <% .Zone %>\n public_subnet_id: <% .PublicSubnetwork %>\n private_subnet_id: <% .PrivateSubnetwork %>\n preemptible: <% .Preemptible %>",
+			want:        "zone: europe-west1-b\n public_subnet_id: 12345\n private_subnet_id: 67890\n preemptible: true",
 			wantErr:     false,
 		},
 		{
@@ -194,12 +191,10 @@ func TestEnvironment_ConfigureDirectorCloudConfig(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			e := Environment{
-				Zone:             tt.fields.Zone,
-				PublicSubnetID:   tt.fields.PublicSubnetID,
-				PrivateSubnetID:  tt.fields.PrivateSubnetID,
-				ATCSecurityGroup: tt.fields.ATCSecurityGroup,
-				VMSecurityGroup:  tt.fields.VMSecurityGroup,
-				Preemptible:      tt.fields.Preemptible,
+				Zone:              tt.fields.Zone,
+				PublicSubnetwork:  tt.fields.PublicSubnetwork,
+				PrivateSubnetwork: tt.fields.PrivateSubnetwork,
+				Preemptible:       tt.fields.Preemptible,
 			}
 			got, err := e.ConfigureDirectorCloudConfig(tt.cloudConfig)
 			if (err != nil) != tt.wantErr {

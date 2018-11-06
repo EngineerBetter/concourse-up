@@ -245,7 +245,7 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 			},
 		}
 
-		boshClientFactory := func(config config.Config, metadata terraform.IAASMetadata, director director.IClient, stdout, stderr io.Writer) (bosh.IClient, error) {
+		boshClientFactory := func(config config.Config, metadata terraform.IAASMetadata, director director.IClient, stdout, stderr io.Writer, provider iaas.Provider) (bosh.IClient, error) {
 			return &testsupport.FakeBoshClient{
 				FakeDeploy: func(stateFileBytes, credsFileBytes []byte, detach bool) ([]byte, []byte, error) {
 					if detach {
