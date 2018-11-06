@@ -5,6 +5,8 @@ import (
 	"io"
 	"net"
 
+	"github.com/EngineerBetter/concourse-up/iaas"
+
 	"github.com/EngineerBetter/concourse-up/terraform"
 
 	"github.com/EngineerBetter/concourse-up/config"
@@ -29,6 +31,7 @@ type Client struct {
 	db       Opener
 	stdout   io.Writer
 	stderr   io.Writer
+	provider iaas.Provider
 }
 
 // IClient is a client for performing bosh-init commands
@@ -40,10 +43,10 @@ type IClient interface {
 }
 
 // ClientFactory creates a new IClient
-type ClientFactory func(config config.Config, metadata terraform.IAASMetadata, director director.IClient, stdout, stderr io.Writer) (IClient, error)
+type ClientFactory func(config config.Config, metadata terraform.IAASMetadata, director director.IClient, stdout, stderr io.Writer, provider iaas.Provider) (IClient, error)
 
 // NewClient creates a new Client
-func NewClient(config config.Config, metadata terraform.IAASMetadata, director director.IClient, stdout, stderr io.Writer) (IClient, error) {
+func NewClient(config config.Config, metadata terraform.IAASMetadata, director director.IClient, stdout, stderr io.Writer, provider iaas.Provider) (IClient, error) {
 	directorPublicIP, err := metadata.Get("DirectorPublicIP")
 	if err != nil {
 		return nil, err
@@ -86,6 +89,7 @@ func NewClient(config config.Config, metadata terraform.IAASMetadata, director d
 		db:       db,
 		stdout:   stdout,
 		stderr:   stderr,
+		provider: provider,
 	}, nil
 }
 

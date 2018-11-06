@@ -21,6 +21,10 @@ type InputVars struct {
 	ExternalIP         string
 	Deployment         string
 	ConfigBucket       string
+	DBName             string
+	DBUsername         string
+	DBPassword         string
+	DBTier             string
 }
 
 // ConfigureTerraform interpolates terraform contents and returns terraform config

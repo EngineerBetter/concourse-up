@@ -119,6 +119,10 @@ func (client *Client) Deploy() error {
 			"ExternalIP":         c.SourceAccessIP,
 			"Deployment":         c.Deployment,
 			"ConfigBucket":       c.ConfigBucket,
+			"DBName":             c.RDSDefaultDatabaseName,
+			"DBTier":             "db-f1-micro",
+			"DBPassword":         c.RDSPassword,
+			"DBUsername":         c.RDSUsername,
 		})
 		if err1 != nil {
 			return err1

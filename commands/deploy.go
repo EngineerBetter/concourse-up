@@ -71,7 +71,7 @@ var deployFlags = []cli.Flag{
 		Usage:       "(optional) IAAS, can be AWS or GCP",
 		EnvVar:      "IAAS",
 		Value:       "AWS",
-		Hidden:      false,
+		Hidden:      true,
 		Destination: &deployArgs.IAAS,
 	},
 	cli.BoolFlag{

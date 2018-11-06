@@ -79,6 +79,10 @@ func (client *Client) FetchInfo() (*Info, error) {
 			"ExternalIP":         config.SourceAccessIP,
 			"Deployment":         config.Deployment,
 			"ConfigBucket":       config.ConfigBucket,
+			"DBName":             config.RDSDefaultDatabaseName,
+			"DBTier":             "db-f1-micro",
+			"DBPassword":         config.RDSPassword,
+			"DBUsername":         config.RDSUsername,
 		})
 		if err1 != nil {
 			return nil, err1

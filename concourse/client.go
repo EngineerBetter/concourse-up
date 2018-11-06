@@ -90,5 +90,6 @@ func (client *Client) buildBoshClient(config config.Config, metadata terraform.I
 		director,
 		client.stdout,
 		client.stderr,
+		client.provider,
 	)
 }

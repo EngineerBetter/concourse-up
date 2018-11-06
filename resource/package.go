@@ -44,6 +44,11 @@ var (
 	// AWSCPIOps statically defines aws-cpi.yml contents
 	AWSCPIOps = mustAssetString("director/aws/cpi.yml")
 
+	// GCPDirectorCloudConfig statically defines gcp cloud-config.yml
+	GCPDirectorCloudConfig = mustAssetString("director/gcp/cloud-config.yml")
+	// GCPCPIOps statically defines gcp-cpi.yml contents
+	GCPCPIOps = mustAssetString("director/gcp/cpi.yml")
+
 	// AWSTerraformConfig holds the terraform conf for AWS
 	AWSTerraformConfig = mustAssetString("director/aws/infrastructure.tf")
 

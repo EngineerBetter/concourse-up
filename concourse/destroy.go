@@ -79,6 +79,10 @@ func (client *Client) Destroy() error {
 			"ExternalIP":         conf.SourceAccessIP,
 			"Deployment":         conf.Deployment,
 			"ConfigBucket":       conf.ConfigBucket,
+			"DBName":             conf.RDSDefaultDatabaseName,
+			"DBTier":             "db-f1-micro",
+			"DBPassword":         conf.RDSPassword,
+			"DBUsername":         conf.RDSUsername,
 		})
 		if err1 != nil {
 			return err1

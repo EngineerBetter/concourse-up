@@ -18,72 +18,60 @@ import (
 
 // Environment holds all the parameters GCP IAAS needs
 type Environment struct {
-	AccessKeyID           string
-	ATCSecurityGroup      string
-	BlobstoreBucket       string
-	DBCACert              string
-	DBHost                string
-	DBName                string
-	DBPassword            string
-	DBPort                string
-	DBUsername            string
-	DefaultKeyName        string
-	DefaultSecurityGroups []string
-	ExternalIP            string
-	GCPCredentialsJSON    string
-	InternalCIDR          string
-	InternalGateway       string
+	InternalCidr          string
+	InternalGW            string
 	InternalIP            string
-	Network               string
-	Preemptible           bool
-	PrivateKey            string
-	PrivateSubnetID       string
-	ProjectID             string
-	PublicSubnetID        string
-	Region                string
-	S3AWSAccessKeyID      string
-	S3AWSSecretAccessKey  string
-	SecretAccessKey       string
-	Tags                  []string
-	VMSecurityGroup       string
+	DirectorName          string
 	Zone                  string
-	Credentials           string
+	Network               string
+	PublicSubnetwork      string
+	PrivateSubnetwork     string
+	Tags                  string
+	ProjectID             string
+	GcpCredentialsJSON    string
+	ExternalIP            string
+	MbusBootstrapPassword string
+	Preemptible           bool
 }
 
-var allOperations = resource.AWSCPIOps + resource.ExternalIPOps
+var allOperations = resource.GCPCPIOps + resource.ExternalIPOps
 
 // ConfigureDirectorManifestCPI interpolates all the Environment parameters and
 // required release versions into ready to use Director manifest
 func (e Environment) ConfigureDirectorManifestCPI(manifest string) (string, error) {
 	return yaml.Interpolate(manifest, allOperations, map[string]interface{}{
-		"external_ip":          e.ExternalIP,
-		"gcp_credentials_json": e.DefaultKeyName,
-		"network":              e.Network,
-		"project_id":           e.ProjectID,
-		"subnetwork":           e.PublicSubnetID,
-		"tags":                 e.Tags,
-		"zone":                 e.Zone,
+		"internal_cidr":           e.InternalCidr,
+		"internal_gw":             e.InternalGW,
+		"internal_ip":             e.InternalIP,
+		"director_name":           e.DirectorName,
+		"zone":                    e.Zone,
+		"network":                 e.Network,
+		"public_subnetwork":       e.PublicSubnetwork,
+		"private_subnetwork":      e.PrivateSubnetwork,
+		"tags":                    e.Tags,
+		"project_id":              e.ProjectID,
+		"gcp_credentials_json":    e.GcpCredentialsJSON,
+		"external_ip":             e.ExternalIP,
+		"mbus_bootstrap_password": e.MbusBootstrapPassword,
 	})
 }
 
 type gcpCloudConfigParams struct {
-	ATCSecurityGroupID string
-	Zone               string
-	PrivateSubnetID    string
-	PublicSubnetID     string
-	Preemptible        bool
-	VMsSecurityGroupID string
+	Zone              string
+	Preemptible       bool
+	PublicSubnetID    string
+	PublicSubnetwork  string
+	PrivateSubnetwork string
 }
 
 // ConfigureDirectorCloudConfig inserts values from the environment into the config template passed as argument
 func (e Environment) ConfigureDirectorCloudConfig(cloudConfig string) (string, error) {
 
 	templateParams := gcpCloudConfigParams{
-		ATCSecurityGroupID: e.ATCSecurityGroup,
-		Zone:               e.Zone,
-		PublicSubnetID:     e.PublicSubnetID,
-		PrivateSubnetID:    e.PrivateSubnetID,
-		Preemptible:        e.Preemptible,
+		Zone:              e.Zone,
+		PublicSubnetwork:  e.PublicSubnetwork,
+		PrivateSubnetwork: e.PrivateSubnetwork,
+		Preemptible:       e.Preemptible,
 	}
 
 	cc, err := util.RenderTemplate(cloudConfig, templateParams)
