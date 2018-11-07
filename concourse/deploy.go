@@ -126,6 +126,8 @@ func (client *Client) Deploy() error {
 		if err1 != nil {
 			return err1
 		}
+		// @Note fix this
+		c.RDSDefaultDatabaseName, _ = metadata.Get("DBName")
 	default:
 		return errors.New("concourse:deploy:unsupported iaas " + client.deployArgs.IAAS)
 	}
@@ -137,11 +139,6 @@ func (client *Client) Deploy() error {
 	err = client.tfCLI.BuildOutput(environment, metadata)
 	if err != nil {
 		return err
-	}
-
-	// @Note: Change this or you will regret it
-	if client.provider.IAAS() == "GCP" {
-		c.RDSDefaultDatabaseName, _ = metadata.Get("DBName")
 	}
 
 	err = client.configClient.Update(c)
