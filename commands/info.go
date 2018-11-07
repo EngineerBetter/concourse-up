@@ -94,24 +94,36 @@ var info = cli.Command{
 		)
 
 		i, err := client.FetchInfo()
-
 		if err != nil {
 			return err
 		}
 
-		switch {
-		case infoArgs.JSON:
-			return json.NewEncoder(os.Stdout).Encode(i)
-		case infoArgs.Env:
+		// This is temporary and used for discovery of BOSH details
+		switch provider.IAAS() {
+		case "AWS":
+			switch {
+			case infoArgs.JSON:
+				return json.NewEncoder(os.Stdout).Encode(i)
+			case infoArgs.Env:
+				env, err := i.Env()
+				if err != nil {
+					return err
+				}
+				_, err = os.Stdout.WriteString(env)
+				return err
+			default:
+				_, err := fmt.Fprint(os.Stdout, i)
+				return err
+			}
+		case "GCP":
+			// DO THE ENV "i.Env()" for GCP in order to be able to connect to the director
 			env, err := i.Env()
 			if err != nil {
 				return err
 			}
 			_, err = os.Stdout.WriteString(env)
 			return err
-		default:
-			_, err := fmt.Fprint(os.Stdout, i)
-			return err
 		}
+		return nil
 	},
 }

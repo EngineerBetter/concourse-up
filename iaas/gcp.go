@@ -49,7 +49,7 @@ func newGCP(region string, ops ...GCPOption) (Provider, error) {
 	}
 	attrs := make(map[string]string)
 	attrs["project"] = project
-	attrs["path"] = path
+	attrs["credentials_path"] = path
 
 	ctx := context.Background()
 

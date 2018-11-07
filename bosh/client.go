@@ -61,13 +61,26 @@ func NewClient(config config.Config, metadata terraform.IAASMetadata, director d
 		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
 		Auth:            []ssh.AuthMethod{ssh.PublicKeys(key)},
 	}
-	boshDBAddress, err := metadata.Get("BoshDBAddress")
-	if err != nil {
-		return nil, err
-	}
-	boshDBPort, err := metadata.Get("BoshDBPort")
-	if err != nil {
-		return nil, err
+	var boshDBAddress, boshDBPort string
+
+	switch provider.IAAS() {
+	case "AWS":
+		var err1 error
+		boshDBAddress, err1 = metadata.Get("BoshDBAddress")
+		if err1 != nil {
+			return nil, err1
+		}
+		boshDBPort, err1 = metadata.Get("BoshDBPort")
+		if err1 != nil {
+			return nil, err1
+		}
+	case "GCP":
+		var err1 error
+		boshDBAddress, err1 = metadata.Get("DBAddress")
+		if err1 != nil {
+			return nil, err1
+		}
+		boshDBPort = "5432"
 	}
 
 	db, err := newProxyOpener(addr, conf, &pq.Driver{},

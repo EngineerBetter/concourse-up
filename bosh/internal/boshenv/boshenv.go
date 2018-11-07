@@ -68,10 +68,12 @@ type Store interface {
 func (c *BOSHCLI) xEnv(action string, store Store, config IAASEnvironment, password, cert, key, ca string, tags map[string]string) error {
 	const stateFilename = "state.json"
 	const varsFilename = "vars.yaml"
+
 	manifest, err := config.ConfigureDirectorManifestCPI(resource.DirectorManifest)
 	if err != nil {
 		return err
 	}
+
 	boshResource := resource.Get(resource.BOSHRelease)
 	bpmResource := resource.Get(resource.BPMRelease)
 

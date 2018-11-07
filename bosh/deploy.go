@@ -171,7 +171,48 @@ func (client *Client) createEnv(bosh *boshenv.BOSHCLI, state, creds []byte) (new
 			return store["state.json"], store["vars.yaml"], err1
 		}
 	case "GCP":
-		err1 := bosh.CreateEnv(store, gcp.Environment{}, client.config.DirectorPassword, client.config.DirectorCert, client.config.DirectorKey, client.config.DirectorCACert, tags)
+
+		network, err1 := client.metadata.Get("Network")
+		if err1 != nil {
+			return state, creds, err1
+		}
+		publicSubnetwork, err1 := client.metadata.Get("PublicSubnetworkName")
+		if err1 != nil {
+			return state, creds, err1
+		}
+		privateSubnetwork, err1 := client.metadata.Get("PrivateSubnetworkName")
+		if err1 != nil {
+			return state, creds, err1
+		}
+		directorPublicIP, err1 := client.metadata.Get("DirectorPublicIP")
+		if err1 != nil {
+			return state, creds, err1
+		}
+		project, err1 := client.provider.Attr("project")
+		if err1 != nil {
+			return state, creds, err1
+		}
+		// credentialsPath := "~/Downloads/concourse-up-6f707de4d7bd.json"
+		credentialsPath, err1 := client.provider.Attr("credentials_path")
+		if err1 != nil {
+			return state, creds, err1
+		}
+
+		err1 = bosh.CreateEnv(store, gcp.Environment{
+			InternalCIDR:       "10.0.0.0/24",
+			InternalGW:         "10.0.0.1",
+			InternalIP:         "10.0.0.6",
+			DirectorName:       "bosh",
+			Zone:               client.provider.Zone(),
+			Network:            network,
+			PublicSubnetwork:   publicSubnetwork,
+			PrivateSubnetwork:  privateSubnetwork,
+			Tags:               "[internal]",
+			ProjectID:          project,
+			GcpCredentialsJSON: credentialsPath,
+			ExternalIP:         directorPublicIP,
+			Preemptible:        false,
+		}, client.config.DirectorPassword, client.config.DirectorCert, client.config.DirectorKey, client.config.DirectorCACert, tags)
 		if err1 != nil {
 			return store["state.json"], store["vars.yaml"], err1
 		}

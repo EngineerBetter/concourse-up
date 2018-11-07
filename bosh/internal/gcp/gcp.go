@@ -18,41 +18,44 @@ import (
 
 // Environment holds all the parameters GCP IAAS needs
 type Environment struct {
-	InternalCidr          string
-	InternalGW            string
-	InternalIP            string
-	DirectorName          string
-	Zone                  string
-	Network               string
-	PublicSubnetwork      string
-	PrivateSubnetwork     string
-	Tags                  string
-	ProjectID             string
-	GcpCredentialsJSON    string
-	ExternalIP            string
-	MbusBootstrapPassword string
-	Preemptible           bool
+	InternalCIDR       string
+	InternalGW         string
+	InternalIP         string
+	DirectorName       string
+	Zone               string
+	Network            string
+	PublicSubnetwork   string
+	PrivateSubnetwork  string
+	Tags               string
+	ProjectID          string
+	GcpCredentialsJSON string
+	ExternalIP         string
+	Preemptible        bool
 }
 
-var allOperations = resource.GCPCPIOps + resource.ExternalIPOps
+var allOperations = resource.GCPCPIOps + resource.GCPExternalIPOps + resource.GCPDirectorCustomOps
 
 // ConfigureDirectorManifestCPI interpolates all the Environment parameters and
 // required release versions into ready to use Director manifest
 func (e Environment) ConfigureDirectorManifestCPI(manifest string) (string, error) {
+	gcpCreds, err := ioutil.ReadFile(e.GcpCredentialsJSON)
+	if err != nil {
+		return "", err
+	}
+
 	return yaml.Interpolate(manifest, allOperations, map[string]interface{}{
-		"internal_cidr":           e.InternalCidr,
-		"internal_gw":             e.InternalGW,
-		"internal_ip":             e.InternalIP,
-		"director_name":           e.DirectorName,
-		"zone":                    e.Zone,
-		"network":                 e.Network,
-		"public_subnetwork":       e.PublicSubnetwork,
-		"private_subnetwork":      e.PrivateSubnetwork,
-		"tags":                    e.Tags,
-		"project_id":              e.ProjectID,
-		"gcp_credentials_json":    e.GcpCredentialsJSON,
-		"external_ip":             e.ExternalIP,
-		"mbus_bootstrap_password": e.MbusBootstrapPassword,
+		"internal_cidr":        e.InternalCIDR,
+		"internal_gw":          e.InternalGW,
+		"internal_ip":          e.InternalIP,
+		"director_name":        e.DirectorName,
+		"zone":                 e.Zone,
+		"network":              e.Network,
+		"subnetwork":           e.PublicSubnetwork,
+		"private_subnetwork":   e.PrivateSubnetwork,
+		"project_id":           e.ProjectID,
+		"gcp_credentials_json": string(gcpCreds),
+		"external_ip":          e.ExternalIP,
+		"preemptible":          false,
 	})
 }
 

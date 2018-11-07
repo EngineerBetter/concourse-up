@@ -48,6 +48,10 @@ var (
 	GCPDirectorCloudConfig = mustAssetString("director/gcp/cloud-config.yml")
 	// GCPCPIOps statically defines gcp-cpi.yml contents
 	GCPCPIOps = mustAssetString("director/gcp/cpi.yml")
+	// GCPExternalIPOps statically defines external-ip.yml contents
+	GCPExternalIPOps = mustAssetString("director/gcp/external-ip.yml")
+	// GCPDirectorCustomOps statically defines custom-ops.yml contents
+	GCPDirectorCustomOps = mustAssetString("director/gcp/custom-ops.yml")
 
 	// AWSTerraformConfig holds the terraform conf for AWS
 	AWSTerraformConfig = mustAssetString("director/aws/infrastructure.tf")

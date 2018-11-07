@@ -21,7 +21,6 @@ type InputVars struct {
 	ExternalIP         string
 	Deployment         string
 	ConfigBucket       string
-	DBName             string
 	DBUsername         string
 	DBPassword         string
 	DBTier             string
@@ -84,6 +83,8 @@ type Metadata struct {
 	ATCPublicIP                MetadataStringValue `json:"atc_public_ip" valid:"required"`
 	DirectorAccountCreds       MetadataStringValue `json:"director_account_creds" valid:"required"`
 	DirectorPublicIP           MetadataStringValue `json:"director_public_ip" valid:"required"`
+	DBAddress                  MetadataStringValue `json:"db_address" valid:"required"`
+	DBName                     MetadataStringValue `json:"db_name" valid:"required"`
 }
 
 // AssertValid returns an error if the struct contains any missing fields

@@ -66,7 +66,7 @@ func (client *Client) FetchInfo() (*Info, error) {
 		if err1 != nil {
 			return nil, err1
 		}
-		credentialspath, err1 := client.provider.Attr("path")
+		credentialspath, err1 := client.provider.Attr("credentials_path")
 		if err1 != nil {
 			return nil, err1
 		}

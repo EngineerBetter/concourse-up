@@ -106,7 +106,7 @@ func (client *Client) Deploy() error {
 		if err1 != nil {
 			return err1
 		}
-		credentialspath, err1 := client.provider.Attr("path")
+		credentialspath, err1 := client.provider.Attr("credentials_path")
 		if err1 != nil {
 			return err1
 		}
@@ -119,7 +119,6 @@ func (client *Client) Deploy() error {
 			"ExternalIP":         c.SourceAccessIP,
 			"Deployment":         c.Deployment,
 			"ConfigBucket":       c.ConfigBucket,
-			"DBName":             c.RDSDefaultDatabaseName,
 			"DBTier":             "db-f1-micro",
 			"DBPassword":         c.RDSPassword,
 			"DBUsername":         c.RDSUsername,
@@ -138,6 +137,11 @@ func (client *Client) Deploy() error {
 	err = client.tfCLI.BuildOutput(environment, metadata)
 	if err != nil {
 		return err
+	}
+
+	// @Note: Change this or you will regret it
+	if client.provider.IAAS() == "GCP" {
+		c.RDSDefaultDatabaseName, _ = metadata.Get("DBName")
 	}
 
 	err = client.configClient.Update(c)
