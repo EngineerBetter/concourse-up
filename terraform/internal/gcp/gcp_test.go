@@ -40,7 +40,7 @@ func TestInputVars_ConfigureTerraform(t *testing.T) {
 		},
 		{name: "Failure",
 			fakeInputVars: FakeInputVars{},
-			args:          "<% .FakeKey %> \n",
+			args:          "{{ .FakeKey }} \n",
 			want:          "",
 			wantErr:       true,
 		},
