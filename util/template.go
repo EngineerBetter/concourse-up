@@ -6,12 +6,9 @@ import (
 	"text/template"
 )
 
-const leftDelim = "<%"
-const rightDelim = "%>"
-
 // RenderTemplate renders a template to a string
 func RenderTemplate(templateStr string, params interface{}) ([]byte, error) {
-	templ, err := template.New("template").Delims(leftDelim, rightDelim).Parse(templateStr)
+	templ, err := template.New("template").Parse(templateStr)
 	if err != nil {
 		return nil, err
 	}

@@ -364,22 +364,22 @@ jobs:
     trigger: true
   - task: update
     params:
-      AWS_REGION: "<% .FlagAWSRegion %>"
-      DOMAIN: "<% .FlagDomain %>"
+      AWS_REGION: "{{ .FlagAWSRegion }}"
+      DOMAIN: "{{ .FlagDomain }}"
       TLS_CERT: |-
-        <% .Indent "8" .FlagTLSCert %>
+        {{ .Indent "8" .FlagTLSCert }}
       TLS_KEY: |-
-        <% .Indent "8" .FlagTLSKey %>
-      WORKERS: "<% .FlagWorkers %>"
-      WORKER_SIZE: "<% .FlagWorkerSize %>"
-      WEB_SIZE: "<% .FlagWebSize %>"
-      DEPLOYMENT: "<% .Deployment %>"
-      GITHUB_AUTH_CLIENT_ID: "<% .FlagGithubAuthID %>"
-      GITHUB_AUTH_CLIENT_SECRET: "<% .FlagGithubAuthSecret %>"
-      AWS_ACCESS_KEY_ID: "<% .AWSAccessKeyID %>"
-      AWS_SECRET_ACCESS_KEY: "<% .AWSSecretAccessKey %>"
+        {{ .Indent "8" .FlagTLSKey }}
+      WORKERS: "{{ .FlagWorkers }}"
+      WORKER_SIZE: "{{ .FlagWorkerSize }}"
+      WEB_SIZE: "{{ .FlagWebSize }}"
+      DEPLOYMENT: "{{ .Deployment }}"
+      GITHUB_AUTH_CLIENT_ID: "{{ .FlagGithubAuthID }}"
+      GITHUB_AUTH_CLIENT_SECRET: "{{ .FlagGithubAuthSecret }}"
+      AWS_ACCESS_KEY_ID: "{{ .AWSAccessKeyID }}"
+      AWS_SECRET_ACCESS_KEY: "{{ .AWSSecretAccessKey }}"
       SELF_UPDATE: true
-      NAMESPACE: <% .Namespace %>
+      NAMESPACE: {{ .Namespace }}
     config:
       platform: linux
       image_resource:
@@ -403,27 +403,27 @@ jobs:
   serial: true
   plan:
   - get: concourse-up-release
-    version: {tag: <% .ConcourseUpVersion %> }
+    version: {tag: {{ .ConcourseUpVersion }} }
   - get: every-month
     trigger: true
   - task: update
     params:
-      AWS_REGION: "<% .FlagAWSRegion %>"
-      DOMAIN: "<% .FlagDomain %>"
+      AWS_REGION: "{{ .FlagAWSRegion }}"
+      DOMAIN: "{{ .FlagDomain }}"
       TLS_CERT: |-
-        <% .Indent "8" .FlagTLSCert %>
+        {{ .Indent "8" .FlagTLSCert }}
       TLS_KEY: |-
-        <% .Indent "8" .FlagTLSKey %>
-      WORKERS: "<% .FlagWorkers %>"
-      WORKER_SIZE: "<% .FlagWorkerSize %>"
-      WEB_SIZE: "<% .FlagWebSize %>"
-      DEPLOYMENT: "<% .Deployment %>"
-      GITHUB_AUTH_CLIENT_ID: "<% .FlagGithubAuthID %>"
-      GITHUB_AUTH_CLIENT_SECRET: "<% .FlagGithubAuthSecret %>"
-      AWS_ACCESS_KEY_ID: "<% .AWSAccessKeyID %>"
-      AWS_SECRET_ACCESS_KEY: "<% .AWSSecretAccessKey %>"
+        {{ .Indent "8" .FlagTLSKey }}
+      WORKERS: "{{ .FlagWorkers }}"
+      WORKER_SIZE: "{{ .FlagWorkerSize }}"
+      WEB_SIZE: "{{ .FlagWebSize }}"
+      DEPLOYMENT: "{{ .Deployment }}"
+      GITHUB_AUTH_CLIENT_ID: "{{ .FlagGithubAuthID }}"
+      GITHUB_AUTH_CLIENT_SECRET: "{{ .FlagGithubAuthSecret }}"
+      AWS_ACCESS_KEY_ID: "{{ .AWSAccessKeyID }}"
+      AWS_SECRET_ACCESS_KEY: "{{ .AWSSecretAccessKey }}"
       SELF_UPDATE: true
-      NAMESPACE: <% .Namespace %>
+      NAMESPACE: {{ .Namespace }}
     config:
       platform: linux
       image_resource:
