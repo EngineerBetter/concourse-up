@@ -172,6 +172,6 @@ var deploy = cli.Command{
 			c.App.Version,
 		)
 
-		return client.DeployAction()
+		return client.Deploy()
 	},
 }

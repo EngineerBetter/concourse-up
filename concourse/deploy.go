@@ -44,12 +44,6 @@ func stripVersion(tags []string) []string {
 	return output
 }
 
-// DeployAction runs Deploy
-func (client *Client) DeployAction() error {
-	err := client.Deploy()
-	return err
-}
-
 // Deploy deploys a concourse instance
 func (client *Client) Deploy() error {
 	c, createdNewConfig, isDomainUpdated, err := client.configClient.LoadOrCreate(client.deployArgs)
