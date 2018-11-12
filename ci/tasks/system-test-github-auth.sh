@@ -7,7 +7,7 @@ deployment="systest-github-$RANDOM"
 
 cleanup() {
   status=$?
-  ./cup --non-interactive destroy $deployment
+  ./cup --non-interactive destroy --region us-east-1 $deployment
   exit $status
 }
 set +u
@@ -23,7 +23,7 @@ chmod +x ./cup
 
 echo "DEPLOY WITH GITHUB FLAGS"
 
-./cup deploy $deployment \
+./cup deploy --region us-east-1 $deployment \
   --github-auth-client-id "$GITHUB_AUTH_CLIENT_ID" \
   --github-auth-client-secret "$GITHUB_AUTH_CLIENT_SECRET" \
   --domain cup.engineerbetter.com \
