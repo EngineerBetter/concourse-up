@@ -23,12 +23,14 @@ chmod +x ./cup
 
 echo "DEPLOY WITH GITHUB FLAGS"
 
-./cup deploy --region us-east-1 $deployment \
+./cup deploy \
   --github-auth-client-id "$GITHUB_AUTH_CLIENT_ID" \
   --github-auth-client-secret "$GITHUB_AUTH_CLIENT_SECRET" \
   --domain cup.engineerbetter.com \
   --tls-cert "$EB_WILDCARD_CERT" \
-  --tls-key "$EB_WILDCARD_KEY"
+  --tls-key "$EB_WILDCARD_KEY" \
+  --region us-east-1 \
+  $deployment
 
 config=$(./cup info --region us-east-1 --json $deployment)
 domain=$(echo "$config" | jq -r '.config.domain')
