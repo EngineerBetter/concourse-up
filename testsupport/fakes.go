@@ -83,8 +83,8 @@ func (client *FakeCLI) BuildOutput(conf terraform.InputVars, metadata terraform.
 // FakeAWSClient implements iaas.IClient for testing
 type FakeAWSClient struct {
 	FakeCheckForWhitelistedIP         func(ip, securityGroup string) (bool, error)
-	FakeDeleteVMsInVPC                func(vpcID string) ([]*string, error)
-	FakeDeleteVolumes                 func(volumesToDelete []*string, deleteVolume func(ec2Client iaas.IEC2, volumeID *string) error) error
+	FakeDeleteVMsInVPC                func(vpcID string) ([]string, error)
+	FakeDeleteVolumes                 func(volumesToDelete []string, deleteVolume func(ec2Client iaas.IEC2, volumeID *string) error) error
 	FakeDeleteFile                    func(bucket, path string) error
 	FakeDeleteVersionedBucket         func(name string) error
 	FakeCreateBucket                  func(name string) error
@@ -126,12 +126,12 @@ func (client *FakeAWSClient) CheckForWhitelistedIP(ip, securityGroup string) (bo
 }
 
 // DeleteVMsInVPC delegates to FakeDeleteVMsInVPC which is dynamically set by the tests
-func (client *FakeAWSClient) DeleteVMsInVPC(vpcID string) ([]*string, error) {
+func (client *FakeAWSClient) DeleteVMsInVPC(vpcID string) ([]string, error) {
 	return client.FakeDeleteVMsInVPC(vpcID)
 }
 
 // DeleteVolumes delegates to FakeDeleteVolumes which is dynamically set by the tests
-func (client *FakeAWSClient) DeleteVolumes(volumesToDelete []*string, deleteVolume func(ec2Client iaas.IEC2, volumeID *string) error) error {
+func (client *FakeAWSClient) DeleteVolumes(volumesToDelete []string, deleteVolume func(ec2Client iaas.IEC2, volumeID *string) error) error {
 	return client.FakeDeleteVolumes(volumesToDelete, deleteVolume)
 }
 

@@ -1,6 +1,7 @@
 package concourse
 
 import (
+	"fmt"
 	"io"
 
 	"github.com/EngineerBetter/concourse-up/iaas"
@@ -55,6 +56,10 @@ func (client *Client) Destroy() error {
 		volumesToDelete, err1 := client.provider.DeleteVMsInVPC(vpcID)
 		if err1 != nil {
 			return err1
+		}
+
+		if len(volumesToDelete) > 0 {
+			fmt.Printf("Scheduling to delete %v volumes\n", len(volumesToDelete))
 		}
 
 		if err1 = client.provider.DeleteVolumes(volumesToDelete, iaas.DeleteVolume); err1 != nil {

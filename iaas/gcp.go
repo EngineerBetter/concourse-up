@@ -219,7 +219,7 @@ func (g *GCPProvider) EnsureFileExists(bucket, path string, defaultContents []by
 }
 
 // DeleteVolumes deletes the specified GCP storage volumes
-func (g *GCPProvider) DeleteVolumes(volumesToDelete []*string, deleteVolume func(ec2Client IEC2, volumeID *string) error) error {
+func (g *GCPProvider) DeleteVolumes(volumesToDelete []string, deleteVolume func(ec2Client IEC2, volumeID *string) error) error {
 	// @note: This will be covered in a later iteration as we need a deployment to try it
 	return errors.New("DeleteVolumes Not Implemented Yet")
 }
@@ -231,9 +231,9 @@ func (g *GCPProvider) CheckForWhitelistedIP(ip, securityGroup string) (bool, err
 }
 
 // DeleteVMsInVPC deletes all the VMs in the given VPC
-func (g *GCPProvider) DeleteVMsInVPC(vpcID string) ([]*string, error) {
+func (g *GCPProvider) DeleteVMsInVPC(vpcID string) ([]string, error) {
 	// @note: This will be covered in a later iteration as we need a deployment to try it
-	return []*string{}, errors.New("DeleteVMsInVPC Not Implemented Yet")
+	return []string{}, errors.New("DeleteVMsInVPC Not Implemented Yet")
 }
 
 // FindLongestMatchingHostedZone finds the longest hosted zone that matches the given subdomain

@@ -98,12 +98,17 @@ func checkPorts(sgCidr, cidr string, port22, port6868, port25555 *bool, fromPort
 }
 
 // DeleteVolumes deletes the specified EBS volumes
-func (a *AWSProvider) DeleteVolumes(volumes []*string, deleteVolume func(ec2Client IEC2, volumeID *string) error) error {
+func (a *AWSProvider) DeleteVolumes(volumes []string, deleteVolume func(ec2Client IEC2, volumeID *string) error) error {
 	if len(volumes) == 0 {
 		return nil
 	}
 
 	ec2Client := ec2.New(a.sess)
+
+	var pvolumes []*string
+	for i := range volumes {
+		pvolumes = append(pvolumes, &volumes[i])
+	}
 
 	volumesOutput, err := ec2Client.DescribeVolumes(&ec2.DescribeVolumesInput{
 		Filters: []*ec2.Filter{
@@ -115,7 +120,7 @@ func (a *AWSProvider) DeleteVolumes(volumes []*string, deleteVolume func(ec2Clie
 			},
 			{
 				Name:   aws.String("volume-id"),
-				Values: volumes,
+				Values: pvolumes,
 			},
 		},
 	})
@@ -123,9 +128,7 @@ func (a *AWSProvider) DeleteVolumes(volumes []*string, deleteVolume func(ec2Clie
 	if err != nil {
 		return err
 	}
-
 	volumesToDelete := volumesOutput.Volumes
-
 	for _, volume := range volumesToDelete {
 		volumeID := volume.VolumeId
 		err = deleteVolume(ec2Client, volumeID)
@@ -146,7 +149,7 @@ func DeleteVolume(ec2Client IEC2, volumeID *string) error {
 }
 
 // DeleteVMsInVPC deletes all the VMs in the given VPC
-func (a *AWSProvider) DeleteVMsInVPC(vpcID string) ([]*string, error) {
+func (a *AWSProvider) DeleteVMsInVPC(vpcID string) ([]string, error) {
 
 	filterName := "vpc-id"
 	ec2Client := ec2.New(a.sess)
@@ -166,13 +169,13 @@ func (a *AWSProvider) DeleteVMsInVPC(vpcID string) ([]*string, error) {
 	}
 
 	instancesToTerminate := []*string{}
-	volumesToDelete := []*string{}
+	volumesToDelete := []string{}
 	for _, reservation := range resp.Reservations {
 		for _, instance := range reservation.Instances {
 			fmt.Printf("Terminating instance %s\n", *instance.InstanceId)
 			instancesToTerminate = append(instancesToTerminate, instance.InstanceId)
 			for _, blockDevice := range instance.BlockDeviceMappings {
-				volumesToDelete = append(volumesToDelete, blockDevice.Ebs.VolumeId)
+				volumesToDelete = append(volumesToDelete, *blockDevice.Ebs.VolumeId)
 			}
 		}
 	}

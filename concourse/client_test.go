@@ -75,11 +75,11 @@ var _ = Describe("Client", func() {
 			}
 			return true, nil
 		},
-		FakeDeleteVMsInVPC: func(vpcID string) ([]*string, error) {
+		FakeDeleteVMsInVPC: func(vpcID string) ([]string, error) {
 			actions = append(actions, fmt.Sprintf("deleting vms in %s", vpcID))
 			return nil, nil
 		},
-		FakeDeleteVolumes: func(volumesToDelete []*string, deleteVolume func(ec2Client iaas.IEC2, volumeID *string) error) error {
+		FakeDeleteVolumes: func(volumesToDelete []string, deleteVolume func(ec2Client iaas.IEC2, volumeID *string) error) error {
 			return nil
 		},
 		FakeRegion: func() string {
