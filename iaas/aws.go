@@ -3,6 +3,7 @@ package iaas
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -97,6 +98,47 @@ func checkPorts(sgCidr, cidr string, port22, port6868, port25555 *bool, fromPort
 	}
 }
 
+func checkInUseVolumes(ec2Client *ec2.EC2, volumes []*string) error {
+	volumesInUse := 1
+	volumesFound := []*ec2.Volume{}
+	for i := 0; i < 3 && volumesInUse != 0; i++ {
+		volumesOutput, err := ec2Client.DescribeVolumes(&ec2.DescribeVolumesInput{
+			Filters: []*ec2.Filter{
+				{
+					Name: aws.String("status"),
+					Values: []*string{
+						aws.String("in-use"),
+					},
+				},
+				{
+					Name:   aws.String("volume-id"),
+					Values: volumes,
+				},
+			},
+		})
+
+		if err != nil {
+			return err
+		}
+		volumesFound = volumesOutput.Volumes
+		volumesInUse = len(volumesFound)
+		if volumesInUse > 0 && i < 2 {
+			fmt.Printf("There are %v volumes in use. Sleeping for 10 seconds.\n", volumesInUse)
+			time.Sleep(10 * time.Second)
+		}
+	}
+
+	if volumesInUse > 0 {
+		output := []string{}
+		for _, v := range volumesFound {
+			output = append(output, *v.VolumeId)
+		}
+		fmt.Printf("There are still volumes in use: %+v\n", output)
+	}
+
+	return nil
+}
+
 // DeleteVolumes deletes the specified EBS volumes
 func (a *AWSProvider) DeleteVolumes(volumes []string, deleteVolume func(ec2Client IEC2, volumeID *string) error) error {
 	if len(volumes) == 0 {
@@ -108,6 +150,10 @@ func (a *AWSProvider) DeleteVolumes(volumes []string, deleteVolume func(ec2Clien
 	var pvolumes []*string
 	for i := range volumes {
 		pvolumes = append(pvolumes, &volumes[i])
+	}
+	err := checkInUseVolumes(ec2Client, pvolumes)
+	if err != nil {
+		return err
 	}
 
 	volumesOutput, err := ec2Client.DescribeVolumes(&ec2.DescribeVolumesInput{

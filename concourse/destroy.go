@@ -20,6 +20,8 @@ func (client *Client) Destroy() error {
 		return err
 	}
 
+	var volumesToDelete []string
+
 	switch client.provider.IAAS() {
 	case "AWS": // nolint
 		err = environment.Build(map[string]interface{}{
@@ -48,21 +50,12 @@ func (client *Client) Destroy() error {
 		if err != nil {
 			return err
 		}
-
 		vpcID, err1 := metadata.Get("VPCID")
 		if err1 != nil {
 			return err1
 		}
-		volumesToDelete, err1 := client.provider.DeleteVMsInVPC(vpcID)
+		volumesToDelete, err1 = client.provider.DeleteVMsInVPC(vpcID)
 		if err1 != nil {
-			return err1
-		}
-
-		if len(volumesToDelete) > 0 {
-			fmt.Printf("Scheduling to delete %v volumes\n", len(volumesToDelete))
-		}
-
-		if err1 = client.provider.DeleteVolumes(volumesToDelete, iaas.DeleteVolume); err1 != nil {
 			return err1
 		}
 
@@ -97,6 +90,15 @@ func (client *Client) Destroy() error {
 	err = client.tfCLI.Destroy(environment)
 	if err != nil {
 		return err
+	}
+
+	if client.provider.IAAS() == "AWS" { // nolint
+		if len(volumesToDelete) > 0 {
+			fmt.Printf("Scheduling to delete %v volumes\n", len(volumesToDelete))
+		}
+		if err1 := client.provider.DeleteVolumes(volumesToDelete, iaas.DeleteVolume); err1 != nil {
+			return err1
+		}
 	}
 
 	if err = client.configClient.DeleteAll(conf); err != nil {
