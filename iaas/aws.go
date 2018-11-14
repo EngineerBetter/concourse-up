@@ -116,6 +116,7 @@ func (a *AWSProvider) DeleteVolumes(volumes []string, deleteVolume func(ec2Clien
 				Name: aws.String("status"),
 				Values: []*string{
 					aws.String("available"),
+					aws.String("creating"),
 				},
 			},
 			{
