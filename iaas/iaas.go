@@ -11,6 +11,7 @@ type Provider interface {
 	DeleteFile(bucket, path string) error
 	DeleteVersionedBucket(name string) error
 	DeleteVMsInVPC(vpcID string) ([]string, error)
+	DeleteVMsInDeployment(zone, project, deployment string) error
 	DeleteVolumes(volumesToDelete []string, deleteVolume func(ec2Client IEC2, volumeID *string) error) error
 	CreateBucket(name string) error
 	BucketExists(name string) (bool, error)

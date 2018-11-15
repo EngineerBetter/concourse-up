@@ -68,9 +68,10 @@ func (client *Client) Destroy() error {
 		if err1 != nil {
 			return err1
 		}
+		zone := client.provider.Zone()
 		err1 = environment.Build(map[string]interface{}{
 			"Region":             client.provider.Region(),
-			"Zone":               client.provider.Zone(),
+			"Zone":               zone,
 			"Tags":               "",
 			"Project":            project,
 			"GCPCredentialsJSON": credentialspath,
@@ -82,7 +83,7 @@ func (client *Client) Destroy() error {
 			"DBPassword":         conf.RDSPassword,
 			"DBUsername":         conf.RDSUsername,
 		})
-		_, err1 = client.provider.DeleteVMsInVPC("")
+		err1 = client.provider.DeleteVMsInDeployment(zone, project, conf.Deployment)
 		if err1 != nil {
 			return err1
 		}

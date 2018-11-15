@@ -195,6 +195,11 @@ func DeleteVolume(ec2Client IEC2, volumeID *string) error {
 	return err
 }
 
+// DeleteVMsInDeployment is a placeholder for a function used with GCP deployments
+func (a *AWSProvider) DeleteVMsInDeployment(zone, project, deployment string) error {
+	return nil
+}
+
 // DeleteVMsInVPC deletes all the VMs in the given VPC
 func (a *AWSProvider) DeleteVMsInVPC(vpcID string) ([]string, error) {
 

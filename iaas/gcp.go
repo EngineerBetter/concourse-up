@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"strings"
 	"time"
 
 	"cloud.google.com/go/storage"
@@ -241,8 +242,13 @@ func (g *GCPProvider) CheckForWhitelistedIP(ip, securityGroup string) (bool, err
 	return false, errors.New("CheckForWhitelistedIP Not Implemented Yet")
 }
 
-// DeleteVMsInVPC deletes all the VMs in the given VPC
+// DeleteVMsInVPC is a placeholder function used with AWS deployments
 func (g *GCPProvider) DeleteVMsInVPC(vpcID string) ([]string, error) {
+	return []string{}, nil
+}
+
+//DeleteVMsInDeployment will delete all vms in a deployment apart from nat instance
+func (g *GCPProvider) DeleteVMsInDeployment(zone, project, deployment string) error {
 	ctx := context.Background()
 
 	c, err := google.DefaultClient(ctx, compute.CloudPlatformScope)
@@ -255,38 +261,30 @@ func (g *GCPProvider) DeleteVMsInVPC(vpcID string) ([]string, error) {
 		log.Fatal(err)
 	}
 
-	// Project ID for this request.
-	project, err := g.Attr("Project")
-	if err != nil {
-		return []string{}, err
-	}
-
-	// The name of the zone where the instances are located.
-	zone := g.Zone()
-
-	// gets all the compute in
-
+	// gets all compute instances for the project
 	req := computeService.Instances.List(project, zone)
 	if err := req.Pages(ctx, func(page *compute.InstanceList) error {
 		for _, instance := range page.Items {
-			// TODO: Change code below to process each `instanceGroup` resource:
-			fmt.Printf("Instance %+v\n", instance)
-			fmt.Printf("Network interface: %+v\n", instance.NetworkInterfaces)
-			fmt.Printf("Network name: %+v\n", instance.NetworkInterfaces[0].Network)
+			name := instance.Name
+			networkName := instance.NetworkInterfaces[0].Network
+			// delete all instances in deployment's network apart from nat instance
+			if !strings.HasSuffix(name, "nat-instance") && strings.HasSuffix(networkName, fmt.Sprintf("%s-bosh-network", deployment)) {
+				fmt.Printf("Deleting instance %+v\n", name)
+				_, err := computeService.Instances.Delete(project, zone, name).Context(ctx).Do()
+				if err != nil {
+					return err
+				}
+			}
 		}
 		return nil
 	}); err != nil {
-		log.Fatal(err)
+		return err
 	}
-	resp, err := computeService.Instances.Delete(project, zone, "vm-787673a9-d6d2-4714-4d10-05d2f954b843").Context(ctx).Do()
-	if err != nil {
-		return []string{}, err
-	}
-	time.Sleep(time.Second * 180)
 
-	// TODO: Change code below to process the `resp` object:
-	fmt.Printf("Deleting vms: vpcID:%+v \nResponse: %#v\n", vpcID, resp)
-	return []string{}, nil
+	//TODO: shorter sleep times in a loop that checks whether any instances remain that need deleting
+	fmt.Println("Sleeping for 3 minutes to allow GCP update after instance deletion...")
+	time.Sleep(time.Second * 180)
+	return nil
 }
 
 // FindLongestMatchingHostedZone finds the longest hosted zone that matches the given subdomain
