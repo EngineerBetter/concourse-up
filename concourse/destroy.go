@@ -82,6 +82,7 @@ func (client *Client) Destroy() error {
 			"DBPassword":         conf.RDSPassword,
 			"DBUsername":         conf.RDSUsername,
 		})
+		_, err1 = client.provider.DeleteVMsInVPC("")
 		if err1 != nil {
 			return err1
 		}

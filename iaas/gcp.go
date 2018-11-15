@@ -5,11 +5,14 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"os"
 	"time"
 
 	"cloud.google.com/go/storage"
 	"golang.org/x/net/context"
+	"golang.org/x/oauth2/google"
+	"google.golang.org/api/compute/v1"
 	"google.golang.org/api/iterator"
 )
 
@@ -89,6 +92,14 @@ func (g *GCPProvider) DeleteVersionedBucket(name string) error {
 		return err
 	}
 	err = g.DeleteFile(name, "default.tfstate")
+	if err != nil {
+		return err
+	}
+	err = g.DeleteFile(name, "director-creds.yml")
+	if err != nil {
+		return err
+	}
+	err = g.DeleteFile(name, "director-state.json")
 	if err != nil {
 		return err
 	}
@@ -232,8 +243,50 @@ func (g *GCPProvider) CheckForWhitelistedIP(ip, securityGroup string) (bool, err
 
 // DeleteVMsInVPC deletes all the VMs in the given VPC
 func (g *GCPProvider) DeleteVMsInVPC(vpcID string) ([]string, error) {
-	// @note: This will be covered in a later iteration as we need a deployment to try it
-	return []string{}, errors.New("DeleteVMsInVPC Not Implemented Yet")
+	ctx := context.Background()
+
+	c, err := google.DefaultClient(ctx, compute.CloudPlatformScope)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	computeService, err := compute.New(c)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Project ID for this request.
+	project, err := g.Attr("Project")
+	if err != nil {
+		return []string{}, err
+	}
+
+	// The name of the zone where the instances are located.
+	zone := g.Zone()
+
+	// gets all the compute in
+
+	req := computeService.Instances.List(project, zone)
+	if err := req.Pages(ctx, func(page *compute.InstanceList) error {
+		for _, instance := range page.Items {
+			// TODO: Change code below to process each `instanceGroup` resource:
+			fmt.Printf("Instance %+v\n", instance)
+			fmt.Printf("Network interface: %+v\n", instance.NetworkInterfaces)
+			fmt.Printf("Network name: %+v\n", instance.NetworkInterfaces[0].Network)
+		}
+		return nil
+	}); err != nil {
+		log.Fatal(err)
+	}
+	resp, err := computeService.Instances.Delete(project, zone, "vm-787673a9-d6d2-4714-4d10-05d2f954b843").Context(ctx).Do()
+	if err != nil {
+		return []string{}, err
+	}
+	time.Sleep(time.Second * 180)
+
+	// TODO: Change code below to process the `resp` object:
+	fmt.Printf("Deleting vms: vpcID:%+v \nResponse: %#v\n", vpcID, resp)
+	return []string{}, nil
 }
 
 // FindLongestMatchingHostedZone finds the longest hosted zone that matches the given subdomain
