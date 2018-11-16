@@ -98,11 +98,17 @@ type FakeAWSClient struct {
 	FakeRegion                        func() string
 	FakeAttr                          func(string) (string, error)
 	FakeZone                          func() string
+	FakeDeleteVMsInDeployment         func(zone, project, deployment string) error
 }
 
 // IAAS is here to implement iaas.IClient
 func (client *FakeAWSClient) IAAS() string {
 	return "AWS"
+}
+
+// DeleteVMsInDeployment delegates to FakeDeleteVMsInDeployment which is dynamically set by the tests
+func (client *FakeAWSClient) DeleteVMsInDeployment(zone, project, deployment string) error {
+	return client.FakeDeleteVMsInDeployment(zone, project, deployment)
 }
 
 // Attr is here to implement iaas.IClient

@@ -116,12 +116,11 @@ func (client *Client) Deploy() error {
 			"DBTier":             "db-f1-micro",
 			"DBPassword":         c.RDSPassword,
 			"DBUsername":         c.RDSUsername,
+			"DBName":             c.RDSDefaultDatabaseName,
 		})
 		if err1 != nil {
 			return err1
 		}
-		// @Note fix this
-		c.RDSDefaultDatabaseName, _ = metadata.Get("DBName")
 	default:
 		return errors.New("concourse:deploy:unsupported iaas " + client.deployArgs.IAAS)
 	}

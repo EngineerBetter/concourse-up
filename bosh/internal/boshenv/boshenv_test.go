@@ -36,6 +36,9 @@ type mockIAASConfig struct {
 	f func(string) string
 }
 
+func (c mockIAASConfig) IAASCheck() string {
+	return "AWS"
+}
 func (c mockIAASConfig) ConfigureDirectorManifestCPI(m string) (string, error) {
 	return c.f(m), nil
 }

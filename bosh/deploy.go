@@ -26,11 +26,9 @@ func (client *Client) Deploy(state, creds []byte, detach bool) (newState, newCre
 	if err = client.updateCloudConfig(bosh); err != nil {
 		return state, creds, err
 	}
-
 	if err = client.uploadConcourseStemcell(bosh); err != nil {
 		return state, creds, err
 	}
-
 	if err = client.createDefaultDatabases(); err != nil {
 		return state, creds, err
 	}
@@ -280,9 +278,18 @@ func (client *Client) uploadConcourseStemcell(bosh *boshenv.BOSHCLI) error {
 	if err != nil {
 		return err
 	}
-	return bosh.UploadConcourseStemcell(aws.Environment{
-		ExternalIP: directorPublicIP,
-	}, directorPublicIP, client.config.DirectorPassword, client.config.DirectorCACert)
+	switch client.provider.IAAS() {
+	case "AWS":
+		return bosh.UploadConcourseStemcell(aws.Environment{
+			ExternalIP: directorPublicIP,
+		}, directorPublicIP, client.config.DirectorPassword, client.config.DirectorCACert)
+	case "GCP":
+		return bosh.UploadConcourseStemcell(gcp.Environment{
+			ExternalIP: directorPublicIP,
+		}, directorPublicIP, client.config.DirectorPassword, client.config.DirectorCACert)
+	}
+
+	return nil
 }
 
 func (client *Client) saveStateFile(bytes []byte) (string, error) {

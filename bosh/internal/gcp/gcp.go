@@ -67,6 +67,11 @@ type gcpCloudConfigParams struct {
 	PrivateSubnetwork string
 }
 
+// IAASCheck returns the IAAS provider
+func (e Environment) IAASCheck() string {
+	return "GCP"
+}
+
 // ConfigureDirectorCloudConfig inserts values from the environment into the config template passed as argument
 func (e Environment) ConfigureDirectorCloudConfig(cloudConfig string) (string, error) {
 
@@ -107,7 +112,7 @@ func (e Environment) ConfigureConcourseStemcell(versions string) (string, error)
 	if version == "" {
 		return "", errors.New("did not find stemcell version in versions.json")
 	}
-	return fmt.Sprintf("https://s3.amazonaws.com/bosh-aws-light-stemcells/light-bosh-stemcell-%s-aws-xen-hvm-ubuntu-xenial-go_agent.tgz", version), nil
+	return fmt.Sprintf("https://s3.amazonaws.com/bosh-gce-light-stemcells/light-bosh-stemcell-%s-google-kvm-ubuntu-xenial-go_agent.tgz", version), nil
 }
 
 // Store holds the abstraction of a aws storage artifact

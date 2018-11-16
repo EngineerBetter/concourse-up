@@ -227,7 +227,7 @@ func TestEnvironment_ConfigureConcourseStemcell(t *testing.T) {
 					"value": "97.19"
 				  }]`,
 			},
-			want:    fmt.Sprintf("https://s3.amazonaws.com/bosh-aws-light-stemcells/light-bosh-stemcell-%s-aws-xen-hvm-ubuntu-xenial-go_agent.tgz", "97.19"),
+			want:    fmt.Sprintf("https://s3.amazonaws.com/bosh-gce-light-stemcells/light-bosh-stemcell-%s-google-kvm-ubuntu-xenial-go_agent.tgz", "97.19"),
 			wantErr: false,
 		},
 		{

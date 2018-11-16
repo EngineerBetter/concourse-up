@@ -150,7 +150,7 @@ var _ = Describe("Client", func() {
 				})
 
 				It("Sets the default value for the RDSDefaultDatabaseName", func() {
-					Expect(conf.RDSDefaultDatabaseName).To(Equal("bosh"))
+					Expect(conf.RDSDefaultDatabaseName).To(HavePrefix("bosh"))
 				})
 
 				It("Sets the default value for the RDSInstanceClass", func() {

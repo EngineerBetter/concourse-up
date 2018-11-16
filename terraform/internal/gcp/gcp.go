@@ -24,6 +24,7 @@ type InputVars struct {
 	DBUsername         string
 	DBPassword         string
 	DBTier             string
+	DBName             string
 }
 
 // ConfigureTerraform interpolates terraform contents and returns terraform config

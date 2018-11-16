@@ -91,6 +91,11 @@ type awsCloudConfigParams struct {
 	VMsSecurityGroupID string
 }
 
+// IAASCheck returns the IAAS provider
+func (e Environment) IAASCheck() string {
+	return "AWS"
+}
+
 // ConfigureDirectorCloudConfig inserts values from the environment into the config template passed as argument
 func (e Environment) ConfigureDirectorCloudConfig(cloudConfig string) (string, error) {
 

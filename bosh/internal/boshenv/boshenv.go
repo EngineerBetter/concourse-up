@@ -56,6 +56,7 @@ type IAASEnvironment interface {
 	ConfigureDirectorManifestCPI(string) (string, error)
 	ConfigureDirectorCloudConfig(string) (string, error)
 	ConfigureConcourseStemcell(string) (string, error)
+	IAASCheck() string
 }
 
 // Store exposes its methods
@@ -119,17 +120,24 @@ func (c *BOSHCLI) xEnv(action string, store Store, config IAASEnvironment, passw
 
 // UpdateCloudConfig generates cloud config from template and use it to update bosh cloud config
 func (c *BOSHCLI) UpdateCloudConfig(config IAASEnvironment, ip, password, ca string) error {
-	cloudConfig, err := config.ConfigureDirectorCloudConfig(resource.AWSDirectorCloudConfig)
+	var cloudConfig string
+	var err error
+	iaas := config.IAASCheck()
+	switch iaas {
+	case "AWS":
+		cloudConfig, err = config.ConfigureDirectorCloudConfig(resource.AWSDirectorCloudConfig)
+
+	case "GCP":
+		cloudConfig, err = config.ConfigureDirectorCloudConfig(resource.GCPDirectorCloudConfig)
+	}
 	if err != nil {
 		return err
 	}
-
 	cloudConfigPath, err := writeTempFile([]byte(cloudConfig))
 	if err != nil {
 		return err
 	}
 	defer os.Remove(cloudConfigPath)
-
 	caPath, err := writeTempFile([]byte(ca))
 	if err != nil {
 		return err
