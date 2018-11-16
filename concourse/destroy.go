@@ -83,6 +83,9 @@ func (client *Client) Destroy() error {
 			"DBPassword":         conf.RDSPassword,
 			"DBUsername":         conf.RDSUsername,
 		})
+		if err1 != nil {
+			return nil
+		}
 		err1 = client.provider.DeleteVMsInDeployment(zone, project, conf.Deployment)
 		if err1 != nil {
 			return err1

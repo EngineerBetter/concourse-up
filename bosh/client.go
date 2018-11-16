@@ -64,7 +64,7 @@ func NewClient(config config.Config, metadata terraform.IAASMetadata, director d
 	var boshDBAddress, boshDBPort string
 
 	switch provider.IAAS() {
-	case "AWS":
+	case "AWS": // nolint
 		var err1 error
 		boshDBAddress, err1 = metadata.Get("BoshDBAddress")
 		if err1 != nil {
@@ -74,7 +74,7 @@ func NewClient(config config.Config, metadata terraform.IAASMetadata, director d
 		if err1 != nil {
 			return nil, err1
 		}
-	case "GCP":
+	case "GCP": // nolint
 		var err1 error
 		boshDBAddress, err1 = metadata.Get("DBAddress")
 		if err1 != nil {

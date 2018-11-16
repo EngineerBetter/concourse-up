@@ -78,7 +78,7 @@ func (client *Client) createEnv(bosh *boshenv.BOSHCLI, state, creds []byte) (new
 	}
 
 	switch client.provider.IAAS() {
-	case "AWS":
+	case "AWS": // nolint
 		boshUserAccessKeyID, err1 := client.metadata.Get("BoshUserAccessKeyID")
 		if err1 != nil {
 			return state, creds, err1
@@ -168,7 +168,7 @@ func (client *Client) createEnv(bosh *boshenv.BOSHCLI, state, creds []byte) (new
 		if err1 != nil {
 			return store["state.json"], store["vars.yaml"], err1
 		}
-	case "GCP":
+	case "GCP": // nolint
 
 		network, err1 := client.metadata.Get("Network")
 		if err1 != nil {
@@ -220,7 +220,7 @@ func (client *Client) createEnv(bosh *boshenv.BOSHCLI, state, creds []byte) (new
 
 func (client *Client) updateCloudConfig(bosh *boshenv.BOSHCLI) error {
 	switch client.provider.IAAS() {
-	case "AWS":
+	case "AWS": // nolint
 		publicSubnetID, err := client.metadata.Get("PublicSubnetID")
 		if err != nil {
 			return err
@@ -250,7 +250,7 @@ func (client *Client) updateCloudConfig(bosh *boshenv.BOSHCLI) error {
 			Spot:             client.config.Spot,
 			ExternalIP:       directorPublicIP,
 		}, directorPublicIP, client.config.DirectorPassword, client.config.DirectorCACert)
-	case "GCP":
+	case "GCP": // nolint
 		privateSubnetwork, err := client.metadata.Get("PrivateSubnetworkName")
 		if err != nil {
 			return err
@@ -279,11 +279,11 @@ func (client *Client) uploadConcourseStemcell(bosh *boshenv.BOSHCLI) error {
 		return err
 	}
 	switch client.provider.IAAS() {
-	case "AWS":
+	case "AWS": // nolint
 		return bosh.UploadConcourseStemcell(aws.Environment{
 			ExternalIP: directorPublicIP,
 		}, directorPublicIP, client.config.DirectorPassword, client.config.DirectorCACert)
-	case "GCP":
+	case "GCP": // nolint
 		return bosh.UploadConcourseStemcell(gcp.Environment{
 			ExternalIP: directorPublicIP,
 		}, directorPublicIP, client.config.DirectorPassword, client.config.DirectorCACert)
