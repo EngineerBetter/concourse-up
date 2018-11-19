@@ -61,13 +61,19 @@ grafana_dashboard: |
                   },
                   {
                     "params": [
+                      "bosh-job"
+                    ],
+                    "type": "tag"
+                  },
+                  {
+                    "params": [
                       "host"
                     ],
                     "type": "tag"
                   },
                   {
                     "params": [
-                      "null"
+                      "none"
                     ],
                     "type": "fill"
                   }
@@ -81,13 +87,73 @@ grafana_dashboard: |
                   [
                     {
                       "params": [
-                        "value"
+                        "usage_system"
                       ],
                       "type": "field"
                     },
                     {
                       "params": [],
                       "type": "mean"
+                    },
+                    {
+                      "params": [
+                        " / 100"
+                      ],
+                      "type": "math"
+                    },
+                    {
+                      "params": [
+                        "system"
+                      ],
+                      "type": "alias"
+                    }
+                  ],
+                  [
+                    {
+                      "params": [
+                        "usage_user"
+                      ],
+                      "type": "field"
+                    },
+                    {
+                      "params": [],
+                      "type": "mean"
+                    },
+                    {
+                      "params": [
+                        " / 100"
+                      ],
+                      "type": "math"
+                    },
+                    {
+                      "params": [
+                        "user"
+                      ],
+                      "type": "alias"
+                    }
+                  ],
+                  [
+                    {
+                      "params": [
+                        "usage_idle"
+                      ],
+                      "type": "field"
+                    },
+                    {
+                      "params": [],
+                      "type": "mean"
+                    },
+                    {
+                      "params": [
+                        " / 100"
+                      ],
+                      "type": "math"
+                    },
+                    {
+                      "params": [
+                        "idle"
+                      ],
+                      "type": "alias"
                     }
                   ]
                 ],
@@ -179,12 +245,18 @@ grafana_dashboard: |
                   },
                   {
                     "params": [
-                      "null"
+                      "bosh-job"
+                    ],
+                    "type": "tag"
+                  },
+                  {
+                    "params": [
+                      "none"
                     ],
                     "type": "fill"
                   }
                 ],
-                "measurement": "memory",
+                "measurement": "mem",
                 "orderByTime": "ASC",
                 "policy": "default",
                 "refId": "A",
@@ -193,13 +265,49 @@ grafana_dashboard: |
                   [
                     {
                       "params": [
-                        "value"
+                        "used_percent"
                       ],
                       "type": "field"
                     },
                     {
                       "params": [],
                       "type": "mean"
+                    },
+                    {
+                      "params": [
+                        " / 100"
+                      ],
+                      "type": "math"
+                    },
+                    {
+                      "params": [
+                        "used"
+                      ],
+                      "type": "alias"
+                    }
+                  ],
+                  [
+                    {
+                      "params": [
+                        "available_percent"
+                      ],
+                      "type": "field"
+                    },
+                    {
+                      "params": [],
+                      "type": "mean"
+                    },
+                    {
+                      "params": [
+                        " / 100"
+                      ],
+                      "type": "math"
+                    },
+                    {
+                      "params": [
+                        "available"
+                      ],
+                      "type": "alias"
                     }
                   ]
                 ],
@@ -563,9 +671,21 @@ grafana_dashboard: |
                 "groupBy": [
                   {
                     "params": [
-                      "$interval"
+                      "$__interval"
                     ],
                     "type": "time"
+                  },
+                  {
+                    "params": [
+                      "path"
+                    ],
+                    "type": "tag"
+                  },
+                  {
+                    "params": [
+                      "bosh-job"
+                    ],
+                    "type": "tag"
                   },
                   {
                     "params": [
@@ -575,29 +695,33 @@ grafana_dashboard: |
                   },
                   {
                     "params": [
-                      "null"
+                      "none"
                     ],
                     "type": "fill"
                   }
                 ],
-                "measurement": "disk /var/vcap/data",
+                "measurement": "disk",
                 "orderByTime": "ASC",
                 "policy": "default",
-                "query": "SELECT mean(\"value\") FROM \"disk /var/vcap/data\" WHERE $timeFilter GROUP BY time($interval), \"host\" fill(null)",
-                "rawQuery": true,
                 "refId": "A",
                 "resultFormat": "time_series",
                 "select": [
                   [
                     {
                       "params": [
-                        "value"
+                        "used_percent"
                       ],
                       "type": "field"
                     },
                     {
                       "params": [],
                       "type": "mean"
+                    },
+                    {
+                      "params": [
+                        " / 100"
+                      ],
+                      "type": "math"
                     }
                   ]
                 ],
