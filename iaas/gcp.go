@@ -316,3 +316,6 @@ func getCredentials() (string, string, error) {
 	}
 	return projectID.(string), path, nil
 }
+
+// WorkerType is a nil setter for workerType
+func (g *GCPProvider) WorkerType(w string) {}

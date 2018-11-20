@@ -99,6 +99,11 @@ type FakeAWSClient struct {
 	FakeAttr                          func(string) (string, error)
 	FakeZone                          func() string
 	FakeDeleteVMsInDeployment         func(zone, project, deployment string) error
+	FakeWorkerType                    func(string)
+}
+
+// WorkerType is here to implement iaas.IClient
+func (client *FakeAWSClient) WorkerType(w string) {
 }
 
 // IAAS is here to implement iaas.IClient

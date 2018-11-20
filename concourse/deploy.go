@@ -55,6 +55,9 @@ func (client *Client) Deploy() error {
 		if err = writeConfigLoadedSuccessMessage(client.stdout); err != nil {
 			return err
 		}
+	} else {
+		client.provider.WorkerType(c.ConcourseWorkerSize)
+		c.AvailabilityZone = client.provider.Zone()
 	}
 
 	r, err := client.checkPreTerraformConfigRequirements(c, client.deployArgs.SelfUpdate)

@@ -13,7 +13,8 @@ import (
 
 // AWSProvider is the concrete implementation of AWS Provider
 type AWSProvider struct {
-	sess *session.Session
+	sess       *session.Session
+	workerType string
 }
 
 // IEC2 only implements functions used in the iaas package
@@ -30,12 +31,39 @@ func newAWS(region string) (Provider, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &AWSProvider{sess}, nil
+	return &AWSProvider{sess, "xlarge"}, nil
+}
+
+// WorkerType is a setter for workerType
+func (a *AWSProvider) WorkerType(w string) {
+	a.workerType = w
 }
 
 // Zone is a placeholder for Zone()
 func (a *AWSProvider) Zone() string {
-	return ""
+	ec2Client := ec2.New(a.sess)
+
+	zones, err := a.listZones()
+	if err != nil {
+		return fmt.Sprintf("%sa", a.Region())
+	}
+
+	for _, z := range zones {
+		o, _ := ec2Client.DescribeReservedInstancesOfferings(&ec2.DescribeReservedInstancesOfferingsInput{
+			AvailabilityZone: aws.String(z),
+			Filters: []*ec2.Filter{
+				{
+					Name:   aws.String("instance-type"),
+					Values: []*string{aws.String(a.workerType)},
+				},
+			},
+		})
+		if len(o.ReservedInstancesOfferings) > 0 {
+			fmt.Printf("Proposed zone for %s worker instances: %s\n", a.workerType, z)
+			return z
+		}
+	}
+	return fmt.Sprintf("%sa", a.Region())
 }
 
 // Attr returns an attribute of the provider
@@ -51,6 +79,31 @@ func (a *AWSProvider) Region() string {
 // IAAS returns the iaas to operate against
 func (a *AWSProvider) IAAS() string {
 	return "AWS"
+}
+
+func (a *AWSProvider) listZones() ([]string, error) {
+	ec2Client := ec2.New(a.sess)
+	zones := []string{}
+
+	o, err := ec2Client.DescribeAvailabilityZones(&ec2.DescribeAvailabilityZonesInput{
+		Filters: []*ec2.Filter{
+			{
+				Name:   aws.String("region-name"),
+				Values: []*string{aws.String(a.Region())},
+			},
+			{
+				Name:   aws.String("state"),
+				Values: []*string{aws.String("available")},
+			},
+		},
+	})
+	if err != nil {
+		return zones, err
+	}
+	for _, z := range o.AvailabilityZones {
+		zones = append(zones, *z.ZoneName)
+	}
+	return zones, nil
 }
 
 // CheckForWhitelistedIP checks if the specified IP is whitelisted in the security group

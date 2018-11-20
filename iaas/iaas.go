@@ -24,6 +24,7 @@ type Provider interface {
 	IAAS() string
 	Attr(string) (string, error)
 	Zone() string
+	WorkerType(string)
 }
 
 // New returns a new IAAS client for a particular IAAS and region
