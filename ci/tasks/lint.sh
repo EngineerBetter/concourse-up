@@ -20,6 +20,7 @@ gometalinter \
 --exclude=resource/internal/file \
 --vendor \
 --enable-gc \
+--deadline=120s \
 ./...
 
 find . -name vendor -prune ! -type d -o -name '*.sh' -exec shellcheck {} +
