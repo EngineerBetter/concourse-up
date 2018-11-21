@@ -5,9 +5,11 @@ import (
 	"fmt"
 	"io/ioutil"
 	"reflect"
+	"regexp"
 	"strings"
 	"testing"
 
+	"github.com/EngineerBetter/concourse-up/resource"
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3iface"
@@ -164,12 +166,16 @@ func TestEnvironment_ConfigureDirectorCloudConfig(t *testing.T) {
 		VMSecurityGroup  string
 		Spot             bool
 	}
+	defaultValidate := func(a, b string) bool {
+		return strings.Contains(a, b)
+	}
 	tests := []struct {
 		name        string
 		fields      fields
 		cloudConfig string
 		want        string
 		wantErr     bool
+		validate    func(string, string) bool
 	}{
 		{
 			name: "Success- template rendered",
@@ -182,12 +188,43 @@ func TestEnvironment_ConfigureDirectorCloudConfig(t *testing.T) {
 			cloudConfig: "availability_zone: {{ .AvailabilityZone }}\n public_subnet_id: {{ .PublicSubnetID }}\n private_subnet_id: {{ .PrivateSubnetID }}\n atc_security_group: {{ .ATCSecurityGroupID }}\n spot: {{ .Spot }}",
 			want:        "availability_zone: eu-west-1\n public_subnet_id: 12345\n private_subnet_id: 67890\n atc_security_group: 00000\n spot: false",
 			wantErr:     false,
+			validate:    defaultValidate,
+		},
+		{
+			name: "Success- spot instance rendered",
+			fields: fields{
+				Spot: true,
+			},
+			cloudConfig: resource.AWSDirectorCloudConfig,
+			want:        "spot_bid_price",
+			wantErr:     false,
+			validate: func(a, b string) bool {
+				re := regexp.MustCompile(b)
+				n := re.FindAllString(a, -1)
+				return len(n) == 8
+			},
+		},
+
+		{
+			name: "Success- running with no spot",
+			fields: fields{
+				Spot: false,
+			},
+			cloudConfig: resource.AWSDirectorCloudConfig,
+			want:        "spot_bid_price",
+			wantErr:     false,
+			validate: func(a, b string) bool {
+				re := regexp.MustCompile(b)
+				n := re.FindAllString(a, -1)
+				return len(n) == 0
+			},
 		},
 		{
 			name:        "Failure- template not rendered",
 			cloudConfig: "non_existant_key: {{ .NonExistantKey }}",
 			want:        "",
 			wantErr:     true,
+			validate:    defaultValidate,
 		},
 	}
 	for _, tt := range tests {
@@ -205,8 +242,8 @@ func TestEnvironment_ConfigureDirectorCloudConfig(t *testing.T) {
 				t.Errorf("Environment.ConfigureDirectorCloudConfig()\nerror expected:  %v\nreceived error:  %v", tt.wantErr, err)
 				return
 			}
-			if got != tt.want {
-				t.Errorf("Environment.ConfigureDirectorCloudConfig()\nexpected %v\nreceived %v", tt.want, got)
+			if !tt.validate(got, tt.want) {
+				t.Errorf("Environment.ConfigureDirectorCloudConfig()\nexpected '%v'\nreceived '%v'", tt.want, got)
 			}
 		})
 	}
@@ -263,6 +300,7 @@ func TestEnvironment_ConfigureConcourseStemcell(t *testing.T) {
 				t.Errorf("Environment.ConfigureConcourseStemcell() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
+
 			if got != tt.want {
 				t.Errorf("Environment.ConfigureConcourseStemcell() = %v, want %v", got, tt.want)
 			}
