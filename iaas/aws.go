@@ -40,7 +40,10 @@ func (a *AWSProvider) WorkerType(w string) {
 }
 
 // Zone is a placeholder for Zone()
-func (a *AWSProvider) Zone() string {
+func (a *AWSProvider) Zone(input string) string {
+	if input != "" {
+		return input
+	}
 	ec2Client := ec2.New(a.sess)
 
 	zones, err := a.listZones()

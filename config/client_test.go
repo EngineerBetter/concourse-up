@@ -77,10 +77,6 @@ var _ = Describe("Client", func() {
 			})
 
 			Describe("the default config file", func() {
-				It("Sets the default value for the AvailabilityZone", func() {
-					Expect(conf.AvailabilityZone).To(Equal("eu-west-1a"))
-				})
-
 				It("Sets the default value for the ConcourseDBName", func() {
 					Expect(conf.ConcourseDBName).To(Equal("concourse_atc"))
 				})

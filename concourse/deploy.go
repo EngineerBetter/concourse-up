@@ -57,7 +57,7 @@ func (client *Client) Deploy() error {
 		}
 	} else {
 		client.provider.WorkerType(c.ConcourseWorkerSize)
-		c.AvailabilityZone = client.provider.Zone()
+		c.AvailabilityZone = client.provider.Zone(client.deployArgs.Zone)
 	}
 
 	r, err := client.checkPreTerraformConfigRequirements(c, client.deployArgs.SelfUpdate)
@@ -109,7 +109,7 @@ func (client *Client) Deploy() error {
 		}
 		err1 = environment.Build(map[string]interface{}{
 			"Region":             client.provider.Region(),
-			"Zone":               client.provider.Zone(),
+			"Zone":               client.provider.Zone(""),
 			"Tags":               "",
 			"Project":            project,
 			"GCPCredentialsJSON": credentialspath,

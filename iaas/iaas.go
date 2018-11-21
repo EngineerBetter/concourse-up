@@ -23,7 +23,7 @@ type Provider interface {
 	Region() string
 	IAAS() string
 	Attr(string) (string, error)
-	Zone() string
+	Zone(string) string
 	WorkerType(string)
 }
 

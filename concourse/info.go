@@ -72,7 +72,7 @@ func (client *Client) FetchInfo() (*Info, error) {
 		}
 		err1 = environment.Build(map[string]interface{}{
 			"Region":             client.provider.Region(),
-			"Zone":               client.provider.Zone(),
+			"Zone":               client.provider.Zone(""),
 			"Tags":               "",
 			"Project":            project,
 			"GCPCredentialsJSON": credentialspath,

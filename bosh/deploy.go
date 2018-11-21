@@ -201,7 +201,7 @@ func (client *Client) createEnv(bosh *boshenv.BOSHCLI, state, creds []byte) (new
 			InternalGW:         "10.0.0.1",
 			InternalIP:         "10.0.0.6",
 			DirectorName:       "bosh",
-			Zone:               client.provider.Zone(),
+			Zone:               client.provider.Zone(""),
 			Network:            network,
 			PublicSubnetwork:   publicSubnetwork,
 			PrivateSubnetwork:  privateSubnetwork,
@@ -263,7 +263,7 @@ func (client *Client) updateCloudConfig(bosh *boshenv.BOSHCLI) error {
 		if err != nil {
 			return err
 		}
-		zone := client.provider.Zone()
+		zone := client.provider.Zone("")
 		return bosh.UpdateCloudConfig(gcp.Environment{
 			Preemptible:       true,
 			PublicSubnetwork:  publicSubnetwork,

@@ -124,6 +124,12 @@ var deployFlags = []cli.Flag{
 		EnvVar:      "NAMESPACE",
 		Destination: &deployArgs.Namespace,
 	},
+	cli.StringFlag{
+		Name:        "zone",
+		Usage:       "(optional) Specify an availability zone",
+		EnvVar:      "ZONE",
+		Destination: &deployArgs.Zone,
+	},
 }
 
 var deploy = cli.Command{

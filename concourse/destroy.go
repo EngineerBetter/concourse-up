@@ -68,7 +68,7 @@ func (client *Client) Destroy() error {
 		if err1 != nil {
 			return err1
 		}
-		zone := client.provider.Zone()
+		zone := client.provider.Zone("")
 		err1 = environment.Build(map[string]interface{}{
 			"Region":             client.provider.Region(),
 			"Zone":               zone,

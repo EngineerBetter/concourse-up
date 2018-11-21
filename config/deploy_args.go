@@ -46,6 +46,8 @@ type DeployArgs struct {
 	TagsIsSet bool
 	Spot      bool
 	SpotIsSet bool
+	Zone      string
+	ZoneIsSet bool
 }
 
 // MarkSetFlags is marking the IsSet DeployArgs
@@ -85,6 +87,8 @@ func (a *DeployArgs) MarkSetFlags(c *cli.Context) error {
 				a.TagsIsSet = true
 			case "namespace":
 				a.NamespaceIsSet = true
+			case "zone":
+				a.ZoneIsSet = true
 			default:
 				return fmt.Errorf("flag %q is not supported by deployment flags", f)
 			}

@@ -74,7 +74,7 @@ func generateDefaultConfig(project, deployment, configBucket, region, namespace 
 	}
 
 	conf := Config{
-		AvailabilityZone:         fmt.Sprintf("%sa", region),
+		AvailabilityZone:         "",
 		ConcourseDBName:          "concourse_atc",
 		ConcourseWorkerCount:     1,
 		ConcourseWebSize:         "small",
