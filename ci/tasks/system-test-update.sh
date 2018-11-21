@@ -48,12 +48,13 @@ until [[ $(bosh locks --json | jq -r '.Tables[].Rows | length') -eq 0 ]]; do
     echo "Waited too long for lock" && exit 1
   fi
   printf '.'
-  sleep 30
+  sleep 60
 done
 echo "Bosh lock available - Proceeding"
 
 echo "UPDATE TO NEW VERSION"
-# export SELF_UPDATE=true
+export SELF_UPDATE=true
+
 ./cup-new deploy $deployment
 
 echo "Waiting for 30 seconds to let detached upgrade start"
