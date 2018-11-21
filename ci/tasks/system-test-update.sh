@@ -33,8 +33,8 @@ echo "DEPLOY OLD VERSION"
 # Otherwise terraform state can get into an invalid state
 # Also wait to make sure the BOSH lock is not taken before
 # starting deploy
-echo "Waiting for 120 seconds to give old deploy time to settle"
-sleep 120
+echo "Waiting for 10 minutes to give old deploy time to settle"
+sleep 600
 
 eval "$(./cup-old info --env $deployment)"
 config=$(./cup-old info --json $deployment)
