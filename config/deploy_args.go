@@ -43,11 +43,13 @@ type DeployArgs struct {
 	GithubAuthIsSet bool
 	Tags            cli.StringSlice
 	// TagsIsSet is true if the user has specified tags using --tags
-	TagsIsSet bool
-	Spot      bool
-	SpotIsSet bool
-	Zone      string
-	ZoneIsSet bool
+	TagsIsSet       bool
+	Spot            bool
+	SpotIsSet       bool
+	Zone            string
+	ZoneIsSet       bool
+	WorkerType      string
+	WorkerTypeIsSet bool
 }
 
 // MarkSetFlags is marking the IsSet DeployArgs
@@ -89,6 +91,8 @@ func (a *DeployArgs) MarkSetFlags(c *cli.Context) error {
 				a.NamespaceIsSet = true
 			case "zone":
 				a.ZoneIsSet = true
+			case "worker-type":
+				a.WorkerTypeIsSet = true
 			default:
 				return fmt.Errorf("flag %q is not supported by deployment flags", f)
 			}

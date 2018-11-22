@@ -65,6 +65,7 @@ type Config struct {
 	Tags                      []string `json:"tags"`
 	TFStatePath               string   `json:"tf_state_path"`
 	Version                   string   `json:"version"`
+	WorkerType                string   `json:"worker_type"`
 }
 
 func generateDefaultConfig(project, deployment, configBucket, region, namespace string) (Config, error) {

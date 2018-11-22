@@ -130,7 +130,13 @@ var deployFlags = []cli.Flag{
 		EnvVar:      "ZONE",
 		Destination: &deployArgs.Zone,
 	},
-}
+	cli.StringFlag{
+		Name:        "worker-type",
+		Usage:       "(optional) Specify a worker type for aws (m5 or m4)",
+		EnvVar:      "WORKER_TYPE",
+		Value:       "m4",
+		Destination: &deployArgs.WorkerType,
+	}}
 
 var deploy = cli.Command{
 	Name:      "deploy",

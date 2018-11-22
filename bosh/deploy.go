@@ -164,7 +164,7 @@ func (client *Client) createEnv(bosh *boshenv.BOSHCLI, state, creds []byte) (new
 			S3AWSAccessKeyID:     blobstoreUserAccessKeyID,
 			S3AWSSecretAccessKey: blobstoreSecretAccessKey,
 			Spot:                 client.config.Spot,
-		}, client.config.DirectorPassword, client.config.DirectorCert, client.config.DirectorKey, client.config.DirectorCACert, tags)
+			WorkerType:           client.config.WorkerType}, client.config.DirectorPassword, client.config.DirectorCert, client.config.DirectorKey, client.config.DirectorCACert, tags)
 		if err1 != nil {
 			return store["state.json"], store["vars.yaml"], err1
 		}
@@ -249,6 +249,7 @@ func (client *Client) updateCloudConfig(bosh *boshenv.BOSHCLI) error {
 			VMSecurityGroup:  vMsSecurityGroupID,
 			Spot:             client.config.Spot,
 			ExternalIP:       directorPublicIP,
+			WorkerType:       client.config.WorkerType,
 		}, directorPublicIP, client.config.DirectorPassword, client.config.DirectorCACert)
 	case "GCP": // nolint
 		privateSubnetwork, err := client.metadata.Get("PrivateSubnetworkName")

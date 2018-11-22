@@ -205,6 +205,9 @@ func (client *Client) LoadOrCreate(deployArgs *DeployArgs) (Config, bool, bool, 
 	if newConfigCreated || deployArgs.SpotIsSet {
 		config.Spot = deployArgs.Spot
 	}
+	if newConfigCreated || deployArgs.WorkerTypeIsSet {
+		config.WorkerType = deployArgs.WorkerType
+	}
 
 	if newConfigCreated || deployArgs.DomainIsSet {
 		if config.Domain != deployArgs.Domain {

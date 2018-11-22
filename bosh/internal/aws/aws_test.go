@@ -201,7 +201,7 @@ func TestEnvironment_ConfigureDirectorCloudConfig(t *testing.T) {
 			validate: func(a, b string) bool {
 				re := regexp.MustCompile(b)
 				n := re.FindAllString(a, -1)
-				return len(n) == 8
+				return len(n) == 10
 			},
 		},
 
