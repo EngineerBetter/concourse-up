@@ -165,9 +165,10 @@ func TestEnvironment_ConfigureDirectorCloudConfig(t *testing.T) {
 		ATCSecurityGroup string
 		VMSecurityGroup  string
 		Spot             bool
+		WorkerType       string
 	}
-	defaultValidate := func(a, b string) bool {
-		return strings.Contains(a, b)
+	defaultValidate := func(a, b string) (bool, string) {
+		return strings.Contains(a, b), fmt.Sprintf("Environment.ConfigureDirectorCloudConfig()\nexpected '%v'\nreceived '%v'", a, b)
 	}
 	tests := []struct {
 		name        string
@@ -175,7 +176,7 @@ func TestEnvironment_ConfigureDirectorCloudConfig(t *testing.T) {
 		cloudConfig string
 		want        string
 		wantErr     bool
-		validate    func(string, string) bool
+		validate    func(string, string) (bool, string)
 	}{
 		{
 			name: "Success- template rendered",
@@ -184,9 +185,10 @@ func TestEnvironment_ConfigureDirectorCloudConfig(t *testing.T) {
 				PublicSubnetID:   "12345",
 				PrivateSubnetID:  "67890",
 				ATCSecurityGroup: "00000",
+				WorkerType:       "m4",
 			},
-			cloudConfig: "availability_zone: {{ .AvailabilityZone }}\n public_subnet_id: {{ .PublicSubnetID }}\n private_subnet_id: {{ .PrivateSubnetID }}\n atc_security_group: {{ .ATCSecurityGroupID }}\n spot: {{ .Spot }}",
-			want:        "availability_zone: eu-west-1\n public_subnet_id: 12345\n private_subnet_id: 67890\n atc_security_group: 00000\n spot: false",
+			cloudConfig: "availability_zone: {{ .AvailabilityZone }}\n public_subnet_id: {{ .PublicSubnetID }}\n private_subnet_id: {{ .PrivateSubnetID }}\n atc_security_group: {{ .ATCSecurityGroupID }}\n spot: {{ .Spot }}\nworker_type: {{ .WorkerType}}",
+			want:        "availability_zone: eu-west-1\n public_subnet_id: 12345\n private_subnet_id: 67890\n atc_security_group: 00000\n spot: false\nworker_type: m4",
 			wantErr:     false,
 			validate:    defaultValidate,
 		},
@@ -198,10 +200,10 @@ func TestEnvironment_ConfigureDirectorCloudConfig(t *testing.T) {
 			cloudConfig: resource.AWSDirectorCloudConfig,
 			want:        "spot_bid_price",
 			wantErr:     false,
-			validate: func(a, b string) bool {
+			validate: func(a, b string) (bool, string) {
 				re := regexp.MustCompile(b)
 				n := re.FindAllString(a, -1)
-				return len(n) == 10
+				return len(n) == 10, fmt.Sprintf("Expected 10 appearances of '%v' in\n'%+v'\ninstead got %+v", b, a, len(n))
 			},
 		},
 
@@ -213,10 +215,38 @@ func TestEnvironment_ConfigureDirectorCloudConfig(t *testing.T) {
 			cloudConfig: resource.AWSDirectorCloudConfig,
 			want:        "spot_bid_price",
 			wantErr:     false,
-			validate: func(a, b string) bool {
+			validate: func(a, b string) (bool, string) {
 				re := regexp.MustCompile(b)
 				n := re.FindAllString(a, -1)
-				return len(n) == 0
+				return len(n) == 0, fmt.Sprintf("Expected 0 appearances of '%v' in\n'%+v'\ninstead got %+v", b, a, len(n))
+			},
+		},
+		{
+			name: "Success- worker type is m5",
+			fields: fields{
+				WorkerType: "m5",
+			},
+			cloudConfig: resource.AWSDirectorCloudConfig,
+			want:        "instance_type: m5",
+			wantErr:     false,
+			validate: func(a, b string) (bool, string) {
+				re := regexp.MustCompile(b)
+				n := re.FindAllString(a, -1)
+				return len(n) == 7, fmt.Sprintf("Expected 7 appearances of '%v' in\n'%+v'\ninstead got %+v", b, a, len(n))
+			},
+		},
+		{
+			name: "Success- m4 worker type is m4",
+			fields: fields{
+				WorkerType: "m4",
+			},
+			cloudConfig: resource.AWSDirectorCloudConfig,
+			want:        "instance_type: m4",
+			wantErr:     false,
+			validate: func(a, b string) (bool, string) {
+				re := regexp.MustCompile(b)
+				n := re.FindAllString(a, -1)
+				return len(n) == 7, fmt.Sprintf("Expected 7 appearances of '%v' in\n'%+v'\ninstead got %+v", b, a, len(n))
 			},
 		},
 		{
@@ -236,14 +266,16 @@ func TestEnvironment_ConfigureDirectorCloudConfig(t *testing.T) {
 				ATCSecurityGroup: tt.fields.ATCSecurityGroup,
 				VMSecurityGroup:  tt.fields.VMSecurityGroup,
 				Spot:             tt.fields.Spot,
+				WorkerType:       tt.fields.WorkerType,
 			}
 			got, err := e.ConfigureDirectorCloudConfig(tt.cloudConfig)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Environment.ConfigureDirectorCloudConfig()\nerror expected:  %v\nreceived error:  %v", tt.wantErr, err)
 				return
 			}
-			if !tt.validate(got, tt.want) {
-				t.Errorf("Environment.ConfigureDirectorCloudConfig()\nexpected '%v'\nreceived '%v'", tt.want, got)
+			passed, message := tt.validate(got, tt.want)
+			if !passed {
+				t.Errorf(message)
 			}
 		})
 	}
