@@ -40,3 +40,38 @@ func Test_regionFromZone(t *testing.T) {
 		})
 	}
 }
+func Test_zoneBelongsToRegion(t *testing.T) {
+	type args struct {
+		zone   string
+		region string
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+	}{
+		{
+			name: "zone belongs to region",
+			args: args{
+				zone:   "us-east1c",
+				region: "us-east1",
+			},
+			wantErr: false,
+		},
+		{
+			name: "zone does not belong to region",
+			args: args{
+				zone:   "us-east1a",
+				region: "eu-east-1",
+			},
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if err := zoneBelongsToRegion(tt.args.zone, tt.args.region); (err != nil) != tt.wantErr {
+				t.Errorf("zoneBelongsToRegion() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}

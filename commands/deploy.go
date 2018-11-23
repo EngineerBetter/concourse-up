@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"regexp"
+	"strings"
 
 	"github.com/EngineerBetter/concourse-up/terraform"
 
@@ -150,6 +151,13 @@ func regionFromZone(zone string) (string, string) {
 	return "", ""
 }
 
+func zoneBelongsToRegion(zone, region string) error {
+	if !strings.Contains(zone, region) {
+		return fmt.Errorf("The region and the zones provided do not match. Please note that the zone %s needs to be within a %s region", zone, region)
+	}
+	return nil
+}
+
 var deploy = cli.Command{
 	Name:      "deploy",
 	Aliases:   []string{"d"},
@@ -170,6 +178,12 @@ var deploy = cli.Command{
 		deployArgs.GithubAuthIsSet = c.IsSet("github-auth-client-id") && c.IsSet("github-auth-client-secret")
 		if err = deployArgs.Validate(); err != nil {
 			return err
+		}
+
+		if deployArgs.ZoneIsSet && deployArgs.AWSRegionIsSet {
+			if err1 := zoneBelongsToRegion(deployArgs.Zone, deployArgs.AWSRegion); err1 != nil {
+				return err1
+			}
 		}
 
 		if deployArgs.ZoneIsSet && !deployArgs.AWSRegionIsSet {
