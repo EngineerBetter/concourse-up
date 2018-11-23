@@ -180,6 +180,10 @@ func (client *Client) LoadOrCreate(deployArgs *DeployArgs) (Config, bool, bool, 
 	}
 
 	if deployArgs.ZoneIsSet {
+		// This is a safeguard for a redeployment where zone does not belong to the region where the original deployment has happened
+		if !newConfigCreated && !strings.Contains(deployArgs.Zone, config.AvailabilityZone) {
+			return Config{}, false, false, fmt.Errorf("Zone %s does not belong to region %s", deployArgs.Zone, config.AvailabilityZone)
+		}
 		config.AvailabilityZone = deployArgs.Zone
 	}
 	if newConfigCreated || deployArgs.WorkerCountIsSet {
