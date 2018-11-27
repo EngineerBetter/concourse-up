@@ -145,10 +145,6 @@ var _ = Describe("Client", func() {
 					Expect(conf.PublicKey).To(HavePrefix("ssh-rsa"))
 				})
 
-				It("Sets the default value for the RDSDefaultDatabaseName", func() {
-					Expect(conf.RDSDefaultDatabaseName).To(HavePrefix("bosh"))
-				})
-
 				It("Sets the default value for the RDSInstanceClass", func() {
 					Expect(conf.RDSInstanceClass).To(Equal("db.t2.medium"))
 				})
