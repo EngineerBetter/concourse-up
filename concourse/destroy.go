@@ -23,7 +23,10 @@ func (client *Client) Destroy() error {
 	var volumesToDelete []string
 
 	switch client.provider.IAAS() {
+
 	case "AWS": // nolint
+		conf.RDSDefaultDatabaseName = fmt.Sprintf("bosh_%s", eightRandomLetters())
+
 		err = environment.Build(map[string]interface{}{
 			"AllowIPs":               conf.AllowIPs,
 			"AvailabilityZone":       conf.AvailabilityZone,
@@ -60,6 +63,8 @@ func (client *Client) Destroy() error {
 		}
 
 	case "GCP": // nolint
+		conf.RDSDefaultDatabaseName = fmt.Sprintf("bosh-%s", eightRandomLetters())
+
 		project, err1 := client.provider.Attr("project")
 		if err1 != nil {
 			return err1

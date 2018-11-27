@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"math/rand"
 	"text/template"
 	"time"
 
@@ -76,6 +77,8 @@ func (client *Client) Deploy() error {
 	}
 	switch client.provider.IAAS() {
 	case "AWS": // nolint
+		c.RDSDefaultDatabaseName = fmt.Sprintf("bosh_%s", eightRandomLetters())
+
 		err = environment.Build(map[string]interface{}{
 			"AllowIPs":               c.AllowIPs,
 			"AvailabilityZone":       c.AvailabilityZone,
@@ -99,6 +102,7 @@ func (client *Client) Deploy() error {
 			return err
 		}
 	case "GCP": // nolint
+		c.RDSDefaultDatabaseName = fmt.Sprintf("bosh-%s", eightRandomLetters())
 		project, err1 := client.provider.Attr("project")
 		if err1 != nil {
 			return err1
@@ -651,4 +655,14 @@ func loadDirectorCreds(configClient config.IClient) ([]byte, error) {
 	}
 
 	return configClient.LoadAsset(bosh.CredsFilename)
+}
+
+func eightRandomLetters() string {
+	rand.Seed(time.Now().UTC().UnixNano())
+	letterBytes := "abcdefghijklmnopqrstuvwxyz"
+	b := make([]byte, 8)
+	for i := range b {
+		b[i] = letterBytes[rand.Intn(len(letterBytes))]
+	}
+	return string(b)
 }

@@ -1,10 +1,7 @@
 package config
 
 import (
-	"fmt"
-	"math/rand"
 	"strings"
-	"time"
 
 	"github.com/EngineerBetter/concourse-up/util"
 )
@@ -93,7 +90,6 @@ func generateDefaultConfig(project, deployment, configBucket, region, namespace 
 		PrivateKey:               strings.TrimSpace(string(privateKey)),
 		Project:                  project,
 		PublicKey:                strings.TrimSpace(string(publicKey)),
-		RDSDefaultDatabaseName:   fmt.Sprintf("bosh_%s", eightRandomLetters()),
 		RDSPassword:              util.GeneratePassword(),
 		RDSUsername:              "admin" + util.GeneratePassword(),
 		Region:                   region,
@@ -111,14 +107,4 @@ func updateAllowedIPs(c Config, ingressAddresses cidrBlocks) (Config, error) {
 	}
 	c.AllowIPs = addr
 	return c, nil
-}
-
-func eightRandomLetters() string {
-	rand.Seed(time.Now().UTC().UnixNano())
-	letterBytes := "abcdefghijklmnopqrstuvwxyz"
-	b := make([]byte, 8)
-	for i := range b {
-		b[i] = letterBytes[rand.Intn(len(letterBytes))]
-	}
-	return string(b)
 }
