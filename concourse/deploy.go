@@ -57,6 +57,13 @@ func (client *Client) Deploy() error {
 			return err
 		}
 	} else {
+		switch client.provider.IAAS() {
+		case "AWS": // nolint
+			c.RDSDefaultDatabaseName = fmt.Sprintf("bosh_%s", eightRandomLetters())
+		case "GCP": // nolint
+			c.RDSDefaultDatabaseName = fmt.Sprintf("bosh-%s", eightRandomLetters())
+		}
+
 		client.provider.WorkerType(c.ConcourseWorkerSize)
 		c.AvailabilityZone = client.provider.Zone(client.deployArgs.Zone)
 	}
@@ -77,8 +84,6 @@ func (client *Client) Deploy() error {
 	}
 	switch client.provider.IAAS() {
 	case "AWS": // nolint
-		c.RDSDefaultDatabaseName = fmt.Sprintf("bosh_%s", eightRandomLetters())
-
 		err = environment.Build(map[string]interface{}{
 			"AllowIPs":               c.AllowIPs,
 			"AvailabilityZone":       c.AvailabilityZone,
@@ -102,7 +107,6 @@ func (client *Client) Deploy() error {
 			return err
 		}
 	case "GCP": // nolint
-		c.RDSDefaultDatabaseName = fmt.Sprintf("bosh-%s", eightRandomLetters())
 		project, err1 := client.provider.Attr("project")
 		if err1 != nil {
 			return err1
