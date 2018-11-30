@@ -2,6 +2,8 @@ cloud.google.com/go v0.26.0/go.mod h1:aQUYkXzVsufM+DwF1aE+0xfcU+56JwCaLick0ClmMT
 cloud.google.com/go v0.31.0 h1:o9K5MWWt2wk+d9jkGn2DAZ7Q9nUdnFLOpK9eIkDwONQ=
 cloud.google.com/go v0.31.0/go.mod h1:aQUYkXzVsufM+DwF1aE+0xfcU+56JwCaLick0ClmMTw=
 git.apache.org/thrift.git v0.0.0-20180902110319-2566ecd5d999/go.mod h1:fPE2ZNJGynbRyZ4dJvy6G277gSllfV2HJqblrnkyeyg=
+github.com/GoogleCloudPlatform/cloudsql-proxy v0.0.0-20181129011958-60b5f58da796 h1:QHB+UTeweu0P7nCdVpKwVRvEi8GpJ+xgObnXiKfOssY=
+github.com/GoogleCloudPlatform/cloudsql-proxy v0.0.0-20181129011958-60b5f58da796/go.mod h1:aJ4qN3TfrelA6NZ6AXsXRfmEVaYin3EDbSPJrKS8OXo=
 github.com/asaskevich/govalidator v0.0.0-20171111151018-521b25f4b05f h1:xHxhygLkJBQaXZ7H0JUpmqK/gfKO2DZXB7gAKT6bbBs=
 github.com/asaskevich/govalidator v0.0.0-20171111151018-521b25f4b05f/go.mod h1:lB+ZfQJz7igIIfQNfa7Ml4HSf2uFQQRzpGGRXenZAgY=
 github.com/aws/aws-sdk-go v1.15.31 h1:ExgD8W8QDeD8Y4CPVlcP/laumxvikDbkVWB+VCHgXxA=

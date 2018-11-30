@@ -1,11 +1,17 @@
 # cloud.google.com/go v0.31.0
+cloud.google.com/go/compute/metadata
 cloud.google.com/go/storage
 cloud.google.com/go/iam
 cloud.google.com/go/internal
 cloud.google.com/go/internal/optional
 cloud.google.com/go/internal/trace
 cloud.google.com/go/internal/version
-cloud.google.com/go/compute/metadata
+# github.com/GoogleCloudPlatform/cloudsql-proxy v0.0.0-20181129011958-60b5f58da796
+github.com/GoogleCloudPlatform/cloudsql-proxy/proxy/dialers/postgres
+github.com/GoogleCloudPlatform/cloudsql-proxy/proxy/proxy
+github.com/GoogleCloudPlatform/cloudsql-proxy/logging
+github.com/GoogleCloudPlatform/cloudsql-proxy/proxy/certs
+github.com/GoogleCloudPlatform/cloudsql-proxy/proxy/util
 # github.com/asaskevich/govalidator v0.0.0-20171111151018-521b25f4b05f
 github.com/asaskevich/govalidator
 # github.com/aws/aws-sdk-go v1.15.31
@@ -152,11 +158,11 @@ golang.org/x/crypto/ed25519/internal/edwards25519
 # golang.org/x/net v0.0.0-20180906233101-161cd47e91fd
 golang.org/x/net/proxy
 golang.org/x/net/context
+golang.org/x/net/context/ctxhttp
 golang.org/x/net/internal/socks
 golang.org/x/net/publicsuffix
 golang.org/x/net/ipv4
 golang.org/x/net/ipv6
-golang.org/x/net/context/ctxhttp
 golang.org/x/net/html/charset
 golang.org/x/net/bpf
 golang.org/x/net/internal/iana
@@ -208,6 +214,7 @@ google.golang.org/api/googleapi/internal/uritemplates
 google.golang.org/api/internal
 google.golang.org/api/googleapi/transport
 google.golang.org/api/transport/http/internal/propagation
+google.golang.org/api/sqladmin/v1beta4
 # google.golang.org/appengine v1.1.0
 google.golang.org/appengine
 google.golang.org/appengine/urlfetch
