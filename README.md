@@ -104,17 +104,20 @@ All flags are optional. Configuration settings provided via flags will persist i
     ```
 
 * `--workers value`      Number of Concourse worker instances to deploy (default: 1) [$WORKERS]
-* `--worker-size value`  Size of Concourse workers. Can be medium, large, xlarge, 2xlarge, 4xlarge, 10xlarge or 16xlarge (default: "xlarge") [$WORKER_SIZE]
+* `--worker-type`        Specify a worker type for aws (m5 or m4) (default: "m4") [$WORKER_TYPE] (see comparison table below)
+* `--worker-size value`  Size of Concourse workers. Can be medium, large, xlarge, 2xlarge, 4xlarge, 10xlarge, 12xlarge, 16xlarge or 24xlarge depending on the worker-type (see above) (default: "xlarge") [$WORKER_SIZE]
 
-    | --worker-size | AWS Instance type |
-    |---------------|-------------------|
-    | medium        | t2.medium         |
-    | large         | m5.large          |
-    | xlarge        | m5.xlarge         |
-    | 2xlarge       | m5.2xlarge        |
-    | 4xlarge       | m5.4xlarge        |
-    | 12xlarge      | m5.12xlarge       |
-    | 24xlarge      | m5.24xlarge       |
+    | --worker-size | AWS m4 Instance type | AWS m5 Instance type |
+    |---------------|----------------------|----------------------|
+    | medium        | t2.medium            | t2.medium            |
+    | large         | m4.large             | m5.large             |
+    | xlarge        | m4.xlarge            | m5.xlarge            |
+    | 2xlarge       | m4.2xlarge           | m5.2xlarge           |
+    | 4xlarge       | m4.4xlarge           | m5.4xlarge           |
+    | 10xlarge      | m4.10xlarge          |                      |
+    | 12xlarge      |                      | m5.12xlarge          |
+    | 16xlarge      | m4.16xlarge          |                      |
+    | 24xlarge      |                      | m5.24xlarge          |
 
 * `--web-size value`     Size of Concourse web node. Can be small, medium, large, xlarge, 2xlarge (default: "small") [$WEB_SIZE]
 
@@ -149,9 +152,10 @@ All flags are optional. Configuration settings provided via flags will persist i
 
     > Concourse Up uses spot instances for workers as a cost saving measure. Users requiring lower risk may switch this feature off by setting --spot=false.
 
-* `--namespace value` Any valid string that provides a meaningful namespace of the deployment - Used as part of the configuration bucket name [$NAMESPACE]. 
+* `--namespace value` Any valid string that provides a meaningful namespace of the deployment - Used as part of the configuration bucket name [$NAMESPACE].
     >Note that if namespace has been provided in the initial `deploy` it will be required for any subsequent `concourse-up` calls against the same deployment.
-     
+* `--zone`            Specify an availability zone [$ZONE] (cannot be changed after the initial deployment)
+
 ### Info
 
 To fetch information about your `concourse-up` deployment:
