@@ -154,7 +154,7 @@ var _ = Describe("Client", func() {
 				})
 
 				It("Generates a secure random string for the RDSUsername", func() {
-					Expect(conf.RDSUsername).To(MatchRegexp("^admin[a-z0-9]{20}$"))
+					Expect(conf.RDSUsername).To(MatchRegexp("^admin[a-z0-9]{7}$"))
 				})
 
 				It("Sets the default value for the Region", func() {
