@@ -5,6 +5,7 @@ import (
 	"io"
 
 	"github.com/EngineerBetter/concourse-up/iaas"
+	"github.com/EngineerBetter/concourse-up/util"
 )
 
 // Destroy destroys a concourse instance
@@ -25,7 +26,7 @@ func (client *Client) Destroy() error {
 	switch client.provider.IAAS() {
 
 	case "AWS": // nolint
-		conf.RDSDefaultDatabaseName = fmt.Sprintf("bosh_%s", eightRandomLetters())
+		conf.RDSDefaultDatabaseName = fmt.Sprintf("bosh_%s", util.EightRandomLetters())
 
 		err = environment.Build(map[string]interface{}{
 			"AllowIPs":               conf.AllowIPs,
@@ -63,7 +64,7 @@ func (client *Client) Destroy() error {
 		}
 
 	case "GCP": // nolint
-		conf.RDSDefaultDatabaseName = fmt.Sprintf("bosh-%s", eightRandomLetters())
+		conf.RDSDefaultDatabaseName = fmt.Sprintf("bosh-%s", util.EightRandomLetters())
 
 		project, err1 := client.provider.Attr("project")
 		if err1 != nil {

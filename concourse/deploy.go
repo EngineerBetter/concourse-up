@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"math/rand"
 	"text/template"
 	"time"
 
@@ -17,6 +16,7 @@ import (
 	"github.com/EngineerBetter/concourse-up/config"
 	"github.com/EngineerBetter/concourse-up/fly"
 	"github.com/EngineerBetter/concourse-up/terraform"
+	"github.com/EngineerBetter/concourse-up/util"
 	"gopkg.in/yaml.v2"
 )
 
@@ -59,9 +59,9 @@ func (client *Client) Deploy() error {
 	} else {
 		switch client.provider.IAAS() {
 		case "AWS": // nolint
-			c.RDSDefaultDatabaseName = fmt.Sprintf("bosh_%s", eightRandomLetters())
+			c.RDSDefaultDatabaseName = fmt.Sprintf("bosh_%s", util.EightRandomLetters())
 		case "GCP": // nolint
-			c.RDSDefaultDatabaseName = fmt.Sprintf("bosh-%s", eightRandomLetters())
+			c.RDSDefaultDatabaseName = fmt.Sprintf("bosh-%s", util.EightRandomLetters())
 		}
 
 		client.provider.WorkerType(c.ConcourseWorkerSize)
@@ -659,14 +659,4 @@ func loadDirectorCreds(configClient config.IClient) ([]byte, error) {
 	}
 
 	return configClient.LoadAsset(bosh.CredsFilename)
-}
-
-func eightRandomLetters() string {
-	rand.Seed(time.Now().UTC().UnixNano())
-	letterBytes := "abcdefghijklmnopqrstuvwxyz"
-	b := make([]byte, 8)
-	for i := range b {
-		b[i] = letterBytes[rand.Intn(len(letterBytes))]
-	}
-	return string(b)
 }
