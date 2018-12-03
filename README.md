@@ -104,7 +104,7 @@ All flags are optional. Configuration settings provided via flags will persist i
     ```
 
 * `--workers value`      Number of Concourse worker instances to deploy (default: 1) [$WORKERS]
-* `--worker-type`        Specify a worker type for aws (m5 or m4) (default: "m4") [$WORKER_TYPE] (see comparison table below). AWS does not offer m5 in\stances in all regions, and even for regions that do offer m5 instances, not all zones within that region may offer them. To complicate matters further, each AWS account is assigned AWS zones at random - for instance, `eu-west-1a` for one account may be the same as `eu-west-1b` in another account. If m5s are available in your chosen region but not the zone Concourse-Up has chosen, you can override the zone choice with `--zone`.
+* `--worker-type`        Specify a worker type for aws (m5 or m4) (default: "m4") [$WORKER_TYPE] (see comparison table below). AWS does not offer m5 instances in all regions, and even for regions that do offer m5 instances, not all zones within that region may offer them. To complicate matters further, each AWS account is assigned AWS zones at random - for instance, `eu-west-1a` for one account may be the same as `eu-west-1b` in another account. If m5s are available in your chosen region but _not_ the zone Concourse-Up has chosen, create a new deployment, this time specifying another `--zone`.
 * `--worker-size value`  Size of Concourse workers. Can be medium, large, xlarge, 2xlarge, 4xlarge, 10xlarge, 12xlarge, 16xlarge or 24xlarge depending on the worker-type (see above) (default: "xlarge") [$WORKER_SIZE]
 
     | --worker-size | AWS m4 Instance type | AWS m5 Instance type* |
