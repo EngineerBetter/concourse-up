@@ -7,24 +7,24 @@ import (
 
 // Provider represents actions taken against AWS
 type Provider interface {
+	Attr(string) (string, error)
+	BucketExists(name string) (bool, error)
 	CheckForWhitelistedIP(ip, securityGroup string) (bool, error)
+	CreateBucket(name string) error
 	DeleteFile(bucket, path string) error
 	DeleteVersionedBucket(name string) error
-	DeleteVMsInVPC(vpcID string) ([]string, error)
 	DeleteVMsInDeployment(zone, project, deployment string) error
+	DeleteVMsInVPC(vpcID string) ([]string, error)
 	DeleteVolumes(volumesToDelete []string, deleteVolume func(ec2Client IEC2, volumeID *string) error) error
-	CreateBucket(name string) error
-	BucketExists(name string) (bool, error)
 	EnsureFileExists(bucket, path string, defaultContents []byte) ([]byte, bool, error)
 	FindLongestMatchingHostedZone(subdomain string) (string, string, error)
 	HasFile(bucket, path string) (bool, error)
-	LoadFile(bucket, path string) ([]byte, error)
-	WriteFile(bucket, path string, contents []byte) error
-	Region() string
 	IAAS() string
-	Attr(string) (string, error)
-	Zone(string) string
+	LoadFile(bucket, path string) ([]byte, error)
+	Region() string
 	WorkerType(string)
+	WriteFile(bucket, path string, contents []byte) error
+	Zone(string) string
 }
 
 // New returns a new IAAS client for a particular IAAS and region
