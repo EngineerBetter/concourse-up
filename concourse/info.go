@@ -10,7 +10,6 @@ import (
 
 	"github.com/EngineerBetter/concourse-up/bosh"
 	"github.com/EngineerBetter/concourse-up/config"
-	"github.com/EngineerBetter/concourse-up/util"
 	"github.com/fatih/color"
 )
 
@@ -40,8 +39,6 @@ func (client *Client) FetchInfo() (*Info, error) {
 	}
 	switch client.provider.IAAS() {
 	case "AWS": // nolint
-		config.RDSDefaultDatabaseName = fmt.Sprintf("bosh_%s", util.EightRandomLetters())
-
 		err = environment.Build(map[string]interface{}{
 			"AllowIPs":               config.AllowIPs,
 			"AvailabilityZone":       config.AvailabilityZone,
@@ -65,8 +62,6 @@ func (client *Client) FetchInfo() (*Info, error) {
 			return nil, err
 		}
 	case "GCP": // nolint
-		config.RDSDefaultDatabaseName = fmt.Sprintf("bosh-%s", util.EightRandomLetters())
-
 		project, err1 := client.provider.Attr("project")
 		if err1 != nil {
 			return nil, err1
