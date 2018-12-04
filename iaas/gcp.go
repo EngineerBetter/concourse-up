@@ -1,6 +1,7 @@
 package iaas
 
 import (
+	"database/sql"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -15,6 +16,9 @@ import (
 	"golang.org/x/oauth2/google"
 	"google.golang.org/api/compute/v1"
 	"google.golang.org/api/iterator"
+
+	// PostgreSQL driver required at runtime
+	_ "github.com/GoogleCloudPlatform/cloudsql-proxy/proxy/dialers/postgres"
 )
 
 // GCPProvider is the concrete implementation of GCP Provider
@@ -320,5 +324,26 @@ func getCredentials() (string, string, error) {
 	return projectID.(string), path, nil
 }
 
+var gcpDB *sql.DB
+
 // WorkerType is a nil setter for workerType
 func (g *GCPProvider) WorkerType(w string) {}
+
+// CreateDatabases creates databases on the server
+func (g *GCPProvider) CreateDatabases(name, username, password string) error {
+	conn := fmt.Sprintf("host=concourse-up:%s:%s user=%s dbname=postgres password=%s sslmode=disable", g.Region(), name, username, password)
+	gcpDB, err := sql.Open("cloudsqlpostgres", conn)
+	if err != nil {
+		return err
+	}
+	defer gcpDB.Close()
+	dbNames := []string{"concourse_atc", "uaa", "credhub"}
+	for _, dbName := range dbNames {
+		_, err := gcpDB.Exec("CREATE DATABASE " + dbName)
+		if err != nil && !strings.Contains(err.Error(),
+			fmt.Sprintf(`pq: database "%s" already exists`, dbName)) {
+			return err
+		}
+	}
+	return nil
+}

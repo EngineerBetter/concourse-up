@@ -100,6 +100,7 @@ type FakeAWSClient struct {
 	FakeZone                          func(string) string
 	FakeDeleteVMsInDeployment         func(zone, project, deployment string) error
 	FakeWorkerType                    func(string)
+	FakeCreateDatabases               func(name, username, password string) error
 }
 
 // WorkerType is here to implement iaas.IClient
@@ -194,6 +195,11 @@ func (client *FakeAWSClient) NewEC2Client() (iaas.IEC2, error) {
 // WriteFile delegates to FakeWriteFile which is dynamically set by the tests
 func (client *FakeAWSClient) WriteFile(bucket, path string, contents []byte) error {
 	return client.FakeWriteFile(bucket, path, contents)
+}
+
+// CreateDatabases delegates to FakeCreateDatabases which is dynamically set by the tests
+func (client *FakeAWSClient) CreateDatabases(name, username, password string) error {
+	return client.FakeCreateDatabases(name, username, password)
 }
 
 // FakeFlyClient implements fly.IClient for testing

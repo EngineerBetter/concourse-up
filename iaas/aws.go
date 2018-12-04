@@ -346,3 +346,8 @@ func (a *AWSProvider) FindLongestMatchingHostedZone(subdomain string) (string, s
 
 	return longestMatchingHostedZoneName, longestMatchingHostedZoneID, err
 }
+
+// CreateDatabases creates databases on the server
+func (a *AWSProvider) CreateDatabases(name, username, password string) error {
+	return fmt.Errorf("Not implemented yet")
+}
