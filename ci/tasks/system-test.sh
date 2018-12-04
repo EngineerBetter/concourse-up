@@ -8,6 +8,13 @@ fi
 deployment="systest-$SYSTEM_TEST_ID"
 set -u
 
+assertDbCorrect() {
+  rds_instance_class=$(aws --region eu-west-1 rds describe-db-instances | jq -r ".DBInstances[] | select(.DBSubnetGroup.DBSubnetGroupName==\"concourse-up-$deployment\") | .DBInstanceClass")
+  if [ "$rds_instance_class" != "db.t2.small" ]; then
+    echo "Unexpected DB instance class: $rds_instance_class"
+    exit 1
+  fi
+}
 
 cleanup() {
   status=$?
@@ -44,11 +51,7 @@ password=$(echo "$config" | jq -r '.config.concourse_password')
 echo "$config" | jq -r '.config.concourse_ca_cert' > generated-ca-cert.pem
 
 # Check RDS instance class is db.t2.small
-rds_instance_class=$(aws --region eu-west-1 rds describe-db-instances | jq -r ".DBInstances[] | select(.DBSubnetGroup.DBSubnetGroupName==\"concourse-up-$deployment\") | .DBInstanceClass")
-if [ "$rds_instance_class" != "db.t2.small" ]; then
-  echo "Unexpected DB instance class: $rds_instance_class"
-  exit 1
-fi
+assertDbCorrect
 
 
 fly --target system-test login \
@@ -103,11 +106,7 @@ certstrap sign "$custom_domain" --CA "$deployment"
 sleep 60
 
 # Check RDS instance class is still db.t2.small
-rds_instance_class=$(aws --region eu-west-1 rds describe-db-instances | jq -r ".DBInstances[] | select(.DBSubnetGroup.DBSubnetGroupName==\"concourse-up-$deployment\") | .DBInstanceClass")
-if [ "$rds_instance_class" != "db.t2.small" ]; then
-  echo "Unexpected DB instance class: $rds_instance_class"
-  exit 1
-fi
+assertDbCorrect
 
 config=$(./cup info --json $deployment)
 username=$(echo "$config" | jq -r '.config.concourse_username')
