@@ -6,6 +6,13 @@ groups:
   - unit-tests
   - build
   - system-test
+  - system-test-update
+  - system-test-alt-region
+  - system-test-credhub
+  - system-test-letsencrypt
+  - system-test-cleanup
+  - system-test-github-auth
+  - system-test-tags
   - system-test-gcp
   - auto
   - major
@@ -241,144 +248,13 @@ jobs:
         params:
           file: build-windows/concourse-up-windows-amd64.exe
 
+
 - name: system-test
   serial_groups:
   - system-test
   serial: true
   plan:
-  - aggregate:
-    - get: version
-      passed: [build]
-    - get: binary-linux
-      trigger: true
-      passed: [build]
-    - get: binary-darwin
-      trigger: true
-      passed: [build]
-    - get: binary-windows
-      trigger: true
-      passed: [build]
-    - get: concourse-up
-      trigger: true
-      passed: [build]
-    - get: concourse-up-ops
-      trigger: true
-      passed: [build]
-    - get: pcf-ops
-      passed: [build]
-    - get: release
-      params:
-        globs: [concourse-up-linux-amd64]
-  - aggregate:
-    - task: system-test-alt-region
-      file: concourse-up/ci/tasks/system-test-alt-region.yml
-      params:
-        AWS_ACCESS_KEY_ID: ((concourse_up_test_access_key_id))
-        AWS_SECRET_ACCESS_KEY: ((concourse_up_test_secret_key))
-        BINARY_PATH: binary-linux/concourse-up-linux-amd64
-      on_failure:
-        put: slack-alert
-        params:
-          channel: "#integrations"
-          text: |
-            <!channel> Concourse Up alt region system test failure!
-    - task: system-test-update
-      file: concourse-up/ci/tasks/system-test-update.yml
-      params:
-        AWS_ACCESS_KEY_ID: ((concourse_up_test_access_key_id))
-        AWS_SECRET_ACCESS_KEY: ((concourse_up_test_secret_key))
-        BINARY_PATH: binary-linux/concourse-up-linux-amd64
-      on_failure:
-        put: slack-alert
-        params:
-          channel: "#integrations"
-          text: |
-            <!channel> Concourse Up update system test failure!
-    - task: system-test
-      file: concourse-up/ci/tasks/system-test.yml
-      params:
-        AWS_ACCESS_KEY_ID: ((concourse_up_test_access_key_id))
-        AWS_SECRET_ACCESS_KEY: ((concourse_up_test_secret_key))
-        BINARY_PATH: binary-linux/concourse-up-linux-amd64
-      on_failure:
-        put: slack-alert
-        params:
-          channel: "#integrations"
-          text: |
-            <!channel> Concourse Up system test failure!
-    - task: system-test-credhub
-      file: concourse-up/ci/tasks/system-test-credhub.yml
-      params:
-        AWS_ACCESS_KEY_ID: ((concourse_up_test_access_key_id))
-        AWS_SECRET_ACCESS_KEY: ((concourse_up_test_secret_key))
-        BINARY_PATH: binary-linux/concourse-up-linux-amd64
-      on_failure:
-        put: slack-alert
-        params:
-          channel: "#integrations"
-          text: |
-            <!channel> Concourse Up system credhub test failure!
-    - task: system-test-letsencrypt
-      file: concourse-up/ci/tasks/system-test-autocert.yml
-      attempts: 2
-      params:
-        AWS_ACCESS_KEY_ID: ((concourse_up_test_access_key_id))
-        AWS_SECRET_ACCESS_KEY: ((concourse_up_test_secret_key))
-        BINARY_PATH: binary-linux/concourse-up-linux-amd64
-      on_failure:
-        put: slack-alert
-        params:
-          channel: "#integrations"
-          text: |
-            <!channel> Concourse Up system letsencrypt test failure!
-    - task: system-test-clean-up
-      file: concourse-up/ci/tasks/system-test-clean-up.yml
-      attempts: 2
-      params:
-        AWS_ACCESS_KEY_ID: ((concourse_up_test_access_key_id))
-        AWS_SECRET_ACCESS_KEY: ((concourse_up_test_secret_key))
-        BINARY_PATH: binary-linux/concourse-up-linux-amd64
-      on_failure:
-        put: slack-alert
-        params:
-          channel: "#integrations"
-          text: |
-            <!channel> Concourse Up system-test-clean-up failure!
-    - task: system-test-github-auth
-      file: concourse-up/ci/tasks/system-test-github-auth.yml
-      params:
-        AWS_ACCESS_KEY_ID: ((concourse_up_test_access_key_id))
-        AWS_SECRET_ACCESS_KEY: ((concourse_up_test_secret_key))
-        BINARY_PATH: binary-linux/concourse-up-linux-amd64
-        EB_WILDCARD_CERT: ((eb_wildcard.certificate))
-        EB_WILDCARD_KEY: ((eb_wildcard.private_key))
-        GITHUB_AUTH_CLIENT_ID: ((github_auth_client_id))
-        GITHUB_AUTH_CLIENT_SECRET: ((github_auth_client_secret))
-      on_failure:
-        put: slack-alert
-        params:
-          channel: "#integrations"
-          text: |
-            <!channel> Concourse Up system-test-github-auth failure!
-    - task: system-test-tags
-      file: concourse-up/ci/tasks/system-test-tags.yml
-      params:
-        AWS_ACCESS_KEY_ID: ((concourse_up_test_access_key_id))
-        AWS_SECRET_ACCESS_KEY: ((concourse_up_test_secret_key))
-        BINARY_PATH: binary-linux/concourse-up-linux-amd64
-      on_failure:
-        put: slack-alert
-        params:
-          channel: "#integrations"
-          text: |
-            <!channel> Concourse Up system-test-tags failure!
-
-- name: system-test-gcp
-  serial_groups:
-  - system-test-gcp
-  serial: true
-  plan:
-  - aggregate:
+  - aggregate: &system-test-gets
     - get: version
       passed: [build]
     - get: binary-linux
@@ -404,6 +280,165 @@ jobs:
   - task: system-test
     file: concourse-up/ci/tasks/system-test.yml
     params:
+      AWS_ACCESS_KEY_ID: ((concourse_up_test_access_key_id))
+      AWS_SECRET_ACCESS_KEY: ((concourse_up_test_secret_key))
+      BINARY_PATH: binary-linux/concourse-up-linux-amd64
+    on_failure:
+      put: slack-alert
+      params:
+        channel: "#integrations"
+        text: |
+          <!channel> Concourse Up system test failure!
+
+- name: system-test-update
+  serial_groups:
+  - system-test-update
+  serial: true
+  plan:
+  - aggregate: *system-test-gets
+  - task: run-system-test-update
+    file: concourse-up/ci/tasks/system-test-update.yml
+    params:
+      AWS_ACCESS_KEY_ID: ((concourse_up_test_access_key_id))
+      AWS_SECRET_ACCESS_KEY: ((concourse_up_test_secret_key))
+      BINARY_PATH: binary-linux/concourse-up-linux-amd64
+      on_failure:
+      put: slack-alert
+      params:
+        channel: "#integrations"
+        text: |
+          <!channel> Concourse Up update system test failure!
+
+- name: system-test-alt-region
+  serial_groups:
+  - system-test-alt-region
+  serial: true
+  plan:
+  - aggregate: *system-test-gets
+  - task: system-test-alt-region
+    file: concourse-up/ci/tasks/system-test-alt-region.yml
+    params:
+      AWS_ACCESS_KEY_ID: ((concourse_up_test_access_key_id))
+      AWS_SECRET_ACCESS_KEY: ((concourse_up_test_secret_key))
+      BINARY_PATH: binary-linux/concourse-up-linux-amd64
+    on_failure:
+      put: slack-alert
+      params:
+        channel: "#integrations"
+        text: |
+          <!channel> Concourse Up alt region system test failure!
+
+- name: system-test-credhub
+  serial_groups:
+  - system-test-credhub
+  serial: true
+  plan:
+  - aggregate: *system-test-gets
+  - task: system-test-credhub
+    file: concourse-up/ci/tasks/system-test-credhub.yml
+    params:
+      AWS_ACCESS_KEY_ID: ((concourse_up_test_access_key_id))
+      AWS_SECRET_ACCESS_KEY: ((concourse_up_test_secret_key))
+      BINARY_PATH: binary-linux/concourse-up-linux-amd64
+    on_failure:
+      put: slack-alert
+      params:
+        channel: "#integrations"
+        text: |
+          <!channel> Concourse Up system credhub test failure!
+
+- name: system-test-letsencrypt
+  serial_groups:
+  - system-test-letencrypt
+  serial: true
+  plan:
+  - aggregate: *system-test-gets
+  - task: system-test-letsencrypt
+    file: concourse-up/ci/tasks/system-test-autocert.yml
+    attempts: 2
+    params:
+      AWS_ACCESS_KEY_ID: ((concourse_up_test_access_key_id))
+      AWS_SECRET_ACCESS_KEY: ((concourse_up_test_secret_key))
+      BINARY_PATH: binary-linux/concourse-up-linux-amd64
+    on_failure:
+      put: slack-alert
+      params:
+        channel: "#integrations"
+        text: |
+          <!channel> Concourse Up system letsencrypt test failure!
+
+
+- name: system-test-cleanup
+  serial_groups:
+  - system-test-clean-up
+  serial: true
+  plan:
+  - aggregate: *system-test-gets
+  - task: system-test-clean-up
+    file: concourse-up/ci/tasks/system-test-clean-up.yml
+    attempts: 2
+    params:
+      AWS_ACCESS_KEY_ID: ((concourse_up_test_access_key_id))
+      AWS_SECRET_ACCESS_KEY: ((concourse_up_test_secret_key))
+      BINARY_PATH: binary-linux/concourse-up-linux-amd64
+    on_failure:
+      put: slack-alert
+      params:
+        channel: "#integrations"
+        text: |
+          <!channel> Concourse Up system-test-clean-up failure!
+
+- name: system-test-github-auth
+  serial_groups:
+  - system-test-github-auth
+  serial: true
+  plan:
+  - aggregate: *system-test-gets
+  - task: system-test-github-auth
+    file: concourse-up/ci/tasks/system-test-github-auth.yml
+    params:
+      AWS_ACCESS_KEY_ID: ((concourse_up_test_access_key_id))
+      AWS_SECRET_ACCESS_KEY: ((concourse_up_test_secret_key))
+      BINARY_PATH: binary-linux/concourse-up-linux-amd64
+      EB_WILDCARD_CERT: ((eb_wildcard.certificate))
+      EB_WILDCARD_KEY: ((eb_wildcard.private_key))
+      GITHUB_AUTH_CLIENT_ID: ((github_auth_client_id))
+      GITHUB_AUTH_CLIENT_SECRET: ((github_auth_client_secret))
+    on_failure:
+      put: slack-alert
+      params:
+        channel: "#integrations"
+        text: |
+          <!channel> Concourse Up system-test-github-auth failure!
+
+- name: system-test-tags
+  serial_groups:
+  - system-test-tags
+  serial: true
+  plan:
+  - aggregate: *system-test-gets
+  - task: system-test-tags
+    file: concourse-up/ci/tasks/system-test-tags.yml
+    params:
+      AWS_ACCESS_KEY_ID: ((concourse_up_test_access_key_id))
+      AWS_SECRET_ACCESS_KEY: ((concourse_up_test_secret_key))
+      BINARY_PATH: binary-linux/concourse-up-linux-amd64
+    on_failure:
+      put: slack-alert
+      params:
+        channel: "#integrations"
+        text: |
+          <!channel> Concourse Up system-test-tags failure!
+
+- name: system-test-gcp
+  serial_groups:
+  - system-test-gcp
+  serial: true
+  plan:
+  - aggregate: *system-test-gets
+  - task: system-test
+    file: concourse-up/ci/tasks/system-test.yml
+    params:
       BINARY_PATH: binary-linux/concourse-up-linux-amd64
       GOOGLE_APPLICATION_CREDENTIALS_CONTENTS: ((system_test_google_application_credentials))
       IAAS: GCP
@@ -413,14 +448,22 @@ jobs:
   plan:
   - aggregate:
     - get: pcf-ops
-      passed: [system-test]
+      passed: &aws-system-tests
+      - system-test
+      - system-test-update
+      - system-test-alt-region
+      - system-test-credhub
+      - system-test-letsencrypt
+      - system-test-cleanup
+      - system-test-github-auth
+      - system-test-tags
     - get: concourse-up
-      passed: [system-test]
+      passed: *aws-system-tests
     - get: concourse-up-ops
       trigger: true
-      passed: [system-test]
+      passed: *aws-system-tests
     - get: version
-      passed: [system-test]
+      passed: *aws-system-tests
       params:
         bump: patch
     - get: build-metadata
@@ -478,13 +521,13 @@ jobs:
     - get: version
       params:
         bump: patch
-      passed: [system-test]
+      passed: *aws-system-tests
     - get: pcf-ops
-      passed: [system-test]
+      passed: *aws-system-tests
     - get: concourse-up
-      passed: [system-test]
+      passed: *aws-system-tests
     - get: concourse-up-ops
-      passed: [system-test]
+      passed: *aws-system-tests
     - get: build-metadata
   - aggregate: *build_binaries
   - task: get-ops-version
@@ -522,13 +565,13 @@ jobs:
     - get: version
       params:
         bump: minor
-      passed: [system-test]
+      passed: *aws-system-tests
     - get: pcf-ops
-      passed: [system-test]
+      passed: *aws-system-tests
     - get: concourse-up
-      passed: [system-test]
+      passed: *aws-system-tests
     - get: concourse-up-ops
-      passed: [system-test]
+      passed: *aws-system-tests
     - get: build-metadata
   - aggregate: *build_binaries
   - task: get-ops-version
@@ -564,15 +607,15 @@ jobs:
   plan:
   - aggregate:
     - get: version
-      passed: [system-test]
+      passed: *aws-system-tests
       params:
         bump: major
     - get: pcf-ops
-      passed: [system-test]
+      passed: *aws-system-tests
     - get: concourse-up
-      passed: [system-test]
+      passed: *aws-system-tests
     - get: concourse-up-ops
-      passed: [system-test]
+      passed: *aws-system-tests
     - get: build-metadata
   - aggregate: *build_binaries
   - task: get-ops-version
@@ -645,6 +688,13 @@ jobs:
   serial: true
   serial_groups:
   - system-test
+  - system-test-update
+  - system-test-alt-region
+  - system-test-credhub
+  - system-test-letsencrypt
+  - system-test-cleanup
+  - system-test-github-auth
+  - system-test-tags
   plan:
   - aggregate:
     - get: concourse-up
