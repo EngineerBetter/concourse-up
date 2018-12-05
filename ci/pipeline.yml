@@ -6,6 +6,7 @@ groups:
   - unit-tests
   - build
   - system-test
+  - system-test-gcp
   - auto
   - major
   - minor
@@ -371,6 +372,41 @@ jobs:
           channel: "#integrations"
           text: |
             <!channel> Concourse Up system-test-tags failure!
+
+- name: system-test-gcp
+  serial_groups:
+  - system-test-gcp
+  serial: true
+  plan:
+  - aggregate:
+    - get: version
+      passed: [build]
+    - get: binary-linux
+      trigger: true
+      passed: [build]
+    - get: binary-darwin
+      trigger: true
+      passed: [build]
+    - get: binary-windows
+      trigger: true
+      passed: [build]
+    - get: concourse-up
+      trigger: true
+      passed: [build]
+    - get: concourse-up-ops
+      trigger: true
+      passed: [build]
+    - get: pcf-ops
+      passed: [build]
+    - get: release
+      params:
+        globs: [concourse-up-linux-amd64]
+  - task: system-test
+    file: concourse-up/ci/tasks/system-test.yml
+    params:
+      BINARY_PATH: binary-linux/concourse-up-linux-amd64
+      GOOGLE_APPLICATION_CREDENTIALS_CONTENTS: ((system_test_google_application_credentials))
+      IAAS: GCP
 
 - name: auto
   serial: true
