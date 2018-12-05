@@ -10,6 +10,12 @@ fi
 deployment="systest-$SYSTEM_TEST_ID"
 set -u
 
+# If we're testing GCP, we need credentials to be available as a file
+if [ "$IAAS" = "GCP" ]; then
+  echo "${GOOGLE_APPLICATION_CREDENTIALS_CONTENTS}" > googlecreds.json
+  export GOOGLE_APPLICATION_CREDENTIALS=$PWD/googlecreds.json
+fi
+
 assertDbCorrect() {
   if [ "$IAAS" = "AWS" ]; then
   rds_instance_class=$(aws --region eu-west-1 rds describe-db-instances | jq -r ".DBInstances[] | select(.DBSubnetGroup.DBSubnetGroupName==\"concourse-up-$deployment\") | .DBInstanceClass")
