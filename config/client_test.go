@@ -7,6 +7,7 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/EngineerBetter/concourse-up/commands/deploy"
 	. "github.com/EngineerBetter/concourse-up/config"
 	"github.com/EngineerBetter/concourse-up/iaas"
 	"github.com/EngineerBetter/concourse-up/testsupport"
@@ -19,7 +20,7 @@ import (
 var _ = Describe("Client", func() {
 	var iaasClient *testsupport.FakeAWSClient
 	var client *Client
-	var deployArgs *DeployArgs
+	var deployArgs *deploy.DeployArgs
 
 	BeforeEach(func() {
 		iaasClient = &testsupport.FakeAWSClient{
@@ -38,7 +39,7 @@ var _ = Describe("Client", func() {
 		}
 		client = New(iaasClient, "test", "")
 
-		deployArgs = &DeployArgs{
+		deployArgs = &deploy.DeployArgs{
 			IAAS:        "AWS",
 			AWSRegion:   "eu-west-1",
 			WorkerCount: 1,
@@ -412,7 +413,7 @@ func TestClient_LoadOrCreate(t *testing.T) {
 		Config       *Config
 	}
 	type args struct {
-		deployArgs *DeployArgs
+		deployArgs *deploy.DeployArgs
 	}
 	type returnVals struct {
 		config           Config
@@ -455,7 +456,7 @@ func TestClient_LoadOrCreate(t *testing.T) {
 				},
 			},
 			args: args{
-				&DeployArgs{
+				&deploy.DeployArgs{
 					AllowIPs:    "0.0.0.0",
 					WorkerCount: 1,
 					WorkerSize:  "xlarge",
@@ -503,7 +504,7 @@ func TestClient_LoadOrCreate(t *testing.T) {
 				},
 			},
 			args: args{
-				&DeployArgs{
+				&deploy.DeployArgs{
 					AllowIPs: "0.0.0.0",
 				},
 			},
@@ -546,7 +547,7 @@ func TestClient_LoadOrCreate(t *testing.T) {
 				},
 			},
 			args: args{
-				&DeployArgs{
+				&deploy.DeployArgs{
 					AllowIPs:         "0.0.0.0",
 					WorkerCountIsSet: true,
 					WorkerCount:      1,

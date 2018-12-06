@@ -1,11 +1,11 @@
-package config_test
+package deploy_test
 
 import (
 	"fmt"
 	"strings"
 	"testing"
 
-	. "github.com/EngineerBetter/concourse-up/config"
+	. "github.com/EngineerBetter/concourse-up/commands/deploy"
 )
 
 func TestDeployArgs_Validate(t *testing.T) {
@@ -181,4 +181,70 @@ func TestDeployArgs_Validate(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestDeployArgs_MarkSetFlags(t *testing.T) {
+	tests := []struct {
+		name                    string
+		specifiedFlags          []string
+		wantErr                 bool
+		expectedGithubAuthIsSet bool
+	}{
+		{
+			name:                    "GithubAuthIsSet is true when both ClientID and ClientSecret are set",
+			specifiedFlags:          []string{"github-auth-client-id", "github-auth-client-secret"},
+			wantErr:                 false,
+			expectedGithubAuthIsSet: true,
+		},
+		{
+			name:                    "GithubAuthIsSet is false when ClientID is set and ClientSecret is not",
+			specifiedFlags:          []string{"github-auth-client-id"},
+			wantErr:                 false,
+			expectedGithubAuthIsSet: false,
+		},
+		{
+			name:                    "GithubAuthIsSet is false when ClientID is not set and ClientSecret is",
+			specifiedFlags:          []string{"github-auth-client-secret"},
+			wantErr:                 false,
+			expectedGithubAuthIsSet: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			a := &DeployArgs{}
+			c := NewFakeFlagSetChecker([]string{"github-auth-client-id", "github-auth-client-secret"}, tt.specifiedFlags)
+			if err := a.MarkSetFlags(&c); (err != nil) != tt.wantErr {
+				t.Errorf("DeployArgs.MarkSetFlags() error = %v, wantErr %v", err, tt.wantErr)
+			}
+
+			if a.GithubAuthIsSet != tt.expectedGithubAuthIsSet {
+				t.Errorf("DeployArgs.MarkSetFlags() set GitHubAuthIsSet to %v, was expecting %v", a.GithubAuthIsSet, tt.expectedGithubAuthIsSet)
+			}
+		})
+	}
+}
+
+type FakeFlagSetChecker struct {
+	names          []string
+	specifiedFlags []string
+}
+
+func NewFakeFlagSetChecker(names, specifiedFlags []string) FakeFlagSetChecker {
+	return FakeFlagSetChecker{
+		names:          names,
+		specifiedFlags: specifiedFlags,
+	}
+}
+
+func (f *FakeFlagSetChecker) IsSet(desired string) bool {
+	for _, flag := range f.specifiedFlags {
+		if desired == flag {
+			return true
+		}
+	}
+	return false
+}
+
+func (f *FakeFlagSetChecker) FlagNames() (names []string) {
+	return names
 }

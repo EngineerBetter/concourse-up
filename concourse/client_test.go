@@ -8,6 +8,7 @@ import (
 
 	"github.com/EngineerBetter/concourse-up/bosh"
 	"github.com/EngineerBetter/concourse-up/certs"
+	"github.com/EngineerBetter/concourse-up/commands/deploy"
 	"github.com/EngineerBetter/concourse-up/concourse"
 	"github.com/EngineerBetter/concourse-up/config"
 	"github.com/EngineerBetter/concourse-up/director"
@@ -27,7 +28,7 @@ var _ = Describe("Client", func() {
 	var stdout *gbytes.Buffer
 	var stderr *gbytes.Buffer
 	var deleteBoshDirectorError error
-	var args *config.DeployArgs
+	var args *deploy.DeployArgs
 	var exampleConfig config.Config
 	var ipChecker func() (string, error)
 	var exampleDirectorCreds []byte
@@ -107,7 +108,7 @@ var _ = Describe("Client", func() {
 	}
 
 	BeforeEach(func() {
-		args = &config.DeployArgs{
+		args = &deploy.DeployArgs{
 			AWSRegion:   "eu-west-1",
 			DBSize:      "small",
 			DBSizeIsSet: false,
@@ -180,7 +181,7 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 		exampleDirectorCreds = []byte("atc_password: s3cret")
 
 		configClient := &testsupport.FakeConfigClient{
-			FakeLoadOrCreate: func(deployArgs *config.DeployArgs) (config.Config, bool, bool, error) {
+			FakeLoadOrCreate: func(deployArgs *deploy.DeployArgs) (config.Config, bool, bool, error) {
 				actions = append(actions, "loading or creating config file")
 				return exampleConfig, false, false, nil
 			},

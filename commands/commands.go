@@ -6,7 +6,7 @@ import (
 
 // Commands is a list of all supported CLI commands
 var Commands = []cli.Command{
-	deploy,
+	deployCmd,
 	destroy,
 	info,
 }

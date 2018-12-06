@@ -1,4 +1,4 @@
-package config
+package deploy
 
 import (
 	"errors"
@@ -53,7 +53,7 @@ type DeployArgs struct {
 }
 
 // MarkSetFlags is marking the IsSet DeployArgs
-func (a *DeployArgs) MarkSetFlags(c *cli.Context) error {
+func (a *DeployArgs) MarkSetFlags(c FlagSetChecker) error {
 	for _, f := range c.FlagNames() {
 		if c.IsSet(f) {
 			switch f {
@@ -98,6 +98,8 @@ func (a *DeployArgs) MarkSetFlags(c *cli.Context) error {
 			}
 		}
 	}
+	a.GithubAuthIsSet = c.IsSet("github-auth-client-id") && c.IsSet("github-auth-client-secret")
+
 	return nil
 }
 
@@ -219,4 +221,25 @@ func (a DeployArgs) validateTags() error {
 		}
 	}
 	return nil
+}
+
+// FlagSetChecker
+type FlagSetChecker interface {
+	IsSet(name string) bool
+	FlagNames() (names []string)
+}
+
+// ContextWrapper
+type ContextWrapper struct {
+	c *cli.Context
+}
+
+// IsSet
+func (t *ContextWrapper) IsSet(name string) bool {
+	return t.c.IsSet(name)
+}
+
+// FlagNames
+func (t *ContextWrapper) FlagNames() (names []string) {
+	return t.c.FlagNames()
 }

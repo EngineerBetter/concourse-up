@@ -28,6 +28,8 @@ type Provider interface {
 	Zone(string) string
 }
 
+type Factory func(iaasName, region string, gops ...GCPOption) (Provider, error)
+
 // New returns a new IAAS client for a particular IAAS and region
 func New(iaasName, region string, gops ...GCPOption) (Provider, error) {
 	switch strings.ToUpper(iaasName) {
