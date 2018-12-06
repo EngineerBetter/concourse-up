@@ -9,7 +9,7 @@ import (
 )
 
 func TestDeployArgs_Validate(t *testing.T) {
-	defaultFields := DeployArgs{
+	defaultFields := Args{
 		AllowIPs:               "0.0.0.0",
 		AWSRegion:              "eu-west-1",
 		DBSize:                 "small",
@@ -27,21 +27,21 @@ func TestDeployArgs_Validate(t *testing.T) {
 	}
 	tests := []struct {
 		name         string
-		modification func() DeployArgs
-		outcomeCheck func(DeployArgs) bool
+		modification func() Args
+		outcomeCheck func(Args) bool
 		wantErr      bool
 		expectedErr  string
 	}{
 		{
 			name: "Default args",
-			modification: func() DeployArgs {
+			modification: func() Args {
 				return defaultFields
 			},
 			wantErr: false,
 		},
 		{
 			name: "All cert fields should be set",
-			modification: func() DeployArgs {
+			modification: func() Args {
 				args := defaultFields
 				args.TLSCert = "a cool cert"
 				args.TLSKey = "a cool key"
@@ -52,7 +52,7 @@ func TestDeployArgs_Validate(t *testing.T) {
 		},
 		{
 			name: "TLSCert cannot be set without TLSKey",
-			modification: func() DeployArgs {
+			modification: func() Args {
 				args := defaultFields
 				args.TLSCert = "a cool cert"
 				args.Domain = "a cool domain"
@@ -63,7 +63,7 @@ func TestDeployArgs_Validate(t *testing.T) {
 		},
 		{
 			name: "TLSKey cannot be set without TLSCert",
-			modification: func() DeployArgs {
+			modification: func() Args {
 				args := defaultFields
 				args.TLSKey = "a cool key"
 				args.Domain = "a cool domain"
@@ -74,7 +74,7 @@ func TestDeployArgs_Validate(t *testing.T) {
 		},
 		{
 			name: "TLSKey and TLSCert require a domain",
-			modification: func() DeployArgs {
+			modification: func() Args {
 				args := defaultFields
 				args.TLSKey = "a cool key"
 				args.TLSCert = "a cool cert"
@@ -85,7 +85,7 @@ func TestDeployArgs_Validate(t *testing.T) {
 		},
 		{
 			name: "Worker count must be positive",
-			modification: func() DeployArgs {
+			modification: func() Args {
 				args := defaultFields
 				args.WorkerCount = 0
 				return args
@@ -95,7 +95,7 @@ func TestDeployArgs_Validate(t *testing.T) {
 		},
 		{
 			name: "Worker size must be a known value",
-			modification: func() DeployArgs {
+			modification: func() Args {
 				args := defaultFields
 				args.WorkerSize = "bananas"
 				return args
@@ -105,7 +105,7 @@ func TestDeployArgs_Validate(t *testing.T) {
 		},
 		{
 			name: "Web size must be a known value",
-			modification: func() DeployArgs {
+			modification: func() Args {
 				args := defaultFields
 				args.WebSize = "bananas"
 				return args
@@ -115,7 +115,7 @@ func TestDeployArgs_Validate(t *testing.T) {
 		},
 		{
 			name: "DB size must be a known value",
-			modification: func() DeployArgs {
+			modification: func() Args {
 				args := defaultFields
 				args.DBSize = "bananas"
 				return args
@@ -125,7 +125,7 @@ func TestDeployArgs_Validate(t *testing.T) {
 		},
 		{
 			name: "Github ID requires Github Secret",
-			modification: func() DeployArgs {
+			modification: func() Args {
 				args := defaultFields
 				args.GithubAuthClientID = "an id"
 				return args
@@ -135,7 +135,7 @@ func TestDeployArgs_Validate(t *testing.T) {
 		},
 		{
 			name: "Github Secret requires Github ID",
-			modification: func() DeployArgs {
+			modification: func() Args {
 				args := defaultFields
 				args.GithubAuthClientSecret = "super secret"
 				return args
@@ -145,7 +145,7 @@ func TestDeployArgs_Validate(t *testing.T) {
 		},
 		{
 			name: "Tags should be in the format 'key=value'",
-			modification: func() DeployArgs {
+			modification: func() Args {
 				args := defaultFields
 				args.Tags = []string{"Key=Value", "Cheese=Ham"}
 				return args
@@ -154,7 +154,7 @@ func TestDeployArgs_Validate(t *testing.T) {
 		},
 		{
 			name: "Invalid tags should throw a helpful error",
-			modification: func() DeployArgs {
+			modification: func() Args {
 				args := defaultFields
 				args.Tags = []string{"not a real tag"}
 				return args
@@ -211,7 +211,7 @@ func TestDeployArgs_MarkSetFlags(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			a := &DeployArgs{}
+			a := &Args{}
 			c := NewFakeFlagSetChecker([]string{"github-auth-client-id", "github-auth-client-secret"}, tt.specifiedFlags)
 			if err := a.MarkSetFlags(&c); (err != nil) != tt.wantErr {
 				t.Errorf("DeployArgs.MarkSetFlags() error = %v, wantErr %v", err, tt.wantErr)

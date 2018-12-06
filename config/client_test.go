@@ -20,7 +20,7 @@ import (
 var _ = Describe("Client", func() {
 	var iaasClient *testsupport.FakeAWSClient
 	var client *Client
-	var deployArgs *deploy.DeployArgs
+	var deployArgs *deploy.Args
 
 	BeforeEach(func() {
 		iaasClient = &testsupport.FakeAWSClient{
@@ -39,7 +39,7 @@ var _ = Describe("Client", func() {
 		}
 		client = New(iaasClient, "test", "")
 
-		deployArgs = &deploy.DeployArgs{
+		deployArgs = &deploy.Args{
 			IAAS:        "AWS",
 			AWSRegion:   "eu-west-1",
 			WorkerCount: 1,
@@ -413,7 +413,7 @@ func TestClient_LoadOrCreate(t *testing.T) {
 		Config       *Config
 	}
 	type args struct {
-		deployArgs *deploy.DeployArgs
+		deployArgs *deploy.Args
 	}
 	type returnVals struct {
 		config           Config
@@ -456,7 +456,7 @@ func TestClient_LoadOrCreate(t *testing.T) {
 				},
 			},
 			args: args{
-				&deploy.DeployArgs{
+				&deploy.Args{
 					AllowIPs:    "0.0.0.0",
 					WorkerCount: 1,
 					WorkerSize:  "xlarge",
@@ -504,7 +504,7 @@ func TestClient_LoadOrCreate(t *testing.T) {
 				},
 			},
 			args: args{
-				&deploy.DeployArgs{
+				&deploy.Args{
 					AllowIPs: "0.0.0.0",
 				},
 			},
@@ -547,7 +547,7 @@ func TestClient_LoadOrCreate(t *testing.T) {
 				},
 			},
 			args: args{
-				&deploy.DeployArgs{
+				&deploy.Args{
 					AllowIPs:         "0.0.0.0",
 					WorkerCountIsSet: true,
 					WorkerCount:      1,

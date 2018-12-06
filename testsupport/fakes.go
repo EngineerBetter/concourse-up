@@ -229,7 +229,7 @@ func (client *FakeFlyClient) CanConnect() (bool, error) {
 type FakeConfigClient struct {
 	FakeLoad         func() (config.Config, error)
 	FakeUpdate       func(config.Config) error
-	FakeLoadOrCreate func(deployArgs *deploy.DeployArgs) (config.Config, bool, bool, error)
+	FakeLoadOrCreate func(deployArgs *deploy.Args) (config.Config, bool, bool, error)
 	FakeStoreAsset   func(filename string, contents []byte) error
 	FakeLoadAsset    func(filename string) ([]byte, error)
 	FakeDeleteAsset  func(filename string) error
@@ -248,7 +248,7 @@ func (client *FakeConfigClient) Update(config config.Config) error {
 }
 
 // LoadOrCreate delegates to FakeLoadOrCreate which is dynamically set by the tests
-func (client *FakeConfigClient) LoadOrCreate(deployArgs *deploy.DeployArgs) (config.Config, bool, bool, error) {
+func (client *FakeConfigClient) LoadOrCreate(deployArgs *deploy.Args) (config.Config, bool, bool, error) {
 	return client.FakeLoadOrCreate(deployArgs)
 }
 

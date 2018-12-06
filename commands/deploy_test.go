@@ -6,20 +6,23 @@ import (
 	"github.com/EngineerBetter/concourse-up/commands/deploy"
 )
 
-// when the equivalent of concourse-up --iaas gcp deploy is called
-// deplayAction(c, fakeIaasFactory, fakeConcourseClient, fakeTfClient)
-// concourse.NewClient is invoked, passing a configClient with a Region of "europe-west1"
-
 func Test_setZoneAndRegion(t *testing.T) {
 	tests := []struct {
 		name           string
-		args           deploy.DeployArgs
+		args           deploy.Args
 		wantErr        bool
 		expectedRegion string
 	}{
 		{
-			name: "success - region defaults to europe-west1 when iaas is gcp",
-			args: deploy.DeployArgs{
+			name: "region should default to eu-west-1 when iaas is AWS",
+			args: deploy.Args{
+				IAAS: "AWS",
+			},
+			expectedRegion: "eu-west-1",
+		},
+		{
+			name: "region should default to europe-west1 when iaas is GCP",
+			args: deploy.Args{
 				IAAS: "GCP",
 			},
 			expectedRegion: "europe-west1",
@@ -27,7 +30,7 @@ func Test_setZoneAndRegion(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			actual, err := setZoneAndRegion(deploy.DeployArgs{})
+			actual, err := setZoneAndRegion(tt.args)
 
 			if err == nil && tt.wantErr {
 				t.Errorf("setZoneAndRegion() error = %v, wantErr %v", err, tt.wantErr)

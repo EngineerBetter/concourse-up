@@ -21,7 +21,7 @@ type Client struct {
 	flyClientFactory      func(fly.Credentials, io.Writer, io.Writer, []byte) (fly.IClient, error)
 	certGenerator         func(constructor func(u *certs.User) (certs.AcmeClient, error), caName string, ip ...string) (*certs.Certs, error)
 	configClient          config.IClient
-	deployArgs            *deploy.DeployArgs
+	deployArgs            *deploy.Args
 	stdout                io.Writer
 	stderr                io.Writer
 	ipChecker             func() (string, error)
@@ -48,7 +48,7 @@ func NewClient(
 	flyClientFactory func(fly.Credentials, io.Writer, io.Writer, []byte) (fly.IClient, error),
 	certGenerator func(constructor func(u *certs.User) (certs.AcmeClient, error), caName string, ip ...string) (*certs.Certs, error),
 	configClient config.IClient,
-	deployArgs *deploy.DeployArgs,
+	deployArgs *deploy.Args,
 	stdout, stderr io.Writer,
 	ipChecker func() (string, error),
 	acmeClientConstructor func(u *certs.User) (certs.AcmeClient, error),

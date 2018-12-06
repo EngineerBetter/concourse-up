@@ -21,12 +21,11 @@ import (
 	"gopkg.in/urfave/cli.v1"
 )
 
-var initialDeployArgs deploy.DeployArgs
+var initialDeployArgs deploy.Args
 
 var deployFlags = []cli.Flag{
 	cli.StringFlag{
 		Name:        "region",
-		Value:       "eu-west-1",
 		Usage:       "(optional) AWS region",
 		EnvVar:      "AWS_REGION",
 		Destination: &initialDeployArgs.AWSRegion,
@@ -143,7 +142,7 @@ var deployFlags = []cli.Flag{
 	},
 }
 
-func deployAction(c *cli.Context, deployArgs deploy.DeployArgs, iaasFactory iaas.Factory) error {
+func deployAction(c *cli.Context, deployArgs deploy.Args, iaasFactory iaas.Factory) error {
 	name := c.Args().Get(0)
 	if name == "" {
 		return errors.New("Usage is `concourse-up deploy <name>`")
@@ -169,7 +168,7 @@ func deployAction(c *cli.Context, deployArgs deploy.DeployArgs, iaasFactory iaas
 	return client.Deploy()
 }
 
-func validateDeployArgs(c *cli.Context, deployArgs deploy.DeployArgs) (deploy.DeployArgs, error) {
+func validateDeployArgs(c *cli.Context, deployArgs deploy.Args) (deploy.Args, error) {
 	err := deployArgs.MarkSetFlags(c)
 	if err != nil {
 		return deployArgs, err
@@ -182,7 +181,15 @@ func validateDeployArgs(c *cli.Context, deployArgs deploy.DeployArgs) (deploy.De
 	return deployArgs, nil
 }
 
-func setZoneAndRegion(deployArgs deploy.DeployArgs) (deploy.DeployArgs, error) {
+func setZoneAndRegion(deployArgs deploy.Args) (deploy.Args, error) {
+	if !deployArgs.AWSRegionIsSet {
+		if deployArgs.IAAS == "AWS" {
+			deployArgs.AWSRegion = "eu-west-1"
+		} else if deployArgs.IAAS == "GCP" {
+			deployArgs.AWSRegion = "europe-west1"
+		}
+	}
+
 	if deployArgs.ZoneIsSet && deployArgs.AWSRegionIsSet {
 		if err := zoneBelongsToRegion(deployArgs.Zone, deployArgs.AWSRegion); err != nil {
 			return deployArgs, err
@@ -216,7 +223,7 @@ func zoneBelongsToRegion(zone, region string) error {
 	return nil
 }
 
-func buildClient(name, version string, deployArgs deploy.DeployArgs, iaasFactory iaas.Factory) (*concourse.Client, error) {
+func buildClient(name, version string, deployArgs deploy.Args, iaasFactory iaas.Factory) (*concourse.Client, error) {
 	awsClient, err := iaasFactory(deployArgs.IAAS, deployArgs.AWSRegion)
 	if err != nil {
 		return nil, err

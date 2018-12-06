@@ -8,8 +8,8 @@ import (
 	"gopkg.in/urfave/cli.v1"
 )
 
-// DeployArgs are arguments passed to the deploy command
-type DeployArgs struct {
+// Args are arguments passed to the deploy command
+type Args struct {
 	IAAS             string
 	IAASIsSet        bool
 	AWSRegion        string
@@ -53,7 +53,7 @@ type DeployArgs struct {
 }
 
 // MarkSetFlags is marking the IsSet DeployArgs
-func (a *DeployArgs) MarkSetFlags(c FlagSetChecker) error {
+func (a *Args) MarkSetFlags(c FlagSetChecker) error {
 	for _, f := range c.FlagNames() {
 		if c.IsSet(f) {
 			switch f {
@@ -120,14 +120,14 @@ var DBSizes = map[string]string{
 }
 
 // ModifyGithub allows mutation of github related fields
-func (a *DeployArgs) ModifyGithub(GithubAuthClientID, GithubAuthClientSecret string, GithubAuthIsSet bool) {
+func (a *Args) ModifyGithub(GithubAuthClientID, GithubAuthClientSecret string, GithubAuthIsSet bool) {
 	a.GithubAuthClientID = GithubAuthClientID
 	a.GithubAuthClientSecret = GithubAuthClientSecret
 	a.GithubAuthIsSet = GithubAuthIsSet
 }
 
 // Validate validates that flag interdependencies
-func (a DeployArgs) Validate() error {
+func (a Args) Validate() error {
 	if err := a.validateCertFields(); err != nil {
 		return err
 	}
@@ -155,7 +155,7 @@ func (a DeployArgs) Validate() error {
 	return nil
 }
 
-func (a DeployArgs) validateCertFields() error {
+func (a Args) validateCertFields() error {
 	if a.TLSKey != "" && a.TLSCert == "" {
 		return errors.New("--tls-key requires --tls-cert to also be provided")
 	}
@@ -169,7 +169,7 @@ func (a DeployArgs) validateCertFields() error {
 	return nil
 }
 
-func (a DeployArgs) validateWorkerFields() error {
+func (a Args) validateWorkerFields() error {
 	if a.WorkerCount < 1 {
 		return errors.New("minimum number of workers is 1")
 	}
@@ -182,7 +182,7 @@ func (a DeployArgs) validateWorkerFields() error {
 	return fmt.Errorf("unknown worker size: `%s`. Valid sizes are: %v", a.WorkerSize, WorkerSizes)
 }
 
-func (a DeployArgs) validateWebFields() error {
+func (a Args) validateWebFields() error {
 	for _, size := range WebSizes {
 		if size == a.WebSize {
 			return nil
@@ -191,7 +191,7 @@ func (a DeployArgs) validateWebFields() error {
 	return fmt.Errorf("unknown web node size: `%s`. Valid sizes are: %v", a.WebSize, WebSizes)
 }
 
-func (a DeployArgs) validateDBFields() error {
+func (a Args) validateDBFields() error {
 	if _, ok := DBSizes[a.DBSize]; !ok {
 		return fmt.Errorf("unknown DB size: `%s`. Valid sizes are: %v", a.DBSize, DBSizes)
 	}
@@ -199,7 +199,7 @@ func (a DeployArgs) validateDBFields() error {
 	return nil
 }
 
-func (a DeployArgs) validateGithubFields() error {
+func (a Args) validateGithubFields() error {
 	if a.GithubAuthClientID != "" && a.GithubAuthClientSecret == "" {
 		return errors.New("--github-auth-client-id requires --github-auth-client-secret to also be provided")
 	}
@@ -210,7 +210,7 @@ func (a DeployArgs) validateGithubFields() error {
 	return nil
 }
 
-func (a DeployArgs) validateTags() error {
+func (a Args) validateTags() error {
 	for _, tag := range a.Tags {
 		m, err := regexp.MatchString(`\w+=\w+`, tag)
 		if err != nil {

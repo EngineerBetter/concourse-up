@@ -28,7 +28,7 @@ var _ = Describe("Client", func() {
 	var stdout *gbytes.Buffer
 	var stderr *gbytes.Buffer
 	var deleteBoshDirectorError error
-	var args *deploy.DeployArgs
+	var args *deploy.Args
 	var exampleConfig config.Config
 	var ipChecker func() (string, error)
 	var exampleDirectorCreds []byte
@@ -108,7 +108,7 @@ var _ = Describe("Client", func() {
 	}
 
 	BeforeEach(func() {
-		args = &deploy.DeployArgs{
+		args = &deploy.Args{
 			AWSRegion:   "eu-west-1",
 			DBSize:      "small",
 			DBSizeIsSet: false,
@@ -181,7 +181,7 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 		exampleDirectorCreds = []byte("atc_password: s3cret")
 
 		configClient := &testsupport.FakeConfigClient{
-			FakeLoadOrCreate: func(deployArgs *deploy.DeployArgs) (config.Config, bool, bool, error) {
+			FakeLoadOrCreate: func(deployArgs *deploy.Args) (config.Config, bool, bool, error) {
 				actions = append(actions, "loading or creating config file")
 				return exampleConfig, false, false, nil
 			},
