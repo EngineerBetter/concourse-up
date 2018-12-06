@@ -9,7 +9,7 @@ if [ -z "$SYSTEM_TEST_ID" ]; then
   # ID constrained to a maximum of four characters to avoid exceeding character limit in GCP naming
   MAX_ID=9999
   SYSTEM_TEST_ID=$RANDOM
-  let "SYSTEM_TEST_ID %= $MAX_ID"
+  (( SYSTEM_TEST_ID %= MAX_ID ))
 fi
 deployment="systest-$SYSTEM_TEST_ID"
 
