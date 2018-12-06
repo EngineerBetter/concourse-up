@@ -223,23 +223,23 @@ func (a Args) validateTags() error {
 	return nil
 }
 
-// FlagSetChecker
+// FlagSetChecker allows us to find out if flags were set, adn what the names of all flags are
 type FlagSetChecker interface {
 	IsSet(name string) bool
 	FlagNames() (names []string)
 }
 
-// ContextWrapper
+// ContextWrapper wraps a CLI context for testing
 type ContextWrapper struct {
 	c *cli.Context
 }
 
-// IsSet
+// IsSet tells you if a user provided a flag
 func (t *ContextWrapper) IsSet(name string) bool {
 	return t.c.IsSet(name)
 }
 
-// FlagNames
+// FlagNames lists all flags it's possible for a user to provide
 func (t *ContextWrapper) FlagNames() (names []string) {
 	return t.c.FlagNames()
 }

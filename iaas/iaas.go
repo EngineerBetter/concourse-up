@@ -28,6 +28,7 @@ type Provider interface {
 	Zone(string) string
 }
 
+// Factory creates a new IaaS provider, defined for testability
 type Factory func(iaasName, region string, gops ...GCPOption) (Provider, error)
 
 // New returns a new IAAS client for a particular IAAS and region
