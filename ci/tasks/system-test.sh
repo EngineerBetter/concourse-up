@@ -4,10 +4,15 @@
 
 set -e
 [ "$VERBOSE" ] && { set -x; export BOSH_LOG_LEVEL=debug; export BOSH_LOG_PATH=bosh.log; }
+
 if [ -z "$SYSTEM_TEST_ID" ]; then
+  # ID constrained to a maximum of four characters to avoid exceeding character limit in GCP naming
+  MAX_ID=9999
   SYSTEM_TEST_ID=$RANDOM
+  let "SYSTEM_TEST_ID %= $MAX_ID"
 fi
 deployment="systest-$SYSTEM_TEST_ID"
+
 set -u
 
 # If we're testing GCP, we need credentials to be available as a file
