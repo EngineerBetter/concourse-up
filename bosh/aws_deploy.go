@@ -6,6 +6,7 @@ import (
 	"github.com/EngineerBetter/concourse-up/db"
 )
 
+// Deploy implements deploy for AWS client
 func (client *AWSClient) Deploy(state, creds []byte, detach bool) (newState, newCreds []byte, err error) {
 	bosh, err := boshenv.New(boshenv.DownloadBOSH())
 	if err != nil {
