@@ -12,7 +12,7 @@ groups:
   - system-test-letsencrypt
   - system-test-destroy
   - system-test-options
-  - system-test-gcp
+  - smoke-test-gcp
   - auto
   - major
   - minor
@@ -288,14 +288,14 @@ jobs:
         text: |
           <!channel> Concourse Up smoke test failure!
 
-- name: system-test-gcp
+- name: smoke-test-gcp
   serial_groups:
-  - system-test-gcp
+  - smoke-test-gcp
   serial: true
   plan:
   - aggregate: *smoke-test-gets
-  - task: system-test
-    file: concourse-up/ci/tasks/system-test.yml
+  - task: smoke-test
+    file: concourse-up/ci/tasks/smoke-test.yml
     params:
       BINARY_PATH: binary-linux/concourse-up-linux-amd64
       GOOGLE_APPLICATION_CREDENTIALS_CONTENTS: ((system_test_google_application_credentials))
