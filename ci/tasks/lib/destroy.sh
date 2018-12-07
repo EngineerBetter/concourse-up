@@ -9,7 +9,7 @@ function recordDeployedState() {
 
     echo "Get terraform state out of S3"
     config_bucket="concourse-up-$deployment-us-east-1-config"
-    aws s3 cp s3://$config_bucket/terraform.tfstate .
+    aws s3 cp "s3://$config_bucket/terraform.tfstate" .
 
     echo "Record name of RDS instance"
     rds_instance_name=$(terraform output -json | jq -r '.bosh_db_address.value' | awk -F. '{print $1}')

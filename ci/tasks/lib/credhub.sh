@@ -3,13 +3,13 @@
 function assertPipelinesCanReadFromCredhub() {
   echo "About to test that pipelines can get values from Credhub"
 
-  config=$(./cup info --json $deployment)
+  config=$(./cup info --json "$deployment")
   domain=$(echo "$config" | jq -r '.config.domain')
   username=$(echo "$config" | jq -r '.config.concourse_username')
   password=$(echo "$config" | jq -r '.config.concourse_password')
   echo "$config" | jq -r '.config.concourse_ca_cert' > generated-ca-cert.pem
 
-  eval "$(./cup info --env $deployment)"
+  eval "$(./cup info --env "$deployment")"
   credhub api
   credhub set -n /concourse/main/password -t password -w c1oudc0w
 
