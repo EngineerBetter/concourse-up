@@ -18,50 +18,21 @@ else
 fi
 set -u
 
+# Create empty array of args that is used in sourced setup functions
+args=()
+# shellcheck disable=SC1091
+source concourse-up/ci/tasks/lib/github-auth.sh
+# shellcheck disable=SC1091
+source concourse-up/ci/tasks/lib/tags.sh
+# shellcheck disable=SC1091
+source concourse-up/ci/tasks/lib/credhub.sh
+
 cp "$BINARY_PATH" ./cup
 chmod +x ./cup
 
-echo "DEPLOY WITH GITHUB FLAGS"
-
-./cup deploy \
-  --github-auth-client-id "$GITHUB_AUTH_CLIENT_ID" \
-  --github-auth-client-secret "$GITHUB_AUTH_CLIENT_SECRET" \
-  --domain cup.engineerbetter.com \
-  --tls-cert "$EB_WILDCARD_CERT" \
-  --tls-key "$EB_WILDCARD_KEY" \
-  --region us-east-1 \
-  $deployment
-
-config=$(./cup info --region us-east-1 --json $deployment)
-domain=$(echo "$config" | jq -r '.config.domain')
-username=$(echo "$config" | jq -r '.config.concourse_username')
-password=$(echo "$config" | jq -r '.config.concourse_password')
-
-fly --target system-test login \
-  --concourse-url "https://$domain" \
-  --username "$username" \
-  --password "$password"
-
-echo "Check for github credentials in self-update pipeline"
-fly --target system-test get-pipeline --pipeline=concourse-up-self-update > pipeline
-
-grep -q "$GITHUB_AUTH_CLIENT_ID" pipeline
-grep -q "$GITHUB_AUTH_CLIENT_SECRET" pipeline
-
-echo "Check that github auth is enabled"
-fly --target system-test set-team \
-  --team-name=git-team \
-  --github-user=EngineerBetterCI \
-  --non-interactive
-
-( ( fly --target system-test login --team-name=git-team 2>&1 ) >fly_out ) &
-
-sleep 5
-
-pkill -9 fly
-
-url=$(grep redirect fly_out | sed 's/ //g')
-
-curl -sL "$url" | grep -q '/sky/issuer/auth/github'
-
-echo "TEST SUCCESSFUL"
+addGitHubFlagsToArgs
+addTagsFlagsToArgs
+./cup deploy "${args[@]}" $deployment
+assertTagsSet
+assertGitHubAuthConfigured
+assertPipelinesCanReadFromCredhub

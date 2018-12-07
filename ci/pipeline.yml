@@ -8,11 +8,9 @@ groups:
   - system-test
   - system-test-update
   - system-test-alt-region
-  - system-test-credhub
   - system-test-letsencrypt
   - system-test-destroy
   - system-test-github-auth
-  - system-test-tags
   - system-test-gcp
   - auto
   - major
@@ -328,25 +326,6 @@ jobs:
         text: |
           <!channel> Concourse Up alt region system test failure!
 
-- name: system-test-credhub
-  serial_groups:
-  - system-test-credhub
-  serial: true
-  plan:
-  - aggregate: *system-test-gets
-  - task: system-test-credhub
-    file: concourse-up/ci/tasks/system-test-credhub.yml
-    params:
-      AWS_ACCESS_KEY_ID: ((concourse_up_test_access_key_id))
-      AWS_SECRET_ACCESS_KEY: ((concourse_up_test_secret_key))
-      BINARY_PATH: binary-linux/concourse-up-linux-amd64
-    on_failure:
-      put: slack-alert
-      params:
-        channel: "#integrations"
-        text: |
-          <!channel> Concourse Up system credhub test failure!
-
 - name: system-test-letsencrypt
   serial_groups:
   - system-test-letencrypt
@@ -366,7 +345,6 @@ jobs:
         channel: "#integrations"
         text: |
           <!channel> Concourse Up system letsencrypt test failure!
-
 
 - name: system-test-destroy
   serial_groups:
@@ -411,25 +389,6 @@ jobs:
         text: |
           <!channel> Concourse Up system-test-github-auth failure!
 
-- name: system-test-tags
-  serial_groups:
-  - system-test-tags
-  serial: true
-  plan:
-  - aggregate: *system-test-gets
-  - task: system-test-tags
-    file: concourse-up/ci/tasks/system-test-tags.yml
-    params:
-      AWS_ACCESS_KEY_ID: ((concourse_up_test_access_key_id))
-      AWS_SECRET_ACCESS_KEY: ((concourse_up_test_secret_key))
-      BINARY_PATH: binary-linux/concourse-up-linux-amd64
-    on_failure:
-      put: slack-alert
-      params:
-        channel: "#integrations"
-        text: |
-          <!channel> Concourse Up system-test-tags failure!
-
 - name: system-test-gcp
   serial_groups:
   - system-test-gcp
@@ -452,11 +411,9 @@ jobs:
       - system-test
       - system-test-update
       - system-test-alt-region
-      - system-test-credhub
       - system-test-letsencrypt
       - system-test-destroy
       - system-test-github-auth
-      - system-test-tags
     - get: concourse-up
       passed: *aws-system-tests
     - get: concourse-up-ops
@@ -690,11 +647,9 @@ jobs:
   - system-test
   - system-test-update
   - system-test-alt-region
-  - system-test-credhub
   - system-test-letsencrypt
   - system-test-destroy
   - system-test-github-auth
-  - system-test-tags
   plan:
   - aggregate:
     - get: concourse-up
