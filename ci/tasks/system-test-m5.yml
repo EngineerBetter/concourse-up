@@ -10,7 +10,7 @@ inputs:
 - name: binary-linux
 
 run:
-  path: concourse-up/ci/tasks/system-test-alt-region.sh
+  path: concourse-up/ci/tasks/system-test-m5.sh
 
 params:
   AWS_ACCESS_KEY_ID:

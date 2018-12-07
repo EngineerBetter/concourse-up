@@ -8,7 +8,7 @@ groups:
   - smoke-test
   - system-test
   - system-test-update
-  - system-test-alt-region
+  - system-test-m5
   - system-test-letsencrypt
   - system-test-destroy
   - system-test-github-auth
@@ -361,14 +361,14 @@ jobs:
         text: |
           <!channel> Concourse Up update system test failure!
 
-- name: system-test-alt-region
+- name: system-test-m5
   serial_groups:
-  - system-test-alt-region
+  - system-test-m5
   serial: true
   plan:
   - aggregate: *system-test-gets
-  - task: system-test-alt-region
-    file: concourse-up/ci/tasks/system-test-alt-region.yml
+  - task: system-test-m5
+    file: concourse-up/ci/tasks/system-test-m5.yml
     params:
       AWS_ACCESS_KEY_ID: ((concourse_up_test_access_key_id))
       AWS_SECRET_ACCESS_KEY: ((concourse_up_test_secret_key))
@@ -378,7 +378,7 @@ jobs:
       params:
         channel: "#integrations"
         text: |
-          <!channel> Concourse Up alt region system test failure!
+          <!channel> Concourse Up m5 system test failure!
 
 - name: system-test-letsencrypt
   serial_groups:
@@ -449,7 +449,7 @@ jobs:
       passed: &aws-system-tests
       - system-test
       - system-test-update
-      - system-test-alt-region
+      - system-test-m5
       - system-test-letsencrypt
       - system-test-destroy
       - system-test-github-auth
@@ -685,7 +685,7 @@ jobs:
   serial_groups:
   - system-test
   - system-test-update
-  - system-test-alt-region
+  - system-test-m5
   - system-test-letsencrypt
   - system-test-destroy
   - system-test-github-auth
