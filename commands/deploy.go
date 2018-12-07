@@ -235,7 +235,7 @@ func buildClient(name, version string, deployArgs deploy.Args, iaasFactory iaas.
 	client := concourse.NewClient(
 		awsClient,
 		terraformClient,
-		bosh.NewClient,
+		bosh.New,
 		fly.New,
 		certs.Generate,
 		config.New(awsClient, name, deployArgs.Namespace),

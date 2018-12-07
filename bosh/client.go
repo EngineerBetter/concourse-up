@@ -3,7 +3,6 @@ package bosh
 import (
 	"fmt"
 	"io"
-	"net"
 
 	"github.com/EngineerBetter/concourse-up/iaas"
 
@@ -11,8 +10,6 @@ import (
 
 	"github.com/EngineerBetter/concourse-up/config"
 	"github.com/EngineerBetter/concourse-up/director"
-	"github.com/lib/pq"
-	"golang.org/x/crypto/ssh"
 )
 
 const cloudConfigFilename = "cloud-config.yml"
@@ -42,71 +39,23 @@ type IClient interface {
 	Instances() ([]Instance, error)
 }
 
+// Instance represents a vm deployed by BOSH
+type Instance struct {
+	Name  string
+	IP    string
+	State string
+}
+
 // ClientFactory creates a new IClient
 type ClientFactory func(config config.Config, metadata terraform.IAASMetadata, director director.IClient, stdout, stderr io.Writer, provider iaas.Provider) (IClient, error)
 
-// NewClient creates a new Client
-func NewClient(config config.Config, metadata terraform.IAASMetadata, director director.IClient, stdout, stderr io.Writer, provider iaas.Provider) (IClient, error) {
-	directorPublicIP, err := metadata.Get("DirectorPublicIP")
-	if err != nil {
-		return nil, err
-	}
-	addr := net.JoinHostPort(directorPublicIP, "22")
-	key, err := ssh.ParsePrivateKey([]byte(config.PrivateKey))
-	if err != nil {
-		return nil, err
-	}
-	conf := &ssh.ClientConfig{
-		User:            "vcap",
-		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
-		Auth:            []ssh.AuthMethod{ssh.PublicKeys(key)},
-	}
-	var boshDBAddress, boshDBPort string
-
+//New returns an IAAS specific implementation of BOSH client
+func New(config config.Config, metadata terraform.IAASMetadata, director director.IClient, stdout, stderr io.Writer, provider iaas.Provider) (IClient, error) {
 	switch provider.IAAS() {
-	case "AWS": // nolint
-		var err1 error
-		boshDBAddress, err1 = metadata.Get("BoshDBAddress")
-		if err1 != nil {
-			return nil, err1
-		}
-		boshDBPort, err1 = metadata.Get("BoshDBPort")
-		if err1 != nil {
-			return nil, err1
-		}
-	case "GCP": // nolint
-		var err1 error
-		boshDBAddress, err1 = metadata.Get("DBAddress")
-		if err1 != nil {
-			return nil, err1
-		}
-		boshDBPort = "5432"
+	case "AWS":
+		return NewAWSClient(config, metadata, director, stdout, stderr, provider)
+	case "GCP":
+		return NewGCPClient(config, metadata, director, stdout, stderr, provider)
 	}
-
-	db, err := newProxyOpener(addr, conf, &pq.Driver{},
-		fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=require",
-			config.RDSUsername,
-			config.RDSPassword,
-			boshDBAddress,
-			boshDBPort,
-			config.RDSDefaultDatabaseName,
-		),
-	)
-	if err != nil {
-		return nil, err
-	}
-	return &Client{
-		config:   config,
-		metadata: metadata,
-		director: director,
-		db:       db,
-		stdout:   stdout,
-		stderr:   stderr,
-		provider: provider,
-	}, nil
-}
-
-// Cleanup cleans up temporary files associated with bosh init
-func (client *Client) Cleanup() error {
-	return client.director.Cleanup()
+	return nil, fmt.Errorf("IAAS not supported: %s", provider.IAAS())
 }

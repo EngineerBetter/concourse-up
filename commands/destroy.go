@@ -78,7 +78,7 @@ var destroy = cli.Command{
 		client := concourse.NewClient(
 			provider,
 			terraformClient,
-			bosh.NewClient,
+			bosh.New,
 			fly.New,
 			certs.Generate,
 			config.New(provider, name, destroyArgs.Namespace),

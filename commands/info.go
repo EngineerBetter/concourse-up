@@ -80,7 +80,7 @@ var info = cli.Command{
 		client := concourse.NewClient(
 			provider,
 			terraformClient,
-			bosh.NewClient,
+			bosh.New,
 			fly.New,
 
 			certs.Generate,

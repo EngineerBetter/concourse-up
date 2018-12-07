@@ -84,7 +84,7 @@ type Metadata struct {
 	ATCPublicIP                MetadataStringValue `json:"atc_public_ip" valid:"required"`
 	DirectorAccountCreds       MetadataStringValue `json:"director_account_creds" valid:"required"`
 	DirectorPublicIP           MetadataStringValue `json:"director_public_ip" valid:"required"`
-	DBAddress                  MetadataStringValue `json:"db_address" valid:"required"`
+	BoshDBAddress              MetadataStringValue `json:"bosh_db_address" valid:"required"`
 	DBName                     MetadataStringValue `json:"db_name" valid:"required"`
 }
 

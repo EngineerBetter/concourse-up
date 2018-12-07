@@ -114,7 +114,7 @@ func proxyConn(conn net.Conn, dialer proxy.Dialer, addr string) {
 	wg.Wait()
 }
 
-func (client *Client) createAWSDatabases() error {
+func (client *AWSClient) createDefaultDatabases() error {
 	db, err := client.db.Open(client.config.RDSDefaultDatabaseName)
 	if err != nil {
 		return err
