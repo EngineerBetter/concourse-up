@@ -28,10 +28,11 @@ func Test_setZoneAndRegion(t *testing.T) {
 			expectedRegion: "europe-west1",
 		},
 		{
-			name: "region should not changed if user provided it",
+			name: "region should not change if user provided it",
 			args: deploy.Args{
-				IAAS:      "AWS",
-				AWSRegion: "us-east-1",
+				IAAS:           "AWS",
+				AWSRegion:      "us-east-1",
+				AWSRegionIsSet: true,
 			},
 			expectedRegion: "us-east-1",
 		},
