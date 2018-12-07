@@ -375,7 +375,6 @@ jobs:
   - aggregate: *system-test-gets
   - task: system-test-letsencrypt
     file: concourse-up/ci/tasks/system-test-autocert.yml
-    attempts: 2
     params:
       AWS_ACCESS_KEY_ID: ((concourse_up_test_access_key_id))
       AWS_SECRET_ACCESS_KEY: ((concourse_up_test_secret_key))
@@ -395,7 +394,6 @@ jobs:
   - aggregate: *system-test-gets
   - task: system-test-destroy
     file: concourse-up/ci/tasks/system-test-destroy.yml
-    attempts: 2
     params:
       AWS_ACCESS_KEY_ID: ((concourse_up_test_access_key_id))
       AWS_SECRET_ACCESS_KEY: ((concourse_up_test_secret_key))
