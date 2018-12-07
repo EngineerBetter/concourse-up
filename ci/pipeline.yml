@@ -252,7 +252,7 @@ jobs:
   - smoke-test
   serial: true
   plan:
-  - aggregate:
+  - aggregate: &smoke-test-gets
     - get: version
       passed: [build]
     - get: binary-linux
@@ -287,6 +287,19 @@ jobs:
         channel: "#integrations"
         text: |
           <!channel> Concourse Up smoke test failure!
+
+- name: system-test-gcp
+  serial_groups:
+  - system-test-gcp
+  serial: true
+  plan:
+  - aggregate: *smoke-test-gets
+  - task: system-test
+    file: concourse-up/ci/tasks/system-test.yml
+    params:
+      BINARY_PATH: binary-linux/concourse-up-linux-amd64
+      GOOGLE_APPLICATION_CREDENTIALS_CONTENTS: ((system_test_google_application_credentials))
+      IAAS: GCP
 
 - name: system-test
   serial_groups:
@@ -427,19 +440,6 @@ jobs:
         channel: "#integrations"
         text: |
           <!channel> Concourse Up system-test-github-auth failure!
-
-- name: system-test-gcp
-  serial_groups:
-  - system-test-gcp
-  serial: true
-  plan:
-  - aggregate: *system-test-gets
-  - task: system-test
-    file: concourse-up/ci/tasks/system-test.yml
-    params:
-      BINARY_PATH: binary-linux/concourse-up-linux-amd64
-      GOOGLE_APPLICATION_CREDENTIALS_CONTENTS: ((system_test_google_application_credentials))
-      IAAS: GCP
 
 - name: auto
   serial: true
