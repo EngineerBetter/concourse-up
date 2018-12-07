@@ -66,6 +66,7 @@ func (client *GCPClient) deployConcourse(creds []byte, detach bool) (newCreds []
 		"worker_network_name":      "private",
 		"postgres_host":            boshDBAddress,
 		"postgres_role":            client.config.RDSUsername,
+		"postgres_port":            "5432",
 		"postgres_password":        client.config.RDSPassword,
 		"postgres_ca_cert":         db.RDSRootCert,
 		"web_vm_type":              "concourse-web-" + client.config.ConcourseWebSize,
