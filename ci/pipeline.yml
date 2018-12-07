@@ -11,7 +11,7 @@ groups:
   - system-test-m5
   - system-test-letsencrypt
   - system-test-destroy
-  - system-test-github-auth
+  - system-test-options
   - system-test-gcp
   - auto
   - major
@@ -418,14 +418,14 @@ jobs:
         text: |
           <!channel> Concourse Up system-test-destroy failure!
 
-- name: system-test-github-auth
+- name: system-test-options
   serial_groups:
-  - system-test-github-auth
+  - system-test-options
   serial: true
   plan:
   - aggregate: *system-test-gets
-  - task: system-test-github-auth
-    file: concourse-up/ci/tasks/system-test-github-auth.yml
+  - task: system-test-options
+    file: concourse-up/ci/tasks/system-test-options.yml
     params:
       AWS_ACCESS_KEY_ID: ((concourse_up_test_access_key_id))
       AWS_SECRET_ACCESS_KEY: ((concourse_up_test_secret_key))
@@ -439,7 +439,7 @@ jobs:
       params:
         channel: "#integrations"
         text: |
-          <!channel> Concourse Up system-test-github-auth failure!
+          <!channel> Concourse Up system-test-options failure!
 
 - name: auto
   serial: true
@@ -452,7 +452,7 @@ jobs:
       - system-test-m5
       - system-test-letsencrypt
       - system-test-destroy
-      - system-test-github-auth
+      - system-test-options
     - get: concourse-up
       passed: *aws-system-tests
     - get: concourse-up-ops
@@ -688,7 +688,7 @@ jobs:
   - system-test-m5
   - system-test-letsencrypt
   - system-test-destroy
-  - system-test-github-auth
+  - system-test-options
   plan:
   - aggregate:
     - get: concourse-up
