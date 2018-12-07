@@ -10,7 +10,7 @@ inputs:
 - name: binary-linux
 
 run:
-  path: concourse-up/ci/tasks/system-test-clean-up.sh
+  path: concourse-up/ci/tasks/system-test-destroy.sh
 
 params:
   AWS_ACCESS_KEY_ID:

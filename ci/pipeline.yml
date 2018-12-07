@@ -10,7 +10,7 @@ groups:
   - system-test-alt-region
   - system-test-credhub
   - system-test-letsencrypt
-  - system-test-cleanup
+  - system-test-destroy
   - system-test-github-auth
   - system-test-tags
   - system-test-gcp
@@ -368,14 +368,14 @@ jobs:
           <!channel> Concourse Up system letsencrypt test failure!
 
 
-- name: system-test-cleanup
+- name: system-test-destroy
   serial_groups:
-  - system-test-clean-up
+  - system-test-destroy
   serial: true
   plan:
   - aggregate: *system-test-gets
-  - task: system-test-clean-up
-    file: concourse-up/ci/tasks/system-test-clean-up.yml
+  - task: system-test-destroy
+    file: concourse-up/ci/tasks/system-test-destroy.yml
     attempts: 2
     params:
       AWS_ACCESS_KEY_ID: ((concourse_up_test_access_key_id))
@@ -386,7 +386,7 @@ jobs:
       params:
         channel: "#integrations"
         text: |
-          <!channel> Concourse Up system-test-clean-up failure!
+          <!channel> Concourse Up system-test-destroy failure!
 
 - name: system-test-github-auth
   serial_groups:
@@ -454,7 +454,7 @@ jobs:
       - system-test-alt-region
       - system-test-credhub
       - system-test-letsencrypt
-      - system-test-cleanup
+      - system-test-destroy
       - system-test-github-auth
       - system-test-tags
     - get: concourse-up
@@ -692,7 +692,7 @@ jobs:
   - system-test-alt-region
   - system-test-credhub
   - system-test-letsencrypt
-  - system-test-cleanup
+  - system-test-destroy
   - system-test-github-auth
   - system-test-tags
   plan:
