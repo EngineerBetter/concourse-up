@@ -53,10 +53,6 @@ func (client *GCPClient) deployConcourse(creds []byte, detach bool) (newCreds []
 	if err != nil {
 		return nil, err
 	}
-	boshDBPort, err := client.metadata.Get("BoshDBPort")
-	if err != nil {
-		return nil, err
-	}
 	atcPublicIP, err := client.metadata.Get("ATCPublicIP")
 	if err != nil {
 		return nil, err
@@ -69,7 +65,6 @@ func (client *GCPClient) deployConcourse(creds []byte, detach bool) (newCreds []
 		"web_network_name":         "public",
 		"worker_network_name":      "private",
 		"postgres_host":            boshDBAddress,
-		"postgres_port":            boshDBPort,
 		"postgres_role":            client.config.RDSUsername,
 		"postgres_password":        client.config.RDSPassword,
 		"postgres_ca_cert":         db.RDSRootCert,
