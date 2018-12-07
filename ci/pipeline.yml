@@ -5,6 +5,7 @@ groups:
   - set-pipeline
   - unit-tests
   - build
+  - smoke-test
   - system-test
   - system-test-update
   - system-test-alt-region
@@ -246,13 +247,12 @@ jobs:
         params:
           file: build-windows/concourse-up-windows-amd64.exe
 
-
-- name: system-test
+- name: smoke-test
   serial_groups:
-  - system-test
+  - smoke-test
   serial: true
   plan:
-  - aggregate: &system-test-gets
+  - aggregate:
     - get: version
       passed: [build]
     - get: binary-linux
@@ -272,6 +272,47 @@ jobs:
       passed: [build]
     - get: pcf-ops
       passed: [build]
+    - get: release
+      params:
+        globs: [concourse-up-linux-amd64]
+  - task: smoke-test
+    file: concourse-up/ci/tasks/smoke-test.yml
+    params:
+      AWS_ACCESS_KEY_ID: ((concourse_up_test_access_key_id))
+      AWS_SECRET_ACCESS_KEY: ((concourse_up_test_secret_key))
+      BINARY_PATH: binary-linux/concourse-up-linux-amd64
+    on_failure:
+      put: slack-alert
+      params:
+        channel: "#integrations"
+        text: |
+          <!channel> Concourse Up smoke test failure!
+
+- name: system-test
+  serial_groups:
+  - system-test
+  serial: true
+  plan:
+  - aggregate: &system-test-gets
+    - get: version
+      passed: [smoke-test]
+    - get: binary-linux
+      trigger: true
+      passed: [smoke-test]
+    - get: binary-darwin
+      trigger: true
+      passed: [smoke-test]
+    - get: binary-windows
+      trigger: true
+      passed: [smoke-test]
+    - get: concourse-up
+      trigger: true
+      passed: [smoke-test]
+    - get: concourse-up-ops
+      trigger: true
+      passed: [smoke-test]
+    - get: pcf-ops
+      passed: [smoke-test]
     - get: release
       params:
         globs: [concourse-up-linux-amd64]
