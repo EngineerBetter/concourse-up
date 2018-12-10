@@ -61,7 +61,7 @@ resources:
   type: git
   source:
     uri: git@github.com:EngineerBetter/concourse-up.git
-    branch: systest-tweaks
+    branch: master
     private_key: ((github_private_key))
     ignore_paths:
     - README.md
@@ -164,7 +164,7 @@ jobs:
   - put: this-pipeline
     params:
       pipelines:
-      - name: systest-tweaks
+      - name: concourse-up
         team: main
         config_file: concourse-up/ci/pipeline.yml
 
