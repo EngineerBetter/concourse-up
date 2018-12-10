@@ -1,7 +1,7 @@
 #!/bin/bash
 
 [ "$VERBOSE" ] && { set -x; export BOSH_LOG_LEVEL=debug; }
-set -eu
+set -e
 
 if [ -z "$SYSTEM_TEST_ID" ]; then
   # ID constrained to a maximum of four characters to avoid exceeding character limit in GCP naming
@@ -10,6 +10,8 @@ if [ -z "$SYSTEM_TEST_ID" ]; then
   (( SYSTEM_TEST_ID %= MAX_ID ))
 fi
 deployment="systest-$SYSTEM_TEST_ID"
+
+set -u
 
 cp "$BINARY_PATH" ./cup
 chmod +x ./cup
