@@ -110,12 +110,17 @@ func (client *GCPClient) updateCloudConfig(bosh *boshenv.BOSHCLI) error {
 	if err != nil {
 		return err
 	}
+	network, err := client.metadata.Get("Network")
+	if err != nil {
+		return err
+	}
 	zone := client.provider.Zone("")
 	return bosh.UpdateCloudConfig(gcp.Environment{
 		Preemptible:       true,
 		PublicSubnetwork:  publicSubnetwork,
 		PrivateSubnetwork: privateSubnetwork,
 		Zone:              zone,
+		Network:           network,
 	}, directorPublicIP, client.config.DirectorPassword, client.config.DirectorCACert)
 	return nil
 }

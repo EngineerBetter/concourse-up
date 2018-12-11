@@ -65,6 +65,7 @@ type gcpCloudConfigParams struct {
 	PublicSubnetID    string
 	PublicSubnetwork  string
 	PrivateSubnetwork string
+	Network           string
 }
 
 // IAASCheck returns the IAAS provider
@@ -80,6 +81,7 @@ func (e Environment) ConfigureDirectorCloudConfig(cloudConfig string) (string, e
 		PublicSubnetwork:  e.PublicSubnetwork,
 		PrivateSubnetwork: e.PrivateSubnetwork,
 		Preemptible:       e.Preemptible,
+		Network:           e.Network,
 	}
 
 	cc, err := util.RenderTemplate(cloudConfig, templateParams)

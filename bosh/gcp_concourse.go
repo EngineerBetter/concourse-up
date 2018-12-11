@@ -58,6 +58,11 @@ func (client *GCPClient) deployConcourse(creds []byte, detach bool) (newCreds []
 		return nil, err
 	}
 
+	networkName, err := client.metadata.Get("Network")
+	if err != nil {
+		return nil, err
+	}
+
 	vmap := map[string]interface{}{
 		"deployment_name":          concourseDeploymentName,
 		"domain":                   client.config.Domain,
@@ -76,6 +81,7 @@ func (client *GCPClient) deployConcourse(creds []byte, detach bool) (newCreds []
 		"external_tls.certificate": client.config.ConcourseCert,
 		"external_tls.private_key": client.config.ConcourseKey,
 		"atc_encryption_key":       client.config.EncryptionKey,
+		"network_name":             networkName,
 	}
 
 	flagFiles := []string{
