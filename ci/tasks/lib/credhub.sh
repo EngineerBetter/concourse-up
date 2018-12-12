@@ -7,7 +7,7 @@ function assertPipelinesCanReadFromCredhub() {
   domain=$(echo "$config" | jq -r '.config.domain')
   username=$(echo "$config" | jq -r '.config.concourse_username')
   password=$(echo "$config" | jq -r '.config.concourse_password')
-  echo "$config" | jq -r '.config.concourse_ca_cert' > generated-ca-cert.pem
+  echo "$config" | jq -r '.config.concourse_cert' > generated-ca-cert.pem
 
   eval "$(./cup info --env --region us-east-1 "$deployment")"
   credhub api
