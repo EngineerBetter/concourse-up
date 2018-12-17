@@ -18,7 +18,7 @@ import (
 	"github.com/EngineerBetter/concourse-up/iaas"
 	"github.com/EngineerBetter/concourse-up/util"
 
-	"gopkg.in/urfave/cli.v1"
+	cli "gopkg.in/urfave/cli.v1"
 )
 
 var initialDeployArgs deploy.Args
@@ -183,9 +183,10 @@ func validateDeployArgs(c *cli.Context, deployArgs deploy.Args) (deploy.Args, er
 
 func setZoneAndRegion(deployArgs deploy.Args) (deploy.Args, error) {
 	if !deployArgs.AWSRegionIsSet {
-		if deployArgs.IAAS == "AWS" {
+		switch strings.ToUpper(deployArgs.IAAS) {
+		case "AWS":
 			deployArgs.AWSRegion = "eu-west-1"
-		} else if deployArgs.IAAS == "GCP" {
+		case "GCP":
 			deployArgs.AWSRegion = "europe-west1"
 		}
 	}
