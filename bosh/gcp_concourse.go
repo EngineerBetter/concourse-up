@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"strings"
-
-	"github.com/EngineerBetter/concourse-up/db"
 )
 
 func (client *GCPClient) deployConcourse(creds []byte, detach bool) (newCreds []byte, err error) {
@@ -63,6 +61,11 @@ func (client *GCPClient) deployConcourse(creds []byte, detach bool) (newCreds []
 		return nil, err
 	}
 
+	sqlCaCert, err := client.metadata.Get("SQLCACert")
+	if err != nil {
+		return nil, err
+	}
+
 	vmap := map[string]interface{}{
 		"deployment_name":          concourseDeploymentName,
 		"domain":                   client.config.Domain,
@@ -73,7 +76,7 @@ func (client *GCPClient) deployConcourse(creds []byte, detach bool) (newCreds []
 		"postgres_role":            client.config.RDSUsername,
 		"postgres_port":            "5432",
 		"postgres_password":        client.config.RDSPassword,
-		"postgres_ca_cert":         db.RDSRootCert,
+		"postgres_ca_cert":         sqlCaCert,
 		"web_vm_type":              "concourse-web-" + client.config.ConcourseWebSize,
 		"worker_vm_type":           "concourse-" + client.config.ConcourseWorkerSize,
 		"worker_count":             client.config.ConcourseWorkerCount,

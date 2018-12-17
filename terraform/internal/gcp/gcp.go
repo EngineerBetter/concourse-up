@@ -85,6 +85,7 @@ type Metadata struct {
 	DirectorAccountCreds       MetadataStringValue `json:"director_account_creds" valid:"required"`
 	DirectorPublicIP           MetadataStringValue `json:"director_public_ip" valid:"required"`
 	BoshDBAddress              MetadataStringValue `json:"bosh_db_address" valid:"required"`
+	SQLCACert                  MetadataStringValue `json:"sql_ca_cert" valid:"required"`
 	DBName                     MetadataStringValue `json:"db_name" valid:"required"`
 }
 
