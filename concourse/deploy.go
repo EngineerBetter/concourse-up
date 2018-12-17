@@ -17,7 +17,7 @@ import (
 	"github.com/EngineerBetter/concourse-up/fly"
 	"github.com/EngineerBetter/concourse-up/terraform"
 	"github.com/EngineerBetter/concourse-up/util"
-	"gopkg.in/yaml.v2"
+	yaml "gopkg.in/yaml.v2"
 )
 
 // BoshParams represents the params used and produced by a BOSH deploy
@@ -217,23 +217,26 @@ func (client *Client) deployBoshAndPipeline(c config.Config, metadata terraform.
 		return bp, err
 	}
 
-	flyClient, err := client.flyClientFactory(fly.Credentials{
-		Target:   c.Deployment,
-		API:      fmt.Sprintf("https://%s", c.Domain),
-		Username: bp.ConcourseUsername,
-		Password: bp.ConcoursePassword,
-	},
-		client.stdout,
-		client.stderr,
-		client.versionFile,
-	)
-	if err != nil {
-		return bp, err
-	}
-	defer flyClient.Cleanup()
+	// Only set the self-update pipeline on AWS
+	if client.provider.IAAS() == "AWS" { //nolint
+		flyClient, err := client.flyClientFactory(fly.Credentials{
+			Target:   c.Deployment,
+			API:      fmt.Sprintf("https://%s", c.Domain),
+			Username: bp.ConcourseUsername,
+			Password: bp.ConcoursePassword,
+		},
+			client.stdout,
+			client.stderr,
+			client.versionFile,
+		)
+		if err != nil {
+			return bp, err
+		}
+		defer flyClient.Cleanup()
 
-	if err := flyClient.SetDefaultPipeline(c, false); err != nil {
-		return bp, err
+		if err := flyClient.SetDefaultPipeline(c, false); err != nil {
+			return bp, err
+		}
 	}
 
 	// This assignment is necessary for the deploy success message
@@ -263,36 +266,40 @@ func (client *Client) updateBoshAndPipeline(c config.Config, metadata terraform.
 		DirectorCACert:           c.DirectorCACert,
 	}
 
-	flyClient, err := client.flyClientFactory(fly.Credentials{
-		Target:   c.Deployment,
-		API:      fmt.Sprintf("https://%s", c.Domain),
-		Username: c.ConcourseUsername,
-		Password: c.ConcoursePassword,
-	},
-		client.stdout,
-		client.stderr,
-		client.versionFile,
-	)
-	if err != nil {
-		return bp, err
-	}
-	defer flyClient.Cleanup()
+	// Only set the self-update pipeline on AWS
+	if client.provider.IAAS() == "AWS" { //nolint
 
-	concourseAlreadyRunning, err := flyClient.CanConnect()
-	if err != nil {
-		return bp, err
+		flyClient, err := client.flyClientFactory(fly.Credentials{
+			Target:   c.Deployment,
+			API:      fmt.Sprintf("https://%s", c.Domain),
+			Username: c.ConcourseUsername,
+			Password: c.ConcoursePassword,
+		},
+			client.stdout,
+			client.stderr,
+			client.versionFile,
+		)
+		if err != nil {
+			return bp, err
+		}
+		defer flyClient.Cleanup()
+
+		concourseAlreadyRunning, err := flyClient.CanConnect()
+		if err != nil {
+			return bp, err
+		}
+
+		if !concourseAlreadyRunning {
+			return bp, fmt.Errorf("In detach mode but it seems that concourse is not currently running")
+		}
+
+		// Allow a fly version discrepancy since we might be targetting an older Concourse
+		if err = flyClient.SetDefaultPipeline(c, true); err != nil {
+			return bp, err
+		}
 	}
 
-	if !concourseAlreadyRunning {
-		return bp, fmt.Errorf("In detach mode but it seems that concourse is not currently running")
-	}
-
-	// Allow a fly version discrepancy since we might be targetting an older Concourse
-	if err = flyClient.SetDefaultPipeline(c, true); err != nil {
-		return bp, err
-	}
-
-	bp, err = client.deployBosh(c, metadata, true)
+	bp, err := client.deployBosh(c, metadata, true)
 	if err != nil {
 		return bp, err
 	}
