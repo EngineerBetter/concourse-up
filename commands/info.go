@@ -14,8 +14,7 @@ import (
 	"github.com/EngineerBetter/concourse-up/iaas"
 	"github.com/EngineerBetter/concourse-up/terraform"
 	"github.com/EngineerBetter/concourse-up/util"
-
-	"gopkg.in/urfave/cli.v1"
+	cli "gopkg.in/urfave/cli.v1"
 )
 
 var infoArgs config.InfoArgs
@@ -100,7 +99,7 @@ var info = cli.Command{
 
 		// This is temporary and used for discovery of BOSH details
 		switch provider.IAAS() {
-		case "AWS":
+		case "AWS": //nolint
 			switch {
 			case infoArgs.JSON:
 				return json.NewEncoder(os.Stdout).Encode(i)
@@ -115,7 +114,7 @@ var info = cli.Command{
 				_, err := fmt.Fprint(os.Stdout, i)
 				return err
 			}
-		case "GCP":
+		case "GCP": //nolint
 			// DO THE ENV "i.Env()" for GCP in order to be able to connect to the director
 			env, err := i.Env()
 			if err != nil {

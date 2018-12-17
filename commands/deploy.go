@@ -184,9 +184,9 @@ func validateDeployArgs(c *cli.Context, deployArgs deploy.Args) (deploy.Args, er
 func setZoneAndRegion(deployArgs deploy.Args) (deploy.Args, error) {
 	if !deployArgs.AWSRegionIsSet {
 		switch strings.ToUpper(deployArgs.IAAS) {
-		case "AWS":
+		case "AWS": //nolint
 			deployArgs.AWSRegion = "eu-west-1"
-		case "GCP":
+		case "GCP": //nolint
 			deployArgs.AWSRegion = "europe-west1"
 		}
 	}

@@ -71,6 +71,9 @@ func destroyAction(c *cli.Context, destroyArgs destroy.Args, iaasFactory iaas.Fa
 	}
 	destroyArgs = setRegion(destroyArgs)
 	client, err := buildDestroyClient(name, version, destroyArgs, iaasFactory)
+	if err != nil {
+		return err
+	}
 	return client.Destroy()
 }
 func markSetFlags(c *cli.Context, destroyArgs destroy.Args) (destroy.Args, error) {
@@ -84,9 +87,9 @@ func setRegion(destroyArgs destroy.Args) destroy.Args {
 
 	if !destroyArgs.AWSRegionIsSet {
 		switch strings.ToUpper(destroyArgs.IAAS) {
-		case "AWS":
+		case "AWS": //nolint
 			destroyArgs.AWSRegion = "eu-west-1"
-		case "GCP":
+		case "GCP": //nolint
 			destroyArgs.AWSRegion = "europe-west1"
 		}
 	}
