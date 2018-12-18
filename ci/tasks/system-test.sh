@@ -16,6 +16,9 @@ source concourse-up/ci/tasks/lib/trap.sh
 # shellcheck disable=SC1091
 source concourse-up/ci/tasks/lib/setGoogleCreds.sh
 
+# shellcheck disable=SC1091
+source concourse-up/ci/tasks/lib/pipeline.sh
+
 [ "$VERBOSE" ] && { handleVerboseMode; }
 
 [ -z "$SYSTEM_TEST_ID" ] && { generateSystemTestId; }
@@ -85,28 +88,12 @@ echo "$config" | jq -r '.config.concourse_ca_cert' > generated-ca-cert.pem
 # Check RDS instance class is db.t2.small
 assertDbCorrect
 
+cert="generated-ca-cert.pem"
+manifest="$(dirname "$0")/hello.yml"
+job="hello"
 
-fly --target system-test login \
---ca-cert out/"$deployment".crt \
-  --concourse-url "https://$custom_domain" \
-  --username "$username" \
-  --password "$password"
+assertPipelineIsSettableAndRunnable "$cert" "$custom_domain" "$username" "$password" "$manifest" "$job"
 
-curl -k "https://$custom_domain:3000"
-
-fly --target system-test sync
-
-fly --target system-test set-pipeline \
-  --non-interactive \
-  --pipeline hello \
-  --config "$(dirname "$0")/hello.yml"
-
-fly --target system-test unpause-pipeline \
-    --pipeline hello
-
-fly --target system-test trigger-job \
-  --job hello/hello \
-  --watch
 
 
 echo "DEPLOY 2 LARGE WORKERS, FIREWALLED TO MY IP"
@@ -127,19 +114,9 @@ username=$(echo "$config" | jq -r '.config.concourse_username')
 password=$(echo "$config" | jq -r '.config.concourse_password')
 echo "$config" | jq -r '.config.concourse_ca_cert' > generated-ca-cert.pem
 
-fly --target system-test-custom-workers-and-ip login \
-  --ca-cert out/"$deployment".crt \
-  --concourse-url https://"$custom_domain" \
-  --username "$username" \
-  --password "$password"
+cert="generated-ca-cert.pem"
+job="hello"
 
-curl -k "https://$custom_domain:3000"
-
-fly --target system-test-custom-workers-and-ip sync
-
-# Check that hello/hello job still exists and works
-fly --target system-test-custom-workers-and-ip trigger-job \
-  --job hello/hello \
-  --watch
+assertPipelineIsRunnable "$cert" "$custom_domain" "$username" "$password" "$job"
 
 

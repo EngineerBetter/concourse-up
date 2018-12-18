@@ -6,6 +6,9 @@ source concourse-up/ci/tasks/lib/handleVerboseMode.sh
 # shellcheck disable=SC1091
 source concourse-up/ci/tasks/lib/trap.sh
 
+# shellcheck disable=SC1091
+source concourse-up/ci/tasks/lib/pipeline.sh
+
 [ "$VERBOSE" ] && { handleVerboseMode; }
 
 set -eu
@@ -32,24 +35,8 @@ username=$(echo "$config" | jq -r '.config.concourse_username')
 password=$(echo "$config" | jq -r '.config.concourse_password')
 echo "$config" | jq -r '.config.concourse_ca_cert' > generated-ca-cert.pem
 
-fly --target system-test login \
-  --ca-cert generated-ca-cert.pem \
-  --concourse-url "https://$domain" \
-  --username "$username" \
-  --password "$password"
+cert="generated-ca-cert.pem"
+manifest="$(dirname "$0")/hello.yml"
+job="hello"
 
-curl -k "https://$domain:3000"
-
-fly --target system-test sync
-
-fly --target system-test set-pipeline \
-  --non-interactive \
-  --pipeline hello \
-  --config "$(dirname "$0")/hello.yml"
-
-fly --target system-test unpause-pipeline \
-    --pipeline hello
-
-fly --target system-test trigger-job \
-  --job hello/hello \
-  --watch
+assertPipelineIsSettableAndRunnable "$cert" "$domain" "$username" "$password" "$manifest" "$job"

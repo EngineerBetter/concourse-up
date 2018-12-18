@@ -2,6 +2,10 @@
 
 # shellcheck disable=SC1091
 source concourse-up/ci/tasks/lib/handleVerboseMode.sh
+
+# shellcheck disable=SC1091
+source concourse-up/ci/tasks/lib/pipeline.sh
+
 [ "$VERBOSE" ] && { handleVerboseMode; }
 
 
@@ -64,27 +68,9 @@ Q9ePRFBCiXOQ6wPLoUhrrbZ8LpFUFYDXHMtYM7P9sc9IAWoONXREJaO08zgFtMp4
 idWw1VrejtwclobqNMVtG3EiPUIpJGpbMcJgbiLSmKkrvQtGng==
 -----END CERTIFICATE-----
 EOF
-SSL_CERT_FILE=$(pwd)/letsencrypt-staging.crt
+certs=$(pwd)/letsencrypt-staging.crt
 
-fly --target system-test-custom-domain login \
-  --ca-cert "${SSL_CERT_FILE}" \
-  --concourse-url https://$custom_domain \
-  --username "$username" \
-  --password "$password"
+manifest="$(dirname "$0")/hello.yml"
+job="hello"
 
-curl -k "https://$custom_domain:3000"
-
-fly --target system-test-custom-domain sync
-
-fly --target system-test-custom-domain set-pipeline \
-  --non-interactive \
-  --pipeline hello \
-  --config "$(dirname "$0")/hello.yml"
-
-fly --target system-test-custom-domain unpause-pipeline \
-    --pipeline hello
-
-# Check that hello/hello job still exists and works
-fly --target system-test-custom-domain trigger-job \
-  --job hello/hello \
-  --watch
+assertPipelineIsSettableAndRunnable "$certs" "$custom_domain" "$username" "$password" "$manifest" "$job"
