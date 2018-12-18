@@ -47,6 +47,11 @@ func (client *GCPClient) deployConcourse(creds []byte, detach bool) (newCreds []
 	if err != nil {
 		return nil, err
 	}
+
+	noSSLPath, err := client.director.SaveFileToWorkingDir(noSSLFilename, gcpNoSSL)
+	if err != nil {
+		return nil, err
+	}
 	boshDBAddress, err := client.metadata.Get("BoshDBAddress")
 	if err != nil {
 		return nil, err
@@ -100,6 +105,8 @@ func (client *GCPClient) deployConcourse(creds []byte, detach bool) (newCreds []
 		concourseSHAsPath,
 		"--ops-file",
 		concourseCompatibilityPath,
+		"--ops-file",
+		noSSLPath,
 		"--vars-file",
 		concourseGrafanaPath,
 	}
