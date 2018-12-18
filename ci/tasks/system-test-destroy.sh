@@ -5,9 +5,9 @@ set -e
 # shellcheck disable=SC1091
 [ "$VERBOSE" ] && { source concourse-up/ci/tasks/lib/handleVerboseMode.sh; }
 
-if [ -z "$SYSTEM_TEST_ID" ]; then
-    SYSTEM_TEST_ID=$RANDOM
-fi
+# shellcheck disable=SC1091
+[ -z "$SYSTEM_TEST_ID" ] && { source concourse-up/ci/tasks/lib/generateSystemTestId; }
+
 deployment="systest-cleanup-$SYSTEM_TEST_ID"
 set -u
 
