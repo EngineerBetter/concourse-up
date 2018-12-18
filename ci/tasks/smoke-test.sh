@@ -20,5 +20,5 @@ if [ "$IAAS" = "GCP" ]; then
   export GOOGLE_APPLICATION_CREDENTIALS=$PWD/googlecreds.json
 fi
 
-./cup deploy $deployment
-./cup --non-interactive destroy $deployment
+./cup deploy "$deployment"
+./cup --non-interactive destroy "$deployment"

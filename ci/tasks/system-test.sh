@@ -23,7 +23,7 @@ fi
 
 cleanup() {
   status=$?
-  ./cup --non-interactive destroy $deployment
+  ./cup --non-interactive destroy "$deployment"
   exit $status
 }
 set +u
@@ -54,16 +54,16 @@ certstrap init \
 
 certstrap request-cert \
    --passphrase "" \
-   --domain $custom_domain
+   --domain "$custom_domain"
 
 certstrap sign "$custom_domain" --CA "$deployment"
 
 echo "DEPLOY WITH A USER PROVIDED CERT, CUSTOM DOMAIN, DEFAULT WORKERS, DEFAULT DATABASE SIZE AND DEFAULT WEB NODE SIZE"
 
-./cup deploy $deployment \
-  --domain $custom_domain \
-  --tls-cert "$(cat out/$custom_domain.crt)" \
-  --tls-key "$(cat out/$custom_domain.key)"
+./cup deploy "$deployment" \
+  --domain "$custom_domain" \
+  --tls-cert "$(cat out/"$custom_domain".crt)" \
+  --tls-key "$(cat out/"$custom_domain".key)"
 
 if [ "$IAAS" = "GCP" ]; then
   echo "Testing GCP, exiting early"
@@ -73,11 +73,11 @@ sleep 60
 
 
 # Check we can log into the BOSH director and SSH into a VM
-eval "$(./cup info --env $deployment)"
+eval "$(./cup info --env "$deployment")"
 bosh vms
 bosh ssh worker true
 
-config=$(./cup info --json $deployment)
+config=$(./cup info --json "$deployment")
 username=$(echo "$config" | jq -r '.config.concourse_username')
 password=$(echo "$config" | jq -r '.config.concourse_password')
 echo "$config" | jq -r '.config.concourse_ca_cert' > generated-ca-cert.pem
@@ -88,7 +88,7 @@ assertDbCorrect
 
 
 fly --target system-test login \
---ca-cert out/$deployment.crt \
+--ca-cert out/"$deployment".crt \
   --concourse-url "https://$custom_domain" \
   --username "$username" \
   --password "$password"
@@ -113,7 +113,7 @@ fly --target system-test trigger-job \
 echo "DEPLOY 2 LARGE WORKERS, FIREWALLED TO MY IP"
 
 
-./cup deploy $deployment \
+./cup deploy "$deployment" \
   --allow-ips "$(dig +short myip.opendns.com @resolver1.opendns.com)" \
   --workers 2 \
   --worker-size large
@@ -123,14 +123,14 @@ sleep 60
 # Check RDS instance class is still db.t2.small
 assertDbCorrect
 
-config=$(./cup info --json $deployment)
+config=$(./cup info --json "$deployment")
 username=$(echo "$config" | jq -r '.config.concourse_username')
 password=$(echo "$config" | jq -r '.config.concourse_password')
 echo "$config" | jq -r '.config.concourse_ca_cert' > generated-ca-cert.pem
 
 fly --target system-test-custom-workers-and-ip login \
-  --ca-cert out/$deployment.crt \
-  --concourse-url https://$custom_domain \
+  --ca-cert out/"$deployment".crt \
+  --concourse-url https://"$custom_domain" \
   --username "$username" \
   --password "$password"
 
