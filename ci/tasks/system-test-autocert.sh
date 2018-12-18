@@ -4,8 +4,9 @@
 source concourse-up/ci/tasks/lib/handleVerboseMode.sh
 [ "$VERBOSE" ] && { handleVerboseMode; }
 
+
 # shellcheck disable=SC1091
-source concourse-up/ci/tasks/lib/cleanup.sh
+source concourse-up/ci/tasks/trap.sh
 
 set -eu
 
@@ -15,11 +16,9 @@ chmod +x ./cup
 deployment="systest-autocert-$RANDOM"
 
 set +u
-if [ -z "$SKIP_TEARDOWN" ]; then
-  trap defaultCleanup EXIT
-else
-  trap "echo Skipping teardown" EXIT
-fi
+
+trapDefaultCleanup
+
 set -u
 
 echo "DEPLOY WITH LETSENCRYPT STAGING CERT, AND CUSTOM DOMAIN"

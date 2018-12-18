@@ -4,7 +4,7 @@
 source concourse-up/ci/tasks/lib/handleVerboseMode.sh
 
 # shellcheck disable=SC1091
-source concourse-up/ci/tasks/lib/cleanup.sh
+source concourse-up/ci/tasks/lib/trap.sh
 
 [ "$VERBOSE" ] && { handleVerboseMode; }
 
@@ -13,11 +13,9 @@ set -eu
 deployment="systest-region-$RANDOM"
 
 set +u
-if [ -z "$SKIP_TEARDOWN" ]; then
-  trap 'customCleanup eu-west-3' EXIT
-else
-  trap "echo Skipping teardown" EXIT
-fi
+
+trapCustomCleanup eu-west-3
+
 set -u
 
 cp "$BINARY_PATH" ./cup

@@ -4,7 +4,7 @@
 source concourse-up/ci/tasks/lib/handleVerboseMode.sh
 
 # shellcheck disable=SC1091
-source concourse-up/ci/tasks/lib/cleanup.sh
+source concourse-up/ci/tasks/lib/trap.sh
 
 [ "$VERBOSE" ] && { handleVerboseMode; }
 
@@ -13,11 +13,9 @@ set -euo pipefail
 deployment="systest-github-$RANDOM"
 
 set +u
-if [ -z "$SKIP_TEARDOWN" ]; then
-  trap 'customCleanup us-east-1' EXIT
-else
-  trap "echo Skipping teardown" EXIT
-fi
+
+trapCustomCleanup us-east-1
+
 set -u
 
 # Create empty array of args that is used in sourced setup functions

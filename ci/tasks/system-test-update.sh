@@ -7,7 +7,7 @@
 source concourse-up/ci/tasks/lib/handleVerboseMode.sh
 
 # shellcheck disable=SC1091
-source concourse-up/ci/tasks/lib/cleanup.sh
+source concourse-up/ci/tasks/lib/trap.sh
 
 [ "$VERBOSE" ] && { handleVerboseMode; }
 
@@ -16,11 +16,9 @@ set -eu
 deployment="systest-update-$RANDOM"
 
 set +u
-if [ -z "$SKIP_TEARDOWN" ]; then
-  trap defaultCleanup EXIT
-else
-  trap "echo Skipping teardown" EXIT
-fi
+
+trapDefaultCleanup
+
 set -u
 
 cp release/concourse-up-linux-amd64 ./cup-old

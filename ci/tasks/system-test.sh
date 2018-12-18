@@ -11,7 +11,7 @@ source concourse-up/ci/tasks/lib/handleVerboseMode.sh
 source concourse-up/ci/tasks/lib/generateSystemTestId.sh
 
 # shellcheck disable=SC1091
-source concourse-up/ci/tasks/lib/cleanup.sh
+source concourse-up/ci/tasks/lib/trap.sh
 
 [ "$VERBOSE" ] && { handleVerboseMode; }
 
@@ -31,11 +31,9 @@ if [ "$IAAS" = "GCP" ]; then
 fi
 
 set +u
-if [ -z "$SKIP_TEARDOWN" ]; then
-  trap defaultCleanup EXIT
-else
-  trap "echo Skipping teardown" EXIT
-fi
+
+trapCustomCleanup
+
 set -u
 
 cp "$BINARY_PATH" ./cup
