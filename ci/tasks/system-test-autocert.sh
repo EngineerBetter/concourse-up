@@ -4,20 +4,19 @@
 source concourse-up/ci/tasks/lib/handleVerboseMode.sh
 [ "$VERBOSE" ] && { handleVerboseMode; }
 
+# shellcheck disable=SC1091
+source concourse-up/ci/tasks/lib/cleanup.sh
+
 set -eu
 
 cp "$BINARY_PATH" ./cup
 chmod +x ./cup
 
 deployment="systest-autocert-$RANDOM"
-cleanup() {
-  status=$?
-  ./cup --non-interactive destroy $deployment
-  exit $status
-}
+
 set +u
 if [ -z "$SKIP_TEARDOWN" ]; then
-  trap cleanup EXIT
+  trap defaultCleanup EXIT
 else
   trap "echo Skipping teardown" EXIT
 fi

@@ -6,6 +6,7 @@ source concourse-up/ci/tasks/lib/handleVerboseMode.sh
 # shellcheck disable=SC1091
 source concourse-up/ci/tasks/lib/generateSystemTestId.sh
 
+
 [ "$VERBOSE" ] && { handleVerboseMode; }
 
 set -e

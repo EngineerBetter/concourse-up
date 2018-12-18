@@ -3,21 +3,18 @@
 # shellcheck disable=SC1091
 source concourse-up/ci/tasks/lib/handleVerboseMode.sh
 
+# shellcheck disable=SC1091
+source concourse-up/ci/tasks/lib/cleanup.sh
+
 [ "$VERBOSE" ] && { handleVerboseMode; }
 
 set -eu
 
 deployment="systest-region-$RANDOM"
 
-cleanup() {
-  status=$?
-  ./cup --non-interactive destroy --region eu-west-3 $deployment
-  exit $status
-}
-
 set +u
 if [ -z "$SKIP_TEARDOWN" ]; then
-  trap cleanup EXIT
+  trap 'customCleanup eu-west-3' EXIT
 else
   trap "echo Skipping teardown" EXIT
 fi

@@ -6,20 +6,18 @@
 # shellcheck disable=SC1091
 source concourse-up/ci/tasks/lib/handleVerboseMode.sh
 
+# shellcheck disable=SC1091
+source concourse-up/ci/tasks/lib/cleanup.sh
+
 [ "$VERBOSE" ] && { handleVerboseMode; }
 
 set -eu
 
 deployment="systest-update-$RANDOM"
 
-cleanup() {
-  status=$?
-  ./cup-new --non-interactive destroy $deployment
-  exit $status
-}
 set +u
 if [ -z "$SKIP_TEARDOWN" ]; then
-  trap cleanup EXIT
+  trap defaultCleanup EXIT
 else
   trap "echo Skipping teardown" EXIT
 fi
