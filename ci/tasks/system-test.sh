@@ -13,6 +13,9 @@ source concourse-up/ci/tasks/lib/generateSystemTestId.sh
 # shellcheck disable=SC1091
 source concourse-up/ci/tasks/lib/trap.sh
 
+# shellcheck disable=SC1091
+source concourse-up/ci/tasks/lib/setGoogleCreds.sh
+
 [ "$VERBOSE" ] && { handleVerboseMode; }
 
 [ -z "$SYSTEM_TEST_ID" ] && { generateSystemTestId; }
@@ -25,10 +28,7 @@ set -u
 source concourse-up/ci/tasks/lib/check-db.sh
 
 # If we're testing GCP, we need credentials to be available as a file
-if [ "$IAAS" = "GCP" ]; then
-  echo "${GOOGLE_APPLICATION_CREDENTIALS_CONTENTS}" > googlecreds.json
-  export GOOGLE_APPLICATION_CREDENTIALS=$PWD/googlecreds.json
-fi
+[ "$IAAS" = "GCP" ] && { setGoogleCreds; }
 
 set +u
 
