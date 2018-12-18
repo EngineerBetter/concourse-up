@@ -19,6 +19,9 @@ import (
 	cli "gopkg.in/urfave/cli.v1"
 )
 
+const awsConst = "AWS"
+const gcpConst = "GCP"
+
 //var destroyArgs config.DestroyArgs
 var initialDestroyArgs destroy.Args
 
@@ -87,9 +90,9 @@ func setRegion(destroyArgs destroy.Args) destroy.Args {
 
 	if !destroyArgs.AWSRegionIsSet {
 		switch strings.ToUpper(destroyArgs.IAAS) {
-		case "AWS": //nolint
+		case awsConst: //nolint
 			destroyArgs.AWSRegion = "eu-west-1" //nolint
-		case "GCP": //nolint
+		case gcpConst: //nolint
 			destroyArgs.AWSRegion = "europe-west1" //nolint
 		}
 	}

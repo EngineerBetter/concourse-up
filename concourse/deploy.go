@@ -20,6 +20,10 @@ import (
 	yaml "gopkg.in/yaml.v2"
 )
 
+const awsConst = "AWS"
+
+const gcpConst = "GCP"
+
 // BoshParams represents the params used and produced by a BOSH deploy
 type BoshParams struct {
 	CredhubPassword          string
@@ -58,9 +62,9 @@ func (client *Client) Deploy() error {
 		}
 	} else {
 		switch client.provider.IAAS() {
-		case "AWS": // nolint
+		case awsConst: // nolint
 			c.RDSDefaultDatabaseName = fmt.Sprintf("bosh_%s", util.EightRandomLetters())
-		case "GCP": // nolint
+		case gcpConst: // nolint
 			c.RDSDefaultDatabaseName = fmt.Sprintf("bosh-%s", util.EightRandomLetters())
 		}
 
@@ -83,7 +87,7 @@ func (client *Client) Deploy() error {
 		return err
 	}
 	switch client.provider.IAAS() {
-	case "AWS": // nolint
+	case awsConst: // nolint
 		err = environment.Build(map[string]interface{}{
 			"AllowIPs":               c.AllowIPs,
 			"AvailabilityZone":       c.AvailabilityZone,
@@ -106,7 +110,7 @@ func (client *Client) Deploy() error {
 		if err != nil {
 			return err
 		}
-	case "GCP": // nolint
+	case gcpConst: // nolint
 		project, err1 := client.provider.Attr("project")
 		if err1 != nil {
 			return err1

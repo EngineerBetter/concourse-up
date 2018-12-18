@@ -11,6 +11,10 @@ import (
 	"github.com/EngineerBetter/concourse-up/util/yaml"
 )
 
+const awsConst = "AWS"
+
+const gcpConst = "GCP"
+
 // BOSHCLI struct holds the abstraction of execCmd
 type BOSHCLI struct {
 	execCmd  func(string, ...string) *exec.Cmd
@@ -124,10 +128,10 @@ func (c *BOSHCLI) UpdateCloudConfig(config IAASEnvironment, ip, password, ca str
 	var err error
 	iaas := config.IAASCheck()
 	switch iaas {
-	case "AWS":
+	case awsConst:
 		cloudConfig, err = config.ConfigureDirectorCloudConfig(resource.AWSDirectorCloudConfig)
 
-	case "GCP":
+	case gcpConst:
 		cloudConfig, err = config.ConfigureDirectorCloudConfig(resource.GCPDirectorCloudConfig)
 	}
 	if err != nil {

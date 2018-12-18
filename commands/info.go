@@ -100,9 +100,9 @@ func setInfoRegion(infoArgs info.Args) info.Args {
 
 	if !infoArgs.AWSRegionIsSet {
 		switch strings.ToUpper(infoArgs.IAAS) {
-		case "AWS": //nolint
+		case awsConst: //nolint
 			infoArgs.AWSRegion = "eu-west-1" //nolint
-		case "GCP": //nolint
+		case gcpConst: //nolint
 			infoArgs.AWSRegion = "europe-west1" //nolint
 		}
 	}

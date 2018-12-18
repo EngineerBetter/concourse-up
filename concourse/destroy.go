@@ -24,7 +24,7 @@ func (client *Client) Destroy() error {
 
 	switch client.provider.IAAS() {
 
-	case "AWS": // nolint
+	case awsConst: // nolint
 		err = environment.Build(map[string]interface{}{
 			"AllowIPs":               conf.AllowIPs,
 			"AvailabilityZone":       conf.AvailabilityZone,
@@ -60,7 +60,7 @@ func (client *Client) Destroy() error {
 			return err1
 		}
 
-	case "GCP": // nolint
+	case gcpConst: // nolint
 		project, err1 := client.provider.Attr("project")
 		if err1 != nil {
 			return err1
@@ -98,7 +98,7 @@ func (client *Client) Destroy() error {
 		return err
 	}
 
-	if client.provider.IAAS() == "AWS" { // nolint
+	if client.provider.IAAS() == awsConst { // nolint
 		if len(volumesToDelete) > 0 {
 			fmt.Printf("Scheduling to delete %v volumes\n", len(volumesToDelete))
 		}

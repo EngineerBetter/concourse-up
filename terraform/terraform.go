@@ -11,12 +11,13 @@ import (
 	"path"
 	"strings"
 
-	"github.com/EngineerBetter/concourse-up/terraform/internal/gcp"
-
-	"github.com/EngineerBetter/concourse-up/terraform/internal/aws"
-
 	"github.com/EngineerBetter/concourse-up/resource"
+	"github.com/EngineerBetter/concourse-up/terraform/internal/aws"
+	"github.com/EngineerBetter/concourse-up/terraform/internal/gcp"
 )
+
+const awsConst = "AWS"
+const gcpConst = "GCP"
 
 // InputVars exposes ConfigureDirectorManifestCPI
 type InputVars interface {
@@ -106,10 +107,10 @@ func (n *NullMetadata) Get(string) (string, error) { return "", nil }
 // IAAS is returning the IAAS specific metadata and environment
 func (c *CLI) IAAS(name string) (InputVars, IAASMetadata, error) {
 	switch strings.ToUpper(name) {
-	case "AWS": // nolint
+	case awsConst: // nolint
 		c.iaas = "AWS" // nolint
 		return &aws.InputVars{}, &aws.Metadata{}, nil
-	case "GCP": // nolint
+	case gcpConst: // nolint
 		c.iaas = "GCP" // nolint
 		return &gcp.InputVars{}, &gcp.Metadata{}, nil
 	}
@@ -123,12 +124,12 @@ func (c *CLI) init(config InputVars) (string, error) {
 		err      error
 	)
 	switch c.iaas {
-	case "AWS": // nolint
+	case awsConst: // nolint
 		tfConfig, err = config.ConfigureTerraform(resource.AWSTerraformConfig)
 		if err != nil {
 			return "", err
 		}
-	case "GCP": // nolint
+	case gcpConst: // nolint
 		tfConfig, err = config.ConfigureTerraform(resource.GCPTerraformConfig)
 		if err != nil {
 			return "", err

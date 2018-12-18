@@ -5,6 +5,9 @@ import (
 	"strings"
 )
 
+const awsConst = "AWS"
+const gcpConst = "GCP"
+
 // Provider represents actions taken against AWS
 type Provider interface {
 	Attr(string) (string, error)
@@ -34,9 +37,9 @@ type Factory func(iaasName, region string, gops ...GCPOption) (Provider, error)
 // New returns a new IAAS client for a particular IAAS and region
 func New(iaasName, region string, gops ...GCPOption) (Provider, error) {
 	switch strings.ToUpper(iaasName) {
-	case "AWS":
+	case awsConst:
 		return newAWS(region)
-	case "GCP":
+	case gcpConst:
 		if len(gops) == 0 {
 			gops = append(gops, GCPStorage())
 		}
