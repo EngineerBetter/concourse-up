@@ -5,14 +5,22 @@
 set -e
 
 # shellcheck disable=SC1091
-[ "$VERBOSE" ] && { source concourse-up/ci/tasks/lib/handleVerboseMode.sh; }
+source concourse-up/ci/tasks/lib/handleVerboseMode.sh
 
 # shellcheck disable=SC1091
-[ -z "$SYSTEM_TEST_ID" ] && { source concourse-up/ci/tasks/lib/generateSystemTestId; }
+source concourse-up/ci/tasks/lib/generateSystemTestId.sh
+
+[ "$VERBOSE" ] && { handleVerboseMode; }
+
+[ -z "$SYSTEM_TEST_ID" ] && { generateSystemTestId; }
 
 deployment="systest-$SYSTEM_TEST_ID"
 
 set -u
+
+# shellcheck disable=SC1091
+source concourse-up/ci/tasks/lib/check-db.sh
+
 
 # If we're testing GCP, we need credentials to be available as a file
 if [ "$IAAS" = "GCP" ]; then
@@ -33,9 +41,6 @@ else
   trap "echo Skipping teardown" EXIT
 fi
 set -u
-
-# shellcheck disable=SC1091
-source concourse-up/ci/tasks/lib/check-db.sh
 
 cp "$BINARY_PATH" ./cup
 chmod +x ./cup

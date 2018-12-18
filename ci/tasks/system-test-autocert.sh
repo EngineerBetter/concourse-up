@@ -1,7 +1,8 @@
 #!/bin/bash
 
 # shellcheck disable=SC1091
-[ "$VERBOSE" ] && { source concourse-up/ci/tasks/lib/handleVerboseMode.sh; }
+source concourse-up/ci/tasks/lib/handleVerboseMode.sh
+[ "$VERBOSE" ] && { handleVerboseMode; }
 
 set -eu
 

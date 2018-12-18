@@ -1,12 +1,17 @@
 #!/bin/bash
 
 # shellcheck disable=SC1091
-[ "$VERBOSE" ] && { source concourse-up/ci/tasks/lib/handleVerboseMode.sh; }
+source concourse-up/ci/tasks/lib/handleVerboseMode.sh
+
+# shellcheck disable=SC1091
+source concourse-up/ci/tasks/lib/generateSystemTestId.sh
+
+[ "$VERBOSE" ] && { handleVerboseMode; }
 
 set -e
 
-# shellcheck disable=SC1091
-[ -z "$SYSTEM_TEST_ID" ] && { source concourse-up/ci/tasks/lib/generateSystemTestId; }
+
+[ -z "$SYSTEM_TEST_ID" ] && { generateSystemTestId; }
 deployment="systest-$SYSTEM_TEST_ID"
 
 set -u

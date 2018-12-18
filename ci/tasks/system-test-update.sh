@@ -4,7 +4,9 @@
 # Instead we will test that if we publish a non-existant release, the self-update will revert back to a known release
 
 # shellcheck disable=SC1091
-[ "$VERBOSE" ] && { source concourse-up/ci/tasks/lib/handleVerboseMode.sh; }
+source concourse-up/ci/tasks/lib/handleVerboseMode.sh
+
+[ "$VERBOSE" ] && { handleVerboseMode; }
 
 set -eu
 
