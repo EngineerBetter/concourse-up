@@ -3,7 +3,9 @@
 # We can't test that concourse-up will update itself to a latest release without publishing a new release
 # Instead we will test that if we publish a non-existant release, the self-update will revert back to a known release
 
-[ "$VERBOSE" ] && { set -x; export BOSH_LOG_LEVEL=debug; }
+# shellcheck disable=SC1091
+[ "$VERBOSE" ] && { source concourse-up/ci/tasks/lib/handleVerboseMode.sh; }
+
 set -eu
 
 deployment="systest-update-$RANDOM"

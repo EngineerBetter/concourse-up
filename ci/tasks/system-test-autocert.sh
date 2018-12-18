@@ -1,8 +1,9 @@
 #!/bin/bash
 
-[ "$VERBOSE" ] && { set -x; export BOSH_LOG_LEVEL=debug; }
+# shellcheck disable=SC1091
+[ "$VERBOSE" ] && { source concourse-up/ci/tasks/lib/handleVerboseMode.sh; }
+
 set -eu
-set -x
 
 cp "$BINARY_PATH" ./cup
 chmod +x ./cup

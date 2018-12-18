@@ -1,7 +1,10 @@
 #!/bin/bash
 
 set -e
-[ "$VERBOSE" ] && { set -x; export BOSH_LOG_LEVEL=debug; export BOSH_LOG_PATH=bosh.log; }
+
+# shellcheck disable=SC1091
+[ "$VERBOSE" ] && { source concourse-up/ci/tasks/lib/handleVerboseMode.sh; }
+
 if [ -z "$SYSTEM_TEST_ID" ]; then
     SYSTEM_TEST_ID=$RANDOM
 fi

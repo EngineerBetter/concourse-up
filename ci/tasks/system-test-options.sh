@@ -1,6 +1,8 @@
 #!/bin/bash
 
-[ "$VERBOSE" ] && { set -x; export BOSH_LOG_LEVEL=debug; }
+# shellcheck disable=SC1091
+[ "$VERBOSE" ] && { source concourse-up/ci/tasks/lib/handleVerboseMode.sh; }
+
 set -euo pipefail
 
 deployment="systest-github-$RANDOM"

@@ -3,7 +3,9 @@
 : "${IAAS:=AWS}"
 
 set -e
-[ "$VERBOSE" ] && { set -x; export BOSH_LOG_LEVEL=debug; export BOSH_LOG_PATH=bosh.log; }
+
+# shellcheck disable=SC1091
+[ "$VERBOSE" ] && { source concourse-up/ci/tasks/lib/handleVerboseMode.sh; }
 
 if [ -z "$SYSTEM_TEST_ID" ]; then
   # ID constrained to a maximum of four characters to avoid exceeding character limit in GCP naming
