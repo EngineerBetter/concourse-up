@@ -88,9 +88,9 @@ func setRegion(destroyArgs destroy.Args) destroy.Args {
 	if !destroyArgs.AWSRegionIsSet {
 		switch strings.ToUpper(destroyArgs.IAAS) {
 		case "AWS": //nolint
-			destroyArgs.AWSRegion = "eu-west-1"
+			destroyArgs.AWSRegion = "eu-west-1" //nolint
 		case "GCP": //nolint
-			destroyArgs.AWSRegion = "europe-west1"
+			destroyArgs.AWSRegion = "europe-west1" //nolint
 		}
 	}
 	return destroyArgs

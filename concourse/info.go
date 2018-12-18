@@ -108,23 +108,26 @@ func (client *Client) FetchInfo() (*Info, error) {
 		NatGatewayIP:     natGatewayIP,
 	}
 
-	userIP, err := client.ipChecker()
-	if err != nil {
-		return nil, err
-	}
+	// temporary fix before GCP has whitelisted IPs implemented
+	if client.provider.IAAS() == "AWS" { //nolint
+		userIP, err1 := client.ipChecker()
+		if err1 != nil {
+			return nil, err1
+		}
 
-	directorSecurityGroupID, err := metadata.Get("DirectorSecurityGroupID")
-	if err != nil {
-		return nil, err
-	}
-	whitelisted, err := client.provider.CheckForWhitelistedIP(userIP, directorSecurityGroupID)
-	if err != nil {
-		return nil, err
-	}
+		directorSecurityGroupID, err1 := metadata.Get("DirectorSecurityGroupID")
+		if err1 != nil {
+			return nil, err1
+		}
+		whitelisted, err1 := client.provider.CheckForWhitelistedIP(userIP, directorSecurityGroupID)
+		if err1 != nil {
+			return nil, err1
+		}
 
-	if !whitelisted {
-		err = fmt.Errorf("Do you need to add your IP %s to the %s-director security group (for ports 22, 6868, and 25555)?", userIP, config.Deployment)
-		return nil, err
+		if !whitelisted {
+			err1 = fmt.Errorf("Do you need to add your IP %s to the %s-director security group (for ports 22, 6868, and 25555)?", userIP, config.Deployment)
+			return nil, err1
+		}
 	}
 
 	boshClient, err := client.buildBoshClient(config, metadata)

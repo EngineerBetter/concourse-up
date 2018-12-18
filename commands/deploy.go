@@ -185,9 +185,9 @@ func setZoneAndRegion(deployArgs deploy.Args) (deploy.Args, error) {
 	if !deployArgs.AWSRegionIsSet {
 		switch strings.ToUpper(deployArgs.IAAS) {
 		case "AWS": //nolint
-			deployArgs.AWSRegion = "eu-west-1"
+			deployArgs.AWSRegion = "eu-west-1" //nolint
 		case "GCP": //nolint
-			deployArgs.AWSRegion = "europe-west1"
+			deployArgs.AWSRegion = "europe-west1" //nolint
 		}
 	}
 
