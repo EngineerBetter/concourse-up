@@ -88,8 +88,11 @@ echo "$config" | jq -r '.config.concourse_ca_cert' > generated-ca-cert.pem
 # Check RDS instance class is db.t2.small
 assertDbCorrect
 
+# shellcheck disable=SC2034
 cert="generated-ca-cert.pem"
+# shellcheck disable=SC2034
 manifest="$(dirname "$0")/hello.yml"
+# shellcheck disable=SC2034
 job="hello"
 
 assertPipelineIsSettableAndRunnable
@@ -109,7 +112,9 @@ sleep 60
 assertDbCorrect
 
 config=$(./cup info --json "$deployment")
+# shellcheck disable=SC2034
 username=$(echo "$config" | jq -r '.config.concourse_username')
+# shellcheck disable=SC2034
 password=$(echo "$config" | jq -r '.config.concourse_password')
 echo "$config" | jq -r '.config.concourse_ca_cert' > generated-ca-cert.pem
 

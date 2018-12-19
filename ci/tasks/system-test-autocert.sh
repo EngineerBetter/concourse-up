@@ -35,7 +35,9 @@ export CONCOURSE_UP_ACME_URL=https://acme-staging.api.letsencrypt.org/directory 
 sleep 60
 
 config=$(./cup info --json $deployment)
+# shellcheck disable=SC2034
 username=$(echo "$config" | jq -r '.config.concourse_username')
+# shellcheck disable=SC2034
 password=$(echo "$config" | jq -r '.config.concourse_password')
 cat <<EOF > letsencrypt-staging.crt
 -----BEGIN CERTIFICATE-----
@@ -68,9 +70,11 @@ Q9ePRFBCiXOQ6wPLoUhrrbZ8LpFUFYDXHMtYM7P9sc9IAWoONXREJaO08zgFtMp4
 idWw1VrejtwclobqNMVtG3EiPUIpJGpbMcJgbiLSmKkrvQtGng==
 -----END CERTIFICATE-----
 EOF
+# shellcheck disable=SC2034
 certs=$(pwd)/letsencrypt-staging.crt
-
+# shellcheck disable=SC2034
 manifest="$(dirname "$0")/hello.yml"
+# shellcheck disable=SC2034
 job="hello"
 
 assertPipelineIsSettableAndRunnable

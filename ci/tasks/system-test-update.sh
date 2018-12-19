@@ -80,12 +80,17 @@ sleep 60
 
 config=$(./cup-new info --json $deployment)
 domain=$(echo "$config" | jq -r '.config.domain')
+# shellcheck disable=SC2034
 username=$(echo "$config" | jq -r '.config.concourse_username')
+# shellcheck disable=SC2034
 password=$(echo "$config" | jq -r '.config.concourse_password')
 echo "$config" | jq -r '.config.concourse_ca_cert' > generated-ca-cert.pem
 
+# shellcheck disable=SC2034
 cert="generated-ca-cert.pem"
+# shellcheck disable=SC2034
 manifest="$(dirname "$0")/hello.yml"
+# shellcheck disable=SC2034
 job="hello"
 
 assertPipelineIsSettableAndRunnable
