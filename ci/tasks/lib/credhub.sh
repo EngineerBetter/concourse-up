@@ -20,7 +20,9 @@ function assertPipelinesCanReadFromCredhub() {
   job="credhub"
   cert="generated-ca-cert.pem"
 
+  set +u
   assertPipelineIsSettableAndRunnable "$cert" "$domain" "$username" "$password" "$manifest" "$job"
+  set -u
 
   echo "Credhub tests passed"
 }
