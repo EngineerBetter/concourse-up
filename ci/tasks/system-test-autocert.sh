@@ -10,7 +10,7 @@ source concourse-up/ci/tasks/lib/pipeline.sh
 
 
 # shellcheck disable=SC1091
-source concourse-up/ci/tasks/trap.sh
+source concourse-up/ci/tasks/lib/trap.sh
 
 set -eu
 
