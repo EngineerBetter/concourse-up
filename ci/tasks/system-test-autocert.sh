@@ -73,5 +73,4 @@ certs=$(pwd)/letsencrypt-staging.crt
 manifest="$(dirname "$0")/hello.yml"
 job="hello"
 
-set +u
-assertPipelineIsSettableAndRunnable "$certs" "$custom_domain" "$username" "$password" "$manifest" "$job"
+assertPipelineIsSettableAndRunnable

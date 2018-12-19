@@ -39,5 +39,5 @@ cert="generated-ca-cert.pem"
 manifest="$(dirname "$0")/hello.yml"
 job="hello"
 
-set +u
-assertPipelineIsSettableAndRunnable "$cert" "$domain" "$username" "$password" "$manifest" "$job"
+
+assertPipelineIsSettableAndRunnable

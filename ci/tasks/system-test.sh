@@ -92,9 +92,7 @@ cert="generated-ca-cert.pem"
 manifest="$(dirname "$0")/hello.yml"
 job="hello"
 
-set +u
-assertPipelineIsSettableAndRunnable "$cert" "$custom_domain" "$username" "$password" "$manifest" "$job"
-set -u
+assertPipelineIsSettableAndRunnable
 
 
 echo "DEPLOY 2 LARGE WORKERS, FIREWALLED TO MY IP"
@@ -115,6 +113,4 @@ username=$(echo "$config" | jq -r '.config.concourse_username')
 password=$(echo "$config" | jq -r '.config.concourse_password')
 echo "$config" | jq -r '.config.concourse_ca_cert' > generated-ca-cert.pem
 
-set +u
-assertPipelineIsRunnable "$cert" "$custom_domain" "$username" "$password" "$job"
-set -u
+assertPipelineIsRunnable

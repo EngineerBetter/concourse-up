@@ -2,13 +2,6 @@
 
 #to be used when setting a new pipeline
 function assertPipelineIsSettableAndRunnable() {
-  cert=$1
-  domain=$2
-  username=$3
-  password=$4
-  manifest=$5
-  job=$6
-
   flyLogin
   setPipeline
   triggerJob
@@ -17,12 +10,6 @@ function assertPipelineIsSettableAndRunnable() {
 
 #to be used when checking that existing pipeline works
 function assertPipelineIsRunnable() {
-  cert=$1
-  domain=$2
-  username=$3
-  password=$4
-  job=$5
-
   flyLogin
   triggerJob
 }
