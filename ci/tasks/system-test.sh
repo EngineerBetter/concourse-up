@@ -5,16 +5,16 @@
 set -e
 
 # shellcheck disable=SC1091
-source concourse-up/ci/tasks/lib/handleVerboseMode.sh
+source concourse-up/ci/tasks/lib/verbose.sh
 
 # shellcheck disable=SC1091
-source concourse-up/ci/tasks/lib/generateSystemTestId.sh
+source concourse-up/ci/tasks/lib/id.sh
 
 # shellcheck disable=SC1091
 source concourse-up/ci/tasks/lib/trap.sh
 
 # shellcheck disable=SC1091
-source concourse-up/ci/tasks/lib/setGoogleCreds.sh
+source concourse-up/ci/tasks/lib/gcreds.sh
 
 # shellcheck disable=SC1091
 source concourse-up/ci/tasks/lib/pipeline.sh
