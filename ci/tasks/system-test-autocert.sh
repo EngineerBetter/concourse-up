@@ -76,5 +76,7 @@ cert=$(pwd)/letsencrypt-staging.crt
 manifest="$(dirname "$0")/hello.yml"
 # shellcheck disable=SC2034
 job="hello"
+# shellcheck disable=SC2034
+domain=$custom_domain
 
 assertPipelineIsSettableAndRunnable
