@@ -80,7 +80,9 @@ bosh vms
 bosh ssh worker true
 
 config=$(./cup info --json "$deployment")
+# shellcheck disable=SC2034
 username=$(echo "$config" | jq -r '.config.concourse_username')
+# shellcheck disable=SC2034
 password=$(echo "$config" | jq -r '.config.concourse_password')
 echo "$config" | jq -r '.config.concourse_ca_cert' > generated-ca-cert.pem
 
