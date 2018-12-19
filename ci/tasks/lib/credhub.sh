@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# shellcheck disable=SC1091
+source concourse-up/ci/tasks/lib/pipeline.sh
+
 function assertPipelinesCanReadFromCredhub() {
   echo "About to test that pipelines can get values from Credhub"
 
@@ -13,25 +16,11 @@ function assertPipelinesCanReadFromCredhub() {
   credhub api
   credhub set -n /concourse/main/password -t password -w c1oudc0w
 
-  fly --target system-test login \
-    --ca-cert generated-ca-cert.pem \
-    --concourse-url "https://$domain" \
-    --username "$username" \
-    --password "$password"
+  manifest="$(dirname "$0")/credhub.yml"
+  job="credhub"
+  cert="generated-ca-cert.pem"
 
-  fly --target system-test sync
-
-  fly --target system-test set-pipeline \
-    --non-interactive \
-    --pipeline credhub \
-    --config "$(dirname "$0")/credhub.yml"
-
-  fly --target system-test unpause-pipeline \
-      --pipeline credhub
-
-  fly --target system-test trigger-job \
-    --job credhub/credhub \
-    --watch
+  assertPipelineIsSettableAndRunnable "$cert" "$domain" "$username" "$password" "$manifest" "$job"
 
   echo "Credhub tests passed"
 }

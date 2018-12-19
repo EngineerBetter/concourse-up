@@ -9,9 +9,9 @@ function assertPipelineIsSettableAndRunnable() {
   manifest=$5
   job=$6
 
-  login "$cert" "$domain" "$username" "$password"
-  setPipeline "$manifest"
-  triggerJob "$job"
+  flyLogin
+  setPipeline
+  triggerJob
 
 }
 
@@ -23,8 +23,8 @@ function assertPipelineIsRunnable() {
   password=$4
   job=$5
 
-  login "$cert" "$domain" "$username" "$password"
-  triggerJob "$job"
+  flyLogin
+  triggerJob
 }
 
 
@@ -32,7 +32,7 @@ function setPipeline() {
   fly --target system-test set-pipeline \
   --non-interactive \
   --pipeline hello \
-  --config "$1"
+  --config "$manifest"
 
 fly --target system-test unpause-pipeline \
   --pipeline hello
@@ -42,14 +42,14 @@ function triggerJob() {
     --job hello/"$job" \
     --watch
 }
-function login() {
+function flyLogin() {
   fly --target system-test login \
-    --ca-cert "$1" \
-    --concourse-url https://"$2" \
-    --username "$3" \
-    --password "$4"
+    --ca-cert "$cert" \
+    --concourse-url https://"$domain" \
+    --username "$username" \
+    --password "$password"
 
-curl -k https://"$2":3000
+curl -k https://"$domain":3000
 
 fly target system-test sync
 

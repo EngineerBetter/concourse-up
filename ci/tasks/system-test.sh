@@ -114,9 +114,6 @@ username=$(echo "$config" | jq -r '.config.concourse_username')
 password=$(echo "$config" | jq -r '.config.concourse_password')
 echo "$config" | jq -r '.config.concourse_ca_cert' > generated-ca-cert.pem
 
-cert="generated-ca-cert.pem"
-job="hello"
-
 assertPipelineIsRunnable "$cert" "$custom_domain" "$username" "$password" "$job"
 
 
