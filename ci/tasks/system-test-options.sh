@@ -13,9 +13,9 @@ set -euo pipefail
 deployment="systest-github-$RANDOM"
 
 set +u
-
+# shellcheck disable=SC2034
+region=us-east-1
 trapCustomCleanup us-east-1
-
 set -u
 
 # Create empty array of args that is used in sourced setup functions

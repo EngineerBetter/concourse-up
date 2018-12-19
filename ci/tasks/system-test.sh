@@ -34,9 +34,7 @@ source concourse-up/ci/tasks/lib/check-db.sh
 [ "$IAAS" = "GCP" ] && { setGoogleCreds; }
 
 set +u
-
-trapCustomCleanup
-
+trapDefaultCleanup
 set -u
 
 cp "$BINARY_PATH" ./cup

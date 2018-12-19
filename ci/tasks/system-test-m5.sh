@@ -16,8 +16,9 @@ set -eu
 deployment="systest-region-$RANDOM"
 
 set +u
-
-trapCustomCleanup eu-west-3
+# shellcheck disable=SC2034
+region=eu-west-3
+trapCustomCleanup
 
 set -u
 

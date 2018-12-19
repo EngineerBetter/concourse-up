@@ -15,7 +15,7 @@ function trapDefaultCleanup() {
 # if skip teardown not set calls custom cleanup with region arg
 function trapCustomCleanup() {
   if [ -z "$SKIP_TEARDOWN" ]; then
-    trap 'customCleanup "$1"' EXIT
+    trap 'customCleanup "$region"' EXIT
   else
     trap "echo Skipping teardown" EXIT
   fi

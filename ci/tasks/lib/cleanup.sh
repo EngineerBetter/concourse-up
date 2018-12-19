@@ -10,6 +10,6 @@ function defaultCleanup() {
 # cleans up a deployment, takes region as an argument
 function customCleanup() {
   status=$?
-  ./cup --non-interactive destroy "$deployment" --region "$1"
+  ./cup --non-interactive destroy "$deployment" --region "$region"
   exit $status
 }
