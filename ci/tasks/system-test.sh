@@ -82,7 +82,7 @@ config=$(./cup info --json "$deployment")
 username=$(echo "$config" | jq -r '.config.concourse_username')
 # shellcheck disable=SC2034
 password=$(echo "$config" | jq -r '.config.concourse_password')
-echo "$config" | jq -r '.config.concourse_ca_cert' > generated-ca-cert.pem
+echo "$config" | jq -r '.config.concourse_cert' > generated-ca-cert.pem
 
 
 # Check RDS instance class is db.t2.small

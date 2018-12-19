@@ -71,7 +71,7 @@ idWw1VrejtwclobqNMVtG3EiPUIpJGpbMcJgbiLSmKkrvQtGng==
 -----END CERTIFICATE-----
 EOF
 # shellcheck disable=SC2034
-certs=$(pwd)/letsencrypt-staging.crt
+cert=$(pwd)/letsencrypt-staging.crt
 # shellcheck disable=SC2034
 manifest="$(dirname "$0")/hello.yml"
 # shellcheck disable=SC2034
