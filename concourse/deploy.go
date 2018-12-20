@@ -223,7 +223,7 @@ func (client *Client) deployBoshAndPipeline(c config.Config, metadata terraform.
 
 	// Only set the self-update pipeline on AWS
 	if client.provider.IAAS() == "AWS" { //nolint
-		flyClient, err := client.flyClientFactory(fly.Credentials{
+		flyClient, err := client.flyClientFactory(client.provider, fly.Credentials{
 			Target:   c.Deployment,
 			API:      fmt.Sprintf("https://%s", c.Domain),
 			Username: bp.ConcourseUsername,
@@ -273,7 +273,7 @@ func (client *Client) updateBoshAndPipeline(c config.Config, metadata terraform.
 	// Only set the self-update pipeline on AWS
 	if client.provider.IAAS() == "AWS" { //nolint
 
-		flyClient, err := client.flyClientFactory(fly.Credentials{
+		flyClient, err := client.flyClientFactory(client.provider, fly.Credentials{
 			Target:   c.Deployment,
 			API:      fmt.Sprintf("https://%s", c.Domain),
 			Username: c.ConcourseUsername,

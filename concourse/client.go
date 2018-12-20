@@ -18,7 +18,7 @@ type Client struct {
 	provider              iaas.Provider
 	tfCLI                 terraform.CLIInterface
 	boshClientFactory     bosh.ClientFactory
-	flyClientFactory      func(fly.Credentials, io.Writer, io.Writer, []byte) (fly.IClient, error)
+	flyClientFactory      func(iaas.Provider, fly.Credentials, io.Writer, io.Writer, []byte) (fly.IClient, error)
 	certGenerator         func(constructor func(u *certs.User) (certs.AcmeClient, error), caName string, ip ...string) (*certs.Certs, error)
 	configClient          config.IClient
 	deployArgs            *deploy.Args
@@ -45,7 +45,7 @@ func NewClient(
 	provider iaas.Provider,
 	tfCLI terraform.CLIInterface,
 	boshClientFactory bosh.ClientFactory,
-	flyClientFactory func(fly.Credentials, io.Writer, io.Writer, []byte) (fly.IClient, error),
+	flyClientFactory func(iaas.Provider, fly.Credentials, io.Writer, io.Writer, []byte) (fly.IClient, error),
 	certGenerator func(constructor func(u *certs.User) (certs.AcmeClient, error), caName string, ip ...string) (*certs.Certs, error),
 	configClient config.IClient,
 	deployArgs *deploy.Args,

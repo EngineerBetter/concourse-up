@@ -283,7 +283,7 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 				awsClient,
 				terraformCLI,
 				boshClientFactory,
-				func(fly.Credentials, io.Writer, io.Writer, []byte) (fly.IClient, error) {
+				func(iaas.Provider, fly.Credentials, io.Writer, io.Writer, []byte) (fly.IClient, error) {
 					return fakeFlyClient, nil
 				},
 				certGenerator,
@@ -302,7 +302,7 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 				otherRegionClient,
 				terraformCLI,
 				boshClientFactory,
-				func(fly.Credentials, io.Writer, io.Writer, []byte) (fly.IClient, error) {
+				func(iaas.Provider, fly.Credentials, io.Writer, io.Writer, []byte) (fly.IClient, error) {
 					return fakeFlyClient, nil
 				},
 				certGenerator,

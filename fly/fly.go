@@ -14,6 +14,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/EngineerBetter/concourse-up/iaas"
+
 	"github.com/aws/aws-sdk-go/aws/session"
 
 	"github.com/EngineerBetter/concourse-up/config"
@@ -32,6 +34,7 @@ type IClient interface {
 
 // Client represents a low-level wrapper for fly
 type Client struct {
+	provider    iaas.Provider
 	tempDir     *util.TempDir
 	creds       Credentials
 	stdout      io.Writer
@@ -49,7 +52,7 @@ type Credentials struct {
 }
 
 // New returns a new fly client
-func New(creds Credentials, stdout, stderr io.Writer, versionFile []byte) (IClient, error) {
+func New(provider iaas.Provider, creds Credentials, stdout, stderr io.Writer, versionFile []byte) (IClient, error) {
 	tempDir, err := util.NewTempDir()
 	if err != nil {
 		return nil, err
@@ -85,6 +88,7 @@ func New(creds Credentials, stdout, stderr io.Writer, versionFile []byte) (IClie
 	}
 
 	return &Client{
+		provider,
 		tempDir,
 		creds,
 		stdout,

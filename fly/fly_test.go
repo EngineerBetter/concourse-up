@@ -8,6 +8,8 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/EngineerBetter/concourse-up/iaas"
+
 	"github.com/EngineerBetter/concourse-up/util"
 )
 
@@ -30,6 +32,7 @@ func TestHelperProcess(t *testing.T) {
 
 func TestClient_runFly(t *testing.T) {
 	type fields struct {
+		provider    iaas.Provider
 		tempDir     *util.TempDir
 		creds       Credentials
 		stdout      io.Writer
@@ -49,6 +52,7 @@ func TestClient_runFly(t *testing.T) {
 	}{{
 		name: "sync",
 		fields: fields{
+			provider:    nil,
 			tempDir:     tmpDir,
 			creds:       Credentials{},
 			stdout:      nil,
@@ -66,6 +70,7 @@ func TestClient_runFly(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			client := &Client{
+				provider:    tt.fields.provider,
 				tempDir:     tt.fields.tempDir,
 				creds:       tt.fields.creds,
 				stdout:      tt.fields.stdout,
