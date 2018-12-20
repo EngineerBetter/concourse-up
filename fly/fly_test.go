@@ -32,12 +32,13 @@ func TestHelperProcess(t *testing.T) {
 
 func TestClient_runFly(t *testing.T) {
 	type fields struct {
-		provider    iaas.Provider
-		tempDir     *util.TempDir
-		creds       Credentials
-		stdout      io.Writer
-		stderr      io.Writer
-		versionFile []byte
+		pipelineParams PipelineParams
+		provider       iaas.Provider
+		tempDir        *util.TempDir
+		creds          Credentials
+		stdout         io.Writer
+		stderr         io.Writer
+		versionFile    []byte
 	}
 	type args struct {
 		args []string
@@ -52,12 +53,13 @@ func TestClient_runFly(t *testing.T) {
 	}{{
 		name: "sync",
 		fields: fields{
-			provider:    nil,
-			tempDir:     tmpDir,
-			creds:       Credentials{},
-			stdout:      nil,
-			stderr:      nil,
-			versionFile: nil,
+			pipelineParams: nil,
+			provider:       nil,
+			tempDir:        tmpDir,
+			creds:          Credentials{},
+			stdout:         nil,
+			stderr:         nil,
+			versionFile:    nil,
 		},
 		args:      args{[]string{"sync"}},
 		cmdOutput: "syncing",

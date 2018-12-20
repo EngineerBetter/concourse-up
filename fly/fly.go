@@ -3,6 +3,7 @@ package fly
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -34,12 +35,13 @@ type IClient interface {
 
 // Client represents a low-level wrapper for fly
 type Client struct {
-	provider    iaas.Provider
-	tempDir     *util.TempDir
-	creds       Credentials
-	stdout      io.Writer
-	stderr      io.Writer
-	versionFile []byte
+	pipelineParams PipelineParams
+	provider       iaas.Provider
+	tempDir        *util.TempDir
+	creds          Credentials
+	stdout         io.Writer
+	stderr         io.Writer
+	versionFile    []byte
 }
 
 // Credentials represents credentials needed to connect to concourse
@@ -87,7 +89,17 @@ func New(provider iaas.Provider, creds Credentials, stdout, stderr io.Writer, ve
 		return nil, err
 	}
 
+	var pipelineParams PipelineParams
+
+	switch provider.IAAS() {
+	case "AWS":
+		pipelineParams = NewAWSPipelineParams()
+	default:
+		return nil, errors.New("fly.go: IAAS not recognised")
+
+	}
 	return &Client{
+		pipelineParams,
 		provider,
 		tempDir,
 		creds,
@@ -190,7 +202,7 @@ func (client *Client) writePipelineConfig(pipelinePath string, config config.Con
 	}
 	defer fileHandler.Close()
 
-	params, err := client.buildDefaultPipelineParams(config)
+	params, err := client.pipelineParams.BuildPipelineParams(config)
 	if err != nil {
 		return err
 	}
