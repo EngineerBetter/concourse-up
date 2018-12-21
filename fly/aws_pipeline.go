@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"github.com/EngineerBetter/concourse-up/config"
+	"github.com/EngineerBetter/concourse-up/util"
 	"github.com/aws/aws-sdk-go/aws/session"
 )
 
@@ -80,6 +81,11 @@ func (a AWSPipeline) BuildPipelineParams(config config.Config) (Pipeline, error)
 func (a AWSPipeline) GetConfigTemplate() string {
 	return awsPipelineTemplate
 
+}
+
+// Indent is a helper function to indent the field a given number of spaces
+func (a AWSPipeline) Indent(countStr, field string) string {
+	return util.Indent(countStr, field)
 }
 
 const awsPipelineTemplate = `

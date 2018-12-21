@@ -6,4 +6,5 @@ import "github.com/EngineerBetter/concourse-up/config"
 type Pipeline interface {
 	BuildPipelineParams(config config.Config) (Pipeline, error)
 	GetConfigTemplate() string
+	Indent(countStr, field string) string
 }
