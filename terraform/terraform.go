@@ -185,7 +185,15 @@ func (c *CLI) Destroy(config InputVars) error {
 
 	defer os.RemoveAll(terraformConfigPath)
 
-	cmd := c.execCmd(c.Path, "destroy", "-auto-approve")
+	// A temporary fix for terraform destroy issues on gcp
+	var cmd *exec.Cmd
+	switch c.iaas {
+	case awsConst:
+		cmd = c.execCmd(c.Path, "destroy", "-auto-approve")
+	case gcpConst:
+		cmd = c.execCmd(c.Path, "destroy", "-auto-approve", "--parallelism=1")
+	}
+
 	cmd.Dir = terraformConfigPath
 	cmd.Stderr = os.Stderr
 	cmd.Stdout = os.Stdout
