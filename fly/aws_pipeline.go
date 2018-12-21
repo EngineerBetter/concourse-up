@@ -187,5 +187,5 @@ jobs:
 
           cd concourse-up-release
           chmod +x concourse-up-linux-amd64
-		  ./concourse-up-linux-amd64 deploy $DEPLOYMENT
-		  `
+          ./concourse-up-linux-amd64 deploy $DEPLOYMENT
+`
