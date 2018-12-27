@@ -191,7 +191,7 @@ func (c *CLI) Destroy(config InputVars) error {
 	case awsConst:
 		cmd = c.execCmd(c.Path, "destroy", "-auto-approve")
 	case gcpConst:
-		cmd = c.execCmd(c.Path, "destroy", "-auto-approve", "--parallelism=1")
+		cmd = c.execCmd(c.Path, "destroy", "-auto-approve", "-parallelism=1")
 	}
 
 	cmd.Dir = terraformConfigPath
