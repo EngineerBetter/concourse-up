@@ -80,13 +80,14 @@ func (client *Client) FetchInfo() (*Info, error) {
 			"Deployment":         config.Deployment,
 			"ConfigBucket":       config.ConfigBucket,
 			"DBName":             config.RDSDefaultDatabaseName,
-			"DBTier":             "db-f1-micro",
+			"DBTier":             "db-g1-small",
 			"DBPassword":         config.RDSPassword,
 			"DBUsername":         config.RDSUsername,
 		})
 		if err1 != nil {
 			return nil, err1
 		}
+		gatewayUser = "jumpbox"
 	}
 	err = client.tfCLI.BuildOutput(environment, metadata)
 	if err != nil {

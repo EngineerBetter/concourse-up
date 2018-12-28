@@ -68,7 +68,7 @@ func assertDatabaseExists(desired string, databases []map[string]interface{}, t 
 }
 
 func setup(dbName string, t *testing.T) {
-	_, errStr, err := runCommand("gcloud", "sql", "instances", "create", dbName, "--tier=db-f1-micro", "--database-version=POSTGRES_9_6", "--region=europe-west1")
+	_, errStr, err := runCommand("gcloud", "sql", "instances", "create", dbName, "--tier=db-g1-small", "--database-version=POSTGRES_9_6", "--region=europe-west1")
 	re := `ERROR: \(gcloud\.sql\.instances\.create\).*is taking longer than expected. You can continue waiting for the operation by running`
 	r, _ := regexp.Compile(re)
 	match := r.MatchString(errStr)
