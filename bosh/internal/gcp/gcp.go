@@ -31,9 +31,10 @@ type Environment struct {
 	GcpCredentialsJSON string
 	ExternalIP         string
 	Preemptible        bool
+	PublicKey          string
 }
 
-var allOperations = resource.GCPCPIOps + resource.GCPExternalIPOps + resource.GCPDirectorCustomOps
+var allOperations = resource.GCPCPIOps + resource.GCPExternalIPOps + resource.GCPDirectorCustomOps + resource.GCPJumpboxUserOps
 
 // ConfigureDirectorManifestCPI interpolates all the Environment parameters and
 // required release versions into ready to use Director manifest
@@ -56,6 +57,7 @@ func (e Environment) ConfigureDirectorManifestCPI(manifest string) (string, erro
 		"gcp_credentials_json": string(gcpCreds),
 		"external_ip":          e.ExternalIP,
 		"preemptible":          false,
+		"public_key":           e.PublicKey,
 	})
 }
 

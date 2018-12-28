@@ -15,9 +15,10 @@ import (
 
 // Info represents the compound fields for info templates
 type Info struct {
-	Terraform TerraformInfo   `json:"terraform"`
-	Config    config.Config   `json:"config"`
-	Instances []bosh.Instance `json:"instances"`
+	Terraform   TerraformInfo   `json:"terraform"`
+	Config      config.Config   `json:"config"`
+	Instances   []bosh.Instance `json:"instances"`
+	GatewayUser string
 }
 
 // TerraformInfo represents the terraform output fields needed for the info templates
@@ -28,6 +29,7 @@ type TerraformInfo struct {
 
 // FetchInfo fetches and builds the info
 func (client *Client) FetchInfo() (*Info, error) {
+	var gatewayUser string
 	config, err := client.configClient.Load()
 	if err != nil {
 		return nil, err
@@ -61,6 +63,7 @@ func (client *Client) FetchInfo() (*Info, error) {
 		if err != nil {
 			return nil, err
 		}
+		gatewayUser = "vcap"
 	case gcpConst: // nolint
 		project, err1 := client.provider.Attr("project")
 		if err1 != nil {
@@ -143,9 +146,10 @@ func (client *Client) FetchInfo() (*Info, error) {
 	}
 
 	return &Info{
-		Terraform: terraformInfo,
-		Config:    config,
-		Instances: instances,
+		Terraform:   terraformInfo,
+		Config:      config,
+		Instances:   instances,
+		GatewayUser: gatewayUser,
 	}, nil
 }
 
@@ -233,7 +237,7 @@ export BOSH_CA_CERT='{{.Config.DirectorCACert}}'
 export BOSH_DEPLOYMENT=concourse
 export BOSH_CLIENT={{.Config.DirectorUsername}}
 export BOSH_CLIENT_SECRET={{.Config.DirectorPassword}}
-export BOSH_GW_USER=vcap
+export BOSH_GW_USER={{.GatewayUser}}
 export BOSH_GW_PRIVATE_KEY={{.Config.PrivateKey | to_file}}
 export CREDHUB_SERVER={{.Config.CredhubURL}}
 export CREDHUB_CA_CERT='{{.Config.CredhubCACert}}'

@@ -89,6 +89,7 @@ func (client *GCPClient) createEnv(bosh *boshenv.BOSHCLI, state, creds []byte) (
 		GcpCredentialsJSON: credentialsPath,
 		ExternalIP:         directorPublicIP,
 		Preemptible:        false,
+		PublicKey:          client.config.PublicKey,
 	}, client.config.DirectorPassword, client.config.DirectorCert, client.config.DirectorKey, client.config.DirectorCACert, tags)
 	if err1 != nil {
 		return store["state.json"], store["vars.yaml"], err1
