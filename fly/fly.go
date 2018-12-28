@@ -34,7 +34,6 @@ type IClient interface {
 // Client represents a low-level wrapper for fly
 type Client struct {
 	pipeline    Pipeline
-	provider    iaas.Provider
 	tempDir     *util.TempDir
 	creds       Credentials
 	stdout      io.Writer
