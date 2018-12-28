@@ -221,26 +221,23 @@ func (client *Client) deployBoshAndPipeline(c config.Config, metadata terraform.
 		return bp, err
 	}
 
-	// Only set the self-update pipeline on AWS
-	if client.provider.IAAS() == "AWS" { //nolint
-		flyClient, err := client.flyClientFactory(client.provider, fly.Credentials{
-			Target:   c.Deployment,
-			API:      fmt.Sprintf("https://%s", c.Domain),
-			Username: bp.ConcourseUsername,
-			Password: bp.ConcoursePassword,
-		},
-			client.stdout,
-			client.stderr,
-			client.versionFile,
-		)
-		if err != nil {
-			return bp, err
-		}
-		defer flyClient.Cleanup()
+	flyClient, err := client.flyClientFactory(client.provider, fly.Credentials{
+		Target:   c.Deployment,
+		API:      fmt.Sprintf("https://%s", c.Domain),
+		Username: bp.ConcourseUsername,
+		Password: bp.ConcoursePassword,
+	},
+		client.stdout,
+		client.stderr,
+		client.versionFile,
+	)
+	if err != nil {
+		return bp, err
+	}
+	defer flyClient.Cleanup()
 
-		if err := flyClient.SetDefaultPipeline(c, false); err != nil {
-			return bp, err
-		}
+	if err := flyClient.SetDefaultPipeline(c, false); err != nil {
+		return bp, err
 	}
 
 	// This assignment is necessary for the deploy success message

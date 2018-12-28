@@ -8,8 +8,6 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/EngineerBetter/concourse-up/iaas"
-
 	"github.com/EngineerBetter/concourse-up/util"
 )
 
