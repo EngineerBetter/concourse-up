@@ -11,7 +11,7 @@ inputs:
 - name: release
 
 run:
-  path: concourse-up/ci/tasks/system-test-options.sh
+  path: concourse-up/ci/tasks/system-test-options-and-destroy.sh
 
 params:
   AWS_ACCESS_KEY_ID:
