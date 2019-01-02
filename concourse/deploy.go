@@ -624,13 +624,14 @@ func (client *Client) setHostedZone(c config.Config, domain string) (HostedZone,
 	return zone, err
 }
 
+//Temporarily sets the IAAS flag just for GCP as we are still defaulting to AWS
 const deployMsg = `DEPLOY SUCCESSFUL. Log in with:
 fly --target {{.Project}} login{{if not .ConcourseUserProvidedCert}} --insecure{{end}} --concourse-url https://{{.Domain}} --username {{.ConcourseUsername}} --password {{.ConcoursePassword}}
 
 Metrics available at https://{{.Domain}}:3000 using the same username and password
 
 Log into credhub with:
-eval "$(concourse-up info {{.Project}} --region {{.Region}} --env)"
+eval "$(concourse-up info {{.Project}} --region {{.Region}} {{ if eq .IAAS "gcp" }} --iaas GCP {{ end }} --env)"
 `
 
 func writeDeploySuccessMessage(config config.Config, metadata terraform.IAASMetadata, stdout io.Writer) error {
