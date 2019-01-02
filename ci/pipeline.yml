@@ -445,8 +445,7 @@ jobs:
       - system-test-update
       - system-test-m5
       - system-test-letsencrypt
-      - system-test-destroy
-      - system-test-options
+      - system-test-options-and-destroy
     - get: concourse-up
       passed: *aws-system-tests
     - get: concourse-up-ops
@@ -681,8 +680,7 @@ jobs:
   - system-test-update
   - system-test-m5
   - system-test-letsencrypt
-  - system-test-destroy
-  - system-test-options
+  - system-test-options-and-destroy
   plan:
   - aggregate:
     - get: concourse-up
