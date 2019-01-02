@@ -10,8 +10,7 @@ groups:
   - system-test-update
   - system-test-m5
   - system-test-letsencrypt
-  - system-test-destroy
-  - system-test-options
+  - system-test-options-and-destroy
   - smoke-test-gcp
   - system-test-gcp
   - auto
@@ -413,33 +412,14 @@ jobs:
         text: |
           <!channel> Concourse Up system letsencrypt test failure!
 
-- name: system-test-destroy
+- name: system-test-options-and-destroy
   serial_groups:
-  - system-test-destroy
+  - system-test-options-and-destroy
   serial: true
   plan:
   - aggregate: *system-test-gets
-  - task: system-test-destroy
-    file: concourse-up/ci/tasks/system-test-destroy.yml
-    params:
-      AWS_ACCESS_KEY_ID: ((concourse_up_test_access_key_id))
-      AWS_SECRET_ACCESS_KEY: ((concourse_up_test_secret_key))
-      BINARY_PATH: binary-linux/concourse-up-linux-amd64
-    on_failure:
-      put: slack-alert
-      params:
-        channel: "#integrations"
-        text: |
-          <!channel> Concourse Up system-test-destroy failure!
-
-- name: system-test-options
-  serial_groups:
-  - system-test-options
-  serial: true
-  plan:
-  - aggregate: *system-test-gets
-  - task: system-test-options
-    file: concourse-up/ci/tasks/system-test-options.yml
+  - task: system-test-options-and-destroy
+    file: concourse-up/ci/tasks/system-test-options-and-destroy.yml
     params:
       AWS_ACCESS_KEY_ID: ((concourse_up_test_access_key_id))
       AWS_SECRET_ACCESS_KEY: ((concourse_up_test_secret_key))
@@ -453,7 +433,7 @@ jobs:
       params:
         channel: "#integrations"
         text: |
-          <!channel> Concourse Up system-test-options failure!
+          <!channel> Concourse Up system-test-options-and-destroy failure!
 
 - name: auto
   serial: true

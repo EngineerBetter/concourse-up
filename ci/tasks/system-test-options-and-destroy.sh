@@ -26,6 +26,9 @@ source concourse-up/ci/tasks/lib/github-auth.sh
 source concourse-up/ci/tasks/lib/tags.sh
 # shellcheck disable=SC1091
 source concourse-up/ci/tasks/lib/credhub.sh
+# shellcheck disable=SC1091
+source concourse-up/ci/tasks/lib/destroy.sh
+
 
 cp "$BINARY_PATH" ./cup
 chmod +x ./cup
@@ -36,3 +39,9 @@ addTagsFlagsToArgs
 assertTagsSet
 assertGitHubAuthConfigured
 assertPipelinesCanReadFromCredhub
+sleep 60
+recordDeployedState
+echo "non-interactive destroy"
+./cup --non-interactive destroy --region us-east-1 "$deployment"
+sleep 180
+assertEverythingDeleted
