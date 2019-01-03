@@ -1,6 +1,7 @@
 package fly
 
 import (
+	"io/ioutil"
 	"strings"
 
 	"github.com/EngineerBetter/concourse-up/config"
@@ -10,7 +11,7 @@ import (
 // GCPPipeline is GCP specific implementation of Pipeline interface
 type GCPPipeline struct {
 	GCPDefaultRegion     string
-	GCPCredsPath         string
+	GCPCreds             string
 	Deployment           string
 	FlagGCPRegion        string
 	FlagDomain           string
@@ -26,10 +27,14 @@ type GCPPipeline struct {
 }
 
 // NewGCPPipeline return GCPPipeline
-func NewGCPPipeline(credsPath string) Pipeline {
-	return GCPPipeline{
-		GCPCredsPath: credsPath,
+func NewGCPPipeline(credsPath string) (Pipeline, error) {
+	creds, err := readFileContents(credsPath)
+	if err != nil {
+		return nil, err
 	}
+	return GCPPipeline{
+		GCPCreds: creds,
+	}, nil
 }
 
 //BuildPipelineParams builds params for AWS concourse-up self update pipeline
@@ -48,9 +53,8 @@ func (a GCPPipeline) BuildPipelineParams(config config.Config) (Pipeline, error)
 		concourseCert = config.ConcourseCert
 		concourseKey = config.ConcourseKey
 	}
-
-	return GCPPipeline{
-		GCPCredsPath:         a.GCPCredsPath,
+	tempPipe := GCPPipeline{
+		GCPCreds:             a.GCPCreds,
 		Deployment:           strings.TrimPrefix(config.Deployment, "concourse-up-"),
 		FlagGCPRegion:        config.Region,
 		FlagDomain:           domain,
@@ -63,7 +67,8 @@ func (a GCPPipeline) BuildPipelineParams(config config.Config) (Pipeline, error)
 		FlagWorkers:          config.ConcourseWorkerCount,
 		ConcourseUpVersion:   ConcourseUpVersion,
 		Namespace:            config.Namespace,
-	}, nil
+	}
+	return tempPipe, nil
 }
 
 // GetConfigTemplate returns template for AWS Concourse Up self update pipeline
@@ -75,6 +80,14 @@ func (a GCPPipeline) GetConfigTemplate() string {
 // Indent is a helper function to indent the field a given number of spaces
 func (a GCPPipeline) Indent(countStr, field string) string {
 	return util.Indent(countStr, field)
+}
+
+func readFileContents(path string) (string, error) {
+	content, err := ioutil.ReadFile(path)
+	if err != nil {
+		return "", err
+	}
+	return string(content), nil
 }
 
 const gcpPipelineTemplate = `
@@ -111,10 +124,10 @@ jobs:
       DEPLOYMENT: "{{ .Deployment }}"
       GITHUB_AUTH_CLIENT_ID: "{{ .FlagGithubAuthID }}"
       GITHUB_AUTH_CLIENT_SECRET: "{{ .FlagGithubAuthSecret }}"
-      GOOGLE_APPLICATION_CREDENTIALS: "{{ .GCPCredsPath }}"
       IAAS: GCP
       SELF_UPDATE: true
       NAMESPACE: {{ .Namespace }}
+      GCPCreds: '{{ .GCPCreds }}'
     config:
       platform: linux
       image_resource:
@@ -128,9 +141,10 @@ jobs:
         args:
         - -c
         - |
-          set -eux
-
           cd concourse-up-release
+          echo "${GCPCreds}" > googlecreds.json
+          export GOOGLE_APPLICATION_CREDENTIALS=$PWD/googlecreds.json
+          set -eux
           chmod +x concourse-up-linux-amd64
           ./concourse-up-linux-amd64 deploy $DEPLOYMENT
 - name: renew-cert
@@ -138,7 +152,7 @@ jobs:
   serial: true
   plan:
   - get: concourse-up-release
-    version: {tag: {{ .ConcourseUpVersion }} }
+    version: {tag: "{{ .ConcourseUpVersion }}" }
   - get: every-month
     trigger: true
   - task: update
@@ -155,10 +169,10 @@ jobs:
       DEPLOYMENT: "{{ .Deployment }}"
       GITHUB_AUTH_CLIENT_ID: "{{ .FlagGithubAuthID }}"
       GITHUB_AUTH_CLIENT_SECRET: "{{ .FlagGithubAuthSecret }}"
-      GOOGLE_APPLICATION_CREDENTIALS: "{{ .GCPCredsPath }}"
       IAAS: GCP
       SELF_UPDATE: true
-      NAMESPACE: {{ .Namespace }}
+      NAMESPACE: "{{ .Namespace }}"
+      GCPCreds: '{{ .GCPCreds }}'
     config:
       platform: linux
       image_resource:
@@ -172,8 +186,9 @@ jobs:
         args:
         - -c
         - |
+          echo "${GCPCreds}" > googlecreds.json
+          export GOOGLE_APPLICATION_CREDENTIALS=$PWD/googlecreds.json
           set -eux
-
           cd concourse-up-release
           chmod +x concourse-up-linux-amd64
           ./concourse-up-linux-amd64 deploy $DEPLOYMENT
