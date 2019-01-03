@@ -37,10 +37,8 @@ function assertEverythingDeleted() {
     echo "RDS instance check for $rds_instance_name returned exit code of $RdsExitCode (expecting non-zero)"
     if [ "$RdsExitCode" -ne 0 ]
     then
-      echo "Success: Exit code not zero"
-    exit 0
+      exit 0
     else
-    echo "Failure: Exit code zero"
       exit 1
     fi
 }

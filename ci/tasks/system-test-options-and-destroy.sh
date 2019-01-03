@@ -45,3 +45,4 @@ echo "non-interactive destroy"
 ./cup --non-interactive destroy --region us-east-1 "$deployment"
 sleep 180
 assertEverythingDeleted
+exit 0
