@@ -35,6 +35,12 @@ function assertEverythingDeleted() {
     set -oe pipefail
 
     echo "RDS instance check for $rds_instance_name returned exit code of $RdsExitCode (expecting non-zero)"
-    [ "$RdsExitCode" -ne 0 ]
+    if [ "$RdsExitCode" -ne 0 ]
+    then
+      echo "Success: Exit code not zero"
     exit 0
+    else
+    echo "Failure: Exit code zero"
+      exit 1
+    fi
 }
