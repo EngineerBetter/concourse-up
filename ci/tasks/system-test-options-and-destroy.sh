@@ -12,12 +12,6 @@ set -euo pipefail
 
 deployment="systest-github-$RANDOM"
 
-set +u
-# shellcheck disable=SC2034
-region=us-east-1
-trapCustomCleanup us-east-1
-set -u
-
 # Create empty array of args that is used in sourced setup functions
 args=()
 # shellcheck disable=SC1091
@@ -45,4 +39,3 @@ echo "non-interactive destroy"
 ./cup --non-interactive destroy --region us-east-1 "$deployment"
 sleep 180
 assertEverythingDeleted
-exit 0
