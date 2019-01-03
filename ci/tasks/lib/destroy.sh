@@ -29,10 +29,10 @@ function assertEverythingDeleted() {
     [ "$instances_count" -eq 0 ]
 
     echo "Check that the RDS instance has been deleted"
-    set +e
+    set +oe pipefail
     aws rds describe-db-instances --region us-east-1 --db-instance-identifier "$rds_instance_name"
     RdsExitCode=$?
-    set -e
+    set -oe pipefail
 
     echo "RDS instance check for $rds_instance_name returned exit code of $RdsExitCode (expecting non-zero)"
     [ "$RdsExitCode" -ne 0 ]
