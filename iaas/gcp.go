@@ -275,11 +275,17 @@ func (g *GCPProvider) DeleteVMsInDeployment(zone, project, deployment string) er
 			name := instance.Name
 			networkName := instance.NetworkInterfaces[0].Network
 			// delete all instances in deployment's network apart from nat instance
-			if !strings.HasSuffix(name, "nat-instance") && strings.HasSuffix(networkName, fmt.Sprintf("%s-bosh-network", deployment)) {
-				fmt.Printf("Deleting instance %+v\n", name)
-				_, err := computeService.Instances.Delete(project, zone, name).Context(ctx).Do()
-				if err != nil {
-					return err
+			if strings.HasSuffix(networkName, fmt.Sprintf("%s-bosh-network", deployment)) {
+				for _, disk := range instance.Disks {
+					fmt.Printf("Marking instance %s volume for deletion\n", name)
+					computeService.Instances.SetDiskAutoDelete(project, zone, name, true, disk.DeviceName).Context(ctx).Do()
+				}
+				if !strings.HasSuffix(name, "nat-instance") {
+					fmt.Printf("Deleting instance %+v\n", name)
+					_, err := computeService.Instances.Delete(project, zone, name).Context(ctx).Do()
+					if err != nil {
+						return err
+					}
 				}
 			}
 		}
