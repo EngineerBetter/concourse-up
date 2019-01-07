@@ -17,8 +17,8 @@ import (
 
 func TestGCPProvider_CreateDatabases(t *testing.T) {
 	dbName := util.EightRandomLetters()
-	setup(dbName, t)
-	defer cleanup(dbName)
+	setupCreateDatabases(dbName, t)
+	defer cleanupCreateDatabases(dbName)
 
 	_, passwordErr, err := runCommand("gcloud", "sql", "users", "set-password", "postgres", "--instance", dbName, "--password", "password")
 	failIfErr(t, err, "Unable to set password with err [%v] and stderr [%v]", passwordErr)
@@ -67,7 +67,7 @@ func assertDatabaseExists(desired string, databases []map[string]interface{}, t 
 	t.Fatalf("Did not find database %v in %+v", desired, databases)
 }
 
-func setup(dbName string, t *testing.T) {
+func setupCreateDatabases(dbName string, t *testing.T) {
 	_, errStr, err := runCommand("gcloud", "sql", "instances", "create", dbName, "--tier=db-g1-small", "--database-version=POSTGRES_9_6", "--region=europe-west1")
 	re := `ERROR: \(gcloud\.sql\.instances\.create\).*is taking longer than expected. You can continue waiting for the operation by running`
 	r, _ := regexp.Compile(re)
@@ -86,7 +86,7 @@ func setup(dbName string, t *testing.T) {
 	}
 }
 
-func cleanup(dbName string) {
+func cleanupCreateDatabases(dbName string) {
 	if _, skipTeardown := os.LookupEnv("SKIP_TEARDOWN"); skipTeardown {
 		fmt.Println("Skipping teardown")
 		return
