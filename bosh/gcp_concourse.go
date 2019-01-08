@@ -141,7 +141,7 @@ func (client *GCPClient) deployConcourse(creds []byte, detach bool) (newCreds []
 	if err == nil {
 		err = err1
 	}
-	return []byte{}, err
+	return
 }
 
 func (client *GCPClient) buildTagsYaml(project interface{}, component string) (string, error) {
