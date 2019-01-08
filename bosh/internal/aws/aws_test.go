@@ -8,6 +8,8 @@ import (
 	"regexp"
 	"strings"
 	"testing"
+	"text/template"
+	"text/template/parse"
 
 	"github.com/EngineerBetter/concourse-up/resource"
 	"github.com/aws/aws-sdk-go/aws/awserr"
@@ -279,6 +281,58 @@ func TestEnvironment_ConfigureDirectorCloudConfig(t *testing.T) {
 			}
 		})
 	}
+}
+
+func listTemplFields(t *template.Template) map[string]int {
+	m := make(map[string]int)
+	return listNodeFields(t.Tree.Root, m)
+}
+
+func listNodeFields(node parse.Node, res map[string]int) map[string]int {
+	if node.Type() == parse.NodeIf {
+		var re = regexp.MustCompile(`{{(if|if eq)?\s\.(\w+)(}}|\s)`)
+		res[re.FindStringSubmatch(node.String())[2]] = 1
+	}
+
+	if node.Type() == parse.NodeAction {
+		var re = regexp.MustCompile(`{{\.(.*)}}`)
+		res[re.FindStringSubmatch(node.String())[1]] = 1
+	}
+	if ln, ok := node.(*parse.ListNode); ok {
+		for _, n := range ln.Nodes {
+			res = listNodeFields(n, res)
+		}
+	}
+	return res
+}
+
+func matchStructFields(c interface{}, res map[string]int) map[string]int {
+	e := reflect.TypeOf(c)
+
+	for i := 0; i < e.NumField(); i++ {
+		varName := e.Field(i).Name
+		if res[varName] == 0 {
+			res[varName] = -1
+		} else {
+			res[varName]++
+		}
+	}
+	return res
+}
+
+func Test_CloudConfigStructureTest(t *testing.T) {
+	t.Run("validating structure", func(t *testing.T) {
+		templ, err := template.New("template").Option("missingkey=error").Parse(resource.AWSDirectorCloudConfig)
+		if err != nil {
+			t.Errorf("cannot parse the template")
+		}
+		emptyAwsCloudConfigParams := awsCloudConfigParams{}
+		for k, v := range matchStructFields(emptyAwsCloudConfigParams, listTemplFields(templ)) {
+			if v < 2 {
+				t.Errorf("Field with key name %s is not mapped properly", k)
+			}
+		}
+	})
 }
 
 func TestEnvironment_ConfigureConcourseStemcell(t *testing.T) {

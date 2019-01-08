@@ -64,7 +64,6 @@ func (e Environment) ConfigureDirectorManifestCPI(manifest string) (string, erro
 type gcpCloudConfigParams struct {
 	Zone              string
 	Preemptible       bool
-	PublicSubnetID    string
 	PublicSubnetwork  string
 	PrivateSubnetwork string
 	Network           string
