@@ -85,9 +85,9 @@ type Metadata struct {
 	DirectorAccountCreds       MetadataStringValue `json:"director_account_creds" valid:"required"`
 	DirectorPublicIP           MetadataStringValue `json:"director_public_ip" valid:"required"`
 	BoshDBAddress              MetadataStringValue `json:"bosh_db_address" valid:"required"`
-	SQLCACert                  MetadataStringValue `json:"sql_ca_cert" valid:"required"`
 	DBName                     MetadataStringValue `json:"db_name" valid:"required"`
 	NatGatewayIP               MetadataStringValue `json:"nat_gateway_ip" valid:"required"`
+	SQLServerCert              MetadataStringValue `json:"server_ca_cert" valid:"required"`
 }
 
 // AssertValid returns an error if the struct contains any missing fields
