@@ -42,18 +42,19 @@ then
     ./cup deploy "${args[@]}" $deployment
     assertTagsSet
     assertGitHubAuthConfigured
-    assertPipelinesCanReadFromCredhub
-    sleep 60
-    recordDeployedState
-    echo "non-interactive destroy"
-    ./cup --non-interactive destroy --region us-east-1 "$deployment"
+    # shellcheck disable=SC2034
+    region=us-east-1
+    
 elif [ "$IAAS" = "GCP" ]
 then
+    # shellcheck disable=SC2034
+    region=europe-west1
     ./cup deploy $deployment -iaas gcp
-    sleep 60
-    recordDeployedState
-    echo "non-interactive destroy"
-    ./cup --non-interactive destroy "$deployment" -iaas gcp
 fi
+assertPipelinesCanReadFromCredhub
+sleep 60
+recordDeployedState
+echo "non-interactive destroy"
+./cup --non-interactive destroy "$deployment" -iaas "$IAAS" --region "$region"
 sleep 180
 assertEverythingDeleted
