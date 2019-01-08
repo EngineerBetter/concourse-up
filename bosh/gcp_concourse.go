@@ -10,65 +10,66 @@ func (client *GCPClient) deployConcourse(creds []byte, detach bool) (newCreds []
 
 	concourseManifestPath, err := client.director.SaveFileToWorkingDir(concourseManifestFilename, awsConcourseManifest)
 	if err != nil {
-		return
+		return []byte{}, err
 	}
 
 	concourseVersionsPath, err := client.director.SaveFileToWorkingDir(concourseVersionsFilename, awsConcourseVersions)
 	if err != nil {
-		return
+		return []byte{}, err
 	}
 
 	concourseSHAsPath, err := client.director.SaveFileToWorkingDir(concourseSHAsFilename, awsConcourseSHAs)
 	if err != nil {
-		return
+		return []byte{}, err
 	}
 
 	concourseCompatibilityPath, err := client.director.SaveFileToWorkingDir(concourseCompatibilityFilename, awsConcourseCompatibility)
 	if err != nil {
-		return
+		return []byte{}, err
 	}
 
 	concourseGrafanaPath, err := client.director.SaveFileToWorkingDir(concourseGrafanaFilename, awsConcourseGrafana)
 	if err != nil {
-		return
+		return []byte{}, err
 	}
 
 	concourseGitHubAuthPath, err := client.director.SaveFileToWorkingDir(concourseGitHubAuthFilename, awsConcourseGitHubAuth)
 	if err != nil {
-		return
+		return []byte{}, err
+	}
+
+	uaaCertPath, err := client.director.SaveFileToWorkingDir(uaaCertFilename, uaaCert)
+	if err != nil {
+		return []byte{}, err
 	}
 
 	credsPath, err := client.director.SaveFileToWorkingDir(credsFilename, creds)
 	if err != nil {
-		return
+		return []byte{}, err
 	}
 
 	extraTagsPath, err := client.director.SaveFileToWorkingDir(extraTagsFilename, extraTags)
 	if err != nil {
-		return nil, err
+		return []byte{}, err
 	}
 
-	noSSLPath, err := client.director.SaveFileToWorkingDir(noSSLFilename, gcpNoSSL)
-	if err != nil {
-		return nil, err
-	}
 	boshDBAddress, err := client.metadata.Get("BoshDBAddress")
 	if err != nil {
-		return nil, err
+		return []byte{}, err
 	}
 	atcPublicIP, err := client.metadata.Get("ATCPublicIP")
 	if err != nil {
-		return nil, err
+		return []byte{}, err
 	}
 
 	networkName, err := client.metadata.Get("Network")
 	if err != nil {
-		return nil, err
+		return []byte{}, err
 	}
 
-	sqlCaCert, err := client.metadata.Get("SQLCACert")
+	SQLServerCert, err := client.metadata.Get("SQLServerCert")
 	if err != nil {
-		return nil, err
+		return []byte{}, err
 	}
 
 	vmap := map[string]interface{}{
@@ -81,7 +82,7 @@ func (client *GCPClient) deployConcourse(creds []byte, detach bool) (newCreds []
 		"postgres_role":            client.config.RDSUsername,
 		"postgres_port":            "5432",
 		"postgres_password":        client.config.RDSPassword,
-		"postgres_ca_cert":         sqlCaCert,
+		"postgres_ca_cert":         SQLServerCert,
 		"web_vm_type":              "concourse-web-" + client.config.ConcourseWebSize,
 		"worker_vm_type":           "concourse-" + client.config.ConcourseWorkerSize,
 		"worker_count":             client.config.ConcourseWorkerCount,
@@ -106,7 +107,7 @@ func (client *GCPClient) deployConcourse(creds []byte, detach bool) (newCreds []
 		"--ops-file",
 		concourseCompatibilityPath,
 		"--ops-file",
-		noSSLPath,
+		uaaCertPath,
 		"--vars-file",
 		concourseGrafanaPath,
 	}
@@ -123,7 +124,7 @@ func (client *GCPClient) deployConcourse(creds []byte, detach bool) (newCreds []
 
 	t, err1 := client.buildTagsYaml(vmap["project"], "concourse")
 	if err1 != nil {
-		return nil, err
+		return []byte{}, err
 	}
 	vmap["tags"] = t
 	flagFiles = append(flagFiles, "--ops-file", extraTagsPath)
@@ -140,7 +141,7 @@ func (client *GCPClient) deployConcourse(creds []byte, detach bool) (newCreds []
 	if err == nil {
 		err = err1
 	}
-	return
+	return []byte{}, err
 }
 
 func (client *GCPClient) buildTagsYaml(project interface{}, component string) (string, error) {

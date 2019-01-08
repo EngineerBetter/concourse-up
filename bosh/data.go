@@ -9,7 +9,7 @@ const concourseGrafanaFilename = "grafana_dashboard.yml"
 const concourseCompatibilityFilename = "cup_compatibility.yml"
 const concourseGitHubAuthFilename = "github-auth.yml"
 const extraTagsFilename = "extra_tags.yml"
-const noSSLFilename = "no-ssl.yml"
+const uaaCertFilename = "uaa-cert.yml"
 
 //go:generate go-bindata -pkg $GOPACKAGE -ignore \.git assets/... ../../concourse-up-ops/...
 var awsConcourseGrafana = MustAsset("assets/grafana_dashboard.yml")
@@ -19,4 +19,4 @@ var extraTags = MustAsset("assets/ops/extra_tags.yml")
 var awsConcourseManifest = MustAsset("../../concourse-up-ops/manifest.yml")
 var awsConcourseVersions = MustAsset("../../concourse-up-ops/ops/versions.json")
 var awsConcourseSHAs = MustAsset("../../concourse-up-ops/ops/shas.json")
-var gcpNoSSL = MustAsset("../../concourse-up-ops/director/gcp/no-ssl.yml")
+var uaaCert = MustAsset("../../concourse-up-ops/director/gcp/uaa-cert.yml")
