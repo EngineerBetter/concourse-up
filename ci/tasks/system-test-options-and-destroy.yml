@@ -14,6 +14,8 @@ run:
   path: concourse-up/ci/tasks/system-test-options-and-destroy.sh
 
 params:
+  IAAS:
+  GOOGLE_APPLICATION_CREDENTIALS_CONTENTS:
   AWS_ACCESS_KEY_ID:
   AWS_SECRET_ACCESS_KEY:
   BINARY_PATH:

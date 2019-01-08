@@ -11,6 +11,7 @@ groups:
   - system-test-m5
   - system-test-letsencrypt
   - system-test-options-and-destroy
+  - system-test-options-and-destroy-gcp
   - smoke-test-gcp
   - system-test-gcp
   - auto
@@ -421,6 +422,7 @@ jobs:
   - task: system-test-options-and-destroy
     file: concourse-up/ci/tasks/system-test-options-and-destroy.yml
     params:
+      IAAS: AWS
       AWS_ACCESS_KEY_ID: ((concourse_up_test_access_key_id))
       AWS_SECRET_ACCESS_KEY: ((concourse_up_test_secret_key))
       BINARY_PATH: binary-linux/concourse-up-linux-amd64
@@ -434,6 +436,28 @@ jobs:
         channel: "#integrations"
         text: |
           <!channel> Concourse Up system-test-options-and-destroy failure!
+- name: system-test-options-and-destroy-gcp
+  serial_groups:
+  - system-test-options-and-destroy-gcp
+  serial: true
+  plan:
+  - aggregate: *system-test-gets
+  - task: system-test-options-and-destroy
+    file: concourse-up/ci/tasks/system-test-options-and-destroy.yml
+    params:
+      GOOGLE_APPLICATION_CREDENTIALS: ((system_test_google_application_credentials))
+      IAAS: GCP
+      BINARY_PATH: binary-linux/concourse-up-linux-amd64
+      EB_WILDCARD_CERT: ((eb_wildcard.certificate))
+      EB_WILDCARD_KEY: ((eb_wildcard.private_key))
+      GITHUB_AUTH_CLIENT_ID: ((github_auth_client_id))
+      GITHUB_AUTH_CLIENT_SECRET: ((github_auth_client_secret))
+    on_failure:
+      put: slack-alert
+      params:
+        channel: "#integrations"
+        text: |
+          <!channel> Concourse Up system-test-options-and-destroy-gcp failure!
 
 - name: auto
   serial: true
