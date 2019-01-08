@@ -83,6 +83,7 @@ func (client *Client) Destroy() error {
 			"DBTier":             "db-g1-small",
 			"DBPassword":         conf.RDSPassword,
 			"DBUsername":         conf.RDSUsername,
+			"AllowIPs":           conf.AllowIPs,
 		})
 		if err1 != nil {
 			return nil

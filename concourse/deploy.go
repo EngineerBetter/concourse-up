@@ -132,6 +132,7 @@ func (client *Client) Deploy() error {
 			"DBPassword":         c.RDSPassword,
 			"DBUsername":         c.RDSUsername,
 			"DBName":             c.RDSDefaultDatabaseName,
+			"AllowIPs":           c.AllowIPs,
 		})
 		if err1 != nil {
 			return err1
