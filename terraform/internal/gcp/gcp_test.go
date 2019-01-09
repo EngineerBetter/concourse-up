@@ -136,6 +136,7 @@ func TestInputVars_Build(t *testing.T) {
 				"DBUsername":         "aDBUsername",
 				"DBPassword":         "aDBPassword",
 				"DBTier":             "aDBTier",
+				"AllowIPs":           "anIP",
 			},
 			fakeInputVars: gcp.InputVars{},
 		},
