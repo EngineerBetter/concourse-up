@@ -11,10 +11,10 @@ source concourse-up/ci/tasks/lib/id.sh
 
 [ "$VERBOSE" ] && { handleVerboseMode; }
 
-set -euo pipefail
-
 [ -z "$SYSTEM_TEST_ID" ] && { generateSystemTestId; }
 deployment="systest-$SYSTEM_TEST_ID"
+
+set -euo pipefail
 
 # Create empty array of args that is used in sourced setup functions
 args=()
