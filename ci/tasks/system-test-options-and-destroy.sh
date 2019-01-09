@@ -20,6 +20,8 @@ source concourse-up/ci/tasks/lib/github-auth.sh
 source concourse-up/ci/tasks/lib/tags.sh
 # shellcheck disable=SC1091
 source concourse-up/ci/tasks/lib/credhub.sh
+# shellcheck disable=SC1091
+source concourse-up/ci/tasks/lib/gcreds.sh
 
 # shellcheck disable=SC1091
 [ "$IAAS" = "AWS" ] && { source concourse-up/ci/tasks/lib/destroy.sh; }
@@ -44,7 +46,7 @@ then
     assertGitHubAuthConfigured
     # shellcheck disable=SC2034
     region=us-east-1
-    
+
 elif [ "$IAAS" = "GCP" ]
 then
     # shellcheck disable=SC2034

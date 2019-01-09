@@ -445,7 +445,7 @@ jobs:
   - task: system-test-options-and-destroy
     file: concourse-up/ci/tasks/system-test-options-and-destroy.yml
     params:
-      GOOGLE_APPLICATION_CREDENTIALS: ((system_test_google_application_credentials))
+      GOOGLE_APPLICATION_CREDENTIALS_CONTENTS: ((system_test_google_application_credentials))
       IAAS: GCP
       BINARY_PATH: binary-linux/concourse-up-linux-amd64
       EB_WILDCARD_CERT: ((eb_wildcard.certificate))
