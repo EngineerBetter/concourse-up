@@ -25,6 +25,7 @@ type InputVars struct {
 	DBPassword         string
 	DBTier             string
 	DBName             string
+	AllowIPs           string
 }
 
 // ConfigureTerraform interpolates terraform contents and returns terraform config
