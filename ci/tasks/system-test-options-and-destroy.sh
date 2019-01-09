@@ -6,11 +6,15 @@ source concourse-up/ci/tasks/lib/verbose.sh
 # shellcheck disable=SC1091
 source concourse-up/ci/tasks/lib/trap.sh
 
+# shellcheck disable=SC1091
+source concourse-up/ci/tasks/lib/id.sh
+
 [ "$VERBOSE" ] && { handleVerboseMode; }
 
 set -euo pipefail
 
-deployment="systest-github-$RANDOM"
+[ -z "$SYSTEM_TEST_ID" ] && { generateSystemTestId; }
+deployment="systest-$SYSTEM_TEST_ID"
 
 # Create empty array of args that is used in sourced setup functions
 args=()
