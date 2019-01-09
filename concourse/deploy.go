@@ -133,6 +133,8 @@ func (client *Client) Deploy() error {
 			"DBUsername":         c.RDSUsername,
 			"DBName":             c.RDSDefaultDatabaseName,
 			"AllowIPs":           c.AllowIPs,
+			"DNSManagedZoneName": c.HostedZoneID,
+			"DNSRecordSetPrefix": c.HostedZoneRecordPrefix,
 		})
 		if err1 != nil {
 			return err1
