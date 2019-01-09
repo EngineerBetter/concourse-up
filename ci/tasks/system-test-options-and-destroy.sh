@@ -45,6 +45,7 @@ if [ "$IAAS" = "AWS" ]
 then
     addGitHubFlagsToArgs
     addTagsFlagsToArgs
+    # shellcheck disable=SC2086
     ./cup deploy "${args[@]}" $deployment
     assertTagsSet
     assertGitHubAuthConfigured
@@ -55,6 +56,7 @@ elif [ "$IAAS" = "GCP" ]
 then
     # shellcheck disable=SC2034
     region=europe-west1
+    # shellcheck disable=SC2086
     ./cup deploy $deployment -iaas gcp
 fi
 assertPipelinesCanReadFromCredhub
