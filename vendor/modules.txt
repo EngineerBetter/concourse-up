@@ -1,11 +1,11 @@
 # cloud.google.com/go v0.31.0
-cloud.google.com/go/compute/metadata
 cloud.google.com/go/storage
 cloud.google.com/go/iam
 cloud.google.com/go/internal
 cloud.google.com/go/internal/optional
 cloud.google.com/go/internal/trace
 cloud.google.com/go/internal/version
+cloud.google.com/go/compute/metadata
 # github.com/GoogleCloudPlatform/cloudsql-proxy v0.0.0-20181129011958-60b5f58da796
 github.com/GoogleCloudPlatform/cloudsql-proxy/proxy/dialers/postgres
 github.com/GoogleCloudPlatform/cloudsql-proxy/proxy/proxy
@@ -134,6 +134,7 @@ github.com/stretchr/testify/require
 github.com/stretchr/testify/assert
 # github.com/xenolf/lego v0.4.1
 github.com/xenolf/lego/acme
+github.com/xenolf/lego/providers/dns/googlecloud
 github.com/xenolf/lego/providers/dns/route53
 # go.opencensus.io v0.17.0
 go.opencensus.io/trace
@@ -158,11 +159,11 @@ golang.org/x/crypto/ed25519/internal/edwards25519
 # golang.org/x/net v0.0.0-20180906233101-161cd47e91fd
 golang.org/x/net/proxy
 golang.org/x/net/context
-golang.org/x/net/context/ctxhttp
 golang.org/x/net/internal/socks
 golang.org/x/net/publicsuffix
 golang.org/x/net/ipv4
 golang.org/x/net/ipv6
+golang.org/x/net/context/ctxhttp
 golang.org/x/net/html/charset
 golang.org/x/net/bpf
 golang.org/x/net/internal/iana
@@ -204,6 +205,7 @@ golang.org/x/text/unicode/bidi
 golang.org/x/text/unicode/norm
 # google.golang.org/api v0.0.0-20181114235557-83a9d304b1e6
 google.golang.org/api/compute/v1
+google.golang.org/api/dns/v1
 google.golang.org/api/iterator
 google.golang.org/api/googleapi
 google.golang.org/api/option

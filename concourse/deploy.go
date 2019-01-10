@@ -133,6 +133,8 @@ func (client *Client) Deploy() error {
 			"DBUsername":         c.RDSUsername,
 			"DBName":             c.RDSDefaultDatabaseName,
 			"AllowIPs":           c.AllowIPs,
+			"DNSManagedZoneName": c.HostedZoneID,
+			"DNSRecordSetPrefix": c.HostedZoneRecordPrefix,
 		})
 		if err1 != nil {
 			return err1
@@ -448,7 +450,7 @@ func (client *Client) ensureDirectorCerts(c func(u *certs.User) (certs.AcmeClien
 		return certs, err
 	}
 
-	directorCerts, err := client.certGenerator(c, deployment, ip, "10.0.0.6")
+	directorCerts, err := client.certGenerator(c, deployment, client.provider, ip, "10.0.0.6")
 	if err != nil {
 		return certs, err
 	}
@@ -490,7 +492,7 @@ func (client *Client) ensureConcourseCerts(c func(u *certs.User) (certs.AcmeClie
 	}
 
 	// If no domain has been provided by the user, the value of cfg.Domain is set to the ATC's public IP in checkPreDeployConfigRequirements
-	Certs, err := client.certGenerator(c, deployment, domain)
+	Certs, err := client.certGenerator(c, deployment, client.provider, domain)
 	if err != nil {
 		return certs, err
 	}

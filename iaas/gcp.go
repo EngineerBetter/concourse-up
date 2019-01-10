@@ -15,6 +15,7 @@ import (
 	"golang.org/x/net/context"
 	"golang.org/x/oauth2/google"
 	"google.golang.org/api/compute/v1"
+	clouddns "google.golang.org/api/dns/v1"
 	"google.golang.org/api/iterator"
 
 	// PostgreSQL driver required at runtime
@@ -256,9 +257,7 @@ func (g *GCPProvider) DeleteVMsInVPC(vpcID string) ([]string, error) {
 
 //DeleteVMsInDeployment will delete all vms in a deployment apart from nat instance
 func (g *GCPProvider) DeleteVMsInDeployment(zone, project, deployment string) error {
-	ctx := context.Background()
-
-	c, err := google.DefaultClient(ctx, compute.CloudPlatformScope)
+	c, err := google.DefaultClient(g.ctx, compute.CloudPlatformScope)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -270,7 +269,7 @@ func (g *GCPProvider) DeleteVMsInDeployment(zone, project, deployment string) er
 
 	// gets all compute instances for the project
 	req := computeService.Instances.List(project, zone)
-	if err := req.Pages(ctx, func(page *compute.InstanceList) error {
+	if err := req.Pages(g.ctx, func(page *compute.InstanceList) error {
 		for _, instance := range page.Items {
 			name := instance.Name
 			networkName := instance.NetworkInterfaces[0].Network
@@ -278,11 +277,11 @@ func (g *GCPProvider) DeleteVMsInDeployment(zone, project, deployment string) er
 			if strings.HasSuffix(networkName, fmt.Sprintf("%s-bosh-network", deployment)) {
 				for _, disk := range instance.Disks {
 					fmt.Printf("Marking instance %s volume for deletion\n", name)
-					computeService.Instances.SetDiskAutoDelete(project, zone, name, true, disk.DeviceName).Context(ctx).Do()
+					computeService.Instances.SetDiskAutoDelete(project, zone, name, true, disk.DeviceName).Context(g.ctx).Do()
 				}
 				if !strings.HasSuffix(name, "nat-instance") {
 					fmt.Printf("Deleting instance %+v\n", name)
-					_, err := computeService.Instances.Delete(project, zone, name).Context(ctx).Do()
+					_, err := computeService.Instances.Delete(project, zone, name).Context(g.ctx).Do()
 					if err != nil {
 						return err
 					}
@@ -301,9 +300,32 @@ func (g *GCPProvider) DeleteVMsInDeployment(zone, project, deployment string) er
 }
 
 // FindLongestMatchingHostedZone finds the longest hosted zone that matches the given subdomain
-func (g *GCPProvider) FindLongestMatchingHostedZone(subdomain string) (string, string, error) {
-	// @note: This will be covered in a later iteration as we need a deployment to try it
-	return "", "", errors.New("FindLongestMatchingHostedZone Not Implemented Yet")
+func (g *GCPProvider) FindLongestMatchingHostedZone(domain string) (string, string, error) {
+	c, err := google.DefaultClient(g.ctx, compute.CloudPlatformScope)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	cloudDNSService, err := clouddns.New(c)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	var dnsNameFound, nameFound string
+	req := cloudDNSService.ManagedZones.List(g.attrs["project"])
+	err = req.Pages(g.ctx, func(page *clouddns.ManagedZonesListResponse) error {
+		for _, zone := range page.ManagedZones {
+			name := zone.Name
+			dnsName := strings.TrimRight(zone.DnsName, ".")
+			if strings.HasSuffix(domain, dnsName) && len(dnsName) > len(dnsNameFound) {
+				dnsNameFound = dnsName
+				nameFound = name
+			}
+		}
+		return nil
+	})
+
+	return dnsNameFound, nameFound, err
 }
 func getCredentials() (string, string, error) {
 	credsStruct := make(map[string]interface{})

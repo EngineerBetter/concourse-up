@@ -10,8 +10,11 @@ import (
 	"sync"
 	"time"
 
+	"github.com/EngineerBetter/concourse-up/iaas"
+
 	"github.com/square/certstrap/pkix"
 	"github.com/xenolf/lego/acme"
+	"github.com/xenolf/lego/providers/dns/googlecloud"
 	"github.com/xenolf/lego/providers/dns/route53"
 )
 
@@ -79,7 +82,7 @@ type AcmeClient interface {
 }
 
 // Generate generates certs for use in a bosh director manifest
-func Generate(constructor func(u *User) (AcmeClient, error), caName string, ipOrDomains ...string) (*Certs, error) {
+func Generate(constructor func(u *User) (AcmeClient, error), caName string, provider iaas.Provider, ipOrDomains ...string) (*Certs, error) {
 
 	if hasIP(ipOrDomains) {
 		return generateSelfSigned(caName, ipOrDomains...)
@@ -92,15 +95,36 @@ func Generate(constructor func(u *User) (AcmeClient, error), caName string, ipOr
 	}
 
 	c.ExcludeChallenges([]acme.Challenge{acme.HTTP01, acme.TLSSNI01})
-	r53, err := route53.NewDNSProvider()
-	if err != nil {
-		return nil, err
+	switch provider.IAAS() {
+	case "AWS":
+		dnsProvider, err1 := route53.NewDNSProvider()
+		if err1 != nil {
+			return nil, err1
+		}
+		c.SetChallengeProvider(acme.DNS01, timeoutProvider{
+			dnsProvider,
+			10 * time.Minute,
+			1 * time.Second,
+		})
+	case "GCP":
+		project, err1 := provider.Attr("project")
+		if err1 != nil {
+			return nil, err1
+		}
+		credentialsPath, err1 := provider.Attr("credentials_path")
+		if err1 != nil {
+			return nil, err1
+		}
+		dnsProvider, err1 := googlecloud.NewDNSProviderServiceAccount(project, credentialsPath)
+		if err1 != nil {
+			return nil, err1
+		}
+		c.SetChallengeProvider(acme.DNS01, timeoutProvider{
+			dnsProvider,
+			10 * time.Minute,
+			1 * time.Second,
+		})
 	}
-	c.SetChallengeProvider(acme.DNS01, timeoutProvider{
-		r53,
-		10 * time.Minute,
-		1 * time.Second,
-	})
 	u.r, err = c.Register()
 	if err != nil {
 		return nil, err

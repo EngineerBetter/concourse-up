@@ -26,6 +26,8 @@ type InputVars struct {
 	DBTier             string
 	DBName             string
 	AllowIPs           string
+	DNSManagedZoneName string
+	DNSRecordSetPrefix string
 }
 
 // ConfigureTerraform interpolates terraform contents and returns terraform config
