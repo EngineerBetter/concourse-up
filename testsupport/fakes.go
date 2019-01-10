@@ -15,6 +15,124 @@ import (
 	"github.com/xenolf/lego/acme"
 )
 
+// FakeProvider is a fake Provider
+type FakeProvider struct {
+	FakeAttr                          func(attr string) (string, error)
+	FakeBucketExists                  func(name string) (bool, error)
+	FakeCheckForWhitelistedIP         func(ip, securityGroup string) (bool, error)
+	FakeCreateBucket                  func(name string) error
+	FakeCreateDatabases               func(name, username, password string) error
+	FakeDeleteFile                    func(bucket, path string) error
+	FakeDeleteVersionedBucket         func(name string) error
+	FakeDeleteVMsInDeployment         func(zone, project, deployment string) error
+	FakeDeleteVMsInVPC                func(vpcID string) ([]string, error)
+	FakeDeleteVolumes                 func(volumesToDelete []string, deleteVolume func(ec2Client iaas.IEC2, volumeID *string) error) error
+	FakeEnsureFileExists              func(bucket, path string, defaultContents []byte) ([]byte, bool, error)
+	FakeFindLongestMatchingHostedZone func(subdomain string) (string, string, error)
+	FakeHasFile                       func(bucket, path string) (bool, error)
+	FakeIAAS                          func() string
+	FakeLoadFile                      func(bucket, path string) ([]byte, error)
+	FakeRegion                        func() string
+	FakeWorkerType                    func(string)
+	FakeWriteFile                     func(bucket, path string, contents []byte) error
+	FakeZone                          func(string) string
+}
+
+// Attr is a fake attr
+func (fakeProvider *FakeProvider) Attr(attr string) (string, error) {
+	return fakeProvider.FakeAttr(attr)
+}
+
+// BucketExists is a fake bucketexists
+func (fakeProvider *FakeProvider) BucketExists(name string) (bool, error) {
+	return fakeProvider.FakeBucketExists(name)
+}
+
+// CheckForWhitelistedIP is a fake checkforwhitelistedip
+func (fakeProvider *FakeProvider) CheckForWhitelistedIP(ip, securityGroup string) (bool, error) {
+	return fakeProvider.FakeCheckForWhitelistedIP(ip, securityGroup)
+}
+
+// CreateBucket is a fake createbucket
+func (fakeProvider *FakeProvider) CreateBucket(name string) error {
+	return fakeProvider.FakeCreateBucket(name)
+}
+
+// CreateDatabases is a fake createdatabases
+func (fakeProvider *FakeProvider) CreateDatabases(name, username, password string) error {
+	return fakeProvider.FakeCreateDatabases(name, username, password)
+}
+
+// DeleteFile is a fake deletefile
+func (fakeProvider *FakeProvider) DeleteFile(bucket, path string) error {
+	return fakeProvider.FakeDeleteFile(bucket, path)
+}
+
+// DeleteVersionedBucket is a fake deleteversionedbucket
+func (fakeProvider *FakeProvider) DeleteVersionedBucket(name string) error {
+	return fakeProvider.FakeDeleteVersionedBucket(name)
+}
+
+// DeleteVMsInDeployment is a fake deletevmsindeployment
+func (fakeProvider *FakeProvider) DeleteVMsInDeployment(zone, project, deployment string) error {
+	return fakeProvider.FakeDeleteVMsInDeployment(zone, project, deployment)
+}
+
+// DeleteVMsInVPC is a fake deletevmsinvpc
+func (fakeProvider *FakeProvider) DeleteVMsInVPC(vpcID string) ([]string, error) {
+	return fakeProvider.FakeDeleteVMsInVPC(vpcID)
+}
+
+// DeleteVolumes is a fake deletevolumes
+func (fakeProvider *FakeProvider) DeleteVolumes(volumesToDelete []string, deleteVolume func(ec2Client iaas.IEC2, volumeID *string) error) error {
+	return fakeProvider.FakeDeleteVolumes(volumesToDelete, deleteVolume)
+}
+
+// EnsureFileExists is a fake ensurefileexists
+func (fakeProvider *FakeProvider) EnsureFileExists(bucket, path string, defaultContents []byte) ([]byte, bool, error) {
+	return fakeProvider.FakeEnsureFileExists(bucket, path, defaultContents)
+}
+
+// FindLongestMatchingHostedZone is a fake findlongestmatchinghostedzone
+func (fakeProvider *FakeProvider) FindLongestMatchingHostedZone(subdomain string) (string, string, error) {
+	return fakeProvider.FakeFindLongestMatchingHostedZone(subdomain)
+}
+
+// HasFile is a fake hasfile
+func (fakeProvider *FakeProvider) HasFile(bucket, path string) (bool, error) {
+	return fakeProvider.FakeHasFile(bucket, path)
+}
+
+// IAAS is a fake iaas
+func (fakeProvider *FakeProvider) IAAS() string {
+	return fakeProvider.FakeIAAS()
+}
+
+// LoadFile is a fake loadfile
+func (fakeProvider *FakeProvider) LoadFile(bucket, path string) ([]byte, error) {
+	return fakeProvider.FakeLoadFile(bucket, path)
+}
+
+// Region is a fake region
+func (fakeProvider *FakeProvider) Region() string {
+	return fakeProvider.FakeRegion()
+}
+
+// WorkerType is a fake workertype
+func (fakeProvider *FakeProvider) WorkerType(workerType string) {
+	fakeProvider.FakeWorkerType(workerType)
+}
+
+// WriteFile is a fake writefile
+func (fakeProvider *FakeProvider) WriteFile(bucket, path string, contents []byte) error {
+	return fakeProvider.FakeWriteFile(bucket, path, contents)
+}
+
+// Zone is a fake zone
+func (fakeProvider *FakeProvider) Zone(zone string) string {
+	return fakeProvider.FakeZone(zone)
+}
+
 // FakeTerraformInputVars implements terraform.TerraformInputVars for testing
 type FakeTerraformInputVars struct {
 	FakeConfigureTerraform func(config string) (string, error)

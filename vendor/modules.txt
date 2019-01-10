@@ -134,6 +134,7 @@ github.com/stretchr/testify/require
 github.com/stretchr/testify/assert
 # github.com/xenolf/lego v0.4.1
 github.com/xenolf/lego/acme
+github.com/xenolf/lego/providers/dns/googlecloud
 github.com/xenolf/lego/providers/dns/route53
 # go.opencensus.io v0.17.0
 go.opencensus.io/trace
