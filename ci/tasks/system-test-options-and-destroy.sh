@@ -54,7 +54,7 @@ then
 
 elif [ "$IAAS" = "GCP" ]
 then
-    gcloud auth activate-service-account --key-file=$GOOGLE_APPLICATION_CREDENTIALS
+    gcloud auth activate-service-account --key-file="$GOOGLE_APPLICATION_CREDENTIALS"
     export CLOUDSDK_CORE_PROJECT=concourse-up
     # shellcheck disable=SC2034
     region=europe-west1
