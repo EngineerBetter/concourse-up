@@ -87,6 +87,8 @@ func (client *Client) FetchInfo() (*Info, error) {
 			"DBPassword":         config.RDSPassword,
 			"DBUsername":         config.RDSUsername,
 			"AllowIPs":           config.AllowIPs,
+			"DNSManagedZoneName": config.HostedZoneID,
+			"DNSRecordSetPrefix": config.HostedZoneRecordPrefix,
 		})
 		if err1 != nil {
 			return nil, err1
