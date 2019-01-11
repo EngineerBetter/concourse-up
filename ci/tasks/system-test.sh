@@ -129,10 +129,12 @@ assertPipelineIsRunnable
 
 if [ "$IAAS" = "AWS" ]
 then
+    # shellcheck disable=SC2034
     region=eu-west-1
 
 elif [ "$IAAS" = "GCP" ]
 then
+    # shellcheck disable=SC2034
     region=europe-west1
 fi
 
