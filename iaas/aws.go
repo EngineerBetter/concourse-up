@@ -2,6 +2,7 @@ package iaas
 
 import (
 	"fmt"
+	"net"
 	"strings"
 	"time"
 
@@ -112,7 +113,7 @@ func (a *AWSProvider) listZones() ([]string, error) {
 // CheckForWhitelistedIP checks if the specified IP is whitelisted in the security group
 func (a *AWSProvider) CheckForWhitelistedIP(ip, securityGroup string) (bool, error) {
 
-	cidr := fmt.Sprintf("%s/32", ip)
+	parsedIP := net.ParseIP(ip)
 
 	ec2Client := ec2.New(a.sess)
 
@@ -130,7 +131,11 @@ func (a *AWSProvider) CheckForWhitelistedIP(ip, securityGroup string) (bool, err
 	port22, port6868, port25555 := false, false, false
 	for _, entry := range ingressPermissions {
 		for _, sgIP := range entry.IpRanges {
-			checkPorts(*sgIP.CidrIp, cidr, &port22, &port6868, &port25555, *entry.FromPort)
+			_, parsedCIDR, err := net.ParseCIDR(*sgIP.CidrIp)
+			if err != nil {
+				return false, err
+			}
+			checkPorts(parsedCIDR, parsedIP, &port22, &port6868, &port25555, *entry.FromPort)
 		}
 	}
 
@@ -141,8 +146,8 @@ func (a *AWSProvider) CheckForWhitelistedIP(ip, securityGroup string) (bool, err
 	return false, nil
 }
 
-func checkPorts(sgCidr, cidr string, port22, port6868, port25555 *bool, fromPort int64) {
-	if sgCidr == cidr {
+func checkPorts(cidr *net.IPNet, ip net.IP, port22, port6868, port25555 *bool, fromPort int64) {
+	if cidr.Contains(ip) {
 		switch fromPort {
 		case 22:
 			*port22 = true
