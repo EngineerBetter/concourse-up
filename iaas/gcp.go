@@ -303,12 +303,12 @@ func (g *GCPProvider) DeleteVMsInDeployment(zone, project, deployment string) er
 func (g *GCPProvider) FindLongestMatchingHostedZone(domain string) (string, string, error) {
 	c, err := google.DefaultClient(g.ctx, compute.CloudPlatformScope)
 	if err != nil {
-		log.Fatal(err)
+		return "", "", err
 	}
 
 	cloudDNSService, err := clouddns.New(c)
 	if err != nil {
-		log.Fatal(err)
+		return "", "", err
 	}
 
 	var dnsNameFound, nameFound string
@@ -324,6 +324,10 @@ func (g *GCPProvider) FindLongestMatchingHostedZone(domain string) (string, stri
 		}
 		return nil
 	})
+
+	if dnsNameFound == "" || nameFound == "" {
+		return "", "", fmt.Errorf("dns zone for domain '%s' was not found in cloudDNS", domain)
+	}
 
 	return dnsNameFound, nameFound, err
 }
