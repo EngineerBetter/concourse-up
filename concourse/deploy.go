@@ -620,7 +620,7 @@ func (client *Client) setHostedZone(c config.Config, domain string) (HostedZone,
 	zone.Domain = domain
 
 	_, err = client.stderr.Write([]byte(fmt.Sprintf(
-		"\nWARNING: adding record %s to Route53 hosted zone %s ID: %s\n\n", domain, hostedZoneName, hostedZoneID)))
+		"\nWARNING: adding record %s to DNS zone %s with name %s\n\n", domain, hostedZoneName, hostedZoneID)))
 	if err != nil {
 		return zone, err
 	}

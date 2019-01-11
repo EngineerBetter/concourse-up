@@ -85,7 +85,8 @@ func (client *Client) Destroy() error {
 			"DBUsername":         conf.RDSUsername,
 			"AllowIPs":           conf.AllowIPs,
 			"DNSManagedZoneName": conf.HostedZoneID,
-			"DNSRecordSetPrefix": conf.HostedZoneRecordPrefix})
+			"DNSRecordSetPrefix": conf.HostedZoneRecordPrefix,
+		})
 		if err1 != nil {
 			return nil
 		}
