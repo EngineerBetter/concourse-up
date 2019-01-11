@@ -19,6 +19,9 @@ source concourse-up/ci/tasks/lib/gcreds.sh
 # shellcheck disable=SC1091
 source concourse-up/ci/tasks/lib/pipeline.sh
 
+# shellcheck disable=SC1091
+source concourse-up/ci/tasks/lib/credhub.sh
+
 [ "$VERBOSE" ] && { handleVerboseMode; }
 
 [ -z "$SYSTEM_TEST_ID" ] && { generateSystemTestId; }
@@ -123,3 +126,4 @@ echo "$config" | jq -r '.config.concourse_cert' > generated-ca-cert.pem
 cert="generated-ca-cert.pem"
 
 assertPipelineIsRunnable
+assertPipelinesCanReadFromCredhub
