@@ -126,4 +126,14 @@ echo "$config" | jq -r '.config.concourse_cert' > generated-ca-cert.pem
 cert="generated-ca-cert.pem"
 
 assertPipelineIsRunnable
+
+if [ "$IAAS" = "AWS" ]
+then
+    region=eu-west-1
+
+elif [ "$IAAS" = "GCP" ]
+then
+    region=europe-west1
+fi
+
 assertPipelinesCanReadFromCredhub
