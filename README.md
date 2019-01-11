@@ -282,7 +282,7 @@ If you'd like to run concourse-up with it's own IAM account, create a user with 
 
 To build and test you'll need:
 
-* Golang 1.10+
+* Golang 1.11+
 * to have installed `github.com/mattn/go-bindata`
 
 ### Building locally
