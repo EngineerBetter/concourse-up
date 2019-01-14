@@ -46,9 +46,9 @@ func (client *Client) FetchInfo() (*Info, error) {
 
 	var certExpiry string
 	if len(directorCredsBytes) > 0 {
-		natsCA, err := yaml.Path(directorCredsBytes, "nats_server_tls/ca")
-		if err != nil {
-			return nil, err
+		natsCA, err1 := yaml.Path(directorCredsBytes, "nats_server_tls/ca")
+		if err1 != nil {
+			return nil, err1
 		}
 
 		var re = regexp.MustCompile(`\n\s*`)
@@ -57,9 +57,9 @@ func (client *Client) FetchInfo() (*Info, error) {
 		openSSL.Stdin = strings.NewReader(re.ReplaceAllString(natsCA, "\n"))
 		var out bytes.Buffer
 		openSSL.Stdout = &out
-		err = openSSL.Run()
-		if err != nil {
-			return nil, err
+		err1 = openSSL.Run()
+		if err1 != nil {
+			return nil, err1
 		}
 		if strings.Contains(out.String(), "notAfter=") {
 			certExpiry = strings.Split(out.String(), "notAfter=")[1]
