@@ -128,7 +128,7 @@ func (client *Client) Deploy() error {
 			"ExternalIP":         c.SourceAccessIP,
 			"Deployment":         c.Deployment,
 			"ConfigBucket":       c.ConfigBucket,
-			"DBTier":             "db-g1-small",
+			"DBTier":             c.RDSInstanceClass,
 			"DBPassword":         c.RDSPassword,
 			"DBUsername":         c.RDSUsername,
 			"DBName":             c.RDSDefaultDatabaseName,

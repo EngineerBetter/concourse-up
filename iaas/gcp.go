@@ -71,6 +71,21 @@ func newGCP(region string, ops ...GCPOption) (Provider, error) {
 	return g, nil
 }
 
+// GCPDBSizes maps user set size to GCP specific machine type
+var GCPDBSizes = map[string]string{
+	"small":   "db-g1-small",
+	"medium":  "db-custom-2-4096",
+	"large":   "db-custom-2-8192",
+	"xlarge":  "db-custom-4-16384",
+	"2xlarge": "db-custom-8-32768",
+	"4xlarge": "db-custom-16-65536",
+}
+
+// DBType gets the correct CloudSQL db tier
+func (g *GCPProvider) DBType(name string) string {
+	return GCPDBSizes[name]
+}
+
 // Attr returns GCP specific attribute
 func (g *GCPProvider) Attr(key string) (string, error) {
 	v, ok := g.attrs[key]

@@ -197,7 +197,7 @@ func (client *Client) LoadOrCreate(deployArgs *deploy.Args) (Config, bool, bool,
 		config.ConcourseWebSize = deployArgs.WebSize
 	}
 	if newConfigCreated || deployArgs.DBSizeIsSet {
-		config.RDSInstanceClass = deploy.DBSizes[deployArgs.DBSize]
+		config.RDSInstanceClass = client.Iaas.DBType(deployArgs.DBSize)
 	}
 	if newConfigCreated || deployArgs.GithubAuthIsSet {
 		config.GithubClientID = deployArgs.GithubAuthClientID

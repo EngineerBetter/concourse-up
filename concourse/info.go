@@ -83,7 +83,7 @@ func (client *Client) FetchInfo() (*Info, error) {
 			"Deployment":         config.Deployment,
 			"ConfigBucket":       config.ConfigBucket,
 			"DBName":             config.RDSDefaultDatabaseName,
-			"DBTier":             "db-g1-small",
+			"DBTier":             config.RDSInstanceClass,
 			"DBPassword":         config.RDSPassword,
 			"DBUsername":         config.RDSUsername,
 			"AllowIPs":           config.AllowIPs,

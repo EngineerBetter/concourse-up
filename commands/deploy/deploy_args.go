@@ -109,15 +109,8 @@ var WorkerSizes = []string{"medium", "large", "xlarge", "2xlarge", "4xlarge", "1
 // WebSizes are the permitted concourse web sizes
 var WebSizes = []string{"small", "medium", "large", "xlarge", "2xlarge"}
 
-// DBSizes maps SML sizes to RDS instance classes
-var DBSizes = map[string]string{
-	"small":   "db.t2.small",
-	"medium":  "db.t2.medium",
-	"large":   "db.m4.large",
-	"xlarge":  "db.m4.xlarge",
-	"2xlarge": "db.m4.2xlarge",
-	"4xlarge": "db.m4.4xlarge",
-}
+// AllowedDBSizes contains the valid values for --db-size flag
+var AllowedDBSizes = []string{"small", "medium", "large", "xlarge", "2xlarge", "4xlarge"}
 
 // ModifyGithub allows mutation of github related fields
 func (a *Args) ModifyGithub(GithubAuthClientID, GithubAuthClientSecret string, GithubAuthIsSet bool) {
@@ -192,11 +185,12 @@ func (a Args) validateWebFields() error {
 }
 
 func (a Args) validateDBFields() error {
-	if _, ok := DBSizes[a.DBSize]; !ok {
-		return fmt.Errorf("unknown DB size: `%s`. Valid sizes are: %v", a.DBSize, DBSizes)
+	for _, size := range AllowedDBSizes {
+		if size == a.DBSize {
+			return nil
+		}
 	}
-
-	return nil
+	return fmt.Errorf("unknown DB size: `%s`. Valid sizes are: %v", a.DBSize, AllowedDBSizes)
 }
 
 func (a Args) validateGithubFields() error {

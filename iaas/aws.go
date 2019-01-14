@@ -12,6 +12,16 @@ import (
 	"github.com/aws/aws-sdk-go/service/route53"
 )
 
+// AWSDBSizes maps user set size to RDS instance classes
+var AWSDBSizes = map[string]string{
+	"small":   "db.t2.small",
+	"medium":  "db.t2.medium",
+	"large":   "db.m4.large",
+	"xlarge":  "db.m4.xlarge",
+	"2xlarge": "db.m4.2xlarge",
+	"4xlarge": "db.m4.4xlarge",
+}
+
 // AWSProvider is the concrete implementation of AWS Provider
 type AWSProvider struct {
 	sess       *session.Session
@@ -38,6 +48,11 @@ func newAWS(region string) (Provider, error) {
 // WorkerType is a setter for workerType
 func (a *AWSProvider) WorkerType(w string) {
 	a.workerType = w
+}
+
+// DBType gets the correct RDSInstance class
+func (a *AWSProvider) DBType(name string) string {
+	return AWSDBSizes[name]
 }
 
 // Zone is a placeholder for Zone()

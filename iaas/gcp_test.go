@@ -82,3 +82,68 @@ func TestGCPProvider_Region(t *testing.T) {
 		})
 	}
 }
+
+func TestGCPProvider_DBType(t *testing.T) {
+	type fields struct {
+		ctx     context.Context
+		storage GCPStorageClient
+		region  string
+		attrs   map[string]string
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		size   string
+		want   string
+	}{
+		{
+			name:   "Success: correctly maps 'medium' size",
+			fields: fields{},
+			size:   "medium",
+			want:   "db-custom-2-4096",
+		},
+		{
+			name:   "Success: correctly maps 'small' size",
+			fields: fields{},
+			size:   "small",
+			want:   "db-g1-small",
+		},
+		{
+			name:   "Success: correctly maps 'large' size",
+			fields: fields{},
+			size:   "large",
+			want:   "db-custom-2-8192",
+		},
+		{
+			name:   "Success: correctly maps 'xlarge' size",
+			fields: fields{},
+			size:   "xlarge",
+			want:   "db-custom-4-16384",
+		},
+		{
+			name:   "Success: correctly maps '2xlarge' size",
+			fields: fields{},
+			size:   "2xlarge",
+			want:   "db-custom-8-32768",
+		},
+		{
+			name:   "Success: correctly maps '4xlarge' size",
+			fields: fields{},
+			size:   "4xlarge",
+			want:   "db-custom-16-65536",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			g := &GCPProvider{
+				ctx:     tt.fields.ctx,
+				storage: tt.fields.storage,
+				region:  tt.fields.region,
+				attrs:   tt.fields.attrs,
+			}
+			if got := g.DBType(tt.size); got != tt.want {
+				t.Errorf("GCPProvider.DBType() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}

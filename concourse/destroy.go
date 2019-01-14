@@ -80,7 +80,7 @@ func (client *Client) Destroy() error {
 			"Deployment":         conf.Deployment,
 			"ConfigBucket":       conf.ConfigBucket,
 			"DBName":             conf.RDSDefaultDatabaseName,
-			"DBTier":             "db-g1-small",
+			"DBTier":             conf.RDSInstanceClass,
 			"DBPassword":         conf.RDSPassword,
 			"DBUsername":         conf.RDSUsername,
 			"AllowIPs":           conf.AllowIPs,

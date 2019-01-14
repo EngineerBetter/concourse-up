@@ -23,6 +23,7 @@ type Provider interface {
 	EnsureFileExists(bucket, path string, defaultContents []byte) ([]byte, bool, error)
 	FindLongestMatchingHostedZone(subdomain string) (string, string, error)
 	HasFile(bucket, path string) (bool, error)
+	DBType(name string) string
 	IAAS() string
 	LoadFile(bucket, path string) ([]byte, error)
 	Region() string
