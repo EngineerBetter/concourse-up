@@ -62,6 +62,9 @@ var _ = Describe("Client", func() {
 	}
 
 	awsClient := &testsupport.FakeAWSClient{
+		FakeDBType: func(size string) string {
+			return "db.t2.small"
+		},
 		FakeFindLongestMatchingHostedZone: func(subdomain string) (string, string, error) {
 			if subdomain == "ci.google.com" {
 				return "google.com", "ABC123", nil

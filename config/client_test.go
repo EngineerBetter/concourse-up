@@ -36,6 +36,9 @@ var _ = Describe("Client", func() {
 			FakeEnsureFileExists: func(bucket, path string, defaultContents []byte) ([]byte, bool, error) {
 				return defaultContents, true, nil
 			},
+			FakeDBType: func(string) string {
+				return "db.t2.medium"
+			},
 		}
 		client = New(iaasClient, "test", "")
 
@@ -201,6 +204,9 @@ func TestNew(t *testing.T) {
 		FakeEnsureFileExists: func(bucket, path string, defaultContents []byte) ([]byte, bool, error) {
 			return defaultContents, true, nil
 		},
+		FakeDBType: func(string) string {
+			return "db.t2.small"
+		},
 	}
 
 	type args struct {
@@ -347,6 +353,9 @@ func TestClient_Load(t *testing.T) {
 			bytes, _ := json.Marshal(Config{})
 			return bytes, nil
 		},
+		FakeDBType: func(string) string {
+			return "db.t2.small"
+		},
 	}
 	tests := []struct {
 		name    string
@@ -453,6 +462,9 @@ func TestClient_LoadOrCreate(t *testing.T) {
 					FakeRegion: func() string {
 						return "eu-west-1"
 					},
+					FakeDBType: func(string) string {
+						return "db.t2.small"
+					},
 				},
 			},
 			args: args{
@@ -501,6 +513,9 @@ func TestClient_LoadOrCreate(t *testing.T) {
 					FakeRegion: func() string {
 						return "eu-west-3"
 					},
+					FakeDBType: func(string) string {
+						return "db.t2.small"
+					},
 				},
 			},
 			args: args{
@@ -543,6 +558,9 @@ func TestClient_LoadOrCreate(t *testing.T) {
 					},
 					FakeRegion: func() string {
 						return "eu-west-3"
+					},
+					FakeDBType: func(string) string {
+						return "db.t2.small"
 					},
 				},
 			},

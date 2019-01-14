@@ -36,6 +36,12 @@ type FakeProvider struct {
 	FakeWorkerType                    func(string)
 	FakeWriteFile                     func(bucket, path string, contents []byte) error
 	FakeZone                          func(string) string
+	FakeDBType                        func(string) string
+}
+
+// DBType is a fake DBType
+func (fakeProvider *FakeProvider) DBType(size string) string {
+	return fakeProvider.FakeDBType(size)
 }
 
 // Attr is a fake attr
@@ -220,6 +226,12 @@ type FakeAWSClient struct {
 	FakeDeleteVMsInDeployment         func(zone, project, deployment string) error
 	FakeWorkerType                    func(string)
 	FakeCreateDatabases               func(name, username, password string) error
+	FakeDBType                        func(size string) string
+}
+
+// DBType is here to implement iaas.DBType
+func (client *FakeAWSClient) DBType(size string) string {
+	return client.FakeDBType(size)
 }
 
 // WorkerType is here to implement iaas.IClient
