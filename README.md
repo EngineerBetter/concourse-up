@@ -172,6 +172,12 @@ To load credentials into your environment from your `concourse-up` deployment:
 $ eval "$(concourse-up info <your-project-name> --env)"
 ```
 
+To check the expiry of the BOSH Director's NATS CA certificate:
+
+```sh
+$ concourse-up info <your-project-name> --cert-expiry
+```
+
 #### Flags
 
 All flags are optional
