@@ -40,6 +40,11 @@ var infoFlags = []cli.Flag{
 		Usage:       "(optional) Output environment variables",
 		Destination: &initialInfoArgs.Env,
 	},
+	cli.BoolFlag{
+		Name:        "cert-expiry",
+		Usage:       "(optional) Output only the expiration date of the director nats certificate",
+		Destination: &initialInfoArgs.CertExpiry,
+	},
 	cli.StringFlag{
 		Name:        "iaas",
 		Usage:       "(optional) IAAS, can be AWS or GCP",
@@ -88,6 +93,9 @@ func infoAction(c *cli.Context, infoArgs info.Args, iaasFactory iaas.Factory) er
 		}
 		_, err = os.Stdout.WriteString(env)
 		return err
+	case infoArgs.CertExpiry:
+		os.Stdout.WriteString(i.CertExpiry)
+		return nil
 	default:
 		_, err := fmt.Fprint(os.Stdout, i)
 		return err

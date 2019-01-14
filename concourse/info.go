@@ -5,11 +5,14 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"os/exec"
+	"regexp"
 	"strings"
 	"text/template"
 
 	"github.com/EngineerBetter/concourse-up/bosh"
 	"github.com/EngineerBetter/concourse-up/config"
+	"github.com/EngineerBetter/concourse-up/util/yaml"
 	"github.com/fatih/color"
 )
 
@@ -18,6 +21,7 @@ type Info struct {
 	Terraform   TerraformInfo   `json:"terraform"`
 	Config      config.Config   `json:"config"`
 	Instances   []bosh.Instance `json:"instances"`
+	CertExpiry  string          `json:"cert_expiry"`
 	GatewayUser string
 }
 
@@ -33,6 +37,35 @@ func (client *Client) FetchInfo() (*Info, error) {
 	config, err := client.configClient.Load()
 	if err != nil {
 		return nil, err
+	}
+
+	directorCredsBytes, err := loadDirectorCreds(client.configClient)
+	if err != nil {
+		return nil, err
+	}
+
+	var certExpiry string
+	if len(directorCredsBytes) > 0 {
+		natsCA, err := yaml.Path(directorCredsBytes, "nats_server_tls/ca")
+		if err != nil {
+			return nil, err
+		}
+
+		var re = regexp.MustCompile(`\n\s*`)
+
+		openSSL := exec.Command("openssl", "x509", "-noout", "-dates")
+		openSSL.Stdin = strings.NewReader(re.ReplaceAllString(natsCA, "\n"))
+		var out bytes.Buffer
+		openSSL.Stdout = &out
+		err = openSSL.Run()
+		if err != nil {
+			return nil, err
+		}
+		if strings.Contains(out.String(), "notAfter=") {
+			certExpiry = strings.Split(out.String(), "notAfter=")[1]
+		} else {
+			return nil, fmt.Errorf("openssl output is not as expected. got: %s", out.String())
+		}
 	}
 
 	environment, metadata, err := client.tfCLI.IAAS(client.provider.IAAS())
@@ -153,6 +186,7 @@ func (client *Client) FetchInfo() (*Info, error) {
 		Config:      config,
 		Instances:   instances,
 		GatewayUser: gatewayUser,
+		CertExpiry:  certExpiry,
 	}, nil
 }
 
@@ -194,6 +228,8 @@ Bosh credentials:
 	IP:       {{.Terraform.DirectorPublicIP}}
 	CA Cert:
 		{{ .Config.DirectorCACert | replace "\n" "\n\t\t"}}
+
+BOSH-generated NAT certs will expire on: {{ .CertExpiry }}
 
 Uses Concourse-Up version {{.Config.Version}}
 

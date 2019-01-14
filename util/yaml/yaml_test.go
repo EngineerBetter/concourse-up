@@ -84,3 +84,67 @@ func TestInterpolate(t *testing.T) {
 		})
 	}
 }
+
+func TestPath(t *testing.T) {
+	dummyYAML := `
+---
+a:
+  b: aValue
+`
+	type args struct {
+		b    []byte
+		path string
+	}
+	tests := []struct {
+		name    string
+		args    args
+		want    string
+		wantErr bool
+	}{
+		{
+			name: "successful path test",
+			args: args{
+				b:    []byte(dummyYAML),
+				path: "a/b",
+			},
+			want:    "aValue\n",
+			wantErr: false,
+		},
+		{
+			name: "unknown path test",
+			args: args{
+				b:    []byte(dummyYAML),
+				path: "a/c",
+			},
+			wantErr: true,
+		},
+		{
+			name: "empty path test",
+			args: args{
+				b:    []byte(dummyYAML),
+				path: "",
+			},
+			wantErr: true,
+		},
+		{
+			name: "empty template test",
+			args: args{
+				b:    []byte(""),
+				path: "a/b",
+			},
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := yaml.Path(tt.args.b, tt.args.path)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Path() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if got != tt.want {
+				t.Errorf("Path() = '%v', want '%v'", got, tt.want)
+			}
+		})
+	}
+}

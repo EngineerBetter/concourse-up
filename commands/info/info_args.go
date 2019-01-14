@@ -15,6 +15,7 @@ type Args struct {
 	Namespace      string
 	NamespaceIsSet bool
 	IAAS           string
+	CertExpiry     bool
 }
 
 //MarkSetFlags is marking which info Args have been set
@@ -26,10 +27,10 @@ func (a *Args) MarkSetFlags(c FlagSetChecker) error {
 				a.AWSRegionIsSet = true
 			case "namespace":
 				a.NamespaceIsSet = true
-			case "iaas", "json", "env":
+			case "iaas", "json", "env", "cert-expiry":
 				//do nothing
 			default:
-				return fmt.Errorf("flag %q is not supported by deployment flags", f)
+				return fmt.Errorf("flag %q is not supported by info flags", f)
 			}
 		}
 	}
