@@ -66,8 +66,7 @@ sleep 30
 
 echo "Waiting for update to complete"
 wait_time=0
-# shellcheck disable=SC2091
-until $(curl -skIfo/dev/null "https://$domain"); do
+until curl -skIfo/dev/null "https://$domain"; do
   (( ++wait_time ))
   if [[ $wait_time -ge 10 ]]; then
     echo "Waited too long for deployment" && exit 1
