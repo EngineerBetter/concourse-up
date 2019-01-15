@@ -18,7 +18,9 @@ function recordDeployedState() {
 function assertEverythingDeleted() {
     echo "Check that volumes have been deleted"
     all_volumes=$(gcloud compute instances list --format=json | jq '[.[].disks[].source]')
-    volumes_count=$(echo "$existing_volumes $all_volumes" | jq --slurp "[.[0][] as $x | .[1][] | select($x == .)] | length")
+    # shellcheck disable=SC2016
+    jq_exp='[.[0][] as $x | .[1][] | select($x == .)] | length'
+    volumes_count=$(echo "$existing_volumes $all_volumes" | jq --slurp "$jq_exp")
     echo "Volumes still remaining after deletion: $volumes_count"
     [ "$volumes_count" -eq 0 ]
 
@@ -30,6 +32,4 @@ function assertEverythingDeleted() {
     echo "Check that the CloudSQL instance has been deleted"
     cloud_sql_count=$(gcloud sql instances list --filter="name=$cloud_sql_instance_name" --format json | jq '. | length')
     [ "$cloud_sql_count" -eq 0 ]
-
-
 }
