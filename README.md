@@ -178,6 +178,8 @@ To check the expiry of the BOSH Director's NATS CA certificate:
 $ concourse-up info <your-project-name> --cert-expiry
 ```
 
+**Warning: if your deployment is approaching a year old, it may stop working due to expired certificates. The Concourse-Up team are currently working on a solution. For information please see this issue https://github.com/EngineerBetter/concourse-up/issues/81.**
+
 #### Flags
 
 All flags are optional
