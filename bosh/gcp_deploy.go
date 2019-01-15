@@ -13,7 +13,7 @@ func (client *GCPClient) Deploy(state, creds []byte, detach bool) (newState, new
 		return state, creds, err
 	}
 
-	state, creds, err = client.createEnv(bosh, state, creds)
+	state, creds, err = client.createEnv(bosh, state, creds, "")
 	if err != nil {
 		return state, creds, err
 	}
@@ -36,7 +36,32 @@ func (client *GCPClient) Deploy(state, creds []byte, detach bool) (newState, new
 	return state, creds, err
 }
 
-func (client *GCPClient) createEnv(bosh *boshenv.BOSHCLI, state, creds []byte) (newState, newCreds []byte, err error) {
+// CreateEnv exposes bosh create-env functionality
+func (client *GCPClient) CreateEnv(state, creds []byte, customOps string) (newState, newCreds []byte, err error) {
+	bosh, err := boshenv.New(boshenv.DownloadBOSH())
+	if err != nil {
+		return state, creds, err
+	}
+
+	return client.createEnv(bosh, state, creds, customOps)
+}
+
+// Recreate exposes BOSH recreate
+func (client *GCPClient) Recreate() error {
+	bosh, err := boshenv.New(boshenv.DownloadBOSH())
+	if err != nil {
+		return err
+	}
+	directorPublicIP, err := client.metadata.Get("DirectorPublicIP")
+	if err != nil {
+		return err
+	}
+	return bosh.UploadConcourseStemcell(gcp.Environment{
+		ExternalIP: directorPublicIP,
+	}, directorPublicIP, client.config.DirectorPassword, client.config.DirectorCACert)
+}
+
+func (client *GCPClient) createEnv(bosh *boshenv.BOSHCLI, state, creds []byte, customOps string) (newState, newCreds []byte, err error) {
 	tags, err := splitTags(client.config.Tags)
 	if err != nil {
 		return state, creds, err
@@ -123,7 +148,6 @@ func (client *GCPClient) updateCloudConfig(bosh *boshenv.BOSHCLI) error {
 		Zone:              zone,
 		Network:           network,
 	}, directorPublicIP, client.config.DirectorPassword, client.config.DirectorCACert)
-	return nil
 }
 func (client *GCPClient) uploadConcourseStemcell(bosh *boshenv.BOSHCLI) error {
 	directorPublicIP, err := client.metadata.Get("DirectorPublicIP")
@@ -133,8 +157,6 @@ func (client *GCPClient) uploadConcourseStemcell(bosh *boshenv.BOSHCLI) error {
 	return bosh.UploadConcourseStemcell(gcp.Environment{
 		ExternalIP: directorPublicIP,
 	}, directorPublicIP, client.config.DirectorPassword, client.config.DirectorCACert)
-
-	return nil
 }
 
 func (client *GCPClient) saveStateFile(bytes []byte) (string, error) {

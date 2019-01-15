@@ -13,7 +13,7 @@ func (client *AWSClient) Deploy(state, creds []byte, detach bool) (newState, new
 		return state, creds, err
 	}
 
-	state, creds, err = client.createEnv(bosh, state, creds)
+	state, creds, err = client.createEnv(bosh, state, creds, "")
 	if err != nil {
 		return state, creds, err
 	}
@@ -36,7 +36,32 @@ func (client *AWSClient) Deploy(state, creds []byte, detach bool) (newState, new
 	return state, creds, err
 }
 
-func (client *AWSClient) createEnv(bosh *boshenv.BOSHCLI, state, creds []byte) (newState, newCreds []byte, err error) {
+// CreateEnv exposes bosh create-env functionality
+func (client *AWSClient) CreateEnv(state, creds []byte, customOps string) (newState, newCreds []byte, err error) {
+	bosh, err := boshenv.New(boshenv.DownloadBOSH())
+	if err != nil {
+		return state, creds, err
+	}
+	return client.createEnv(bosh, state, creds, customOps)
+}
+
+// Recreate exposes BOSH recreate
+func (client *AWSClient) Recreate() error {
+	bosh, err := boshenv.New(boshenv.DownloadBOSH())
+	if err != nil {
+		return err
+	}
+
+	directorPublicIP, err := client.metadata.Get("DirectorPublicIP")
+	if err != nil {
+		return err
+	}
+	return bosh.Recreate(aws.Environment{
+		ExternalIP: directorPublicIP,
+	}, directorPublicIP, client.config.DirectorPassword, client.config.DirectorCACert)
+}
+
+func (client *AWSClient) createEnv(bosh *boshenv.BOSHCLI, state, creds []byte, customOps string) (newState, newCreds []byte, err error) {
 	tags, err := splitTags(client.config.Tags)
 	if err != nil {
 		return state, creds, err
@@ -134,7 +159,9 @@ func (client *AWSClient) createEnv(bosh *boshenv.BOSHCLI, state, creds []byte) (
 		S3AWSAccessKeyID:     blobstoreUserAccessKeyID,
 		S3AWSSecretAccessKey: blobstoreSecretAccessKey,
 		Spot:                 client.config.Spot,
-		WorkerType:           client.config.WorkerType}, client.config.DirectorPassword, client.config.DirectorCert, client.config.DirectorKey, client.config.DirectorCACert, tags)
+		WorkerType:           client.config.WorkerType,
+		CustomOperations:     customOps,
+	}, client.config.DirectorPassword, client.config.DirectorCert, client.config.DirectorKey, client.config.DirectorCACert, tags)
 	if err1 != nil {
 		return store["state.json"], store["vars.yaml"], err1
 	}
@@ -172,8 +199,6 @@ func (client *AWSClient) updateCloudConfig(bosh *boshenv.BOSHCLI) error {
 		ExternalIP:       directorPublicIP,
 		WorkerType:       client.config.WorkerType,
 	}, directorPublicIP, client.config.DirectorPassword, client.config.DirectorCACert)
-
-	return nil
 }
 func (client *AWSClient) uploadConcourseStemcell(bosh *boshenv.BOSHCLI) error {
 	directorPublicIP, err := client.metadata.Get("DirectorPublicIP")
@@ -183,7 +208,6 @@ func (client *AWSClient) uploadConcourseStemcell(bosh *boshenv.BOSHCLI) error {
 	return bosh.UploadConcourseStemcell(aws.Environment{
 		ExternalIP: directorPublicIP,
 	}, directorPublicIP, client.config.DirectorPassword, client.config.DirectorCACert)
-	return nil
 }
 
 func (client *AWSClient) saveStateFile(bytes []byte) (string, error) {

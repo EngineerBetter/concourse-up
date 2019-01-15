@@ -413,6 +413,8 @@ type FakeBoshClient struct {
 	FakeDelete    func([]byte) ([]byte, error)
 	FakeCleanup   func() error
 	FakeInstances func() ([]bosh.Instance, error)
+	FakeCreateEnv func([]byte, []byte, string) ([]byte, []byte, error)
+	FakeRecreate  func() error
 }
 
 // Deploy delegates to FakeDeploy which is dynamically set by the tests
@@ -433,6 +435,16 @@ func (client *FakeBoshClient) Cleanup() error {
 // Instances delegates to FakeInstances which is dynamically set by the tests
 func (client *FakeBoshClient) Instances() ([]bosh.Instance, error) {
 	return client.FakeInstances()
+}
+
+// CreateEnv delegates to FakeCreateEnv which is dynamically set by the tests
+func (client *FakeBoshClient) CreateEnv(state, creds []byte, customOps string) ([]byte, []byte, error) {
+	return client.FakeCreateEnv(state, creds, customOps)
+}
+
+// Recreate delegates to FakeRecreate which is dynamically set by the tests
+func (client *FakeBoshClient) Recreate() error {
+	return client.FakeRecreate()
 }
 
 // NewFakeAcmeClient returns a new FakeAcmeClient

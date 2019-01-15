@@ -173,6 +173,20 @@ func (c *BOSHCLI) UploadConcourseStemcell(config IAASEnvironment, ip, password, 
 	return cmd.Run()
 }
 
+// Recreate runs BOSH recreate
+func (c *BOSHCLI) Recreate(config IAASEnvironment, ip, password, ca string) error {
+	caPath, err := writeTempFile([]byte(ca))
+	if err != nil {
+		return err
+	}
+	defer os.Remove(caPath)
+	ip = fmt.Sprintf("https://%s", ip)
+	cmd := c.execCmd(c.boshPath, "--non-interactive", "--environment", ip, "--ca-cert", caPath, "--client", "admin", "--client-secret", password, "--deployment", "concourse", "recreate")
+	cmd.Stderr = os.Stderr
+	cmd.Stdout = os.Stdout
+	return cmd.Run()
+}
+
 // DeleteEnv deletes a bosh env
 func (c *BOSHCLI) DeleteEnv(store Store, config IAASEnvironment, password, cert, key, ca string, tags map[string]string) error {
 	return c.xEnv("delete-env", store, config, password, cert, key, ca, tags)

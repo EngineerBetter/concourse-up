@@ -32,6 +32,7 @@ type Environment struct {
 	ExternalIP         string
 	Preemptible        bool
 	PublicKey          string
+	CustomOperations   string
 }
 
 var allOperations = resource.GCPCPIOps + resource.GCPExternalIPOps + resource.GCPDirectorCustomOps + resource.GCPJumpboxUserOps
@@ -44,7 +45,7 @@ func (e Environment) ConfigureDirectorManifestCPI(manifest string) (string, erro
 		return "", err
 	}
 
-	return yaml.Interpolate(manifest, allOperations, map[string]interface{}{
+	return yaml.Interpolate(manifest, allOperations+e.CustomOperations, map[string]interface{}{
 		"internal_cidr":        e.InternalCIDR,
 		"internal_gw":          e.InternalGW,
 		"internal_ip":          e.InternalIP,

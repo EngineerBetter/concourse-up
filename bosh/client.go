@@ -40,6 +40,8 @@ type IClient interface {
 	Delete([]byte) ([]byte, error)
 	Cleanup() error
 	Instances() ([]Instance, error)
+	CreateEnv([]byte, []byte, string) ([]byte, []byte, error)
+	Recreate() error
 }
 
 // Instance represents a vm deployed by BOSH

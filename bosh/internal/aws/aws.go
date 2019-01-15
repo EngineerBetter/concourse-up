@@ -44,6 +44,7 @@ type Environment struct {
 	Spot                  bool
 	VMSecurityGroup       string
 	WorkerType            string
+	CustomOperations      string
 }
 
 var allOperations = resource.AWSCPIOps + resource.ExternalIPOps + resource.DirectorCustomOps
@@ -53,7 +54,8 @@ var allOperations = resource.AWSCPIOps + resource.ExternalIPOps + resource.Direc
 func (e Environment) ConfigureDirectorManifestCPI(manifest string) (string, error) {
 	cpiResource := resource.Get(resource.AWSCPI)
 	stemcellResource := resource.Get(resource.AWSStemcell)
-	return yaml.Interpolate(manifest, allOperations, map[string]interface{}{
+
+	return yaml.Interpolate(manifest, allOperations+e.CustomOperations, map[string]interface{}{
 		"cpi_url":                  cpiResource.URL,
 		"cpi_version":              cpiResource.Version,
 		"cpi_sha1":                 cpiResource.SHA1,

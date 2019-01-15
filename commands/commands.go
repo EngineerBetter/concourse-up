@@ -9,6 +9,7 @@ var Commands = []cli.Command{
 	deployCmd,
 	destroyCmd,
 	infoCmd,
+	maintainCmd,
 }
 
 var nonInteractive bool

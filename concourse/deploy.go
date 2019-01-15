@@ -21,7 +21,6 @@ import (
 )
 
 const awsConst = "AWS"
-
 const gcpConst = "GCP"
 
 // BoshParams represents the params used and produced by a BOSH deploy

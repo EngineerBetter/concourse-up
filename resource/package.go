@@ -67,6 +67,12 @@ var (
 
 	// ReleaseVersions carries all versions of releases
 	ReleaseVersions = mustAssetString("ops/versions.json")
+
+	// AddNewCa carries the ops file that adds a new CA required for cert rotation
+	AddNewCa = mustAssetString("director/maintenance/add-new-ca.yml")
+
+	// RemoveOldCa carries the ops file that removes the old CA required for cert rotation
+	RemoveOldCa = mustAssetString("director/maintenance/remove-old-ca.yml")
 )
 
 // NOTE(px) remove this in a later version of github.com/mattn/go-bindata

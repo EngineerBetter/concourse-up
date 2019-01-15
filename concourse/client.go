@@ -3,6 +3,8 @@ package concourse
 import (
 	"io"
 
+	"github.com/EngineerBetter/concourse-up/commands/maintain"
+
 	"github.com/EngineerBetter/concourse-up/bosh"
 	"github.com/EngineerBetter/concourse-up/certs"
 	"github.com/EngineerBetter/concourse-up/commands/deploy"
@@ -35,6 +37,7 @@ type IClient interface {
 	Deploy() error
 	Destroy() error
 	FetchInfo() (*Info, error)
+	Maintain(maintain.Args) error
 }
 
 //go:generate go-bindata -pkg $GOPACKAGE ../../concourse-up-ops/director-versions.json
