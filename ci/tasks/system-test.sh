@@ -139,3 +139,16 @@ then
 fi
 
 assertPipelinesCanReadFromCredhub
+
+# Check nats certificate renewal
+before="$(./cup info "$deployment" --cert-expiry)"
+before_timestamp="$(date -d "$before" +"%s")"
+
+./cup maintain --renew-nats-cert "$deployment"
+
+after="$(./cup info "$deployment" --cert-expiry)"
+after_timestamp="$(date -d "$after" +"%s")"
+
+[[ $before_timestamp -lt $after_timestamp ]]
+
+assertPipelinesCanReadFromCredhub

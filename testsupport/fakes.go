@@ -415,6 +415,7 @@ type FakeBoshClient struct {
 	FakeInstances func() ([]bosh.Instance, error)
 	FakeCreateEnv func([]byte, []byte, string) ([]byte, []byte, error)
 	FakeRecreate  func() error
+	FakeLocks     func() ([]byte, error)
 }
 
 // Deploy delegates to FakeDeploy which is dynamically set by the tests
@@ -445,6 +446,11 @@ func (client *FakeBoshClient) CreateEnv(state, creds []byte, customOps string) (
 // Recreate delegates to FakeRecreate which is dynamically set by the tests
 func (client *FakeBoshClient) Recreate() error {
 	return client.FakeRecreate()
+}
+
+// Locks delegates to FakeLocks which is dynamically set by the tests
+func (client *FakeBoshClient) Locks() ([]byte, error) {
+	return client.FakeLocks()
 }
 
 // NewFakeAcmeClient returns a new FakeAcmeClient

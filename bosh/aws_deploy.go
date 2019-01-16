@@ -36,6 +36,23 @@ func (client *AWSClient) Deploy(state, creds []byte, detach bool) (newState, new
 	return state, creds, err
 }
 
+// Locks implements locks for AWS client
+func (client *AWSClient) Locks() ([]byte, error) {
+	bosh, err := boshenv.New(boshenv.DownloadBOSH())
+	if err != nil {
+		return []byte{}, err
+	}
+
+	directorPublicIP, err := client.metadata.Get("DirectorPublicIP")
+	if err != nil {
+		return nil, err
+	}
+	return bosh.Locks(aws.Environment{
+		ExternalIP: directorPublicIP,
+	}, directorPublicIP, client.config.DirectorPassword, client.config.DirectorCACert)
+
+}
+
 // CreateEnv exposes bosh create-env functionality
 func (client *AWSClient) CreateEnv(state, creds []byte, customOps string) (newState, newCreds []byte, err error) {
 	bosh, err := boshenv.New(boshenv.DownloadBOSH())

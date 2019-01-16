@@ -42,6 +42,7 @@ type IClient interface {
 	Instances() ([]Instance, error)
 	CreateEnv([]byte, []byte, string) ([]byte, []byte, error)
 	Recreate() error
+	Locks() ([]byte, error)
 }
 
 // Instance represents a vm deployed by BOSH

@@ -73,6 +73,9 @@ var (
 
 	// RemoveOldCa carries the ops file that removes the old CA required for cert rotation
 	RemoveOldCa = mustAssetString("director/maintenance/remove-old-ca.yml")
+
+	// CleanupCerts moves renewed values of certs to old keys in director vars store
+	CleanupCerts = mustAssetString("director/maintenance/cleanup-certs.yml")
 )
 
 // NOTE(px) remove this in a later version of github.com/mattn/go-bindata

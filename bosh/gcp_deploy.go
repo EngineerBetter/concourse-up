@@ -122,6 +122,23 @@ func (client *GCPClient) createEnv(bosh *boshenv.BOSHCLI, state, creds []byte, c
 	return store["state.json"], store["vars.yaml"], err
 }
 
+// Locks implements locks for GCP client
+func (client *GCPClient) Locks() ([]byte, error) {
+	bosh, err := boshenv.New(boshenv.DownloadBOSH())
+	if err != nil {
+		return []byte{}, err
+	}
+
+	directorPublicIP, err := client.metadata.Get("DirectorPublicIP")
+	if err != nil {
+		return nil, err
+	}
+	return bosh.Locks(gcp.Environment{
+		ExternalIP: directorPublicIP,
+	}, directorPublicIP, client.config.DirectorPassword, client.config.DirectorCACert)
+
+}
+
 func (client *GCPClient) updateCloudConfig(bosh *boshenv.BOSHCLI) error {
 
 	privateSubnetwork, err := client.metadata.Get("PrivateSubnetworkName")

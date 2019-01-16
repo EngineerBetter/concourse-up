@@ -1,6 +1,7 @@
 package boshenv
 
 import (
+	"bytes"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -152,6 +153,23 @@ func (c *BOSHCLI) UpdateCloudConfig(config IAASEnvironment, ip, password, ca str
 	cmd.Stderr = os.Stderr
 	cmd.Stdout = os.Stdout
 	return cmd.Run()
+}
+
+// Locks runs bosh locks
+func (c *BOSHCLI) Locks(config IAASEnvironment, ip, password, ca string) ([]byte, error) {
+	var out bytes.Buffer
+	caPath, err := writeTempFile([]byte(ca))
+	if err != nil {
+		return nil, err
+	}
+	defer os.Remove(caPath)
+	cmd := c.execCmd(c.boshPath, "--environment", ip, "--ca-cert", caPath, "--client", "admin", "--client-secret", password, "locks", "--json")
+	cmd.Stdout = &out
+	err = cmd.Run()
+	if err != nil {
+		return nil, err
+	}
+	return out.Bytes(), nil
 }
 
 // UploadConcourseStemcell uploads a stemcell for the chosen IAAS
