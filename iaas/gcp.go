@@ -352,10 +352,32 @@ func (g *GCPProvider) DeleteVMsInDeployment(zone, project, deployment string) er
 		return err
 	}
 
-	//TODO: shorter sleep times in a loop that checks whether any instances remain that need deleting
-	fmt.Println("Sleeping for 3 minutes to allow GCP update after instance deletion...")
-	time.Sleep(time.Second * 180)
-	return nil
+	start := time.Now().UTC()
+	for {
+		found := false
+		req = computeService.Instances.List(project, zone)
+
+		if err := req.Pages(g.ctx, func(page *compute.InstanceList) error {
+			for _, instance := range page.Items {
+				name := instance.Name
+				networkName := instance.NetworkInterfaces[0].Network
+				if strings.HasSuffix(networkName, fmt.Sprintf("%s-bosh-network", deployment)) && !strings.HasSuffix(name, "nat-instance") {
+					found = true
+					fmt.Printf("Waiting for instance %s to be deleted\n", name)
+				}
+			}
+			return nil
+		}); err != nil {
+			return err
+		}
+		if !found {
+			return nil
+		}
+		if time.Since(start) > time.Second*180 {
+			return fmt.Errorf("Instances not deleted after 3 minutes")
+		}
+		time.Sleep(time.Second * 10)
+	}
 }
 
 // FindLongestMatchingHostedZone finds the longest hosted zone that matches the given subdomain
