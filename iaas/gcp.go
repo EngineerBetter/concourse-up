@@ -129,6 +129,10 @@ func (g *GCPProvider) DeleteVersionedBucket(name string) error {
 	if err != nil && err.Error() != "storage: object doesn't exist" {
 		return err
 	}
+	err = g.DeleteFile(name, "director-creds-backup.yml")
+	if err != nil && err.Error() != "storage: object doesn't exist" {
+		return err
+	}
 	time.Sleep(time.Second)
 	if err := g.storage.Bucket(name).Delete(g.ctx); err != nil {
 		return err
