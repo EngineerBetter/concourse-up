@@ -656,7 +656,7 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 			It("Returns a meaningful error", func() {
 				client := buildClient()
 				_, err := client.FetchInfo()
-				Expect(err).To(MatchError("Do you need to add your IP 1.2.3.4 to the concourse-up-happymeal-director security group (for ports 22, 6868, and 25555)?"))
+				Expect(err).To(MatchError("Do you need to add your IP 1.2.3.4 to the concourse-up-happymeal-director security group/source range entry for director firewall (for ports 22, 6868, and 25555)?"))
 			})
 		})
 	})
