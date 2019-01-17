@@ -71,12 +71,7 @@ echo "DEPLOY WITH A USER PROVIDED CERT, CUSTOM DOMAIN, DEFAULT WORKERS, DEFAULT 
   --tls-cert "$(cat out/"$custom_domain".crt)" \
   --tls-key "$(cat out/"$custom_domain".key)"
 
-if [ "$IAAS" = "GCP" ]; then
-  echo "Testing GCP, exiting early"
-  exit 1
-fi
 sleep 60
-
 
 # Check we can log into the BOSH director and SSH into a VM
 eval "$(./cup info --env "$deployment")"
