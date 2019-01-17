@@ -42,7 +42,6 @@ func (client *GCPClient) CreateEnv(state, creds []byte, customOps string) (newSt
 	if err != nil {
 		return state, creds, err
 	}
-
 	return client.createEnv(bosh, state, creds, customOps)
 }
 
@@ -99,7 +98,6 @@ func (client *GCPClient) createEnv(bosh *boshenv.BOSHCLI, state, creds []byte, c
 	if err1 != nil {
 		return state, creds, err1
 	}
-
 	err1 = bosh.CreateEnv(store, gcp.Environment{
 		InternalCIDR:       "10.0.0.0/24",
 		InternalGW:         "10.0.0.1",
@@ -115,6 +113,7 @@ func (client *GCPClient) createEnv(bosh *boshenv.BOSHCLI, state, creds []byte, c
 		ExternalIP:         directorPublicIP,
 		Preemptible:        false,
 		PublicKey:          client.config.PublicKey,
+		CustomOperations:   customOps,
 	}, client.config.DirectorPassword, client.config.DirectorCert, client.config.DirectorKey, client.config.DirectorCACert, tags)
 	if err1 != nil {
 		return store["state.json"], store["vars.yaml"], err1
@@ -128,7 +127,6 @@ func (client *GCPClient) Locks() ([]byte, error) {
 	if err != nil {
 		return []byte{}, err
 	}
-
 	directorPublicIP, err := client.metadata.Get("DirectorPublicIP")
 	if err != nil {
 		return nil, err

@@ -48,11 +48,14 @@ func (client *Client) Maintain(m maintain.Args) error {
 }
 
 func (client *Client) renewCert() error {
-	// waitForBOSHLocks will wait waitTime for BOSH to release its locks in order to proceed.
-	// It will also printout a message to the user that the system is waiting for those locks.
+
 	err := client.waitForBOSHLocks(10 * time.Minute)
 	if err != nil {
-		return err
+		if err.Error() == "timeout" {
+			fmt.Println("bosh locks timed out - attempting to continue")
+		} else {
+			return err
+		}
 	}
 
 	maintenance, err := client.retrieveState()
@@ -176,14 +179,12 @@ func (client *Client) constructBoshClient() (*bosh.IClient, error) {
 // returns true if the lock is taken
 func (client *Client) checkIfLocked() (bool, error) {
 	var tables Tables
-
 	boshClientPointer, err := client.constructBoshClient()
 	if err != nil {
 		return true, err
 	}
 	boshClient := *boshClientPointer
 	defer boshClient.Cleanup()
-
 	lockBytes, err := boshClient.Locks()
 	if err != nil {
 		return true, err
@@ -200,7 +201,8 @@ func (client *Client) checkIfLocked() (bool, error) {
 	return true, nil
 }
 
-// waitForBOSHLocks waits waitTime for the BOSH lock to become available
+// waitForBOSHLocks will wait waitTime for BOSH to release its locks in order to proceed.
+// It will also printout a message to the user that the system is waiting for those locks.
 func (client *Client) waitForBOSHLocks(waitTime time.Duration) error {
 	start := time.Now().UTC()
 	for {
@@ -269,12 +271,10 @@ func (client *Client) createEnv(description, operation string) error {
 	if err != nil {
 		return err
 	}
-
 	boshCredsBytes, err := loadDirectorCreds(client.configClient)
 	if err != nil {
 		return err
 	}
-
 	boshStateBytes, boshCredsBytes, err = boshClient.CreateEnv(boshStateBytes, boshCredsBytes, operation)
 	err1 := client.configClient.StoreAsset(bosh.StateFilename, boshStateBytes)
 	if err == nil {
