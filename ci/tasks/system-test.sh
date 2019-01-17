@@ -85,6 +85,11 @@ username=$(echo "$config" | jq -r '.config.concourse_username')
 password=$(echo "$config" | jq -r '.config.concourse_password')
 echo "$config" | jq -r '.config.concourse_cert' > generated-ca-cert.pem
 
+if [ "$IAAS" = "GCP" ]
+then
+  gcloud auth activate-service-account --key-file="$GOOGLE_APPLICATION_CREDENTIALS"
+  export CLOUDSDK_CORE_PROJECT=concourse-up
+fi
 
 # Check RDS instance class is db.t2.small
 assertDbCorrect
