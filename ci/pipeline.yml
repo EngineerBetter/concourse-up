@@ -301,6 +301,12 @@ jobs:
       BINARY_PATH: binary-linux/concourse-up-linux-amd64
       GOOGLE_APPLICATION_CREDENTIALS_CONTENTS: ((system_test_google_application_credentials))
       IAAS: GCP
+    on_failure:
+      put: slack-alert
+      params:
+        channel: "#integrations"
+        text: |
+          <!channel> Concourse Up GCP smoke test failure!
 
 - name: system-test
   serial_groups:
@@ -348,13 +354,41 @@ jobs:
   - system-test-gcp
   serial: true
   plan:
-  - aggregate: *system-test-gets
+  - aggregate: &system-test-gets-gcp
+    - get: version
+      passed: [smoke-test-gcp]
+    - get: binary-linux
+      trigger: true
+      passed: [smoke-test-gcp]
+    - get: binary-darwin
+      trigger: true
+      passed: [smoke-test-gcp]
+    - get: binary-windows
+      trigger: true
+      passed: [smoke-test-gcp]
+    - get: concourse-up
+      trigger: true
+      passed: [smoke-test-gcp]
+    - get: concourse-up-ops
+      trigger: true
+      passed: [smoke-test-gcp]
+    - get: pcf-ops
+      passed: [smoke-test-gcp]
+    - get: release
+      params:
+        globs: [concourse-up-linux-amd64]
   - task: system-test
     file: concourse-up/ci/tasks/system-test.yml
     params:
       GOOGLE_APPLICATION_CREDENTIALS_CONTENTS: ((system_test_google_application_credentials))
       IAAS: GCP
       BINARY_PATH: binary-linux/concourse-up-linux-amd64
+      on_failure:
+        put: slack-alert
+        params:
+          channel: "#integrations"
+          text: |
+            <!channel> Concourse Up GCP system test failure!
 
 - name: system-test-update
   serial_groups:
@@ -369,11 +403,11 @@ jobs:
       AWS_SECRET_ACCESS_KEY: ((concourse_up_test_secret_key))
       BINARY_PATH: binary-linux/concourse-up-linux-amd64
       on_failure:
-      put: slack-alert
-      params:
-        channel: "#integrations"
-        text: |
-          <!channel> Concourse Up update system test failure!
+        put: slack-alert
+        params:
+          channel: "#integrations"
+          text: |
+            <!channel> Concourse Up update system test failure!
 
 - name: system-test-m5
   serial_groups:
@@ -441,7 +475,7 @@ jobs:
   - system-test-options-and-destroy-gcp
   serial: true
   plan:
-  - aggregate: *system-test-gets
+  - aggregate: *system-test-gets-gcp
   - task: system-test-options-and-destroy
     file: concourse-up/ci/tasks/system-test-options-and-destroy.yml
     params:
