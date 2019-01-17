@@ -11,7 +11,7 @@ function assertDbCorrect() {
     echo "DB class correct"
   elif [ "$IAAS" = "GCP" ]; then
     echo "About to check DB tier"
-    rds_instance_tier=$(gcloud sql instances list --filter="labels.deployment:concourse-up-$deployment" --format=json | jq '.[0].settings.tier')
+    rds_instance_tier=$(gcloud sql instances list --filter="labels.deployment:concourse-up-$deployment" --format=json | jq -r '.[0].settings.tier')
     if [ "$rds_instance_tier" != "db-g1-small" ]; then
       echo "Unexpected DB instance tier: $rds_instance_tier"
       exit 1
