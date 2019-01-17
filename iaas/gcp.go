@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"net"
 	"os"
 	"strings"
 	"time"
@@ -260,9 +261,48 @@ func (g *GCPProvider) DeleteVolumes(volumesToDelete []string, deleteVolume func(
 }
 
 // CheckForWhitelistedIP checks if the specified IP is whitelisted in the security group
-func (g *GCPProvider) CheckForWhitelistedIP(ip, securityGroup string) (bool, error) {
-	// @note: This will be covered in a later iteration as we need a deployment to try it
-	return false, errors.New("CheckForWhitelistedIP Not Implemented Yet")
+func (g *GCPProvider) CheckForWhitelistedIP(ip, firewallName string) (bool, error) {
+
+	parsedIP := net.ParseIP(ip)
+
+	c, err := google.DefaultClient(g.ctx, compute.CloudPlatformScope)
+	if err != nil {
+		return false, err
+	}
+
+	computeService, err := compute.New(c)
+	if err != nil {
+		return false, err
+	}
+
+	project, err := g.Attr("project")
+	if err != nil {
+		return false, err
+	}
+
+	// gets all compute instances for the project
+	req := computeService.Firewalls.List(project)
+	var sourceRanges []string
+	if err := req.Pages(g.ctx, func(page *compute.FirewallList) error {
+		for _, firewall := range page.Items {
+			if firewall.Name == firewallName {
+				sourceRanges = firewall.SourceRanges
+			}
+		}
+		return nil
+	}); err != nil {
+		return false, err
+	}
+	for _, cidr := range sourceRanges {
+		_, parsedCIDR, err := net.ParseCIDR(cidr)
+		if err != nil {
+			return false, err
+		}
+		if parsedCIDR.Contains(parsedIP) {
+			return true, nil
+		}
+	}
+	return false, nil
 }
 
 // DeleteVMsInVPC is a placeholder function used with AWS deployments

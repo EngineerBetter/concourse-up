@@ -148,26 +148,23 @@ func (client *Client) FetchInfo() (*Info, error) {
 		NatGatewayIP:     natGatewayIP,
 	}
 
-	// temporary fix before GCP has whitelisted IPs implemented
-	if client.provider.IAAS() == "AWS" { //nolint
-		userIP, err1 := client.ipChecker()
-		if err1 != nil {
-			return nil, err1
-		}
+	userIP, err1 := client.ipChecker()
+	if err1 != nil {
+		return nil, err1
+	}
 
-		directorSecurityGroupID, err1 := metadata.Get("DirectorSecurityGroupID")
-		if err1 != nil {
-			return nil, err1
-		}
-		whitelisted, err1 := client.provider.CheckForWhitelistedIP(userIP, directorSecurityGroupID)
-		if err1 != nil {
-			return nil, err1
-		}
+	directorSecurityGroupID, err1 := metadata.Get("DirectorSecurityGroupID")
+	if err1 != nil {
+		return nil, err1
+	}
+	whitelisted, err1 := client.provider.CheckForWhitelistedIP(userIP, directorSecurityGroupID)
+	if err1 != nil {
+		return nil, err1
+	}
 
-		if !whitelisted {
-			err1 = fmt.Errorf("Do you need to add your IP %s to the %s-director security group (for ports 22, 6868, and 25555)?", userIP, config.Deployment)
-			return nil, err1
-		}
+	if !whitelisted {
+		err1 = fmt.Errorf("Do you need to add your IP %s to the %s-director security group/source range entry for director firewall (for ports 22, 6868, and 25555)?", userIP, config.Deployment)
+		return nil, err1
 	}
 
 	boshClient, err := client.buildBoshClient(config, metadata)
