@@ -43,8 +43,11 @@ set -u
 cp "$BINARY_PATH" ./cup
 chmod +x ./cup
 
-
-custom_domain="$deployment-user.concourse-up.engineerbetter.com"
+if [ "$IAAS" = "GCP" ]; then
+  custom_domain="$deployment-user.concourse-up.gcp.engineerbetter.com"
+else
+  custom_domain="$deployment-user.concourse-up.engineerbetter.com"
+fi
 
 certstrap init \
   --common-name "$deployment" \
