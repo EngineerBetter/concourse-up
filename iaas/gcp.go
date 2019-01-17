@@ -125,6 +125,10 @@ func (g *GCPProvider) DeleteVersionedBucket(name string) error {
 	if err != nil {
 		return err
 	}
+	err = g.DeleteFile(name, "maintenance.json")
+	if err != nil && err.Error() != "storage: object doesn't exist" {
+		return err
+	}
 	time.Sleep(time.Second)
 	if err := g.storage.Bucket(name).Delete(g.ctx); err != nil {
 		return err
