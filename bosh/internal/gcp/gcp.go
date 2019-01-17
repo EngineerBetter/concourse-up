@@ -30,7 +30,7 @@ type Environment struct {
 	ProjectID          string
 	GcpCredentialsJSON string
 	ExternalIP         string
-	Preemptible        bool
+	Spot               bool
 	PublicKey          string
 	CustomOperations   string
 }
@@ -57,14 +57,13 @@ func (e Environment) ConfigureDirectorManifestCPI(manifest string) (string, erro
 		"project_id":           e.ProjectID,
 		"gcp_credentials_json": string(gcpCreds),
 		"external_ip":          e.ExternalIP,
-		"preemptible":          false,
 		"public_key":           e.PublicKey,
 	})
 }
 
 type gcpCloudConfigParams struct {
 	Zone              string
-	Preemptible       bool
+	Spot              bool
 	PublicSubnetwork  string
 	PrivateSubnetwork string
 	Network           string
@@ -82,7 +81,7 @@ func (e Environment) ConfigureDirectorCloudConfig(cloudConfig string) (string, e
 		Zone:              e.Zone,
 		PublicSubnetwork:  e.PublicSubnetwork,
 		PrivateSubnetwork: e.PrivateSubnetwork,
-		Preemptible:       e.Preemptible,
+		Spot:              e.Spot,
 		Network:           e.Network,
 	}
 

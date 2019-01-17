@@ -46,6 +46,7 @@ type Args struct {
 	TagsIsSet       bool
 	Spot            bool
 	SpotIsSet       bool
+	Preemptible     bool
 	Zone            string
 	ZoneIsSet       bool
 	WorkerType      string
@@ -77,7 +78,7 @@ func (a *Args) MarkSetFlags(c FlagSetChecker) error {
 				a.SelfUpdateIsSet = true
 			case "db-size":
 				a.DBSizeIsSet = true
-			case "spot":
+			case "spot", "preemptible":
 				a.SpotIsSet = true
 			case "allow-ips":
 				a.AllowIPsIsSet = true

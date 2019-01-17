@@ -104,6 +104,12 @@ var deployFlags = []cli.Flag{
 		EnvVar:      "SPOT",
 		Destination: &initialDeployArgs.Spot,
 	},
+	cli.BoolTFlag{
+		Name:        "preemptible",
+		Usage:       "(optional) Use preemptible instances for workers. Can be true/false (default: true)",
+		EnvVar:      "PREEMPTIBLE",
+		Destination: &initialDeployArgs.Preemptible,
+	},
 	cli.StringFlag{
 		Name:        "allow-ips",
 		Usage:       "(optional) Comma separated list of IP addresses or CIDR ranges to allow access to",

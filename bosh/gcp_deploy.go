@@ -111,7 +111,7 @@ func (client *GCPClient) createEnv(bosh *boshenv.BOSHCLI, state, creds []byte, c
 		ProjectID:          project,
 		GcpCredentialsJSON: credentialsPath,
 		ExternalIP:         directorPublicIP,
-		Preemptible:        false,
+		Spot:               client.config.Spot,
 		PublicKey:          client.config.PublicKey,
 		CustomOperations:   customOps,
 	}, client.config.DirectorPassword, client.config.DirectorCert, client.config.DirectorKey, client.config.DirectorCACert, tags)
@@ -157,7 +157,7 @@ func (client *GCPClient) updateCloudConfig(bosh *boshenv.BOSHCLI) error {
 	}
 	zone := client.provider.Zone("")
 	return bosh.UpdateCloudConfig(gcp.Environment{
-		Preemptible:       true,
+		Spot:              client.config.Spot,
 		PublicSubnetwork:  publicSubnetwork,
 		PrivateSubnetwork: privateSubnetwork,
 		Zone:              zone,

@@ -51,6 +51,7 @@ var _ = Describe("Client", func() {
 			DBSizeIsSet: false,
 			AllowIPs:    "0.0.0.0",
 			Spot:        true,
+			Preemptible: true,
 		}
 	})
 

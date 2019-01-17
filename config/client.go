@@ -208,7 +208,7 @@ func (client *Client) LoadOrCreate(deployArgs *deploy.Args) (Config, bool, bool,
 		config.Tags = deployArgs.Tags
 	}
 	if newConfigCreated || deployArgs.SpotIsSet {
-		config.Spot = deployArgs.Spot
+		config.Spot = deployArgs.Spot && deployArgs.Preemptible
 	}
 	if newConfigCreated || deployArgs.WorkerTypeIsSet {
 		config.WorkerType = deployArgs.WorkerType

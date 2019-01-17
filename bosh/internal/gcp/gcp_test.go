@@ -164,7 +164,7 @@ func TestEnvironment_ConfigureDirectorCloudConfig(t *testing.T) {
 		Zone              string
 		PublicSubnetwork  string
 		PrivateSubnetwork string
-		Preemptible       bool
+		Spot              bool
 	}
 	tests := []struct {
 		name        string
@@ -179,9 +179,9 @@ func TestEnvironment_ConfigureDirectorCloudConfig(t *testing.T) {
 				Zone:              "europe-west1-b",
 				PublicSubnetwork:  "12345",
 				PrivateSubnetwork: "67890",
-				Preemptible:       true,
+				Spot:              true,
 			},
-			cloudConfig: "zone: {{ .Zone }}\n public_subnet_id: {{ .PublicSubnetwork }}\n private_subnet_id: {{ .PrivateSubnetwork }}\n preemptible: {{ .Preemptible }}",
+			cloudConfig: "zone: {{ .Zone }}\n public_subnet_id: {{ .PublicSubnetwork }}\n private_subnet_id: {{ .PrivateSubnetwork }}\n preemptible: {{ .Spot }}",
 			want:        "zone: europe-west1-b\n public_subnet_id: 12345\n private_subnet_id: 67890\n preemptible: true",
 			wantErr:     false,
 		},
@@ -198,7 +198,7 @@ func TestEnvironment_ConfigureDirectorCloudConfig(t *testing.T) {
 				Zone:              tt.fields.Zone,
 				PublicSubnetwork:  tt.fields.PublicSubnetwork,
 				PrivateSubnetwork: tt.fields.PrivateSubnetwork,
-				Preemptible:       tt.fields.Preemptible,
+				Spot:              tt.fields.Spot,
 			}
 			got, err := e.ConfigureDirectorCloudConfig(tt.cloudConfig)
 			if (err != nil) != tt.wantErr {
