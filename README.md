@@ -8,10 +8,16 @@ A tool for easily deploying [Concourse](https://concourse-ci.org) in a single co
 
 ## TL;DR
 
-```
+```sh
 $ AWS_ACCESS_KEY_ID=<access-key-id> \
   AWS_SECRET_ACCESS_KEY=<secret-access-key> \
   concourse-up deploy <your-project-name>
+```
+
+```sh
+$ GOOGLE_APPLICATION_CREDENTIALS=<path/to/googlecreds.json> \
+  concourse-up deploy <your-project-name> \
+  --iaas gcp
 ```
 
 ## Why?
