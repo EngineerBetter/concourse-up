@@ -23,17 +23,17 @@ providing you with a single command for getting your Concourse up and keeping it
 
 ## Features
 
-- Deploys the latest version of Concourse CI on AWS, without you having to know anything about BOSH
+- Deploys the latest version of Concourse CI on AWS or GCP, without you having to know anything about BOSH
 - Idempotent deployment with either manual upgrade or automatic self-upgrade
 - Supports https access by default using a user-provided certificate or auto-generating a self-signed one
 - Supports custom domains for your Concourse URL
-- Uses cost effective AWS spot instances where possible (BOSH will take care of the service)
+- Uses cost effective AWS spot instances or preemptible GCP instances where possible (BOSH will take care of the service)
 - Uses precompiled BOSH packages to minimise install time
 - Horizontal and vertical worker scaling
 - Vertical database scaling
 - Workers reside behind a single, persistent public IP to simplify external security
 - Easy destroy and cleanup
-- Deploy to any AWS region
+- Deploy to any AWS or GCP region
 - Metrics infrastructure deployed by default (check http://your-concourse-url:3000)
 - DB encryption turned on by default
 - Uses credhub for secret management (see: <https://concourse-ci.org/creds.html>)
@@ -82,7 +82,7 @@ A new deploy from scratch takes approximately 20 minutes.
 
 All flags are optional. Configuration settings provided via flags will persist in later deployments unless explicitly overriden.
 
-* `--region value`       AWS region (default: "eu-west-1") [$AWS_REGION]
+* `--region value`       AWS or GCP region (default: "eu-west-1") [$AWS_REGION]
 * `--domain value`       Domain to use as endpoint for Concourse web interface (eg: ci.myproject.com) [$DOMAIN]
     ```sh
     $ concourse-up deploy --domain chimichanga.engineerbetter.com chimichanga
@@ -104,7 +104,10 @@ All flags are optional. Configuration settings provided via flags will persist i
     ```
 
 * `--workers value`      Number of Concourse worker instances to deploy (default: 1) [$WORKERS]
-* `--worker-type`        Specify a worker type for aws (m5 or m4) (default: "m4") [$WORKER_TYPE] (see comparison table below). AWS does not offer m5 instances in all regions, and even for regions that do offer m5 instances, not all zones within that region may offer them. To complicate matters further, each AWS account is assigned AWS zones at random - for instance, `eu-west-1a` for one account may be the same as `eu-west-1b` in another account. If m5s are available in your chosen region but _not_ the zone Concourse-Up has chosen, create a new deployment, this time specifying another `--zone`.
+* `--worker-type`        Specify a worker type for aws (m5 or m4) (default: "m4") [$WORKER_TYPE] (see comparison table below). **Note: this is an AWS-specific option**
+
+> AWS does not offer m5 instances in all regions, and even for regions that do offer m5 instances, not all zones within that region may offer them. To complicate matters further, each AWS account is assigned AWS zones at random - for instance, `eu-west-1a` for one account may be the same as `eu-west-1b` in another account. If m5s are available in your chosen region but _not_ the zone Concourse-Up has chosen, create a new deployment, this time specifying another `--zone`.
+
 * `--worker-size value`  Size of Concourse workers. Can be medium, large, xlarge, 2xlarge, 4xlarge, 10xlarge, 12xlarge, 16xlarge or 24xlarge depending on the worker-type (see above) (default: "xlarge") [$WORKER_SIZE]
 
     | --worker-size | AWS m4 Instance type | AWS m5 Instance type* |
@@ -263,7 +266,7 @@ For example to deploy Concourse-up and only allow traffic from your local machin
 
 ## Estimated Cost
 
-By default, `concourse-up` deploys to the AWS eu-west-1 (Ireland) region, and uses spot instances for large and xlarge Concourse VMs. The estimated monthly cost is as follows:
+By default, `concourse-up` deploys to the AWS eu-west-1 (Ireland) region or the GCP europe-west1 (Belgium) region, and uses spot instances for large and xlarge Concourse VMs. The estimated monthly cost is as follows:
 
 | Component     | Size             | Count | Price (USD) |
 |---------------|------------------|-------|------------:|
@@ -278,23 +281,37 @@ By default, `concourse-up` deploys to the AWS eu-west-1 (Ireland) region, and us
 
 ## What it does
 
-`concourse-up` first creates an S3 bucket to store its own configuration and saves a `config.json` file there.
+`concourse-up` first creates an S3 or GCS bucket to store its own configuration and saves a `config.json` file there.
 
 It then uses Terraform to deploy the following infrastructure:
 
-- A VPC, with public and private subnets and routing
-- A NAT gateway for outbound traffic from the private subnet
-- An S3 bucket which BOSH uses as a blobstore
-- An IAM user that can access the blobstore
-- An IAM user that can deploy EC2 instances
-- An AWS keypair for BOSH to use when deploying VMs
-- An RDS instance (default: db.t2.small) for BOSH and Concourse to use
-- Concourse database is [encrypted](http://concourse-ci.org/encryption.html) by default
-- A security group to allow access to the BOSH director from your local IP
-- A security group for BOSH-deployed VMs
-- A security group to allow access to the Concourse web server from the internet
-- A security group to allow access to the RDS database from BOSH and it's VMs
-
+- AWS
+  - A VPC, with public and private subnets and routing
+  - A NAT gateway for outbound traffic from the private  subnet
+  - An S3 bucket which BOSH uses as a blobstore
+  - An IAM user that can access the blobstore
+  - An IAM user that can deploy EC2 instances
+  - An AWS keypair for BOSH to use when deploying VMs
+  - An RDS instance (default: db.t2.small) for BOSH and  Concourse to use
+  - Concourse database is [encrypted](http:/  concourse-ci.org/encryption.html) by default
+  - A security group to allow access to the BOSH director  from your local IP
+  - A security group for BOSH-deployed VMs
+  - A security group to allow access to the Concourse web  server from the internet
+  - A security group to allow access to the RDS database from BOSH and it's VMs
+- GCP
+  - A DNS A record pointing to the ATC IP
+  - A Compute route for the nat instance
+  - A Compute instance for the nat
+  - A Compute network
+  - Public and Private Compute subnetworks
+  - Compute firewalls for director, nat, atc-one, atc-two, vms, atc-three, internal, and sql
+  - A Service account for for bosh
+  - A Service account key for bosh
+  - A Project iam member for bosh
+  - Comput addresses for the ATC and Director
+  - A Sql database instance
+  - A Sql database
+  - A Sql user
 
 Once the terraform step is complete, `concourse-up` deploys a BOSH director on an t2.micro instance, and then uses that to deploy a Concourse with the following settings:
 
@@ -307,6 +324,10 @@ Once the terraform step is complete, `concourse-up` deploys a BOSH director on a
 If you'd like to run concourse-up with it's own IAM account, create a user with the following permissions:
 
 ![](http://i.imgur.com/Q0mOUjv.png)
+
+## Using a dedicated GCP IAM member
+
+We configure the IAM member with `roles/owner`
 
 ## Project
 
@@ -333,6 +354,9 @@ Tests use the [Ginkgo](https://onsi.github.io/ginkgo/) Go testing framework. The
 
 Install ginkgo and run the tests with:
 
+```sh
+go get github.com/onsi/ginkgo/ginkgo
+ginkgo -r
 ```
 $ go get github.com/onsi/ginkgo/ginkgo
 $ ginkgo -r
