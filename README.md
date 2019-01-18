@@ -28,7 +28,7 @@ In just one command you can deploy a new Concourse environment for your team, on
 
 You can keep up to date on Concourse-Up announcement by reading the [EngineerBetter Blog](http://www.engineerbetter.com/blog/)
 
-## Features
+## Feature Summary
 
 - Deploys the latest version of Concourse CI on any region in AWS or GCP
 - Manual upgrade or automatic self-upgrade
