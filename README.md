@@ -56,7 +56,7 @@ providing you with a single command for getting your Concourse up and keeping it
 
 ## Install
 
-Download the [latest release](https://github.com/EngineerBetter/concourse-up/releases) and install it into your $PATH:
+Download the [latest release](https://github.com/EngineerBetter/concourse-up/releases) and install it into your `PATH`
 
 ## Usage
 
