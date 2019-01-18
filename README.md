@@ -110,29 +110,29 @@ All flags are optional. Configuration settings provided via flags will persist i
 
 * `--worker-size value`  Size of Concourse workers. Can be medium, large, xlarge, 2xlarge, 4xlarge, 10xlarge, 12xlarge, 16xlarge or 24xlarge depending on the worker-type (see above) (default: "xlarge") [$WORKER_SIZE]
 
-    | --worker-size | AWS m4 Instance type | AWS m5 Instance type* |
-    |---------------|----------------------|----------------------|
-    | medium        | t2.medium            | t2.medium            |
-    | large         | m4.large             | m5.large             |
-    | xlarge        | m4.xlarge            | m5.xlarge            |
-    | 2xlarge       | m4.2xlarge           | m5.2xlarge           |
-    | 4xlarge       | m4.4xlarge           | m5.4xlarge           |
-    | 10xlarge      | m4.10xlarge          |                      |
-    | 12xlarge      |                      | m5.12xlarge          |
-    | 16xlarge      | m4.16xlarge          |                      |
-    | 24xlarge      |                      | m5.24xlarge          |
+    | --worker-size | AWS m4 Instance type | AWS m5 Instance type* | GCP Instance type |
+    |---------------|----------------------|-----------------------|-------------------|
+    | medium        | t2.medium            | t2.medium             | n1-standard-1     |
+    | large         | m4.large             | m5.large              | n1-standard-2     |
+    | xlarge        | m4.xlarge            | m5.xlarge             | n1-standard-4     |
+    | 2xlarge       | m4.2xlarge           | m5.2xlarge            | n1-standard-8     |
+    | 4xlarge       | m4.4xlarge           | m5.4xlarge            | n1-standard-16    |
+    | 10xlarge      | m4.10xlarge          |                       | n1-standard-32    |
+    | 12xlarge      |                      | m5.12xlarge           |                   |
+    | 16xlarge      | m4.16xlarge          |                       | n1-standard-64    |
+    | 24xlarge      |                      | m5.24xlarge           |                   |
 
     \* _m5 instances not available in all regions and all zones. See `--worker-type` for more info._
 
 * `--web-size value`     Size of Concourse web node. Can be small, medium, large, xlarge, 2xlarge (default: "small") [$WEB_SIZE]
 
-    | --web-size | AWS Instance type |
-    |------------|-------------------|
-    | small      | t2.small          |
-    | medium     | t2.medium         |
-    | large      | t2.large          |
-    | xlarge     | t2.xlarge         |
-    | 2xlarge    | t2.2xlarge        |
+    | --web-size | AWS Instance type | GCP Instance type |
+    |------------|-------------------|-------------------|
+    | small      | t2.small          | n1-standard-1     |
+    | medium     | t2.medium         | n1-standard-2     |
+    | large      | t2.large          | n1-standard-4     |
+    | xlarge     | t2.xlarge         | n1-standard-8     |
+    | 2xlarge    | t2.2xlarge        | n1-standard-16    |
 
 * `--db-size value`      Size of Concourse RDS instance. Can be small, medium, large, xlarge, 2xlarge, or 4xlarge (default: "small") [$DB_SIZE]
 
@@ -140,14 +140,14 @@ All flags are optional. Configuration settings provided via flags will persist i
 
     The following table shows the allowed database sizes and the corresponding AWS RDS instance types
 
-    | --db-size | AWS Instance type |
-    |-----------|-------------------|
-    | small     | db.t2.small       |
-    | medium    | db.t2.medium      |
-    | large     | db.m4.large       |
-    | xlarge    | db.m4.xlarge      |
-    | 2xlarge   | db.m4.2xlarge     |
-    | 4xlarge   | db.m4.4xlarge     |
+    | --db-size | AWS Instance type | GCP Instance type  |
+    |-----------|-------------------|--------------------|
+    | small     | db.t2.small       | db-g1-small        |
+    | medium    | db.t2.medium      | db-custom-2-4096   |
+    | large     | db.m4.large       | db-custom-2-8192   |
+    | xlarge    | db.m4.xlarge      | db-custom-4-16384  |
+    | 2xlarge   | db.m4.2xlarge     | db-custom-8-32768  |
+    | 4xlarge   | db.m4.4xlarge     | db-custom-16-65536 |
 
 * `--allow-ips value`    Comma separated list of IP addresses or CIDR ranges to allow access to (default: "0.0.0.0/0") [$ALLOW_IPS]
 * `--github-auth-client-id value`      Client ID for a github OAuth application - Used for Github Auth [$GITHUB_AUTH_CLIENT_ID]
