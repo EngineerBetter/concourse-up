@@ -74,11 +74,8 @@ resources:
     branch: master
     # tag_filter: 0.*.*
     private_key: ((github_private_key))
-    paths:
-    - manifest.yml
-    - director-versions.json
-    - ops/versions.json
-    - director/aws/cloud-config.yml
+    ignore_paths:
+    - README.md
 
 - name: pcf-ops
   type: docker-image
