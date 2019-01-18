@@ -26,7 +26,7 @@ The goal of Concourse-Up is to be the easiest way to deploy and run Concourse CI
 
 In just one command you can deploy a new Concourse environment for your team, on either AWS or GCP. Your Concourse-Up deployment will *upgrade itself* and self-heal, restoring the underlying VMs if needed. Using the same command-line tool you can do things like manage DNS, scale your environment, or manage firewall policy.
 
-You can keep up to date on Concourse-Up announcement by reading the [EngineerBetter Blog](http://www.engineerbetter.com/blog/)
+You can keep up to date on Concourse-Up announcements by reading the [EngineerBetter Blog](http://www.engineerbetter.com/blog/)
 
 ## Feature Summary
 
