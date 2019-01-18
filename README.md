@@ -30,20 +30,19 @@ You can keep up to date on Concourse-Up announcement by reading the [EngineerBet
 
 ## Features
 
-- Deploys the latest version of Concourse CI on AWS or GCP, without you having to know anything about BOSH
-- Idempotent deployment with either manual upgrade or automatic self-upgrade
-- Supports https access by default using a user-provided certificate or auto-generating a self-signed one
-- Supports custom domains for your Concourse URL
-- Uses cost effective AWS spot instances or preemptible GCP instances where possible (BOSH will take care of the service)
-- Uses precompiled BOSH packages to minimise install time
-- Horizontal and vertical worker scaling
-- Vertical database scaling
-- Workers reside behind a single, persistent public IP to simplify external security
+- Deploys the latest version of Concourse CI on any region in AWS or GCP
+- Manual upgrade or automatic self-upgrade
+- Access your Concourse over https access by default, with auto-generated or self-provided cert.
+- Deploy on your own domain, if you have a zone in Route53 or Cloud DNS.
+- Scale your workers horizontally or vertically 
+- Scale your Concourse database
+- Presents workers on a single public IP to simplify external security
+- Database encryption enabled by default
+- Includes Grafana metrics dashboard (check http://your-concourse-url:3000)
+- Includes CredHub for secret management (see: <https://concourse-ci.org/creds.html>)
+- Saves you money by using AWS spot or GCP preemptible instances where possible (BOSH will take care of the service).
+- Idempotent deployment and operations
 - Easy destroy and cleanup
-- Deploy to any AWS or GCP region
-- Metrics infrastructure deployed by default (check http://your-concourse-url:3000)
-- DB encryption turned on by default
-- Uses credhub for secret management (see: <https://concourse-ci.org/creds.html>)
 
 ## Prerequisites
 
