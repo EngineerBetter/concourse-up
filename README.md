@@ -36,7 +36,7 @@ You can keep up to date on Concourse-Up announcement by reading the [EngineerBet
 - Deploy on your own domain, if you have a zone in Route53 or Cloud DNS.
 - Scale your workers horizontally or vertically 
 - Scale your Concourse database
-- Presents workers on a single public IP to simplify external security
+- Presents workers on a single public IP to simplify external security policy
 - Database encryption enabled by default
 - Includes Grafana metrics dashboard (check http://your-concourse-url:3000)
 - Includes CredHub for secret management (see: <https://concourse-ci.org/creds.html>)
