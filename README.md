@@ -95,13 +95,13 @@ A new deploy from scratch takes approximately 20 minutes.
 
 All flags are optional. Configuration settings provided via flags will persist in later deployments unless explicitly overriden.
 
-- `--region value`       AWS or GCP region (default: "eu-west-1") [$AWS_REGION]
+- `--region value`       AWS or GCP region (default: "eu-west-1" on AWS and "europe-west1" on GCP) [$AWS_REGION]
 - `--domain value`       Domain to use as endpoint for Concourse web interface (eg: ci.myproject.com) [$DOMAIN]
     ```sh
     $ concourse-up deploy --domain chimichanga.engineerbetter.com chimichanga
     ```
 
-    In the example above `concourse-up` will search for a Route 53 hosted zone that matches `chimichanga.engineerbetter.com` or `engineerbetter.com` and add a record to the longest match (`chimichanga.engineerbetter.com` in this example).
+    In the example above `concourse-up` will search for a hosted zone that matches `chimichanga.engineerbetter.com` or `engineerbetter.com` and add a record to the longest match (`chimichanga.engineerbetter.com` in this example).
 
 - `--tls-cert value`     TLS cert to use with Concourse endpoint [$TLS_CERT]
 - `--tls-key value`      TLS private key to use with Concourse endpoint [$TLS_KEY]
@@ -163,6 +163,9 @@ All flags are optional. Configuration settings provided via flags will persist i
     | 4xlarge   | db.m4.4xlarge     | db-custom-16-65536 |
 
 - `--allow-ips value`    Comma separated list of IP addresses or CIDR ranges to allow access to (default: "0.0.0.0/0") [$ALLOW_IPS]
+
+> Note: `allow-ips` governs what can access Concourse but not what can access the control plane (i.e. the BOSH director).
+
 - `--github-auth-client-id value`      Client ID for a github OAuth application - Used for Github Auth [$GITHUB_AUTH_CLIENT_ID]
 - `--github-auth-client-secret value`  Client Secret for a github OAuth application - Used for Github Auth [$GITHUB_AUTH_CLIENT_SECRET]
 - `--add-tag key=value` Add a tag to the VMs that form your `concourse-up` deployment. Can be used multiple times in a single `deploy` command.
@@ -225,6 +228,10 @@ To destroy your Concourse:
 
 ```sh
 $ concourse-up destroy <your-project-name>
+```
+
+```sh
+$ concourse-up destroy <your-project-name> --iaas gcp
 ```
 
 #### Flags
@@ -347,15 +354,15 @@ It then uses Terraform to deploy the following infrastructure:
   - A Service account for for bosh
   - A Service account key for bosh
   - A Project iam member for bosh
-  - Comput addresses for the ATC and Director
+  - Compute addresses for the ATC and Director
   - A Sql database instance
   - A Sql database
   - A Sql user
 
-Once the terraform step is complete, `concourse-up` deploys a BOSH director on an t2.micro instance, and then uses that to deploy a Concourse with the following settings:
+Once the terraform step is complete, `concourse-up` deploys a BOSH director on an t2.small/n1-standard-1 instance, and then uses that to deploy a Concourse with the following settings:
 
-- One t2.small for the Concourse web server
-- One m4.xlarge [spot](https://aws.amazon.com/ec2/spot/) instance used as a Concourse worker
+- One t2.small/n1-standard-1 for the Concourse web server
+- One m4.xlarge [spot](https://aws.amazon.com/ec2/spot/)/n1-standard-4 [preemptible](https://cloud.google.com/preemptible-vms/) instance used as a Concourse worker
 - Access via over HTTP and HTTPS using a user-provided certificate, or an auto-generated self-signed certificate if one isn't provided.
 
 ## Using a dedicated AWS IAM account
