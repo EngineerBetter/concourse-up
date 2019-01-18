@@ -72,7 +72,7 @@ resources:
   source:
     uri: git@github.com:EngineerBetter/concourse-up-ops.git
     branch: master
-    tag_filter: 0.*.*
+    # tag_filter: 0.*.*
     private_key: ((github_private_key))
     paths:
     - manifest.yml
