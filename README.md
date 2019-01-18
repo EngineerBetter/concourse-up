@@ -44,6 +44,7 @@ providing you with a single command for getting your Concourse up and keeping it
   - The environment variables `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` are set.
   - Credentials for the default profile in `~/.aws/credentials` are present.
   - Credentials for a profile in `~/.aws/credentials` are present.
+  - The environment variable `GOOGLE_APPLICATION_CREDENTIALS_CONTENTS` set to the path to a GCP credentials json file
 - Ensure your credentials are *long lived credentials* and not *temporary security credentials*
 - Ensure you have the correct local dependencies for [bootstrapping a BOSH VM](https://bosh.io/docs/cli-v2-install/#additional-dependencies)
 
@@ -58,7 +59,13 @@ Download the [latest release](https://github.com/EngineerBetter/concourse-up/rel
 Deploy a new Concourse with:
 
 ```sh
-$ concourse-up deploy <your-project-name>
+concourse-up deploy <your-project-name>
+```
+
+Deploy a new Concourse to GCP with:
+
+```sh
+concourse-up deploy <your-project-name> --iaas gcp
 ```
 
 eg:
@@ -82,16 +89,16 @@ A new deploy from scratch takes approximately 20 minutes.
 
 All flags are optional. Configuration settings provided via flags will persist in later deployments unless explicitly overriden.
 
-* `--region value`       AWS or GCP region (default: "eu-west-1") [$AWS_REGION]
-* `--domain value`       Domain to use as endpoint for Concourse web interface (eg: ci.myproject.com) [$DOMAIN]
+- `--region value`       AWS or GCP region (default: "eu-west-1") [$AWS_REGION]
+- `--domain value`       Domain to use as endpoint for Concourse web interface (eg: ci.myproject.com) [$DOMAIN]
     ```sh
     $ concourse-up deploy --domain chimichanga.engineerbetter.com chimichanga
     ```
 
     In the example above `concourse-up` will search for a Route 53 hosted zone that matches `chimichanga.engineerbetter.com` or `engineerbetter.com` and add a record to the longest match (`chimichanga.engineerbetter.com` in this example).
 
-* `--tls-cert value`     TLS cert to use with Concourse endpoint [$TLS_CERT]
-* `--tls-key value`      TLS private key to use with Concourse endpoint [$TLS_KEY]
+- `--tls-cert value`     TLS cert to use with Concourse endpoint [$TLS_CERT]
+- `--tls-key value`      TLS private key to use with Concourse endpoint [$TLS_KEY]
 
     By default `concourse-up` will generate a self-signed cert using the given domain. If you'd like to provide your own certificate instead, pass the cert and private key as strings using the `--tls-cert` and `--tls-key` flags respectively. eg:
 
@@ -103,12 +110,12 @@ All flags are optional. Configuration settings provided via flags will persist i
       chimichanga
     ```
 
-* `--workers value`      Number of Concourse worker instances to deploy (default: 1) [$WORKERS]
-* `--worker-type`        Specify a worker type for aws (m5 or m4) (default: "m4") [$WORKER_TYPE] (see comparison table below). **Note: this is an AWS-specific option**
+- `--workers value`      Number of Concourse worker instances to deploy (default: 1) [$WORKERS]
+- `--worker-type`        Specify a worker type for aws (m5 or m4) (default: "m4") [$WORKER_TYPE] (see comparison table below). **Note: this is an AWS-specific option**
 
 > AWS does not offer m5 instances in all regions, and even for regions that do offer m5 instances, not all zones within that region may offer them. To complicate matters further, each AWS account is assigned AWS zones at random - for instance, `eu-west-1a` for one account may be the same as `eu-west-1b` in another account. If m5s are available in your chosen region but _not_ the zone Concourse-Up has chosen, create a new deployment, this time specifying another `--zone`.
 
-* `--worker-size value`  Size of Concourse workers. Can be medium, large, xlarge, 2xlarge, 4xlarge, 10xlarge, 12xlarge, 16xlarge or 24xlarge depending on the worker-type (see above) (default: "xlarge") [$WORKER_SIZE]
+- `--worker-size value`  Size of Concourse workers. Can be medium, large, xlarge, 2xlarge, 4xlarge, 10xlarge, 12xlarge, 16xlarge or 24xlarge depending on the worker-type (see above) (default: "xlarge") [$WORKER_SIZE]
 
     | --worker-size | AWS m4 Instance type | AWS m5 Instance type* | GCP Instance type |
     |---------------|----------------------|-----------------------|-------------------|
@@ -124,7 +131,7 @@ All flags are optional. Configuration settings provided via flags will persist i
 
     \* _m5 instances not available in all regions and all zones. See `--worker-type` for more info._
 
-* `--web-size value`     Size of Concourse web node. Can be small, medium, large, xlarge, 2xlarge (default: "small") [$WEB_SIZE]
+- `--web-size value`     Size of Concourse web node. Can be small, medium, large, xlarge, 2xlarge (default: "small") [$WEB_SIZE]
 
     | --web-size | AWS Instance type | GCP Instance type |
     |------------|-------------------|-------------------|
@@ -134,7 +141,7 @@ All flags are optional. Configuration settings provided via flags will persist i
     | xlarge     | t2.xlarge         | n1-standard-8     |
     | 2xlarge    | t2.2xlarge        | n1-standard-16    |
 
-* `--db-size value`      Size of Concourse RDS instance. Can be small, medium, large, xlarge, 2xlarge, or 4xlarge (default: "small") [$DB_SIZE]
+- `--db-size value`      Size of Concourse RDS instance. Can be small, medium, large, xlarge, 2xlarge, or 4xlarge (default: "small") [$DB_SIZE]
 
     >Note that when changing the database size on an existing concourse-up deployment, the RDS instance will scaled by terraform resulting in approximately 3 minutes of downtime.
 
@@ -149,17 +156,29 @@ All flags are optional. Configuration settings provided via flags will persist i
     | 2xlarge   | db.m4.2xlarge     | db-custom-8-32768  |
     | 4xlarge   | db.m4.4xlarge     | db-custom-16-65536 |
 
-* `--allow-ips value`    Comma separated list of IP addresses or CIDR ranges to allow access to (default: "0.0.0.0/0") [$ALLOW_IPS]
-* `--github-auth-client-id value`      Client ID for a github OAuth application - Used for Github Auth [$GITHUB_AUTH_CLIENT_ID]
-* `--github-auth-client-secret value`  Client Secret for a github OAuth application - Used for Github Auth [$GITHUB_AUTH_CLIENT_SECRET]
-* `--add-tag key=value` Add a tag to the VMs that form your `concourse-up` deployment. Can be used multiple times in a single `deploy` command.
-* `--spot=value` Use spot instances for workers. Can be true/false. Default is true.
+- `--allow-ips value`    Comma separated list of IP addresses or CIDR ranges to allow access to (default: "0.0.0.0/0") [$ALLOW_IPS]
+- `--github-auth-client-id value`      Client ID for a github OAuth application - Used for Github Auth [$GITHUB_AUTH_CLIENT_ID]
+- `--github-auth-client-secret value`  Client Secret for a github OAuth application - Used for Github Auth [$GITHUB_AUTH_CLIENT_SECRET]
+- `--add-tag key=value` Add a tag to the VMs that form your `concourse-up` deployment. Can be used multiple times in a single `deploy` command.
+- `--spot=value` Use spot instances for workers. Can be true/false. Default is true.
 
     > Concourse Up uses spot instances for workers as a cost saving measure. Users requiring lower risk may switch this feature off by setting --spot=false.
+- `--preemptible` Use preemptible instances for workers. Can be true/false. Default is true.
 
-* `--namespace value` Any valid string that provides a meaningful namespace of the deployment - Used as part of the configuration bucket name [$NAMESPACE].
+    > Be aware the [preemptible instances](https://cloud.google.com/preemptible-vms/) _will_ go down at least once every 24 hours so deployments with only one worker _will_ experience downtime with this feature enabled. BOSH will ressurect falled workers automatically.
+
+    If either `spot` or `preemptible` is set to false then interruptible instances will not be used regardless of your IaaS. i.e:
+
+    ```sh
+    # Results in an AWS deployment using non-spot workers
+    concourse-up deploy <name> --preemptible=false`
+    # Results in a GCP deployment using non-preemptible workers
+    concourse-up deploy <name> --iaas gcp --spot=false
+    ```
+
+- `--namespace value` Any valid string that provides a meaningful namespace of the deployment - Used as part of the configuration bucket name [$NAMESPACE].
     >Note that if namespace has been provided in the initial `deploy` it will be required for any subsequent `concourse-up` calls against the same deployment.
-* `--zone`            Specify an availability zone [$ZONE] (cannot be changed after the initial deployment)
+- `--zone`            Specify an availability zone [$ZONE] (cannot be changed after the initial deployment)
 
 ### Info
 
@@ -339,8 +358,8 @@ We configure the IAM member with `roles/owner`
 
 To build and test you'll need:
 
-* Golang 1.11+
-* to have installed `github.com/mattn/go-bindata`
+- Golang 1.11+
+- to have installed `github.com/mattn/go-bindata`
 
 ### Building locally
 
