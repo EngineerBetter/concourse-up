@@ -20,12 +20,13 @@ $ GOOGLE_APPLICATION_CREDENTIALS=<path/to/googlecreds.json> \
   --iaas gcp
 ```
 
-## Why?
+## Why Concourse-Up?
 
-Concourse is easy to get started with, but as soon as you want your team to use it you've
-previously had to learn BOSH. Teams who just want great CI shouldn't need to think about this.
-The goal of `concourse-up` is to hide the complexity of [BOSH](https://bosh.io), while giving you all the benefits,
-providing you with a single command for getting your Concourse up and keeping it running. You can read more about the rationale for this tool in [this blog post](http://www.engineerbetter.com/2017/05/03/introducing-concourse-up.html). Some more recent features, including self-update, are described in [this blog post](http://www.engineerbetter.com/2017/09/18/perpetual-motion-software-updates.html).
+The goal of Concourse-Up is to be the easiest way to deploy and run Concourse CI on your own infrastructure. 
+
+In just one command you can deploy a new Concourse environment for your team, on either AWS or GCP. Your Concourse-Up deployment will *upgrade itself* and self-heal, restoring the underlying VMs if needed. Using the same command-line tool you can do things like manage DNS, scale your environment, or manage firewall policy.
+
+You can keep up to date on Concourse-Up announcement by reading the [EngineerBetter Blog[(http://www.engineerbetter.com/blog/)]
 
 ## Features
 
