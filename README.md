@@ -187,6 +187,7 @@ All flags are optional
 `--region value`  AWS region (default: "eu-west-1") [$AWS_REGION]
 `--json`          Output as json [$JSON]
 `--env`           Output environment variables
+`--cert-expiry`   Output the expiry of the BOSH director's NATS certificate
 
 ### Destroy
 
