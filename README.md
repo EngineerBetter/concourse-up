@@ -332,18 +332,30 @@ By default, `concourse-up` deploys to the AWS eu-west-1 (Ireland) region or the 
 It then uses Terraform to deploy the following infrastructure:
 
 - AWS
-  - A VPC, with public and private subnets and routing
-  - A NAT gateway for outbound traffic from the private  subnet
-  - An S3 bucket which BOSH uses as a blobstore
-  - An IAM user that can access the blobstore
-  - An IAM user that can deploy EC2 instances
-  - An AWS keypair for BOSH to use when deploying VMs
-  - An RDS instance (default: db.t2.small) for BOSH and  Concourse to use
-  - Concourse database is [encrypted](http:/  concourse-ci.org/encryption.html) by default
-  - A security group to allow access to the BOSH director  from your local IP
-  - A security group for BOSH-deployed VMs
-  - A security group to allow access to the Concourse web  server from the internet
-  - A security group to allow access to the RDS database from BOSH and it's VMs
+  - Key pair
+  - S3 bucket for the blobstore
+  - IAM user that can access the blobstore
+    - IAM access key
+    - IAM user policy
+  - IAM user that can deploy EC2 instances
+    - IAM access key
+    - IAM user policy
+  - VPC
+  - Internet gateway
+  - Route for internet_access
+  - NAT gateway
+  - Route table for private
+  - Subnet for public
+  - Subnet for private
+  - Route table association for private
+  - Route53 record for Concourse
+  - EIP for director, ATC, and NAT
+  - Security groups for director, vms, RDS, and ATC
+  - Route table for RDS
+  - Route table associations for RDS
+  - Subnets for RDS
+  - DB subnet group
+  - DB instance
 - GCP
   - A DNS A record pointing to the ATC IP
   - A Compute route for the nat instance
