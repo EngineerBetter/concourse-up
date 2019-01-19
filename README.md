@@ -40,7 +40,7 @@ You can keep up to date on Concourse-Up announcements by reading the [EngineerBe
 - Database encryption enabled by default
 - Includes Grafana metrics dashboard (check http://your-concourse-url:3000)
 - Includes CredHub for secret management (see: <https://concourse-ci.org/creds.html>)
-- Saves you money by using AWS spot or GCP preemptible instances where possible (BOSH will take care of the service).
+- Saves you money by using AWS spot or GCP preemptible instances where possible, restarting them when needed
 - Idempotent deployment and operations
 - Easy destroy and cleanup
 
