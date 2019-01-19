@@ -22,7 +22,7 @@ $ GOOGLE_APPLICATION_CREDENTIALS=<path/to/googlecreds.json> \
 
 ## Why Concourse-Up?
 
-The goal of Concourse-Up is to be the easiest way to deploy and run Concourse CI on your own infrastructure. 
+The goal of Concourse-Up is to be the world's easiest way to deploy and operate Concourse CI in production. 
 
 In just one command you can deploy a new Concourse environment for your team, on either AWS or GCP. Your Concourse-Up deployment will *upgrade itself* and self-heal, restoring the underlying VMs if needed. Using the same command-line tool you can do things like manage DNS, scale your environment, or manage firewall policy.
 
