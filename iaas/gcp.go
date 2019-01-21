@@ -448,7 +448,12 @@ func (g *GCPProvider) WorkerType(w string) {}
 
 // CreateDatabases creates databases on the server
 func (g *GCPProvider) CreateDatabases(name, username, password string) error {
-	conn := fmt.Sprintf("host=concourse-up:%s:%s user=%s dbname=postgres password=%s sslmode=disable", g.Region(), name, username, password)
+	project, err := g.Attr("project")
+	if err != nil {
+		return err
+	}
+	conn := fmt.Sprintf("host=%s:%s:%s user=%s dbname=postgres password=%s sslmode=disable", project, g.Region(), name, username, password)
+
 	gcpDB, err := sql.Open("cloudsqlpostgres", conn)
 	if err != nil {
 		return err
