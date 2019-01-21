@@ -23,4 +23,7 @@ gometalinter \
 --deadline=120s \
 ./...
 
-find . -name vendor -prune ! -type d -o -name '*.sh' -exec shellcheck {} +
+# Globally ignoring SC2154 as it doesn't play nice with variables
+# set by Concourse for use in tasks.
+# https://github.com/koalaman/shellcheck/wiki/SC2154
+find . -name vendor -prune ! -type d -o -name '*.sh' -exec shellcheck -e SC2154 {} +

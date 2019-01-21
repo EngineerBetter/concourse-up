@@ -1,4 +1,8 @@
 #!/bin/bash
+# shellcheck disable=SC2091,SC2006
+
+# Disabling SC2091 above because we want to print commands encased in $()
+# Disabling SC2006 above because ``` code blocks are misinterpretted as shell execution
 
 set -eu
 
