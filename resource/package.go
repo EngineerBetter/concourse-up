@@ -8,7 +8,7 @@ import (
 	"github.com/EngineerBetter/concourse-up/util/bincache"
 )
 
-//go:generate go-bindata -o internal/file/file.go -ignore (\.go$)|(\.git)|(bosh/assets) -nometadata -pkg file -prefix=../../concourse-up-ops . ../../concourse-up-ops/...
+//go:generate go-bindata -o internal/file/file.go -ignore (\.go$)|(\.git)|(bosh/assets) -nometadata -pkg file ../../concourse-up-ops/... assets/...
 
 // Resource safely exposes the json parameters of a resource
 type Resource struct {
@@ -37,45 +37,45 @@ var (
 
 var (
 	// DirectorManifest statically defines director-manifest.yml contents
-	DirectorManifest = mustAssetString("director/manifest.yml")
+	DirectorManifest = mustAssetString("assets/manifest.yml")
 
 	// AWSDirectorCloudConfig statically defines aws cloud-config.yml
-	AWSDirectorCloudConfig = mustAssetString("director/aws/cloud-config.yml")
+	AWSDirectorCloudConfig = mustAssetString("assets/aws/cloud-config.yml")
 	// AWSCPIOps statically defines aws-cpi.yml contents
-	AWSCPIOps = mustAssetString("director/aws/cpi.yml")
+	AWSCPIOps = mustAssetString("assets/aws/cpi.yml")
 	//GCPJumpboxUserOps statically defines gcp jumpbox-user.yml
-	GCPJumpboxUserOps = mustAssetString("director/gcp/jumpbox-user.yml")
+	GCPJumpboxUserOps = mustAssetString("assets/gcp/jumpbox-user.yml")
 	// GCPDirectorCloudConfig statically defines gcp cloud-config.yml
-	GCPDirectorCloudConfig = mustAssetString("director/gcp/cloud-config.yml")
+	GCPDirectorCloudConfig = mustAssetString("assets/gcp/cloud-config.yml")
 	// GCPCPIOps statically defines gcp-cpi.yml contents
-	GCPCPIOps = mustAssetString("director/gcp/cpi.yml")
+	GCPCPIOps = mustAssetString("assets/gcp/cpi.yml")
 	// GCPExternalIPOps statically defines external-ip.yml contents
-	GCPExternalIPOps = mustAssetString("director/gcp/external-ip.yml")
+	GCPExternalIPOps = mustAssetString("assets/gcp/external-ip.yml")
 	// GCPDirectorCustomOps statically defines custom-ops.yml contents
-	GCPDirectorCustomOps = mustAssetString("director/gcp/custom-ops.yml")
+	GCPDirectorCustomOps = mustAssetString("assets/gcp/custom-ops.yml")
 
 	// AWSTerraformConfig holds the terraform conf for AWS
-	AWSTerraformConfig = mustAssetString("director/aws/infrastructure.tf")
+	AWSTerraformConfig = mustAssetString("assets/aws/infrastructure.tf")
 
 	// GCPTerraformConfig holds the terraform conf for GCP
-	GCPTerraformConfig = mustAssetString("director/gcp/infrastructure.tf")
+	GCPTerraformConfig = mustAssetString("assets/gcp/infrastructure.tf")
 
 	// ExternalIPOps statically defines external-ip.yml contents
-	ExternalIPOps = mustAssetString("director/external-ip.yml")
+	ExternalIPOps = mustAssetString("assets/external-ip.yml")
 	// DirectorCustomOps statically defines custom-ops.yml contents
-	DirectorCustomOps = mustAssetString("director/custom-ops.yml")
+	DirectorCustomOps = mustAssetString("assets/custom-ops.yml")
 
 	// ReleaseVersions carries all versions of releases
-	ReleaseVersions = mustAssetString("ops/versions.json")
+	ReleaseVersions = mustAssetString("../../concourse-up-ops/ops/versions.json")
 
 	// AddNewCa carries the ops file that adds a new CA required for cert rotation
-	AddNewCa = mustAssetString("director/maintenance/add-new-ca.yml")
+	AddNewCa = mustAssetString("assets/maintenance/add-new-ca.yml")
 
 	// RemoveOldCa carries the ops file that removes the old CA required for cert rotation
-	RemoveOldCa = mustAssetString("director/maintenance/remove-old-ca.yml")
+	RemoveOldCa = mustAssetString("assets/maintenance/remove-old-ca.yml")
 
 	// CleanupCerts moves renewed values of certs to old keys in director vars store
-	CleanupCerts = mustAssetString("director/maintenance/cleanup-certs.yml")
+	CleanupCerts = mustAssetString("assets/maintenance/cleanup-certs.yml")
 )
 
 // NOTE(px) remove this in a later version of github.com/mattn/go-bindata
@@ -93,7 +93,7 @@ func Get(id ID) Resource {
 }
 
 func init() {
-	p := file.MustAsset("director-versions.json")
+	p := file.MustAsset("../../concourse-up-ops/director-versions.json")
 	err := json.Unmarshal(p, &resources)
 	if err != nil {
 		panic(err)

@@ -1,0 +1,93 @@
+- type: replace
+  path: /disk_pools/name=disks/disk_size
+  value: 20000
+
+- type: replace
+  path: /instance_groups/name=bosh/properties/blobstore
+  value:
+    access_key_id: ((s3_aws_access_key_id))
+    bucket_name: ((blobstore_bucket))
+    provider: s3
+    s3_region: ((region))
+    secret_access_key: ((s3_aws_secret_access_key))
+
+- type: replace
+  path: /instance_groups/name=bosh/properties/director/db
+  value:
+    adapter: postgres
+    database: ((db_name))
+    host: ((db_host))
+    password: ((db_password))
+    port: ((db_port))
+    user: ((db_username))
+
+- type: replace
+  path: /instance_groups/name=bosh/properties/director/max_threads?
+  value: 10
+
+- type: replace
+  path: /instance_groups/name=bosh/properties/director/trusted_certs?
+  value: ((db_ca_cert))
+
+- type: replace
+  path: /instance_groups/name=bosh/properties/postgres
+  value:
+    adapter: postgres
+    database: ((db_name))
+    host: ((db_host))
+    password: ((db_password))
+    port: ((db_port))
+    user: ((db_username))
+
+- type: replace
+  path: /instance_groups/name=bosh/properties/registry/db
+  value:
+    adapter: postgres
+    database: ((db_name))
+    host: ((db_host))
+    password: ((db_password))
+    port: ((db_port))
+    user: ((db_username))
+
+- type: replace
+  path: /instance_groups/name=bosh/properties/registry/http/user
+  value: admin
+
+- type: replace
+  path: /instance_groups/name=bosh/properties/registry/username
+  value: admin
+
+- type: replace
+  path: /resource_pools/name=vms/cloud_properties/instance_type
+  value: t2.small
+
+- type: remove
+  path: /instance_groups/name=bosh/properties/agent/env
+
+- type: remove
+  path: /variables/name=blobstore_ca
+
+- type: remove
+  path: /variables/name=blobstore_server_tls
+
+- type: remove
+  path: /instance_groups/name=bosh/jobs/name=postgres-9.4
+
+- type: remove
+  path: /instance_groups/name=bosh/jobs/name=blobstore
+
+- type: remove
+  path: /cloud_provider/cert
+
+- type: remove
+  path: /resource_pools/name=vms/env/bosh/mbus
+
+- type: remove
+  path: /variables/name=mbus_bootstrap_ssl
+
+- type: remove
+  path: /instance_groups/name=bosh/properties/director/workers
+
+- type: replace
+  path: /tags?
+  value: ((tags))

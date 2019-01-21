@@ -1,0 +1,146 @@
+---
+azs:
+- name: z1
+  cloud_properties:
+    zone: {{ .Zone }}
+
+vm_types:
+- name: concourse-web-small
+  cloud_properties:
+    machine_type: n1-standard-1
+    root_disk_size_gb: 20
+    root_disk_type: pd-ssd
+
+- name: concourse-web-medium
+  cloud_properties:
+    machine_type: n1-standard-2
+    root_disk_size_gb: 20
+    root_disk_type: pd-ssd
+
+- name: concourse-web-large
+  cloud_properties:
+    machine_type: n1-standard-4
+    root_disk_size_gb: 20
+    root_disk_type: pd-ssd
+
+- name: concourse-web-xlarge
+  cloud_properties:
+    machine_type: n1-standard-8
+    root_disk_size_gb: 20
+    root_disk_type: pd-ssd
+
+- name: concourse-web-2xlarge
+  cloud_properties:
+    machine_type: n1-standard-16
+    root_disk_size_gb: 20
+    root_disk_type: pd-ssd
+
+- name: concourse-medium
+  cloud_properties:
+    machine_type: n1-standard-1 {{ if .Spot }}
+    preemptible: true # {{ end }}
+    root_disk_size_gb: 200
+    root_disk_type: pd-ssd
+
+- name: concourse-large
+  cloud_properties:
+    machine_type: n1-standard-2 {{ if .Spot }}
+    preemptible: true # {{ end }}
+    root_disk_size_gb: 200
+    root_disk_type: pd-ssd
+
+- name: concourse-xlarge
+  cloud_properties:
+    machine_type: n1-standard-4 {{ if .Spot }}
+    preemptible: true # {{ end }}
+    root_disk_size_gb: 200
+    root_disk_type: pd-ssd
+
+- name: concourse-2xlarge
+  cloud_properties:
+    machine_type: n1-standard-8 {{ if .Spot }}
+    preemptible: true # {{ end }}
+    root_disk_size_gb: 200
+    root_disk_type: pd-ssd
+
+- name: concourse-4xlarge
+  cloud_properties:
+    machine_type: n1-standard-16 {{ if .Spot }}
+    preemptible: true # {{ end }}
+    root_disk_size_gb: 200
+    root_disk_type: pd-ssd
+
+- name: concourse-10xlarge
+  cloud_properties:
+    machine_type: n1-standard-32 {{ if .Spot }}
+    preemptible: true # {{ end }}
+    root_disk_size_gb: 200
+    root_disk_type: pd-ssd
+
+- name: concourse-16xlarge
+  cloud_properties:
+    machine_type: n1-standard-64 {{ if .Spot }}
+    preemptible: true # {{ end }}
+    root_disk_size_gb: 200
+    root_disk_type: pd-ssd
+
+- name: compilation
+  cloud_properties:
+    machine_type: n1-standard-2 {{ if .Spot }}
+    preemptible: true # {{ end }}
+    root_disk_size_gb: 5
+    root_disk_type: pd-ssd
+
+disk_types:
+- name: default
+  disk_size: 50_000
+  cloud_properties:
+    type: pd-ssd
+- name: large
+  disk_size: 200_000
+  cloud_properties:
+    type: pd-ssd
+
+networks:
+- name: public
+  type: manual
+  subnets:
+  - range: 10.0.0.0/24
+    gateway: 10.0.0.1
+    dns:
+    - 10.0.0.2
+    az: z1
+    static:
+    - 10.0.0.6
+    - 10.0.0.7
+    reserved:
+    - 10.0.0.1-10.0.0.5
+    cloud_properties:
+      network_name: {{ .Network }}
+      subnetwork_name: {{ .PublicSubnetwork }}
+- name: private
+  type: manual
+  subnets:
+  - range: 10.0.1.0/24
+    gateway: 10.0.1.1
+    dns:
+    - 10.0.0.2
+    az: z1
+    reserved:
+    - 10.0.1.1-10.0.1.5
+    cloud_properties:
+      network_name: {{ .Network }}
+      subnetwork_name: {{ .PrivateSubnetwork }}
+      tags: [no-ip]
+- name: vip
+  type: vip
+
+vm_extensions:
+- name: atc
+
+compilation:
+  workers: 5
+  reuse_compilation_vms: true
+  az: z1
+  vm_type: compilation
+  network: private

@@ -1,0 +1,40 @@
+- type: replace
+  path: /nats_ca
+  value:
+    ca: ((nats_ca_ca))
+    certificate: ((nats_ca_certificate))
+    private_key: ((nats_ca_private_key))
+
+- type: replace
+  path: /nats_clients_director_tls
+  value:
+    ca: ((nats_clients_director_tls_ca))
+    certificate: ((nats_clients_director_tls_certificate))
+    private_key: ((nats_clients_director_tls_private_key))
+
+- type: replace
+  path: /nats_clients_health_monitor_tls
+  value:
+    ca: ((nats_clients_health_monitor_tls_ca))
+    certificate: ((nats_clients_health_monitor_tls_certificate))
+    private_key: ((nats_clients_health_monitor_tls_private_key))
+
+
+- type: replace
+  path: /nats_server_tls
+  value:
+    ca: ((nats_server_tls_ca))
+    certificate: ((nats_server_tls_certificate))
+    private_key: ((nats_server_tls_private_key))
+
+- type: remove
+  path: /nats_ca_2
+
+- type: remove
+  path: /nats_clients_director_tls_2
+
+- type: remove
+  path: /nats_clients_health_monitor_tls_2
+
+- type: remove
+  path: /nats_server_tls_2
