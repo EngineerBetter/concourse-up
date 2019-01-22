@@ -185,8 +185,8 @@ resource "google_compute_firewall" "nat" {
   }
 }
 
-resource "google_compute_firewall" "atc-one" {
-  name = "${var.deployment}-atc-one"
+resource "google_compute_firewall" "atc-http" {
+  name = "${var.deployment}-atc-http"
   description = "Firewall for external access to concourse atc"
   network     = "${google_compute_network.default.self_link}"
   target_tags = ["web"]
@@ -198,8 +198,8 @@ resource "google_compute_firewall" "atc-one" {
   }
 }
 
-resource "google_compute_firewall" "atc-two" {
-  name = "${var.deployment}-atc-two"
+resource "google_compute_firewall" "atc-https" {
+  name = "${var.deployment}-atc-https"
   description = "Firewall for external access to concourse atc"
   network     = "${google_compute_network.default.self_link}"
   target_tags = ["web"]
@@ -229,8 +229,8 @@ resource "google_compute_firewall" "vms" {
   }
 }
 
-resource "google_compute_firewall" "atc-three" {
-  name = "${var.deployment}-atc-three"
+resource "google_compute_firewall" "atc-services" {
+  name = "${var.deployment}-atc-services"
   description = "Firewall for external access to concourse atc"
   network     = "${google_compute_network.default.self_link}"
   target_tags = ["web"]
