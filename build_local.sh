@@ -2,8 +2,6 @@
 
 set -eu
 
-cp run_tests_local.sh .git/hooks/pre-push
-
 version=dev
 go generate github.com/EngineerBetter/concourse-up/...
 GO111MODULE=on go build -mod=vendor -ldflags "
