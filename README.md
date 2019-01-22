@@ -8,16 +8,19 @@ A tool for easily deploying [Concourse](https://concourse-ci.org) in a single co
 
 ## TL;DR
 
+##### AWS
+
 ```sh
 $ AWS_ACCESS_KEY_ID=<access-key-id> \
   AWS_SECRET_ACCESS_KEY=<secret-access-key> \
   concourse-up deploy <your-project-name>
 ```
 
+##### GCP
+
 ```sh
 $ GOOGLE_APPLICATION_CREDENTIALS=<path/to/googlecreds.json> \
-  concourse-up deploy <your-project-name> \
-  --iaas gcp
+  concourse-up deploy --iaas gcp <your-project-name> 
 ```
 
 ## Why Concourse-Up?
@@ -60,18 +63,26 @@ Download the [latest release](https://github.com/EngineerBetter/concourse-up/rel
 
 ## Usage
 
+### Global flags
+
+- `--region value`    AWS or GCP region (default: "eu-west-1" on AWS and "europe-west1" on GCP) [$AWS_REGION]
+- `--namespace value` Any valid string that provides a meaningful namespace of the deployment - Used as part of the configuration bucket name [$NAMESPACE].
+    >Note that if namespace has been provided in the initial `deploy` it will be required for any subsequent `concourse-up` calls against the same deployment.
+
+#### Choosing an IAAS
+
+The default IAAS for Concourse-Up is AWS. To choose a different IAAS use the `--iaas` flag. For every IAAS provider apart from AWS this flag is required for all commands.
+
+Supported IAAS values: AWS, GCP
+
+- `--iaas value` (optional) IAAS, can be AWS or GCP (default: "AWS") [$IAAS]
+
 ### Deploy
 
 Deploy a new Concourse with:
 
 ```sh
 concourse-up deploy <your-project-name>
-```
-
-Deploy a new Concourse to GCP with:
-
-```sh
-concourse-up deploy <your-project-name> --iaas gcp
 ```
 
 eg:
@@ -95,7 +106,6 @@ A new deploy from scratch takes approximately 20 minutes.
 
 All flags are optional. Configuration settings provided via flags will persist in later deployments unless explicitly overriden.
 
-- `--region value`       AWS or GCP region (default: "eu-west-1" on AWS and "europe-west1" on GCP) [$AWS_REGION]
 - `--domain value`       Domain to use as endpoint for Concourse web interface (eg: ci.myproject.com) [$DOMAIN]
     ```sh
     $ concourse-up deploy --domain chimichanga.engineerbetter.com chimichanga
@@ -147,11 +157,11 @@ All flags are optional. Configuration settings provided via flags will persist i
     | xlarge     | t2.xlarge         | n1-standard-8     |
     | 2xlarge    | t2.2xlarge        | n1-standard-16    |
 
-- `--db-size value`      Size of Concourse RDS instance. Can be small, medium, large, xlarge, 2xlarge, or 4xlarge (default: "small") [$DB_SIZE]
+- `--db-size value`      Size of Concourse Postgres instance. Can be small, medium, large, xlarge, 2xlarge, or 4xlarge (default: "small") [$DB_SIZE]
 
-    >Note that when changing the database size on an existing concourse-up deployment, the RDS instance will scaled by terraform resulting in approximately 3 minutes of downtime.
+    >Note that when changing the database size on an existing concourse-up deployment, the SQL instance will scaled by terraform resulting in approximately 3 minutes of downtime.
 
-    The following table shows the allowed database sizes and the corresponding AWS RDS instance types
+    The following table shows the allowed database sizes and the corresponding AWS RDS & CloudSQL instance types
 
     | --db-size | AWS Instance type | GCP Instance type  |
     |-----------|-------------------|--------------------|
@@ -164,7 +174,7 @@ All flags are optional. Configuration settings provided via flags will persist i
 
 - `--allow-ips value`    Comma separated list of IP addresses or CIDR ranges to allow access to (default: "0.0.0.0/0") [$ALLOW_IPS]
 
-> Note: `allow-ips` governs what can access Concourse but not what can access the control plane (i.e. the BOSH director).
+    > Note: `allow-ips` governs what can access Concourse but not what can access the control plane (i.e. the BOSH director).
 
 - `--github-auth-client-id value`      Client ID for a github OAuth application - Used for Github Auth [$GITHUB_AUTH_CLIENT_ID]
 - `--github-auth-client-secret value`  Client Secret for a github OAuth application - Used for Github Auth [$GITHUB_AUTH_CLIENT_SECRET]
@@ -172,21 +182,21 @@ All flags are optional. Configuration settings provided via flags will persist i
 - `--spot=value` Use spot instances for workers. Can be true/false. Default is true.
 
     > Concourse Up uses spot instances for workers as a cost saving measure. Users requiring lower risk may switch this feature off by setting --spot=false.
-- `--preemptible` Use preemptible instances for workers. Can be true/false. Default is true.
+- `--preemptible=value` Use preemptible instances for workers. Can be true/false. Default is true.
 
     > Be aware the [preemptible instances](https://cloud.google.com/preemptible-vms/) _will_ go down at least once every 24 hours so deployments with only one worker _will_ experience downtime with this feature enabled. BOSH will ressurect falled workers automatically.
 
-    If either `spot` or `preemptible` is set to false then interruptible instances will not be used regardless of your IaaS. i.e:
+    `spot` and `preemptible` are interchangeable so if either of them is set to false then interruptible instances will not be used regardless of your IaaS. i.e:
 
     ```sh
     # Results in an AWS deployment using non-spot workers
-    concourse-up deploy <name> --preemptible=false`
+    concourse-up deploy --spot=true --preemptible=false <your-project-name>
+    # Results in an AWS deployment using non-spot workers
+    concourse-up deploy --preemptible=false <your-project-name>
     # Results in a GCP deployment using non-preemptible workers
-    concourse-up deploy <name> --iaas gcp --spot=false
+    concourse-up deploy --iaas gcp --spot=false <your-project-name>
     ```
 
-- `--namespace value` Any valid string that provides a meaningful namespace of the deployment - Used as part of the configuration bucket name [$NAMESPACE].
-    >Note that if namespace has been provided in the initial `deploy` it will be required for any subsequent `concourse-up` calls against the same deployment.
 - `--zone`            Specify an availability zone [$ZONE] (cannot be changed after the initial deployment)
 
 ### Info
@@ -200,13 +210,13 @@ $ concourse-up info --json <your-project-name>
 To load credentials into your environment from your `concourse-up` deployment:
 
 ```sh
-$ eval "$(concourse-up info <your-project-name> --env)"
+$ eval "$(concourse-up info --env <your-project-name>)"
 ```
 
 To check the expiry of the BOSH Director's NATS CA certificate:
 
 ```sh
-$ concourse-up info <your-project-name> --cert-expiry
+$ concourse-up info --cert-expiry <your-project-name>
 ```
 
 **Warning: if your deployment is approaching a year old, it may stop working due to expired certificates. The Concourse-Up team are currently working on a solution. For information please see this issue https://github.com/EngineerBetter/concourse-up/issues/81.**
@@ -215,9 +225,6 @@ $ concourse-up info <your-project-name> --cert-expiry
 
 All flags are optional
 
-`--region value`  AWS region (default: "eu-west-1") [$AWS_REGION]
-- `--namespace value` Any valid string that provides a meaningful namespace of the deployment - Used as part of the configuration bucket name [$NAMESPACE].
-    >Note that if namespace has been provided in the initial `deploy` it will be required for any subsequent `concourse-up` calls against the same deployment.
 `--json`          Output as json [$JSON]
 `--env`           Output environment variables
 `--cert-expiry`   Output the expiry of the BOSH director's NATS certificate
@@ -230,18 +237,6 @@ To destroy your Concourse:
 $ concourse-up destroy <your-project-name>
 ```
 
-```sh
-$ concourse-up destroy <your-project-name> --iaas gcp
-```
-
-#### Flags
-
-All flags are optional
-
-* `--region value`  AWS region (default: "eu-west-1") [$AWS_REGION]
-- `--namespace value` Any valid string that provides a meaningful namespace of the deployment - Used as part of the configuration bucket name [$NAMESPACE].
-    >Note that if namespace has been provided in the initial `deploy` it will be required for any subsequent `concourse-up` calls against the same deployment.
-
 ### Maintain
 
 Handles maintenance operations in concourse-up
@@ -250,9 +245,6 @@ Handles maintenance operations in concourse-up
 
 All flags are optional
 
-- `--region value`  AWS or GCP region (default: "eu-west-1" on AWS and "europe-west1" on GCP) [$AWS_REGION]
-- `--namespace value` Any valid string that provides a meaningful namespace of the deployment - Used as part of the configuration bucket name [$NAMESPACE].
-    >Note that if namespace has been provided in the initial `deploy` it will be required for any subsequent `concourse-up` calls against the same deployment.
 - `--renew-nats-cert` Rotate the NATS certificate on the director
     >Note that the NATS certificate [is hardcoded to expire after 1 year](https://github.com/cloudfoundry/bosh-cli/blob/master/vendor/github.com/cloudfoundry/config-server/types/certificate_generator.go#L171). This command follows [the istructions on bosh.io](https://bosh.io/docs/nats-ca-rotation/) to rotate this certificate. **This operation _will_ cause downtime on your Concourse** as it performs multiple full recreates.
 - `--stage value` Specify a specific stage at which to start the NATS certificate renewal process. If not specified, the stage will be determined automatically. See the following table for details.
@@ -384,7 +376,7 @@ If you'd like to run concourse-up with it's own IAM account, create a user with 
 
 ## Using a dedicated GCP IAM member
 
-We configure the IAM member with `roles/owner`
+A IAM Primitive role of `roles/owner` for the target GCP Project is required
 
 ## Project
 
