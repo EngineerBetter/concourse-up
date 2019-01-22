@@ -311,6 +311,7 @@ $ go get github.com/onsi/ginkgo/ginkgo
 $ ginkgo -r
 ```
 
+Go linting, shell linting, and unit tests can be run together in the same docker image CI uses with `./run_tests_local.sh`. This should be done before committing or raising a PR.
 
 ### Bumping Manifest/Ops File versions
 
