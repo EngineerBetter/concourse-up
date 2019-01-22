@@ -2,13 +2,11 @@ package boshenv
 
 import (
 	"bytes"
-	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"os"
 	"os/exec"
 	"path/filepath"
-	"strings"
 
 	"github.com/EngineerBetter/concourse-up/resource"
 	"github.com/EngineerBetter/concourse-up/util/yaml"
@@ -157,11 +155,6 @@ func (c *BOSHCLI) UpdateCloudConfig(config IAASEnvironment, ip, password, ca str
 	return cmd.Run()
 }
 
-//FailedOutput represents the output of a failed BOSH command
-type FailedOutput struct {
-	Lines []string
-}
-
 // Locks runs bosh locks
 func (c *BOSHCLI) Locks(config IAASEnvironment, ip, password, ca string) ([]byte, error) {
 	var out bytes.Buffer
@@ -174,15 +167,6 @@ func (c *BOSHCLI) Locks(config IAASEnvironment, ip, password, ca string) ([]byte
 	cmd.Stdout = &out
 	err = cmd.Run()
 	if err != nil {
-		var output FailedOutput
-		err1 := json.Unmarshal(out.Bytes(), &output)
-		if err1 == nil {
-			for _, line := range output.Lines {
-				if strings.Contains(line, "i/o timeout") {
-					return nil, fmt.Errorf("timeout")
-				}
-			}
-		}
 		return nil, err
 	}
 	return out.Bytes(), nil

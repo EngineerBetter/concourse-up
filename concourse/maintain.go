@@ -49,14 +49,7 @@ func (client *Client) Maintain(m maintain.Args) error {
 
 func (client *Client) renewCert(m maintain.Args) error {
 
-	err := client.waitForBOSHLocks(10 * time.Minute)
-	if err != nil {
-		if err.Error() == "timeout" {
-			fmt.Println("bosh locks timed out - attempting to continue")
-		} else {
-			return err
-		}
-	}
+	_ = client.waitForBOSHLocks(10 * time.Minute)
 
 	maintenance, err := client.retrieveStage()
 	if err != nil {
