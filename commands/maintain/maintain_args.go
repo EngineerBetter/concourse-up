@@ -15,8 +15,8 @@ type Args struct {
 	Namespace          string
 	NamespaceIsSet     bool
 	IAAS               string
-	State              int
-	StateIsSet         bool
+	Stage              int
+	StageIsSet         bool
 }
 
 //MarkSetFlags is marking which info Args have been set
@@ -30,8 +30,8 @@ func (a *Args) MarkSetFlags(c FlagSetChecker) error {
 				a.NamespaceIsSet = true
 			case "renew-nats-cert":
 				a.RenewNatsCertIsSet = true
-			case "state":
-				a.StateIsSet = true
+			case "stage":
+				a.StageIsSet = true
 			case "iaas":
 				//do nothing
 			default:

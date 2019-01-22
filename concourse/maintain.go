@@ -42,12 +42,12 @@ const maintenanceFilename = "maintenance.json"
 func (client *Client) Maintain(m maintain.Args) error {
 	switch {
 	case m.RenewNatsCertIsSet:
-		return client.renewCert()
+		return client.renewCert(m)
 	}
 	return nil
 }
 
-func (client *Client) renewCert() error {
+func (client *Client) renewCert(m maintain.Args) error {
 
 	err := client.waitForBOSHLocks(10 * time.Minute)
 	if err != nil {
@@ -58,14 +58,19 @@ func (client *Client) renewCert() error {
 		}
 	}
 
-	maintenance, err := client.retrieveState()
+	maintenance, err := client.retrieveStage()
 	if err != nil {
 		return err
 	}
 
-	stateIndex, err := client.determineState(maintenance)
-	if err != nil {
-		return err
+	var stageIndex int
+	if m.StageIsSet {
+		stageIndex = m.Stage
+	} else {
+		stageIndex, err = client.determineStage(maintenance)
+		if err != nil {
+			return err
+		}
 	}
 
 	tasks := []tasks{
@@ -76,22 +81,22 @@ func (client *Client) renewCert() error {
 		{"Cleaning up director-creds.yml", "", client.cleanup},
 	}
 
-	if stateIndex >= len(tasks) {
-		return fmt.Errorf("Invalid state index")
+	if stageIndex >= len(tasks) {
+		return fmt.Errorf("Invalid stage index")
 	}
 
-	for i := stateIndex; i < len(tasks); i++ {
+	for i := stageIndex; i < len(tasks); i++ {
 		fmt.Printf("current action: %s\n", tasks[i].description)
 		err1 := tasks[i].action(tasks[i].description, tasks[i].operation)
 		if err1 != nil {
 			return err1
 		}
-		err1 = client.updateState(i, maintenance)
+		err1 = client.updateStage(i, maintenance)
 		if err1 != nil {
 			return err1
 		}
 	}
-	err = client.updateState(-1, maintenance)
+	err = client.updateStage(-1, maintenance)
 	return err
 }
 
@@ -220,9 +225,9 @@ func (client *Client) waitForBOSHLocks(waitTime time.Duration) error {
 	}
 }
 
-// retrieveState will retrieve the maintenance object from the config bucket
+// retrieveStage will retrieve the maintenance object from the config bucket
 // if the object is not found it will create one with statusIndex of -1
-func (client *Client) retrieveState() (*Maintenance, error) {
+func (client *Client) retrieveStage() (*Maintenance, error) {
 	var maintenance Maintenance
 	fileExists, err := client.configClient.HasAsset(maintenanceFilename)
 	if err != nil {
@@ -243,13 +248,13 @@ func (client *Client) retrieveState() (*Maintenance, error) {
 	return &maintenance, nil
 }
 
-// determineState returns the index of the next operation to be run
-func (client *Client) determineState(maintenance *Maintenance) (int, error) {
+// determineStage returns the index of the next operation to be run
+func (client *Client) determineStage(maintenance *Maintenance) (int, error) {
 	return maintenance.StatusIndex + 1, nil
 }
 
-// updateState stores the specified index in the maintenance object in the config bucket
-func (client *Client) updateState(index int, maintenance *Maintenance) error {
+// updateStage stores the specified index in the maintenance object in the config bucket
+func (client *Client) updateStage(index int, maintenance *Maintenance) error {
 	maintenance.StatusIndex = index
 	maintenanceBytes, err := json.Marshal(maintenance)
 	if err != nil {

@@ -48,10 +48,10 @@ var maintainFlags = []cli.Flag{
 		Destination: &initialMaintainArgs.Namespace,
 	},
 	cli.IntFlag{
-		Name:        "state",
-		Usage:       "(optional) Set the desired state for nats rotation tasks",
-		EnvVar:      "STATE",
-		Destination: &initialMaintainArgs.State,
+		Name:        "stage",
+		Usage:       "(optional) Set the desired stage for nats rotation tasks",
+		EnvVar:      "STAGE",
+		Destination: &initialMaintainArgs.Stage,
 	},
 }
 
