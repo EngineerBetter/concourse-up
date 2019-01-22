@@ -181,9 +181,6 @@ func (client *Client) Deploy() error {
 	} else {
 		bp, err = client.deployBoshAndPipeline(c, metadata)
 	}
-	if err != nil && !createdNewConfig {
-		return err
-	}
 
 	c.CredhubPassword = bp.CredhubPassword
 	c.CredhubAdminClientSecret = bp.CredhubAdminClientSecret
@@ -198,7 +195,7 @@ func (client *Client) Deploy() error {
 	c.DirectorCACert = bp.DirectorCACert
 
 	err1 := client.configClient.Update(c)
-	if err1 != nil {
+	if err == nil {
 		err = err1
 	}
 	return err
