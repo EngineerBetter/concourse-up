@@ -185,6 +185,8 @@ $ concourse-up info <your-project-name> --cert-expiry
 All flags are optional
 
 `--region value`  AWS region (default: "eu-west-1") [$AWS_REGION]
+- `--namespace value` Any valid string that provides a meaningful namespace of the deployment - Used as part of the configuration bucket name [$NAMESPACE].
+    >Note that if namespace has been provided in the initial `deploy` it will be required for any subsequent `concourse-up` calls against the same deployment.
 `--json`          Output as json [$JSON]
 `--env`           Output environment variables
 `--cert-expiry`   Output the expiry of the BOSH director's NATS certificate
@@ -202,6 +204,30 @@ $ concourse-up destroy <your-project-name>
 All flags are optional
 
 * `--region value`  AWS region (default: "eu-west-1") [$AWS_REGION]
+- `--namespace value` Any valid string that provides a meaningful namespace of the deployment - Used as part of the configuration bucket name [$NAMESPACE].
+    >Note that if namespace has been provided in the initial `deploy` it will be required for any subsequent `concourse-up` calls against the same deployment.
+
+### Maintain
+
+Handles maintenance operations in concourse-up
+
+#### Flags
+
+All flags are optional
+
+- `--region value`  AWS or GCP region (default: "eu-west-1" on AWS and "europe-west1" on GCP) [$AWS_REGION]
+- `--namespace value` Any valid string that provides a meaningful namespace of the deployment - Used as part of the configuration bucket name [$NAMESPACE].
+    >Note that if namespace has been provided in the initial `deploy` it will be required for any subsequent `concourse-up` calls against the same deployment.
+- `--renew-nats-cert` Rotate the NATS certificate on the director
+    >Note that the NATS certificate [is hardcoded to expire after 1 year](https://github.com/cloudfoundry/bosh-cli/blob/master/vendor/github.com/cloudfoundry/config-server/types/certificate_generator.go#L171). This command follows [the istructions on bosh.io](https://bosh.io/docs/nats-ca-rotation/) to rotate this certificate. **This operation _will_ cause downtime on your Concourse** as it performs multiple full recreates.
+- `--stage value` Specify a specific stage at which to start the NATS certificate renewal process. If not specified, the stage will be determined automatically. See the following table for details.
+    | Stage | Description |
+    |-------|-------------|
+    | 0     | Adding new CA (create-env) |
+    | 1     | Recreating VMs for the first time (recreate) |
+    | 2     | Removing old CA (create-env) |
+    | 3     | Recreating VMs for the second time (recreate) |
+    | 4     | Cleaning up director-creds.yml |
 
 ## Self-update
 
