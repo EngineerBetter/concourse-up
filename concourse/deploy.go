@@ -181,7 +181,7 @@ func (client *Client) Deploy() error {
 	} else {
 		bp, err = client.deployBoshAndPipeline(c, metadata)
 	}
-	if err != nil {
+	if err != nil && !createdNewConfig {
 		return err
 	}
 
@@ -197,7 +197,11 @@ func (client *Client) Deploy() error {
 	c.DirectorPassword = bp.DirectorPassword
 	c.DirectorCACert = bp.DirectorCACert
 
-	return client.configClient.Update(c)
+	err1 := client.configClient.Update(c)
+	if err1 != nil {
+		err = err1
+	}
+	return err
 }
 
 func (client *Client) deployBoshAndPipeline(c config.Config, metadata terraform.IAASMetadata) (BoshParams, error) {
