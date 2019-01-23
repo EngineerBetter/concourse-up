@@ -495,19 +495,21 @@ jobs:
   plan:
   - aggregate:
     - get: pcf-ops
-      passed: &aws-system-tests
+      passed: &system-tests
       - system-test
       - system-test-update
       - system-test-m5
       - system-test-letsencrypt
       - system-test-options-and-destroy
+      - system-test-gcp
+      - system-test-options-and-destroy-gcp
     - get: concourse-up
-      passed: *aws-system-tests
+      passed: *system-tests
     - get: concourse-up-ops
       trigger: true
-      passed: *aws-system-tests
+      passed: *system-tests
     - get: version
-      passed: *aws-system-tests
+      passed: *system-tests
       params:
         bump: patch
     - get: build-metadata
@@ -565,13 +567,13 @@ jobs:
     - get: version
       params:
         bump: patch
-      passed: *aws-system-tests
+      passed: *system-tests
     - get: pcf-ops
-      passed: *aws-system-tests
+      passed: *system-tests
     - get: concourse-up
-      passed: *aws-system-tests
+      passed: *system-tests
     - get: concourse-up-ops
-      passed: *aws-system-tests
+      passed: *system-tests
     - get: build-metadata
   - aggregate: *build_binaries
   - task: get-ops-version
@@ -609,13 +611,13 @@ jobs:
     - get: version
       params:
         bump: minor
-      passed: *aws-system-tests
+      passed: *system-tests
     - get: pcf-ops
-      passed: *aws-system-tests
+      passed: *system-tests
     - get: concourse-up
-      passed: *aws-system-tests
+      passed: *system-tests
     - get: concourse-up-ops
-      passed: *aws-system-tests
+      passed: *system-tests
     - get: build-metadata
   - aggregate: *build_binaries
   - task: get-ops-version
@@ -651,15 +653,15 @@ jobs:
   plan:
   - aggregate:
     - get: version
-      passed: *aws-system-tests
+      passed: *system-tests
       params:
         bump: major
     - get: pcf-ops
-      passed: *aws-system-tests
+      passed: *system-tests
     - get: concourse-up
-      passed: *aws-system-tests
+      passed: *system-tests
     - get: concourse-up-ops
-      passed: *aws-system-tests
+      passed: *system-tests
     - get: build-metadata
   - aggregate: *build_binaries
   - task: get-ops-version
