@@ -634,7 +634,7 @@ fly --target {{.Project}} login{{if not .ConcourseUserProvidedCert}} --insecure{
 Metrics available at https://{{.Domain}}:3000 using the same username and password
 
 Log into credhub with:
-eval "$(concourse-up info --region {{.Region}} {{ if ne .Namespace .Region }} --namespace {{ .Namespace }} {{ end }} {{ if eq .IAAS "gcp" }} --iaas GCP {{ end }} --env {{.Project}})"
+eval "$(concourse-up info --region {{.Region}} {{ if ne .Namespace .Region }} --namespace {{ .Namespace }} {{ end }} --iaas {{ .IAAS }} --env {{.Project}})"
 `
 
 func writeDeploySuccessMessage(config config.Config, metadata terraform.IAASMetadata, stdout io.Writer) error {
