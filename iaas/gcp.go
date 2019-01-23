@@ -365,7 +365,7 @@ func (g *GCPProvider) DeleteVMsInDeployment(zone, project, deployment string) er
 			for _, instance := range page.Items {
 				name := instance.Name
 				networkName := instance.NetworkInterfaces[0].Network
-				if strings.HasSuffix(networkName, fmt.Sprintf("%s-bosh-network", deployment)) && !strings.HasSuffix(name, "nat-instance") {
+				if strings.HasSuffix(networkName, deployment) && !strings.HasSuffix(name, "nat-instance") {
 					found = true
 					fmt.Printf("Waiting for instance %s to be deleted\n", name)
 				}
