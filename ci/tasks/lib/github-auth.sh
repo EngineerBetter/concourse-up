@@ -4,14 +4,12 @@
 function addGitHubFlagsToArgs() {
   args+=(--github-auth-client-id "$GITHUB_AUTH_CLIENT_ID")
   args+=(--github-auth-client-secret "$GITHUB_AUTH_CLIENT_SECRET")
-  args+=(--domain cup.engineerbetter.com)
   args+=(--tls-cert "$EB_WILDCARD_CERT")
   args+=(--tls-key "$EB_WILDCARD_KEY")
-  args+=(--region us-east-1)
 }
 
 function assertGitHubAuthConfigured() {
-  config=$(./cup info --region us-east-1 --json "$deployment")
+  config=$(./cup info --region "$region" --iaas "$IAAS" --json "$deployment")
   domain=$(echo "$config" | jq -r '.config.domain')
   username=$(echo "$config" | jq -r '.config.concourse_username')
   password=$(echo "$config" | jq -r '.config.concourse_password')

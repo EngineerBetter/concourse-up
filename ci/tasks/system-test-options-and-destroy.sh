@@ -46,25 +46,29 @@ chmod +x ./cup
 # Temporary fix whilst we haven't implemented the rest for GCP
 if [ "$IAAS" = "AWS" ]
 then
+    # shellcheck disable=SC2034
+    region=us-east-1
     addGitHubFlagsToArgs
     addTagsFlagsToArgs
+    args+=(--region "$region")
+    args+=(--domain cup.engineerbetter.com)
     ./cup deploy "${args[@]}" "$deployment"
     assertTagsSet
     assertGitHubAuthConfigured
-    # shellcheck disable=SC2034
-    region=us-east-1
 
 elif [ "$IAAS" = "GCP" ]
 then
+    # shellcheck disable=SC2034
+    region=europe-west2
     gcloud auth activate-service-account --key-file="$GOOGLE_APPLICATION_CREDENTIALS"
     export CLOUDSDK_CORE_PROJECT=concourse-up
     addGitHubFlagsToArgs
     addTagsFlagsToArgs
+    args+=(--region "$region")
+    args+=(--domain cup.gcp.engineerbetter.com)
     ./cup deploy "$deployment" -iaas gcp
     assertTagsSet
     assertGitHubAuthConfigured
-    # shellcheck disable=SC2034
-    region=europe-west1
 fi
 assertPipelinesCanReadFromCredhub
 sleep 60
@@ -73,3 +77,6 @@ echo "non-interactive destroy"
 ./cup --non-interactive destroy "$deployment" -iaas "$IAAS" --region "$region"
 sleep 180
 assertEverythingDeleted
+
+# If deletion has succeeded above then the cleanup in the trap will fail
+export SKIP_TEARDOWN=true
