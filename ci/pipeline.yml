@@ -12,6 +12,7 @@ groups:
   - system-test-letsencrypt
   - system-test-options-and-destroy
   - system-test-options-and-destroy-gcp
+  - system-test-letsencrypt-gcp
   - smoke-test-gcp
   - system-test-gcp
   - auto
