@@ -47,6 +47,32 @@ You can keep up to date on Concourse-Up announcements by reading the [EngineerBe
 - Idempotent deployment and operations
 - Easy destroy and cleanup
 
+### Feature Table
+
+| **Feature** | **AWS** | **GCP** |
+|:-|:-:|:-:|
+| Concourse IP whitelisting | **+** | **+** |
+| Custom domains | **+** | **+** |
+| Custom tagging | **+** | **BOSH only** |
+| Custom TLS certificates | **+** | **+** |
+| Database vertical scaling | **+** | **+** |
+| GitHub authentication | **+** | **+** |
+| Interruptable worker support | **+** | **+** |
+| Namespace support | **+** | **+** |
+| Region selection | **+** | **+** |
+| Retrieving deployment information | **+** | **+** |
+| Retrieving deployment information as shell exports | **+** | **+** |
+| Retrieving deployment information in JSON | **+** | **+** |
+| Retrieving director NATS cert expiration | **+** | **+** |
+| Rotating director NATS cert | **+** | **+** |
+| Self-Update support | **+** | **+** |
+| Teardown deployment | **+** | **+** |
+| Web server vertical scaling | **+** | **+** |
+| Worker horizontal scaling | **+** | **+** |
+| Worker type selection | **+** | **N/A** |
+| Worker vertical scaling | **+** | **+** |
+| Zone selection | **+** | **+** |
+
 ## Prerequisites
 
 - One of:
@@ -408,6 +434,8 @@ Install ginkgo and run the tests with:
 go get github.com/onsi/ginkgo/ginkgo
 ginkgo -r
 ```
+
+```sh
 $ go get github.com/onsi/ginkgo/ginkgo
 $ ginkgo -r
 ```
