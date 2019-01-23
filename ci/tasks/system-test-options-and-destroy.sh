@@ -36,10 +36,6 @@ source concourse-up/ci/tasks/lib/gcreds.sh
 # If we're testing GCP, we need credentials to be available as a file
 [ "$IAAS" = "GCP" ] && { setGoogleCreds; }
 
-set +u
-trapDefaultCleanup
-set -u
-
 cp "$BINARY_PATH" ./cup
 chmod +x ./cup
 
@@ -77,6 +73,3 @@ echo "non-interactive destroy"
 ./cup --non-interactive destroy "$deployment" -iaas "$IAAS" --region "$region"
 sleep 180
 assertEverythingDeleted
-
-# If deletion has succeeded above then the cleanup in the trap will fail
-export SKIP_TEARDOWN=true
