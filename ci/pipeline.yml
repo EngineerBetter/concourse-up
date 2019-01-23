@@ -380,12 +380,12 @@ jobs:
       GOOGLE_APPLICATION_CREDENTIALS_CONTENTS: ((system_test_google_application_credentials))
       IAAS: GCP
       BINARY_PATH: binary-linux/concourse-up-linux-amd64
-      on_failure:
-        put: slack-alert
-        params:
-          channel: "#integrations"
-          text: |
-            <!channel> Concourse Up GCP system test failure!
+    on_failure:
+      put: slack-alert
+      params:
+        channel: "#integrations"
+        text: |
+          <!channel> Concourse Up GCP system test failure!
 
 - name: system-test-update
   serial_groups:
@@ -399,12 +399,12 @@ jobs:
       AWS_ACCESS_KEY_ID: ((concourse_up_test_access_key_id))
       AWS_SECRET_ACCESS_KEY: ((concourse_up_test_secret_key))
       BINARY_PATH: binary-linux/concourse-up-linux-amd64
-      on_failure:
-        put: slack-alert
-        params:
-          channel: "#integrations"
-          text: |
-            <!channel> Concourse Up update system test failure!
+    on_failure:
+      put: slack-alert
+      params:
+        channel: "#integrations"
+        text: |
+          <!channel> Concourse Up update system test failure!
 
 - name: system-test-m5
   serial_groups:
