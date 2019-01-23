@@ -154,4 +154,6 @@ after_timestamp="$(date -d "$after" +"%s")"
 
 [[ $before_timestamp -lt $after_timestamp ]]
 
+sleep 60
+
 assertPipelinesCanReadFromCredhub
