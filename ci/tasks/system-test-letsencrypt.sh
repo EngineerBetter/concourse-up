@@ -22,7 +22,7 @@ source concourse-up/ci/tasks/lib/gcreds.sh
 cp "$BINARY_PATH" ./cup
 chmod +x ./cup
 
-deployment="systest-autocert-$RANDOM"
+deployment="certs-$RANDOM"
 
 set +u
 trapDefaultCleanup
