@@ -52,12 +52,15 @@ You can keep up to date on Concourse-Up announcements by reading the [EngineerBe
 | **Feature** | **AWS** | **GCP** |
 |:-|:-:|:-:|
 | Concourse IP whitelisting | **+** | **+** |
+| Credhub | **+** | **+** |
 | Custom domains | **+** | **+** |
-| Custom tagging | **+** | **BOSH only** |
+| Custom tagging | **BOSH only** | **BOSH only** |
 | Custom TLS certificates | **+** | **+** |
 | Database vertical scaling | **+** | **+** |
 | GitHub authentication | **+** | **+** |
+| Grafana | **+** | **+** |
 | Interruptable worker support | **+** | **+** |
+| Letsencrypt integration | **+** | **+** |
 | Namespace support | **+** | **+** |
 | Region selection | **+** | **+** |
 | Retrieving deployment information | **+** | **+** |
