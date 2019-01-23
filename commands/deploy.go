@@ -21,7 +21,7 @@ import (
 	cli "gopkg.in/urfave/cli.v1"
 )
 
-const maxAllowedNameLength = 11
+const maxAllowedNameLength = 12
 
 var initialDeployArgs deploy.Args
 
