@@ -1,6 +1,6 @@
 # Concourse-Up
 
-![](http://i.imgur.com/gZPuUW5.png)
+[![asciicast](https://asciinema.org/a/xVKD0dQuXdEmOcExt4A9WfbEN.svg)](https://asciinema.org/a/xVKD0dQuXdEmOcExt4A9WfbEN)
 
 A tool for easily deploying [Concourse](https://concourse-ci.org) in a single command.
 
