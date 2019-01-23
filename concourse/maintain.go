@@ -138,21 +138,22 @@ func (client *Client) constructBoshClient() (*bosh.IClient, error) {
 			return nil, err1
 		}
 		err1 = environment.Build(map[string]interface{}{
-			"Region":             client.provider.Region(),
-			"Zone":               client.provider.Zone(""),
-			"Tags":               "",
-			"Project":            project,
-			"GCPCredentialsJSON": credentialspath,
-			"ExternalIP":         c.SourceAccessIP,
-			"Deployment":         c.Deployment,
-			"ConfigBucket":       c.ConfigBucket,
-			"DBTier":             c.RDSInstanceClass,
-			"DBPassword":         c.RDSPassword,
-			"DBUsername":         c.RDSUsername,
-			"DBName":             c.RDSDefaultDatabaseName,
 			"AllowIPs":           c.AllowIPs,
+			"ConfigBucket":       c.ConfigBucket,
+			"DBName":             c.RDSDefaultDatabaseName,
+			"DBPassword":         c.RDSPassword,
+			"DBTier":             c.RDSInstanceClass,
+			"DBUsername":         c.RDSUsername,
+			"Deployment":         c.Deployment,
 			"DNSManagedZoneName": c.HostedZoneID,
 			"DNSRecordSetPrefix": c.HostedZoneRecordPrefix,
+			"ExternalIP":         c.SourceAccessIP,
+			"GCPCredentialsJSON": credentialspath,
+			"Namespace":          c.Namespace,
+			"Project":            project,
+			"Region":             client.provider.Region(),
+			"Tags":               "",
+			"Zone":               client.provider.Zone(""),
 		})
 		if err1 != nil {
 			return nil, err1

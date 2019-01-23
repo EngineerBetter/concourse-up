@@ -47,6 +47,11 @@ variable "db_name" {
   default = "{{ .DBName }}"
 }
 
+variable "namespace" {
+  type = "string"
+  default = "{{ .Namespace }}"
+}
+
 {{if .DNSManagedZoneName }}
 variable "dns_managed_zone_name" {
   type = "string"
@@ -143,19 +148,19 @@ EOT
 }
 
 resource "google_compute_network" "default" {
-  name                    = "${var.deployment}-bosh-network"
+  name                    = "${var.deployment}"
   project                 = "${var.project}"
   auto_create_subnetworks = "false"
 }
 
 resource "google_compute_subnetwork" "public" {
-  name          = "${var.deployment}-bosh-${var.region}-subnet-public"
+  name          = "${var.deployment}-${var.namespace}-public"
   ip_cidr_range = "10.0.0.0/24"
   network       = "${google_compute_network.default.self_link}"
   project       = "${var.project}"
 }
 resource "google_compute_subnetwork" "private" {
-  name          = "${var.deployment}-bosh-${var.region}-subnet-private"
+  name          = "${var.deployment}-${var.namespace}-private"
   ip_cidr_range = "10.0.1.0/24"
   network       = "${google_compute_network.default.self_link}"
   project       = "${var.project}"

@@ -137,6 +137,7 @@ func TestInputVars_Build(t *testing.T) {
 				"DBPassword":         "aDBPassword",
 				"DBTier":             "aDBTier",
 				"AllowIPs":           "aAllowIPs",
+				"Namespace":          "Namespace",
 				"DNSManagedZoneName": "aDNSManagedZoneName",
 				"DNSRecordSetPrefix": "aDNSRecordSetPrefix",
 			},

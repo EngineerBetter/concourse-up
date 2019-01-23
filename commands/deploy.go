@@ -21,6 +21,8 @@ import (
 	cli "gopkg.in/urfave/cli.v1"
 )
 
+const maxAllowedNameLength = 11
+
 var initialDeployArgs deploy.Args
 
 var deployFlags = []cli.Flag{
@@ -166,6 +168,11 @@ func deployAction(c *cli.Context, deployArgs deploy.Args, iaasFactory iaas.Facto
 		return err
 	}
 
+	err = validateNameLength(name, deployArgs)
+	if err != nil {
+		return err
+	}
+
 	client, err := buildClient(name, version, deployArgs, iaasFactory)
 	if err != nil {
 		return err
@@ -227,6 +234,16 @@ func zoneBelongsToRegion(zone, region string) error {
 	if !strings.Contains(zone, region) {
 		return fmt.Errorf("The region and the zones provided do not match. Please note that the zone %s needs to be within a %s region", zone, region)
 	}
+	return nil
+}
+
+func validateNameLength(name string, args deploy.Args) error {
+	if strings.ToUpper(args.IAAS) == "GCP" {
+		if len(name) > maxAllowedNameLength {
+			return fmt.Errorf("deployment name %s is too long. %d character limit", name, maxAllowedNameLength)
+		}
+	}
+
 	return nil
 }
 
