@@ -6,13 +6,18 @@ source concourse-up/ci/tasks/lib/verbose.sh
 # shellcheck disable=SC1091
 source concourse-up/ci/tasks/lib/pipeline.sh
 
-[ "$VERBOSE" ] && { handleVerboseMode; }
-
-
 # shellcheck disable=SC1091
 source concourse-up/ci/tasks/lib/trap.sh
 
-set -eu
+[ "$VERBOSE" ] && { handleVerboseMode; }
+
+set -eou pipefail
+
+# shellcheck disable=SC1091
+source concourse-up/ci/tasks/lib/gcreds.sh
+
+# If we're testing GCP, we need credentials to be available as a file
+[ "$IAAS" = "GCP" ] && { setGoogleCreds; }
 
 cp "$BINARY_PATH" ./cup
 chmod +x ./cup
@@ -20,9 +25,7 @@ chmod +x ./cup
 deployment="systest-autocert-$RANDOM"
 
 set +u
-
 trapDefaultCleanup
-
 set -u
 
 echo "DEPLOY WITH LETSENCRYPT STAGING CERT, AND CUSTOM DOMAIN"
