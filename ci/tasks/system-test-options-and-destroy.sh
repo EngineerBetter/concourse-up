@@ -36,6 +36,9 @@ source concourse-up/ci/tasks/lib/gcreds.sh
 # If we're testing GCP, we need credentials to be available as a file
 [ "$IAAS" = "GCP" ] && { setGoogleCreds; }
 
+set +u
+trapDefaultCleanup
+set -u
 
 cp "$BINARY_PATH" ./cup
 chmod +x ./cup
@@ -55,9 +58,13 @@ elif [ "$IAAS" = "GCP" ]
 then
     gcloud auth activate-service-account --key-file="$GOOGLE_APPLICATION_CREDENTIALS"
     export CLOUDSDK_CORE_PROJECT=concourse-up
+    addGitHubFlagsToArgs
+    addTagsFlagsToArgs
+    ./cup deploy "$deployment" -iaas gcp
+    assertTagsSet
+    assertGitHubAuthConfigured
     # shellcheck disable=SC2034
     region=europe-west1
-    ./cup deploy "$deployment" -iaas gcp
 fi
 assertPipelinesCanReadFromCredhub
 sleep 60
