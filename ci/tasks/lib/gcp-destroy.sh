@@ -7,7 +7,7 @@ function recordDeployedState() {
 
     existing_volumes=$(echo "$instances" | tr -d "[:cntrl:]" | jq -r '[.[].disks[].source]')
     echo "Get terraform state from bucket"
-    config_bucket="concourse-up-$deployment-europe-west1-config"
+    config_bucket="concourse-up-$deployment-$region-config"
     gsutil cp "gs://$config_bucket/default.tfstate" .
 
     echo "Record name of db instance"
