@@ -68,6 +68,7 @@ echo "DEPLOY WITH A USER PROVIDED CERT, CUSTOM DOMAIN, DEFAULT WORKERS, DEFAULT 
 
 ./cup deploy "$deployment" \
   --domain "$custom_domain" \
+  --spot=false \
   --tls-cert "$(cat out/"$custom_domain".crt)" \
   --tls-key "$(cat out/"$custom_domain".key)"
 
