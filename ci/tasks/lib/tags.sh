@@ -13,7 +13,7 @@ function assertTagsSet() {
 
   if [ "$IAAS" = "GCP" ]
   then
-    tagged_instances=$(gcloud compute instances list --filter="labels.unique-tag:special-value AND labels.yet-another-tag:some-value" | awk 'NR>1 {print}'| wc -l)
+    tagged_instances=$(gcloud compute instances list --filter="labels.unique-tag:special-value AND labels.yet-another-tag:some-value AND labels.concourse-up-project:$deployment" | awk 'NR>1 {print}'| wc -l)
   elif [ "$IAAS" = "AWS" ]
   then
     tagged_instances=$(aws ec2 --region us-east-1 \

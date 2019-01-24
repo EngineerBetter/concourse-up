@@ -39,33 +39,27 @@ source concourse-up/ci/tasks/lib/gcreds.sh
 cp "$BINARY_PATH" ./cup
 chmod +x ./cup
 
-# Temporary fix whilst we haven't implemented the rest for GCP
 if [ "$IAAS" = "AWS" ]
 then
     # shellcheck disable=SC2034
     region=us-east-1
-    addGitHubFlagsToArgs
-    addTagsFlagsToArgs
-    args+=(--region "$region")
     args+=(--domain cup.engineerbetter.com)
-    ./cup deploy "${args[@]}" "$deployment"
-    assertTagsSet
-    assertGitHubAuthConfigured
-
 elif [ "$IAAS" = "GCP" ]
 then
     # shellcheck disable=SC2034
     region=europe-west2
     gcloud auth activate-service-account --key-file="$GOOGLE_APPLICATION_CREDENTIALS"
     export CLOUDSDK_CORE_PROJECT=concourse-up
-    addGitHubFlagsToArgs
-    addTagsFlagsToArgs
-    args+=(--region "$region")
     args+=(--domain cup.gcp.engineerbetter.com)
-    ./cup deploy "$deployment" -iaas gcp
-    assertTagsSet
-    assertGitHubAuthConfigured
 fi
+
+addGitHubFlagsToArgs
+addTagsFlagsToArgs
+args+=(--region "$region")
+./cup deploy "${args[@]}" --iaas "$IAAS" "$deployment"
+assertTagsSet
+assertGitHubAuthConfigured
+
 assertPipelinesCanReadFromCredhub
 sleep 60
 recordDeployedState
