@@ -47,7 +47,7 @@ type Environment struct {
 	CustomOperations      string
 }
 
-var allOperations = resource.AWSCPIOps + resource.ExternalIPOps + resource.DirectorCustomOps
+var allOperations = resource.AWSCPIOps + resource.ExternalIPOps + resource.AWSDirectorCustomOps
 
 // ConfigureDirectorManifestCPI interpolates all the Environment parameters and
 // required release versions into ready to use Director manifest

@@ -62,8 +62,8 @@ var (
 
 	// ExternalIPOps statically defines external-ip.yml contents
 	ExternalIPOps = mustAssetString("assets/external-ip.yml")
-	// DirectorCustomOps statically defines custom-ops.yml contents
-	DirectorCustomOps = mustAssetString("assets/custom-ops.yml")
+	// AWSDirectorCustomOps statically defines custom-ops.yml contents
+	AWSDirectorCustomOps = mustAssetString("assets/aws/custom-ops.yml")
 
 	// ReleaseVersions carries all versions of releases
 	ReleaseVersions = mustAssetString("../../concourse-up-ops/ops/versions.json")

@@ -2,3 +2,7 @@
 - type: replace
   path: /networks/name=default/subnets/0/cloud_properties/tags?
   value: [external]
+
+- type: replace
+  path: /tags?
+  value: ((tags))
