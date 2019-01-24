@@ -44,7 +44,7 @@ cp "$BINARY_PATH" ./cup
 chmod +x ./cup
 
 if [ "$IAAS" = "GCP" ]; then
-  custom_domain="$deployment-user.concourse-up.gcp.engineerbetter.com"
+  custom_domain="$deployment-user.gcp.engineerbetter.com"
 else
   custom_domain="$deployment-user.concourse-up.engineerbetter.com"
 fi
