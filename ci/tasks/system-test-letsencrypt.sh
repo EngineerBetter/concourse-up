@@ -34,7 +34,7 @@ custom_domain="$deployment-auto-2.concourse-up.engineerbetter.com"
 
 if [ "$IAAS" = "GCP" ]
 then
-  custom_domain="$deployment-auto-2.concourse-up.gcp.engineerbetter.com"
+  custom_domain="$deployment-auto-2.gcp.engineerbetter.com"
 fi
 
 export CONCOURSE_UP_ACME_URL=https://acme-staging.api.letsencrypt.org/directory # Avoid rate limits when testing
