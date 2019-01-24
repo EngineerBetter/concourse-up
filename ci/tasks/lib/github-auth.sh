@@ -4,8 +4,6 @@
 function addGitHubFlagsToArgs() {
   args+=(--github-auth-client-id "$GITHUB_AUTH_CLIENT_ID")
   args+=(--github-auth-client-secret "$GITHUB_AUTH_CLIENT_SECRET")
-  args+=(--tls-cert "$EB_WILDCARD_CERT")
-  args+=(--tls-key "$EB_WILDCARD_KEY")
 }
 
 function assertGitHubAuthConfigured() {
