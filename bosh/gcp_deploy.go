@@ -55,7 +55,7 @@ func (client *GCPClient) Recreate() error {
 	if err != nil {
 		return err
 	}
-	return bosh.UploadConcourseStemcell(gcp.Environment{
+	return bosh.Recreate(gcp.Environment{
 		ExternalIP: directorPublicIP,
 	}, directorPublicIP, client.config.DirectorPassword, client.config.DirectorCACert)
 }
