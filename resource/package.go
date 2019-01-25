@@ -65,8 +65,11 @@ var (
 	// AWSDirectorCustomOps statically defines custom-ops.yml contents
 	AWSDirectorCustomOps = mustAssetString("assets/aws/custom-ops.yml")
 
-	// ReleaseVersions carries all versions of releases
-	ReleaseVersions = mustAssetString("../../concourse-up-ops/ops/versions.json")
+	// AWSReleaseVersions carries all versions of releases
+	AWSReleaseVersions = mustAssetString("../../concourse-up-ops/ops/versions-aws.json")
+
+	// GCPReleaseVersions carries all versions of releases
+	GCPReleaseVersions = mustAssetString("../../concourse-up-ops/ops/versions-gcp.json")
 
 	// AddNewCa carries the ops file that adds a new CA required for cert rotation
 	AddNewCa = mustAssetString("assets/maintenance/add-new-ca.yml")

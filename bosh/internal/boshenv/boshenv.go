@@ -174,7 +174,18 @@ func (c *BOSHCLI) Locks(config IAASEnvironment, ip, password, ca string) ([]byte
 
 // UploadConcourseStemcell uploads a stemcell for the chosen IAAS
 func (c *BOSHCLI) UploadConcourseStemcell(config IAASEnvironment, ip, password, ca string) error {
-	stemcell, err := config.ConfigureConcourseStemcell(resource.ReleaseVersions)
+	var (
+		stemcell string
+		err      error
+	)
+	iaas := config.IAASCheck()
+	switch iaas {
+	case awsConst:
+		stemcell, err = config.ConfigureConcourseStemcell(resource.AWSReleaseVersions)
+
+	case gcpConst:
+		stemcell, err = config.ConfigureConcourseStemcell(resource.GCPReleaseVersions)
+	}
 	if err != nil {
 		return err
 	}
