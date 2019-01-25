@@ -502,8 +502,8 @@ jobs:
       BINARY_PATH: binary-linux/concourse-up-linux-amd64
       EB_WILDCARD_CERT: ((eb_wildcard.certificate))
       EB_WILDCARD_KEY: ((eb_wildcard.private_key))
-      GITHUB_AUTH_CLIENT_ID: ((github_auth_client_id))
-      GITHUB_AUTH_CLIENT_SECRET: ((github_auth_client_secret))
+      GITHUB_AUTH_CLIENT_ID: ((github_auth_client_id_gcp))
+      GITHUB_AUTH_CLIENT_SECRET: ((github_auth_client_secret_gcp))
     on_failure:
       put: slack-alert
       params:
