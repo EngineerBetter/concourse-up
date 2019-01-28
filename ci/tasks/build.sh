@@ -1,6 +1,7 @@
 #!/bin/bash
 
-set -eu
+# shellcheck disable=SC1091
+source concourse-up/ci/tasks/lib/set-flags.sh
 
 build_dir=$PWD/build-$GOOS
 mkdir -p build_dir
