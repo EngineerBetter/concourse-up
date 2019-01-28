@@ -4,6 +4,9 @@
 source concourse-up/ci/tasks/lib/set-flags.sh
 
 # shellcheck disable=SC1091
+source concourse-up/ci/tasks/lib/assert-iaas.sh
+
+# shellcheck disable=SC1091
 source concourse-up/ci/tasks/lib/verbose.sh
 
 # shellcheck disable=SC1091
@@ -24,8 +27,6 @@ source concourse-up/ci/tasks/lib/tags.sh
 # shellcheck disable=SC1091
 source concourse-up/ci/tasks/lib/credhub.sh
 # shellcheck disable=SC1091
-source concourse-up/ci/tasks/lib/gcreds.sh
-# shellcheck disable=SC1091
 source concourse-up/ci/tasks/lib/letsencrypt.sh
 
 # shellcheck disable=SC1091
@@ -33,9 +34,6 @@ source concourse-up/ci/tasks/lib/letsencrypt.sh
 
 # shellcheck disable=SC1091
 [ "$IAAS" = "GCP" ] && { source concourse-up/ci/tasks/lib/gcp-destroy.sh; }
-
-# If we're testing GCP, we need credentials to be available as a file
-[ "$IAAS" = "GCP" ] && { setGoogleCreds; }
 
 cp "$BINARY_PATH" ./cup
 chmod +x ./cup

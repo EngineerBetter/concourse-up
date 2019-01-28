@@ -7,6 +7,9 @@
 source concourse-up/ci/tasks/lib/set-flags.sh
 
 # shellcheck disable=SC1091
+source concourse-up/ci/tasks/lib/assert-iaas.sh
+
+# shellcheck disable=SC1091
 source concourse-up/ci/tasks/lib/verbose.sh
 
 # shellcheck disable=SC1091
@@ -16,15 +19,9 @@ source concourse-up/ci/tasks/lib/trap.sh
 source concourse-up/ci/tasks/lib/pipeline.sh
 
 # shellcheck disable=SC1091
-source concourse-up/ci/tasks/lib/gcreds.sh
-
-# shellcheck disable=SC1091
 source concourse-up/ci/tasks/lib/id.sh
 
 handleVerboseMode
-
-# If we're testing GCP, we need credentials to be available as a file
-[ "$IAAS" = "GCP" ] && { setGoogleCreds; }
 
 setDeploymentName updt
 
