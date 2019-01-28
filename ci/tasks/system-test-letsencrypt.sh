@@ -12,7 +12,7 @@ source concourse-up/ci/tasks/lib/trap.sh
 # shellcheck disable=SC1091
 source concourse-up/ci/tasks/lib/letsencrypt.sh
 
-[ "$VERBOSE" ] && { handleVerboseMode; }
+handleVerboseMode
 
 set -eou pipefail
 

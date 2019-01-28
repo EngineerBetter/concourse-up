@@ -9,7 +9,7 @@ source concourse-up/ci/tasks/lib/trap.sh
 # shellcheck disable=SC1091
 source concourse-up/ci/tasks/lib/pipeline.sh
 
-[ "$VERBOSE" ] && { handleVerboseMode; }
+handleVerboseMode
 
 set -eu
 

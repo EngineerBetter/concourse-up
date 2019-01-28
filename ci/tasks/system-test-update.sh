@@ -4,6 +4,9 @@
 # Instead we will test that if we publish a non-existant release, the self-update will revert back to a known release
 
 # shellcheck disable=SC1091
+source concourse-up/ci/tasks/lib/set-flags.sh
+
+# shellcheck disable=SC1091
 source concourse-up/ci/tasks/lib/verbose.sh
 
 # shellcheck disable=SC1091
@@ -15,7 +18,8 @@ source concourse-up/ci/tasks/lib/pipeline.sh
 # shellcheck disable=SC1091
 source concourse-up/ci/tasks/lib/gcreds.sh
 
-[ "$VERBOSE" ] && { handleVerboseMode; }
+
+handleVerboseMode
 
 # If we're testing GCP, we need credentials to be available as a file
 [ "$IAAS" = "GCP" ] && { setGoogleCreds; }

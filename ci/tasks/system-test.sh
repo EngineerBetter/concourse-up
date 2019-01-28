@@ -22,7 +22,7 @@ source concourse-up/ci/tasks/lib/pipeline.sh
 # shellcheck disable=SC1091
 source concourse-up/ci/tasks/lib/credhub.sh
 
-[ "$VERBOSE" ] && { handleVerboseMode; }
+handleVerboseMode
 
 [ -z "$SYSTEM_TEST_ID" ] && { generateSystemTestId; }
 

@@ -9,10 +9,9 @@ source concourse-up/ci/tasks/lib/id.sh
 # shellcheck disable=SC1091
 source concourse-up/ci/tasks/lib/gcreds.sh
 
-[ "$VERBOSE" ] && { handleVerboseMode; }
+handleVerboseMode
 
 set -e
-
 
 [ -z "$SYSTEM_TEST_ID" ] && { generateSystemTestId; }
 deployment="systest-$SYSTEM_TEST_ID"

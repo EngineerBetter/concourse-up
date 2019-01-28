@@ -9,7 +9,7 @@ source concourse-up/ci/tasks/lib/trap.sh
 # shellcheck disable=SC1091
 source concourse-up/ci/tasks/lib/id.sh
 
-[ "$VERBOSE" ] && { handleVerboseMode; }
+handleVerboseMode
 
 [ -z "$SYSTEM_TEST_ID" ] && { generateSystemTestId; }
 deployment="systest-$SYSTEM_TEST_ID"
