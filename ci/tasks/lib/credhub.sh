@@ -24,7 +24,7 @@ function assertPipelinesCanReadFromCredhub() {
   # shellcheck disable=SC2034
   job="credhub"
   # shellcheck disable=SC2034
-  cert="generated-ca-cert.pem"
+  cert="${cert:-generated-ca-cert.pem}"
 
   assertPipelineIsSettableAndRunnable
 

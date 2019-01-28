@@ -26,6 +26,8 @@ source concourse-up/ci/tasks/lib/tags.sh
 source concourse-up/ci/tasks/lib/credhub.sh
 # shellcheck disable=SC1091
 source concourse-up/ci/tasks/lib/gcreds.sh
+# shellcheck disable=SC1091
+source concourse-up/ci/tasks/lib/letsencrypt.sh
 
 # shellcheck disable=SC1091
 [ "$IAAS" = "AWS" ] && { source concourse-up/ci/tasks/lib/destroy.sh; }
