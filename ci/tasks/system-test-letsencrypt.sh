@@ -1,22 +1,7 @@
 #!/bin/bash
 
 # shellcheck disable=SC1091
-source concourse-up/ci/tasks/lib/set-flags.sh
-
-# shellcheck disable=SC1091
-source concourse-up/ci/tasks/lib/assert-iaas.sh
-
-# shellcheck disable=SC1091
-source concourse-up/ci/tasks/lib/verbose.sh
-
-# shellcheck disable=SC1091
-source concourse-up/ci/tasks/lib/id.sh
-
-# shellcheck disable=SC1091
-source concourse-up/ci/tasks/lib/pipeline.sh
-
-# shellcheck disable=SC1091
-source concourse-up/ci/tasks/lib/trap.sh
+source concourse-up/ci/tasks/lib/test-setup.sh
 
 # shellcheck disable=SC1091
 source concourse-up/ci/tasks/lib/letsencrypt.sh

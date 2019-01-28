@@ -1,16 +1,7 @@
 #!/bin/bash
 
 # shellcheck disable=SC1091
-source concourse-up/ci/tasks/lib/set-flags.sh
-
-# shellcheck disable=SC1091
-source concourse-up/ci/tasks/lib/assert-iaas.sh
-
-# shellcheck disable=SC1091
-source concourse-up/ci/tasks/lib/verbose.sh
-
-# shellcheck disable=SC1091
-source concourse-up/ci/tasks/lib/id.sh
+source concourse-up/ci/tasks/lib/test-setup.sh
 
 handleVerboseMode
 setDeploymentName smk
