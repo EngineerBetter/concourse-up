@@ -13,12 +13,12 @@ func (client *GCPClient) deployConcourse(creds []byte, detach bool) (newCreds []
 		return []byte{}, err
 	}
 
-	concourseVersionsPath, err := client.director.SaveFileToWorkingDir(concourseVersionsFilename, awsConcourseVersions)
+	concourseVersionsPath, err := client.director.SaveFileToWorkingDir(concourseVersionsFilename, gcpConcourseVersions)
 	if err != nil {
 		return []byte{}, err
 	}
 
-	concourseSHAsPath, err := client.director.SaveFileToWorkingDir(concourseSHAsFilename, awsConcourseSHAs)
+	concourseSHAsPath, err := client.director.SaveFileToWorkingDir(concourseSHAsFilename, gcpConcourseSHAs)
 	if err != nil {
 		return []byte{}, err
 	}
