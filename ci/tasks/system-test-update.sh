@@ -18,18 +18,18 @@ source concourse-up/ci/tasks/lib/pipeline.sh
 # shellcheck disable=SC1091
 source concourse-up/ci/tasks/lib/gcreds.sh
 
+# shellcheck disable=SC1091
+source concourse-up/ci/tasks/lib/id.sh
 
 handleVerboseMode
 
 # If we're testing GCP, we need credentials to be available as a file
 [ "$IAAS" = "GCP" ] && { setGoogleCreds; }
 
-set -eu
-deployment="systest-update-$RANDOM"
+setDeploymentName updt
+
 set +u
-
 trapDefaultCleanup
-
 set -u
 
 cp release/concourse-up-linux-amd64 ./cup

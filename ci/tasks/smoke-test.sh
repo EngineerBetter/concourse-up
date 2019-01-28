@@ -13,8 +13,7 @@ handleVerboseMode
 
 set -e
 
-[ -z "$SYSTEM_TEST_ID" ] && { generateSystemTestId; }
-deployment="systest-$SYSTEM_TEST_ID"
+setDeploymentName smk
 
 set -u
 

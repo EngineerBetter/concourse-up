@@ -24,9 +24,7 @@ source concourse-up/ci/tasks/lib/credhub.sh
 
 handleVerboseMode
 
-[ -z "$SYSTEM_TEST_ID" ] && { generateSystemTestId; }
-
-deployment="systest-$SYSTEM_TEST_ID"
+setDeploymentName sys
 
 set -u
 

@@ -11,8 +11,7 @@ source concourse-up/ci/tasks/lib/id.sh
 
 handleVerboseMode
 
-[ -z "$SYSTEM_TEST_ID" ] && { generateSystemTestId; }
-deployment="systest-$SYSTEM_TEST_ID"
+setDeploymentName opt
 
 set -euo pipefail
 
