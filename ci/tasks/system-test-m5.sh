@@ -18,11 +18,9 @@ source concourse-up/ci/tasks/lib/pipeline.sh
 handleVerboseMode
 setDeploymentName region
 
-set +u
 # shellcheck disable=SC2034
 region=eu-west-3
 trapCustomCleanup
-set -u
 
 cp "$BINARY_PATH" ./cup
 chmod +x ./cup

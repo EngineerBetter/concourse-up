@@ -28,9 +28,7 @@ handleVerboseMode
 
 setDeploymentName updt
 
-set +u
 trapDefaultCleanup
-set -u
 
 cp release/concourse-up-linux-amd64 ./cup
 chmod +x ./cup

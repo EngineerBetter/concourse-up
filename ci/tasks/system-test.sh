@@ -30,9 +30,7 @@ source concourse-up/ci/tasks/lib/check-db.sh
 # If we're testing GCP, we need credentials to be available as a file
 [ "$IAAS" = "GCP" ] && { setGoogleCreds; }
 
-set +u
 trapDefaultCleanup
-set -u
 
 cp "$BINARY_PATH" ./cup
 chmod +x ./cup

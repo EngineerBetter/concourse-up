@@ -31,9 +31,7 @@ chmod +x ./cup
 
 setDeploymentName crt
 
-set +u
 trapDefaultCleanup
-set -u
 
 echo "DEPLOY WITH LETSENCRYPT STAGING CERT, AND CUSTOM DOMAIN"
 
