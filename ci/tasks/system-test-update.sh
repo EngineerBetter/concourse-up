@@ -33,7 +33,7 @@ chmod +x ./cup
 
 echo "DEPLOY OLD VERSION"
 
-./cup deploy $deployment
+./cup deploy "$deployment"
 
 # Wait for previous deployment to finish
 # Otherwise terraform state can get into an invalid state
@@ -42,8 +42,8 @@ echo "DEPLOY OLD VERSION"
 echo "Waiting for 10 minutes to give old deploy time to settle"
 sleep 600
 
-eval "$(./cup info --env $deployment)"
-config=$(./cup info --json $deployment)
+eval "$(./cup info --env "$deployment")"
+config=$(./cup info --json "$deployment")
 domain=$(echo "$config" | jq -r '.config.domain')
 
 echo "Waiting for bosh lock to become available"
@@ -63,7 +63,7 @@ echo "UPDATE TO NEW VERSION"
 rm -rf cup
 cp "$BINARY_PATH" ./cup
 chmod +x ./cup
-./cup deploy $deployment
+./cup deploy "$deployment"
 
 echo "Waiting for 30 seconds to let detached upgrade start"
 sleep 30
@@ -82,7 +82,7 @@ echo "Update complete - Proceeding"
 
 sleep 60
 
-config=$(./cup info --json $deployment)
+config=$(./cup info --json "$deployment")
 domain=$(echo "$config" | jq -r '.config.domain')
 # shellcheck disable=SC2034
 username=$(echo "$config" | jq -r '.config.concourse_username')
