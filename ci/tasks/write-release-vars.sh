@@ -4,7 +4,8 @@
 # Disabling SC2091 above because we want to print commands encased in $()
 # Disabling SC2006 above because ``` code blocks are misinterpretted as shell execution
 
-set -eu
+# shellcheck disable=SC1091
+source concourse-up/ci/tasks/lib/set-flags.sh
 
 version=$(cat version/version)
 pushd concourse-up-ops
