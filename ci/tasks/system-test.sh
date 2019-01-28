@@ -1,7 +1,5 @@
 #!/bin/bash
 
-: "${IAAS:=AWS}"
-
 # shellcheck disable=SC1091
 source concourse-up/ci/tasks/lib/set-flags.sh
 
