@@ -1,5 +1,7 @@
 #!/bin/bash
 
+export CONCOURSE_UP_ACME_URL=https://acme-staging.api.letsencrypt.org/directory # Avoid rate limits when testing
+
 cat <<EOF > letsencrypt-staging.crt
 -----BEGIN CERTIFICATE-----
 MIIFATCCAumgAwIBAgIRAKc9ZKBASymy5TLOEp57N98wDQYJKoZIhvcNAQELBQAw

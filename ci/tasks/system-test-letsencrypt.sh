@@ -24,7 +24,6 @@ then
   custom_domain="$deployment-auto-2.gcp.engineerbetter.com"
 fi
 
-export CONCOURSE_UP_ACME_URL=https://acme-staging.api.letsencrypt.org/directory # Avoid rate limits when testing
 ./cup deploy "$deployment" \
   --domain "$custom_domain"
 sleep 60
