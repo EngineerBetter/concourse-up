@@ -2,7 +2,8 @@
 
 : "${IAAS:=AWS}"
 
-set -e
+# shellcheck disable=SC1091
+source concourse-up/ci/tasks/lib/set-flags.sh
 
 # shellcheck disable=SC1091
 source concourse-up/ci/tasks/lib/verbose.sh
@@ -23,10 +24,7 @@ source concourse-up/ci/tasks/lib/pipeline.sh
 source concourse-up/ci/tasks/lib/credhub.sh
 
 handleVerboseMode
-
 setDeploymentName sys
-
-set -u
 
 # shellcheck disable=SC1091
 source concourse-up/ci/tasks/lib/check-db.sh

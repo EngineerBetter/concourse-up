@@ -1,6 +1,9 @@
 #!/bin/bash
 
 # shellcheck disable=SC1091
+source concourse-up/ci/tasks/lib/set-flags.sh
+
+# shellcheck disable=SC1091
 source concourse-up/ci/tasks/lib/verbose.sh
 
 # shellcheck disable=SC1091
@@ -10,10 +13,7 @@ source concourse-up/ci/tasks/lib/trap.sh
 source concourse-up/ci/tasks/lib/id.sh
 
 handleVerboseMode
-
 setDeploymentName opt
-
-set -euo pipefail
 
 # Create empty array of args that is used in sourced setup functions
 args=()

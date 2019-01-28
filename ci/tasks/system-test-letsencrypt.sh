@@ -1,6 +1,9 @@
 #!/bin/bash
 
 # shellcheck disable=SC1091
+source concourse-up/ci/tasks/lib/set-flags.sh
+
+# shellcheck disable=SC1091
 source concourse-up/ci/tasks/lib/verbose.sh
 
 # shellcheck disable=SC1091
@@ -16,8 +19,6 @@ source concourse-up/ci/tasks/lib/trap.sh
 source concourse-up/ci/tasks/lib/letsencrypt.sh
 
 handleVerboseMode
-
-set -euo pipefail
 
 # shellcheck disable=SC1091
 source concourse-up/ci/tasks/lib/gcreds.sh

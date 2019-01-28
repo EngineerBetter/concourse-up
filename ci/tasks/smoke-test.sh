@@ -1,6 +1,9 @@
 #!/bin/bash
 
 # shellcheck disable=SC1091
+source concourse-up/ci/tasks/lib/set-flags.sh
+
+# shellcheck disable=SC1091
 source concourse-up/ci/tasks/lib/verbose.sh
 
 # shellcheck disable=SC1091
@@ -10,12 +13,7 @@ source concourse-up/ci/tasks/lib/id.sh
 source concourse-up/ci/tasks/lib/gcreds.sh
 
 handleVerboseMode
-
-set -e
-
 setDeploymentName smk
-
-set -u
 
 cp "$BINARY_PATH" ./cup
 chmod +x ./cup

@@ -1,6 +1,9 @@
 #!/bin/bash
 
 # shellcheck disable=SC1091
+source concourse-up/ci/tasks/lib/set-flags.sh
+
+# shellcheck disable=SC1091
 source concourse-up/ci/tasks/lib/verbose.sh
 
 # shellcheck disable=SC1091
@@ -13,16 +16,12 @@ source concourse-up/ci/tasks/lib/trap.sh
 source concourse-up/ci/tasks/lib/pipeline.sh
 
 handleVerboseMode
-
-set -eu
-
 setDeploymentName region
 
 set +u
 # shellcheck disable=SC2034
 region=eu-west-3
 trapCustomCleanup
-
 set -u
 
 cp "$BINARY_PATH" ./cup
