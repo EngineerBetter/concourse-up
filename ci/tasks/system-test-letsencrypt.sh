@@ -14,7 +14,7 @@ source concourse-up/ci/tasks/lib/letsencrypt.sh
 
 handleVerboseMode
 
-set -eou pipefail
+set -euo pipefail
 
 # shellcheck disable=SC1091
 source concourse-up/ci/tasks/lib/gcreds.sh
