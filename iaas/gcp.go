@@ -107,6 +107,11 @@ func (g *GCPProvider) DeleteFile(bucket, path string) error {
 	return nil
 }
 
+// Choose for the consumer the appropriate output based on the provider
+func (g *GCPProvider) Choose(c Choice) interface{} {
+	return c.GCP
+}
+
 // DeleteVersionedBucket deletes a bucket and its content from GCP
 func (g *GCPProvider) DeleteVersionedBucket(name string) error {
 	err := g.DeleteFile(name, "config.json")

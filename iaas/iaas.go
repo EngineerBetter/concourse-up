@@ -5,8 +5,17 @@ import (
 	"strings"
 )
 
-const awsConst = "AWS"
-const gcpConst = "GCP"
+// Choice is an interface which can help on the abstraction of provider data
+// by defining any kind of data mapped against the available providers
+type Choice struct {
+	AWS interface{}
+	GCP interface{}
+}
+
+const (
+	awsConst = "AWS"
+	gcpConst = "GCP"
+)
 
 // Provider represents actions taken against AWS
 type Provider interface {
@@ -30,6 +39,7 @@ type Provider interface {
 	WorkerType(string)
 	WriteFile(bucket, path string, contents []byte) error
 	Zone(string) string
+	Choose(Choice) interface{}
 }
 
 // Factory creates a new IaaS provider, defined for testability

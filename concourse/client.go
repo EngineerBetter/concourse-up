@@ -40,8 +40,9 @@ type IClient interface {
 	Maintain(maintain.Args) error
 }
 
-//go:generate go-bindata -pkg $GOPACKAGE ../../concourse-up-ops/director-versions.json
-var versionFile = MustAsset("../../concourse-up-ops/director-versions.json")
+//go:generate go-bindata -pkg $GOPACKAGE ../../concourse-up-ops/director-versions-aws.json ../../concourse-up-ops/director-versions-gcp.json
+var awsVersionFile = MustAsset("../../concourse-up-ops/director-versions-aws.json")
+var gcpVersionFile = MustAsset("../../concourse-up-ops/director-versions-gcp.json")
 
 // NewClient returns a new Client
 func NewClient(
@@ -56,6 +57,10 @@ func NewClient(
 	ipChecker func() (string, error),
 	acmeClientConstructor func(u *certs.User) (certs.AcmeClient, error),
 	version string) *Client {
+	v, _ := provider.Choose(iaas.Choice{
+		AWS: awsVersionFile,
+		GCP: gcpVersionFile,
+	}).([]byte)
 	return &Client{
 		provider:              provider,
 		tfCLI:                 tfCLI,
@@ -68,7 +73,7 @@ func NewClient(
 		stderr:                stderr,
 		ipChecker:             ipChecker,
 		acmeClientConstructor: acmeClientConstructor,
-		versionFile:           versionFile,
+		versionFile:           v,
 		version:               version,
 	}
 }
@@ -78,12 +83,17 @@ func (client *Client) buildBoshClient(config config.Config, metadata terraform.I
 	if err != nil {
 		return nil, err
 	}
+	v, _ := client.provider.Choose(iaas.Choice{
+		AWS: awsVersionFile,
+		GCP: gcpVersionFile,
+	}).([]byte)
+
 	director, err := director.NewClient(director.Credentials{
 		Username: config.DirectorUsername,
 		Password: config.DirectorPassword,
 		Host:     directorPublicIP,
 		CACert:   config.DirectorCACert,
-	}, versionFile)
+	}, v)
 	if err != nil {
 		return nil, err
 	}

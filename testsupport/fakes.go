@@ -37,11 +37,7 @@ type FakeProvider struct {
 	FakeWriteFile                     func(bucket, path string, contents []byte) error
 	FakeZone                          func(string) string
 	FakeDBType                        func(string) string
-}
-
-// DBType is a fake DBType
-func (fakeProvider *FakeProvider) DBType(size string) string {
-	return fakeProvider.FakeDBType(size)
+	FakeChoose                        func(iaas.Choice) interface{}
 }
 
 // Attr is a fake attr
@@ -139,6 +135,16 @@ func (fakeProvider *FakeProvider) Zone(zone string) string {
 	return fakeProvider.FakeZone(zone)
 }
 
+// DBType is a fake DBType
+func (fakeProvider *FakeProvider) DBType(size string) string {
+	return fakeProvider.FakeDBType(size)
+}
+
+// Choose is a fake Choose
+func (fakeProvider *FakeProvider) Choose(c iaas.Choice) interface{} {
+	return fakeProvider.FakeChoose(c)
+}
+
 // FakeTerraformInputVars implements terraform.TerraformInputVars for testing
 type FakeTerraformInputVars struct {
 	FakeConfigureTerraform func(config string) (string, error)
@@ -227,11 +233,7 @@ type FakeAWSClient struct {
 	FakeWorkerType                    func(string)
 	FakeCreateDatabases               func(name, username, password string) error
 	FakeDBType                        func(size string) string
-}
-
-// DBType is here to implement iaas.DBType
-func (client *FakeAWSClient) DBType(size string) string {
-	return client.FakeDBType(size)
+	FakeChoose                        func(iaas.Choice) interface{}
 }
 
 // WorkerType is here to implement iaas.IClient
@@ -331,6 +333,16 @@ func (client *FakeAWSClient) WriteFile(bucket, path string, contents []byte) err
 // CreateDatabases delegates to FakeCreateDatabases which is dynamically set by the tests
 func (client *FakeAWSClient) CreateDatabases(name, username, password string) error {
 	return client.FakeCreateDatabases(name, username, password)
+}
+
+// DBType is here to implement iaas.DBType
+func (client *FakeAWSClient) DBType(size string) string {
+	return client.FakeDBType(size)
+}
+
+// Choose is here to implement iaas.Choose
+func (client *FakeAWSClient) Choose(c iaas.Choice) interface{} {
+	return c.AWS
 }
 
 // FakeFlyClient implements fly.IClient for testing

@@ -55,6 +55,11 @@ func (a *AWSProvider) DBType(name string) string {
 	return AWSDBSizes[name]
 }
 
+// Choose for the consumer the appropriate output based on the provider
+func (a *AWSProvider) Choose(c Choice) interface{} {
+	return c.AWS
+}
+
 // Zone is a placeholder for Zone()
 func (a *AWSProvider) Zone(input string) string {
 	if input != "" {
