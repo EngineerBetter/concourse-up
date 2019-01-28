@@ -12,12 +12,16 @@ source concourse-up/ci/tasks/lib/trap.sh
 # shellcheck disable=SC1091
 source concourse-up/ci/tasks/lib/pipeline.sh
 
+# shellcheck disable=SC1091
+source concourse-up/ci/tasks/lib/gcreds.sh
+
 [ "$VERBOSE" ] && { handleVerboseMode; }
 
+# If we're testing GCP, we need credentials to be available as a file
+[ "$IAAS" = "GCP" ] && { setGoogleCreds; }
+
 set -eu
-
 deployment="systest-update-$RANDOM"
-
 set +u
 
 trapDefaultCleanup

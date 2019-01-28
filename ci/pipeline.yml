@@ -15,6 +15,7 @@ groups:
   - system-test-letsencrypt-gcp
   - smoke-test-gcp
   - system-test-gcp
+  - system-test-update-gcp
   - auto
   - major
   - minor
@@ -407,6 +408,25 @@ jobs:
         text: |
           <!channel> Concourse Up update system test failure!
 
+- name: system-test-update-gcp
+  serial_groups:
+  - system-test-update-gcp
+  serial: true
+  plan:
+  - aggregate: *system-test-gets-gcp
+  - task: run-system-test-update
+    file: concourse-up/ci/tasks/system-test-update.yml
+    params:
+      BINARY_PATH: binary-linux/concourse-up-linux-amd64
+      GOOGLE_APPLICATION_CREDENTIALS_CONTENTS: ((system_test_google_application_credentials))
+      IAAS: GCP
+    on_failure:
+      put: slack-alert
+      params:
+        channel: "#integrations"
+        text: |
+          <!channel> Concourse Up update system test GCP failure!
+
 - name: system-test-m5
   serial_groups:
   - system-test-m5
@@ -525,6 +545,7 @@ jobs:
       - system-test-gcp
       - system-test-options-and-destroy-gcp
       - system-test-letsencrypt-gcp
+      - system-test-update-gcp
     - get: concourse-up
       passed: *system-tests
     - get: concourse-up-ops
