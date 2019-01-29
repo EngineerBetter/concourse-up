@@ -5,6 +5,7 @@ source concourse-up/ci/tasks/lib/test-setup.sh
 
 handleVerboseMode
 setDeploymentName smk
+trapDefaultCleanup
 
 cp "$BINARY_PATH" ./cup
 chmod +x ./cup
