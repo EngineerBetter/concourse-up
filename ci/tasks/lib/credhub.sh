@@ -15,9 +15,9 @@ function assertPipelinesCanReadFromCredhub() {
   password=$(echo "$config" | jq -r '.config.concourse_password')
   echo "$config" | jq -r '.config.concourse_cert' > generated-ca-cert.pem
 
-  # Subshell-in-a-subshell fails fast; eval "$(... doesn't
-  # shellcheck disable=SC2091
-  $( "$(./cup info --env --region "$region" "$deployment" -iaas "$IAAS")")
+  # Assigning a subshell to a variable fails fast; eval "$(... doesn't
+  info_output="$(./cup info --env --region "$region" "$deployment" -iaas "$IAAS")"
+  eval "$info_output"
   credhub api
   credhub set -n /concourse/main/password -t password -w c1oudc0w
 

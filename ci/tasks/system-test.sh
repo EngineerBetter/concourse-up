@@ -46,9 +46,9 @@ echo "DEPLOY WITH A USER PROVIDED CERT, CUSTOM DOMAIN, DEFAULT WORKERS, DEFAULT 
 sleep 60
 
 # Check we can log into the BOSH director and SSH into a VM
-# Subshell-in-a-subshell fails fast; eval "$(... doesn't
-# shellcheck disable=SC2091
-$( "$(./cup info --env "$deployment")" )
+# Assigning a subshell to a variable fails fast; eval "$(... doesn't
+info_output="$(./cup info --env "$deployment")"
+eval "$info_output"
 bosh vms
 bosh ssh worker true
 

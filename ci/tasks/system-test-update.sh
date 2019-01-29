@@ -26,9 +26,9 @@ echo "DEPLOY OLD VERSION"
 echo "Waiting for 10 minutes to give old deploy time to settle"
 sleep 600
 
-# Subshell-in-a-subshell fails fast; eval "$(... doesn't
-# shellcheck disable=SC2091
-$( "$(./cup info --env "$deployment")" )
+# Assigning a subshell to a variable fails fast; eval "$(... doesn't
+info_output="$(./cup info --env "$deployment")"
+eval "$info_output"
 config=$(./cup info --json "$deployment")
 [[ -n $config ]]
 domain=$(echo "$config" | jq -r '.config.domain')
