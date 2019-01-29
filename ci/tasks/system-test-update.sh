@@ -26,8 +26,11 @@ echo "DEPLOY OLD VERSION"
 echo "Waiting for 10 minutes to give old deploy time to settle"
 sleep 600
 
-eval "$(./cup info --env "$deployment")"
+# Subshell-in-a-subshell fails fast; eval "$(... doesn't
+# shellcheck disable=SC2091
+$( "$(./cup info --env "$deployment")" )
 config=$(./cup info --json "$deployment")
+[[ -n $config ]]
 domain=$(echo "$config" | jq -r '.config.domain')
 
 echo "Waiting for bosh lock to become available"
