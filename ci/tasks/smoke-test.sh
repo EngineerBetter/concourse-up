@@ -11,4 +11,3 @@ cp "$BINARY_PATH" ./cup
 chmod +x ./cup
 
 ./cup deploy "$deployment"
-./cup --non-interactive destroy "$deployment"
