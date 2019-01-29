@@ -13,6 +13,7 @@ function assertGitHubAuthConfigured() {
   password=$(echo "$config" | jq -r '.config.concourse_password')
 
   fly --target system-test login \
+    --ca-cert "$cert" \
     --concourse-url "https://$domain" \
     --username "$username" \
     --password "$password"
