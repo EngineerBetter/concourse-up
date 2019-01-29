@@ -40,6 +40,8 @@ then
     args+=(--domain cup.gcp.engineerbetter.com)
 fi
 
+trapCustomCleanup
+
 addGitHubFlagsToArgs
 addTagsFlagsToArgs
 args+=(--region "$region")
