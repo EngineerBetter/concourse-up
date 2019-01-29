@@ -38,7 +38,7 @@ function assertGitHubAuthConfigured() {
 
   url=$(grep redirect fly_out | sed 's/ //g')
 
-  curl -sL "$url" | grep -q '/sky/issuer/auth/github'
+  curl -sL --cacert "$cert" "$url" | grep -q '/sky/issuer/auth/github'
 
   echo "GitHub Auth test passed"
 }
