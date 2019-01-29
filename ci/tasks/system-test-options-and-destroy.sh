@@ -13,8 +13,6 @@ source concourse-up/ci/tasks/lib/github-auth.sh
 # shellcheck disable=SC1091
 source concourse-up/ci/tasks/lib/tags.sh
 # shellcheck disable=SC1091
-source concourse-up/ci/tasks/lib/credhub.sh
-# shellcheck disable=SC1091
 source concourse-up/ci/tasks/lib/letsencrypt.sh
 
 # shellcheck disable=SC1091
