@@ -271,40 +271,36 @@ func (client *Client) updateBoshAndPipeline(c config.Config, metadata terraform.
 		DirectorCACert:           c.DirectorCACert,
 	}
 
-	// Only set the self-update pipeline on AWS
-	if client.provider.IAAS() == "AWS" { //nolint
+	flyClient, err := client.flyClientFactory(client.provider, fly.Credentials{
+		Target:   c.Deployment,
+		API:      fmt.Sprintf("https://%s", c.Domain),
+		Username: c.ConcourseUsername,
+		Password: c.ConcoursePassword,
+	},
+		client.stdout,
+		client.stderr,
+		client.versionFile,
+	)
+	if err != nil {
+		return bp, err
+	}
+	defer flyClient.Cleanup()
 
-		flyClient, err := client.flyClientFactory(client.provider, fly.Credentials{
-			Target:   c.Deployment,
-			API:      fmt.Sprintf("https://%s", c.Domain),
-			Username: c.ConcourseUsername,
-			Password: c.ConcoursePassword,
-		},
-			client.stdout,
-			client.stderr,
-			client.versionFile,
-		)
-		if err != nil {
-			return bp, err
-		}
-		defer flyClient.Cleanup()
-
-		concourseAlreadyRunning, err := flyClient.CanConnect()
-		if err != nil {
-			return bp, err
-		}
-
-		if !concourseAlreadyRunning {
-			return bp, fmt.Errorf("In detach mode but it seems that concourse is not currently running")
-		}
-
-		// Allow a fly version discrepancy since we might be targetting an older Concourse
-		if err = flyClient.SetDefaultPipeline(c, true); err != nil {
-			return bp, err
-		}
+	concourseAlreadyRunning, err := flyClient.CanConnect()
+	if err != nil {
+		return bp, err
 	}
 
-	bp, err := client.deployBosh(c, metadata, true)
+	if !concourseAlreadyRunning {
+		return bp, fmt.Errorf("In detach mode but it seems that concourse is not currently running")
+	}
+
+	// Allow a fly version discrepancy since we might be targetting an older Concourse
+	if err = flyClient.SetDefaultPipeline(c, true); err != nil {
+		return bp, err
+	}
+
+	bp, err = client.deployBosh(c, metadata, true)
 	if err != nil {
 		return bp, err
 	}
