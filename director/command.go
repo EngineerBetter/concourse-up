@@ -71,7 +71,7 @@ func (client *Client) runDetachingCommand(stdout, stderr io.Writer, args ...stri
 		if _, err := stdout.Write([]byte(fmt.Sprintf("%s\n", text))); err != nil {
 			return err
 		}
-		if strings.HasPrefix(text, "Task") {
+		if strings.Contains(text, "Preparing deployment") {
 			stdout.Write([]byte("Task started, detaching output\n"))
 			return nil
 		}
