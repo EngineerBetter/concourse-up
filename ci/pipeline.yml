@@ -179,6 +179,7 @@ resources:
 
 jobs:
 - name: set-pipeline
+  serial: true
   plan:
   - get: concourse-up
     trigger: true
