@@ -71,7 +71,7 @@ resources:
   source:
     storage:
       bucket_path: ci/tf
-      bucket: concourse-up-ci-artifacts
+      bucket: ((bucket-name))
       access_key_id: ((concourse_ci_s3_access_key))
       secret_access_key: ((concourse_ci_s3_secret_key))
       region_name: eu-west-1
