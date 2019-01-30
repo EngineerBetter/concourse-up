@@ -16,14 +16,14 @@ var blue = color.New(color.FgCyan, color.Bold).SprintfFunc()
 
 func main() {
 	app := cli.NewApp()
-	app.Name = "Concourse-Up"
+	app.Name = "Control Tower for Concourse"
 	app.Usage = "A CLI tool to deploy Concourse CI"
 	app.Version = ConcourseUpVersion
 	app.Commands = commands.Commands
 	app.Flags = commands.GlobalFlags
 	cli.AppHelpTemplate = fmt.Sprintf(`%s
 
-See 'concourse-up help <command>' to read about a specific command.
+See 'ctwr help <command>' to read about a specific command.
 
 Built by %s %s
 
