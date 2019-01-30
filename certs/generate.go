@@ -1,11 +1,18 @@
 package certs
 
 import (
+	"context"
 	"crypto"
 	"crypto/rand"
 	"crypto/rsa"
+	"encoding/json"
 	"fmt"
+	"github.com/xenolf/lego/platform/config/env"
+	"golang.org/x/oauth2/google"
+	"google.golang.org/api/dns/v1"
+	"io/ioutil"
 	"net"
+	"os"
 	"strings"
 	"sync"
 	"time"
@@ -13,9 +20,12 @@ import (
 	"github.com/EngineerBetter/concourse-up/iaas"
 
 	"github.com/square/certstrap/pkix"
-	"github.com/xenolf/lego/acme"
-	"github.com/xenolf/lego/providers/dns/googlecloud"
+	"github.com/xenolf/lego/certificate"
+	"github.com/xenolf/lego/challenge"
+	"github.com/xenolf/lego/lego"
+	"github.com/xenolf/lego/providers/dns/gcloud"
 	"github.com/xenolf/lego/providers/dns/route53"
+	"github.com/xenolf/lego/registration"
 )
 
 // Certs contains certificates and keys
@@ -28,7 +38,7 @@ type Certs struct {
 // User contains a key, a registration resource, and a sync parameter
 type User struct {
 	k crypto.PrivateKey
-	r *acme.RegistrationResource
+	r *registration.Resource
 	sync.Once
 }
 
@@ -38,7 +48,7 @@ func (u *User) GetEmail() string {
 }
 
 // GetRegistration returns the registration for a user
-func (u *User) GetRegistration() *acme.RegistrationResource {
+func (u *User) GetRegistration() *registration.Resource {
 	return u.r
 }
 
@@ -63,26 +73,45 @@ func hasIP(x []string) bool {
 	return false
 }
 
-type timeoutProvider struct {
-	acme.ChallengeProvider
-	timeout, interval time.Duration
-}
+func customNewDNSProviderServiceAccount(saFile string, config *gcloud.Config) (*gcloud.DNSProvider, error) {
+	if saFile == "" {
+		return nil, fmt.Errorf("googlecloud: Service Account file missing")
+	}
 
-func (t timeoutProvider) Timeout() (timeout, interval time.Duration) {
-	return t.timeout, t.interval
-}
+	dat, err := ioutil.ReadFile(saFile)
+	if err != nil {
+		return nil, fmt.Errorf("googlecloud: unable to read Service Account file: %v", err)
+	}
 
-// AcmeClient is an interface for an acme client
-type AcmeClient interface {
-	SetChallengeProvider(challenge acme.Challenge, p acme.ChallengeProvider) error
-	ExcludeChallenges(challenges []acme.Challenge)
-	Register() (*acme.RegistrationResource, error)
-	AgreeToTOS() error
-	ObtainCertificate(domains []string, bundle bool, privKey crypto.PrivateKey, mustStaple bool) (acme.CertificateResource, map[string]error)
+	// If GCE_PROJECT is non-empty it overrides the project in the service
+	// account file.
+	project := env.GetOrDefaultString("GCE_PROJECT", "")
+	if project == "" {
+		// read project id from service account file
+		var datJSON struct {
+			ProjectID string `json:"project_id"`
+		}
+		err = json.Unmarshal(dat, &datJSON)
+		if err != nil || datJSON.ProjectID == "" {
+			return nil, fmt.Errorf("googlecloud: project ID not found in Google Cloud Service Account file")
+		}
+		project = datJSON.ProjectID
+	}
+
+	conf, err := google.JWTConfigFromJSON(dat, dns.NdevClouddnsReadwriteScope)
+	if err != nil {
+		return nil, fmt.Errorf("googlecloud: unable to acquire config: %v", err)
+	}
+	client := conf.Client(context.Background())
+
+	config.Project = project
+	config.HTTPClient = client
+
+	return gcloud.NewDNSProviderConfig(config)
 }
 
 // Generate generates certs for use in a bosh director manifest
-func Generate(constructor func(u *User) (AcmeClient, error), caName string, provider iaas.Provider, ipOrDomains ...string) (*Certs, error) {
+func Generate(constructor func(u *User) (*lego.Client, error), caName string, provider iaas.Provider, ipOrDomains ...string) (*Certs, error) {
 
 	if hasIP(ipOrDomains) {
 		return generateSelfSigned(caName, ipOrDomains...)
@@ -94,50 +123,54 @@ func Generate(constructor func(u *User) (AcmeClient, error), caName string, prov
 		return nil, err
 	}
 
-	c.ExcludeChallenges([]acme.Challenge{acme.HTTP01, acme.TLSSNI01})
+	c.Challenge.Remove(challenge.HTTP01)
+	c.Challenge.Remove(challenge.TLSALPN01)
+
 	switch provider.IAAS() {
 	case "AWS":
-		dnsProvider, err1 := route53.NewDNSProvider()
+		dnsConfig := route53.NewDefaultConfig()
+		dnsConfig.PropagationTimeout = 10 * time.Minute
+		dnsConfig.PollingInterval = 30 * time.Second
+		dnsProvider, err1 := route53.NewDNSProviderConfig(dnsConfig)
 		if err1 != nil {
 			return nil, err1
 		}
-		c.SetChallengeProvider(acme.DNS01, timeoutProvider{
-			dnsProvider,
-			10 * time.Minute,
-			1 * time.Second,
-		})
+
+		err1 = c.Challenge.SetDNS01Provider(dnsProvider)
+		if err1 != nil {
+			return nil, err1
+		}
 	case "GCP":
-		project, err1 := provider.Attr("project")
+		dnsConfig := gcloud.NewDefaultConfig()
+		dnsConfig.PropagationTimeout = 10 * time.Minute
+		dnsConfig.PollingInterval = 30 * time.Second
+		dnsProvider, err1 := customNewDNSProviderServiceAccount(os.Getenv("GOOGLE_APPLICATION_CREDENTIALS"), dnsConfig)
 		if err1 != nil {
 			return nil, err1
 		}
-		credentialsPath, err1 := provider.Attr("credentials_path")
+		err1 = c.Challenge.SetDNS01Provider(dnsProvider)
 		if err1 != nil {
 			return nil, err1
 		}
-		dnsProvider, err1 := googlecloud.NewDNSProviderServiceAccount(project, credentialsPath)
-		if err1 != nil {
-			return nil, err1
-		}
-		c.SetChallengeProvider(acme.DNS01, timeoutProvider{
-			dnsProvider,
-			10 * time.Minute,
-			1 * time.Second,
-		})
 	}
-	u.r, err = c.Register()
+	u.r, err = c.Registration.Register(registration.RegisterOptions{TermsOfServiceAgreed: true})
 	if err != nil {
 		return nil, err
 	}
-	c.AgreeToTOS()
-	resp, errs := c.ObtainCertificate(ipOrDomains, true, nil, false)
-	if len(errs) != 0 {
-		return nil, fmt.Errorf("%v", errs)
+	request := certificate.ObtainRequest{
+		Domains:    ipOrDomains,
+		Bundle:     true,
+		PrivateKey: nil,
+		MustStaple: false,
+	}
+	certificates, err := c.Certificate.Obtain(request)
+	if err != nil {
+		return nil, err
 	}
 	return &Certs{
-		CACert: resp.IssuerCertificate,
-		Key:    resp.PrivateKey,
-		Cert:   resp.Certificate,
+		CACert: certificates.IssuerCertificate,
+		Key:    certificates.PrivateKey,
+		Cert:   certificates.Certificate,
 	}, nil
 }
 

@@ -17,6 +17,7 @@ import (
 	"github.com/EngineerBetter/concourse-up/fly"
 	"github.com/EngineerBetter/concourse-up/terraform"
 	"github.com/EngineerBetter/concourse-up/util"
+	"github.com/xenolf/lego/lego"
 	yaml "gopkg.in/yaml.v2"
 )
 
@@ -380,7 +381,7 @@ type Requirements struct {
 	Certs            Certs
 }
 
-func (client *Client) checkPreDeployConfigRequirements(c func(u *certs.User) (certs.AcmeClient, error), isDomainUpdated bool, cfg config.Config, metadata terraform.IAASMetadata) (Requirements, error) {
+func (client *Client) checkPreDeployConfigRequirements(c func(u *certs.User) (*lego.Client, error), isDomainUpdated bool, cfg config.Config, metadata terraform.IAASMetadata) (Requirements, error) {
 	cr := Requirements{
 		Domain:           cfg.Domain,
 		DirectorPublicIP: cfg.DirectorPublicIP,
@@ -429,7 +430,7 @@ func (client *Client) checkPreDeployConfigRequirements(c func(u *certs.User) (ce
 	return cr, nil
 }
 
-func (client *Client) ensureDirectorCerts(c func(u *certs.User) (certs.AcmeClient, error), dc DirectorCerts, deployment string, metadata terraform.IAASMetadata) (DirectorCerts, error) {
+func (client *Client) ensureDirectorCerts(c func(u *certs.User) (*lego.Client, error), dc DirectorCerts, deployment string, metadata terraform.IAASMetadata) (DirectorCerts, error) {
 	// If we already have director certificates, don't regenerate as changing them will
 	// force a bosh director re-deploy even if there are no other changes
 	certs := dc
@@ -471,7 +472,7 @@ func timeTillExpiry(cert string) time.Duration {
 	return time.Until(c.NotAfter)
 }
 
-func (client *Client) ensureConcourseCerts(c func(u *certs.User) (certs.AcmeClient, error), domainUpdated bool, cc Certs, deployment, domain string) (Certs, error) {
+func (client *Client) ensureConcourseCerts(c func(u *certs.User) (*lego.Client, error), domainUpdated bool, cc Certs, deployment, domain string) (Certs, error) {
 	certs := cc
 
 	if client.deployArgs.TLSCert != "" {

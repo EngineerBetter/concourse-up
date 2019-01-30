@@ -3,23 +3,31 @@ package certs
 import (
 	"os"
 
-	"github.com/xenolf/lego/acme"
+	"github.com/xenolf/lego/lego"
 )
 
 // NewAcmeClient returns a new AcmeClient
-func NewAcmeClient(u *User) (AcmeClient, error) {
+func NewAcmeClient(u *User) (*lego.Client, error) {
 
-	var c AcmeClient
-	c, err := acme.NewClient(acmeURL(), u, acme.RSA2048)
+	var (
+		c  *lego.Config
+		cl *lego.Client
+	)
+
+	c = lego.NewConfig(u)
+	c.CADirURL = acmeURL()
+
+	cl, err := lego.NewClient(c)
 	if err != nil {
 		return nil, err
 	}
-	return c, nil
+
+	return cl, nil
 }
 
 func acmeURL() string {
 	if u := os.Getenv("CONCOURSE_UP_ACME_URL"); u != "" {
 		return u
 	}
-	return "https://acme-v01.api.letsencrypt.org/directory"
+	return lego.LEDirectoryProduction
 }

@@ -13,6 +13,8 @@ import (
 	"github.com/EngineerBetter/concourse-up/fly"
 	"github.com/EngineerBetter/concourse-up/iaas"
 	"github.com/EngineerBetter/concourse-up/terraform"
+
+	"github.com/xenolf/lego/lego"
 )
 
 // Client is a concrete implementation of IClient interface
@@ -21,13 +23,13 @@ type Client struct {
 	tfCLI                 terraform.CLIInterface
 	boshClientFactory     bosh.ClientFactory
 	flyClientFactory      func(iaas.Provider, fly.Credentials, io.Writer, io.Writer, []byte) (fly.IClient, error)
-	certGenerator         func(constructor func(u *certs.User) (certs.AcmeClient, error), caName string, provider iaas.Provider, ip ...string) (*certs.Certs, error)
+	certGenerator         func(constructor func(u *certs.User) (*lego.Client, error), caName string, provider iaas.Provider, ip ...string) (*certs.Certs, error)
 	configClient          config.IClient
 	deployArgs            *deploy.Args
 	stdout                io.Writer
 	stderr                io.Writer
 	ipChecker             func() (string, error)
-	acmeClientConstructor func(u *certs.User) (certs.AcmeClient, error)
+	acmeClientConstructor func(u *certs.User) (*lego.Client, error)
 	versionFile           []byte
 	version               string
 }
@@ -50,12 +52,12 @@ func NewClient(
 	tfCLI terraform.CLIInterface,
 	boshClientFactory bosh.ClientFactory,
 	flyClientFactory func(iaas.Provider, fly.Credentials, io.Writer, io.Writer, []byte) (fly.IClient, error),
-	certGenerator func(constructor func(u *certs.User) (certs.AcmeClient, error), caName string, provider iaas.Provider, ip ...string) (*certs.Certs, error),
+	certGenerator func(constructor func(u *certs.User) (*lego.Client, error), caName string, provider iaas.Provider, ip ...string) (*certs.Certs, error),
 	configClient config.IClient,
 	deployArgs *deploy.Args,
 	stdout, stderr io.Writer,
 	ipChecker func() (string, error),
-	acmeClientConstructor func(u *certs.User) (certs.AcmeClient, error),
+	acmeClientConstructor func(u *certs.User) (*lego.Client, error),
 	version string) *Client {
 	v, _ := provider.Choose(iaas.Choice{
 		AWS: awsVersionFile,

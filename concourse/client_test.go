@@ -3,6 +3,7 @@ package concourse_test
 import (
 	"errors"
 	"fmt"
+	"github.com/xenolf/lego/lego"
 	"io"
 	"reflect"
 
@@ -54,7 +55,7 @@ var _ = Describe("Client", func() {
 	}
 	var terraformMetadata TerraformMetadata
 
-	certGenerator := func(c func(u *certs.User) (certs.AcmeClient, error), caName string, provider iaas.Provider, ip ...string) (*certs.Certs, error) {
+	certGenerator := func(c func(u *certs.User) (*lego.Client, error), caName string, provider iaas.Provider, ip ...string) (*certs.Certs, error) {
 		actions = append(actions, fmt.Sprintf("generating cert ca: %s, cn: %s", caName, ip))
 		return &certs.Certs{
 			CACert: []byte("----EXAMPLE CERT----"),

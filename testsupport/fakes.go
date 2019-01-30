@@ -2,8 +2,8 @@ package testsupport
 
 import (
 	"bytes"
-	"crypto"
-	"errors"
+
+	"github.com/xenolf/lego/lego"
 
 	"github.com/EngineerBetter/concourse-up/commands/deploy"
 	"github.com/EngineerBetter/concourse-up/terraform"
@@ -12,7 +12,6 @@ import (
 	"github.com/EngineerBetter/concourse-up/certs"
 	"github.com/EngineerBetter/concourse-up/config"
 	"github.com/EngineerBetter/concourse-up/iaas"
-	"github.com/xenolf/lego/acme"
 )
 
 // FakeProvider is a fake Provider
@@ -466,43 +465,6 @@ func (client *FakeBoshClient) Locks() ([]byte, error) {
 }
 
 // NewFakeAcmeClient returns a new FakeAcmeClient
-func NewFakeAcmeClient(u *certs.User) (certs.AcmeClient, error) {
-	return &FakeAcmeClient{}, nil
-}
-
-// FakeAcmeClient implements certs.AcmeClient for testing
-type FakeAcmeClient struct {
-}
-
-// SetChallengeProvider returns nil
-func (c *FakeAcmeClient) SetChallengeProvider(challenge acme.Challenge, p acme.ChallengeProvider) error {
-	return nil
-}
-
-// ExcludeChallenges does nothing
-func (c *FakeAcmeClient) ExcludeChallenges(challenges []acme.Challenge) {
-}
-
-// Register returns nil
-func (c *FakeAcmeClient) Register() (*acme.RegistrationResource, error) {
-	return nil, nil
-}
-
-// AgreeToTOS returns nil
-func (c *FakeAcmeClient) AgreeToTOS() error {
-	return nil
-}
-
-// ObtainCertificate returns a fake certificate if domain is valid
-func (c *FakeAcmeClient) ObtainCertificate(domains []string, bundle bool, privKey crypto.PrivateKey, mustStaple bool) (acme.CertificateResource, map[string]error) {
-	if domains[0] == "google.com" {
-		errs := make(map[string]error)
-		errs["error"] = errors.New("this is an error")
-		return acme.CertificateResource{}, errs
-	}
-	return acme.CertificateResource{
-		PrivateKey:        []byte("BEGIN RSA PRIVATE KEY"),
-		Certificate:       []byte("BEGIN CERTIFICATE"),
-		IssuerCertificate: []byte("BEGIN CERTIFICATE"),
-	}, nil
+func NewFakeAcmeClient(u *certs.User) (*lego.Client, error) {
+	return &lego.Client{}, nil
 }

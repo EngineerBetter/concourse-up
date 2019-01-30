@@ -83,8 +83,8 @@ github.com/square/certstrap v1.1.1 h1:GAzfXUcuior+dIWBo0OYODROz71P3mf0B9AQsVX0FS
 github.com/square/certstrap v1.1.1/go.mod h1:1+xoDwJbjCv1e3erNygZ/sHwgq8dr8CgQB3M5mMI6ds=
 github.com/stretchr/testify v1.2.2 h1:bSDNvY7ZPG5RlJ8otE/7V6gMiyenm9RtJ7IUVIAoJ1w=
 github.com/stretchr/testify v1.2.2/go.mod h1:a8OnRcib4nhh0OaRAV+Yts87kKdq0PP7pXfy6kDkUVs=
-github.com/xenolf/lego v0.4.1 h1:D/QMnzmGNhYMIqifwt1OMoSeERrClOPuXDP4HrC3ZPY=
-github.com/xenolf/lego v0.4.1/go.mod h1:fwiGnfsIjG7OHPfOvgK7Y/Qo6+2Ox0iozjNTkZICKbY=
+github.com/xenolf/lego v2.1.0+incompatible h1:zZErna+4KHeBsUC3mw6gthaXncPDoBuFJOHKCRl64Wg=
+github.com/xenolf/lego v2.1.0+incompatible/go.mod h1:fwiGnfsIjG7OHPfOvgK7Y/Qo6+2Ox0iozjNTkZICKbY=
 go.opencensus.io v0.17.0 h1:2Cu88MYg+1LU+WVD+NWwYhyP0kKgRlN9QjWGaX0jKTE=
 go.opencensus.io v0.17.0/go.mod h1:mp1VrMQxhlqqDpKvH4UcQUa4YwlzNmymAjPrDdfxNpI=
 golang.org/x/crypto v0.0.0-20180111101123-5f55bce93ad2 h1:FUpi9WPK4+CAw030St1QsK3yqlOtHgVUabBcQiGPuwc=
@@ -120,8 +120,8 @@ gopkg.in/check.v1 v1.0.0-20180628173108-788fd7840127 h1:qIbj1fsPNlZgppZ+VLlY7N33
 gopkg.in/check.v1 v1.0.0-20180628173108-788fd7840127/go.mod h1:Co6ibVJAznAaIkqp8huTwlJQCZ016jof/cbN4VW5Yz0=
 gopkg.in/ini.v1 v1.38.1 h1:8E3nEICVJ6kxl6aTXYp77xYyObhw7YG9/avdj0r3vME=
 gopkg.in/ini.v1 v1.38.1/go.mod h1:pNLf8WUiyNEtQjuu5G5vTm06TEv9tsIgeAvK8hOrP4k=
-gopkg.in/square/go-jose.v1 v1.1.0 h1:T/KcERvxOFKL2QzwvOsP0l5xRvvhTlwcTxw5qad61pQ=
-gopkg.in/square/go-jose.v1 v1.1.0/go.mod h1:QpYS+a4WhS+DTlyQIi6Ka7MS3SuR9a055rgXNEe6EiA=
+gopkg.in/square/go-jose.v2 v2.2.2 h1:orlkJ3myw8CN1nVQHBFfloD+L3egixIa4FvUP6RosSA=
+gopkg.in/square/go-jose.v2 v2.2.2/go.mod h1:M9dMgbHiYLoDGQrXy7OpJDJWiKiU//h+vD76mk0e1AI=
 gopkg.in/urfave/cli.v1 v1.20.0 h1:NdAVW6RYxDif9DhDHaAortIu956m2c0v+09AZBPTbE0=
 gopkg.in/urfave/cli.v1 v1.20.0/go.mod h1:vuBzUtMdQeixQj8LVd+/98pzhxNGQoyuPBlsXHOQNO0=
 gopkg.in/yaml.v2 v2.0.0 h1:uUkhRGrsEyx/laRdeS6YIQKIys8pg+lRSRdVMTYjivs=
