@@ -190,8 +190,9 @@ jobs:
         team: main
         config_file: concourse-up/ci/pipeline.yml
         vars:
-          pipeline-name: ((pipeline-name))
           branch: ((branch))
+          bucket-name: ((bucket-name))
+          pipeline-name: ((pipeline-name))
 
 - name: setup-ci-bucket
   serial: true
