@@ -4,6 +4,7 @@
 set -eu
 
 docker run -it \
+    -e GO111MODULE=off \
     -v "${PWD}:/mnt/concourse-up" \
     -v "${PWD}/../concourse-up-ops:/mnt/concourse-up-ops" \
     engineerbetter/pcf-ops \
