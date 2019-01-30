@@ -123,7 +123,7 @@ resources:
   type: s3
   source:
     bucket: concourse-up-ci-artifacts
-    versioned_file: concourse-up-linux-amd64
+    versioned_file: ((binary-name))-linux-amd64
     access_key_id: ((concourse_ci_s3_access_key))
     secret_access_key: ((concourse_ci_s3_secret_key))
     region_name: eu-west-1
@@ -132,7 +132,7 @@ resources:
   type: s3
   source:
     bucket: concourse-up-ci-artifacts
-    versioned_file: concourse-up-darwin-amd64
+    versioned_file: ((binary-name))-darwin-amd64
     access_key_id: ((concourse_ci_s3_access_key))
     secret_access_key: ((concourse_ci_s3_secret_key))
     region_name: eu-west-1
@@ -141,7 +141,7 @@ resources:
   type: s3
   source:
     bucket: concourse-up-ci-artifacts
-    versioned_file: concourse-up-darwin-amd64
+    versioned_file: ((binary-name))-darwin-amd64
     access_key_id: ((concourse_ci_s3_access_key))
     secret_access_key: ((concourse_ci_s3_secret_key))
     region_name: eu-west-1
