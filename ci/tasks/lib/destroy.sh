@@ -28,6 +28,10 @@ function assertEverythingDeleted() {
     echo "Instances still remaining after deletion: $instances_count"
     [ "$instances_count" -eq 0 ]
 
+    echo "Check that NAT gateway has been deleted"
+    nat_gateway_count=$(aws ec2 describe-nat-gateways --region eu-west-2 --filter "Name=tag:concourse-up-project,Values=$deployment" | jq '.NatGateways | length')
+    [ "$nat_gateway_count" -eq 0 ]
+
     echo "Check that the RDS instance has been deleted"
     set +oe pipefail
     aws rds describe-db-instances --region us-east-1 --db-instance-identifier "$rds_instance_name"
