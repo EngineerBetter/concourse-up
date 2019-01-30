@@ -85,7 +85,7 @@ resources:
   type: git
   source:
     uri: git@github.com:EngineerBetter/concourse-up.git
-    branch: master
+    branch: ((branch))
     private_key: ((github_private_key))
     ignore_paths:
     - README.md
@@ -185,9 +185,12 @@ jobs:
   - put: this-pipeline
     params:
       pipelines:
-      - name: concourse-up
+      - name: ((pipeline-name))
         team: main
         config_file: concourse-up/ci/pipeline.yml
+        vars:
+          pipeline-name: ((pipeline-name))
+          branch: ((branch))
 
 - name: setup-ci-bucket
   serial: true
