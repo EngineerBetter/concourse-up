@@ -1,6 +1,5 @@
 variable "region" {}
 variable "bucket-name" {
-  default = "concourse-up-ci-artifacts"
 }
 
 provider "aws" {

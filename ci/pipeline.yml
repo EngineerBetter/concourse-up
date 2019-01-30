@@ -76,6 +76,7 @@ resources:
       secret_access_key: ((concourse_ci_s3_secret_key))
       region_name: eu-west-1
     vars:
+      bucket-name: ((bucket-name))
       region: eu-west-1
     env:
       AWS_ACCESS_KEY_ID: ((concourse_ci_s3_access_key))
@@ -203,9 +204,7 @@ jobs:
   - put: ci-bucket
     params:
       terraform_source: concourse-up/ci/tf
-      env_name: ci
-      vars:
-        bucket-name: ((bucket-name))
+      env_name: ((branch))
 
 - name: unit-tests
   plan:
