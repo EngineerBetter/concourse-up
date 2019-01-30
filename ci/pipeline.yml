@@ -191,6 +191,7 @@ jobs:
         team: main
         config_file: concourse-up/ci/pipeline.yml
         vars:
+          binary-name: ((binary-name))
           branch: ((branch))
           bucket-name: ((bucket-name))
           pipeline-name: ((pipeline-name))
@@ -253,33 +254,33 @@ jobs:
         params:
           GOOS: linux
           GOARCH: amd64
-          OUTPUT_FILE: concourse-up-linux-amd64
+          OUTPUT_FILE: ((binary-name))-linux-amd64
         file: concourse-up/ci/tasks/build_linux.yml
       - put: binary-linux
         params:
-          file: build-linux/concourse-up-linux-amd64
+          file: build-linux/((binary-name))-linux-amd64
     - do:
       - task: build-darwin
         image: pcf-ops
         params:
           GOOS: darwin
           GOARCH: amd64
-          OUTPUT_FILE: concourse-up-darwin-amd64
+          OUTPUT_FILE: ((binary-name))-darwin-amd64
         file: concourse-up/ci/tasks/build_darwin.yml
       - put: binary-darwin
         params:
-          file: build-darwin/concourse-up-darwin-amd64
+          file: build-darwin/((binary-name))-darwin-amd64
     - do:
       - task: build-windows
         image: pcf-ops
         params:
           GOOS: windows
           GOARCH: amd64
-          OUTPUT_FILE: concourse-up-windows-amd64.exe
+          OUTPUT_FILE: ((binary-name))-windows-amd64.exe
         file: concourse-up/ci/tasks/build_windows.yml
       - put: binary-windows
         params:
-          file: build-windows/concourse-up-windows-amd64.exe
+          file: build-windows/((binary-name))-windows-amd64.exe
 
 - name: smoke-test
   serial_groups:
@@ -314,7 +315,7 @@ jobs:
     params:
       AWS_ACCESS_KEY_ID: ((concourse_up_test_access_key_id))
       AWS_SECRET_ACCESS_KEY: ((concourse_up_test_secret_key))
-      BINARY_PATH: binary-linux/concourse-up-linux-amd64
+      BINARY_PATH: binary-linux/((binary-name))-linux-amd64
     on_failure:
       put: slack-alert
       params:
@@ -331,7 +332,7 @@ jobs:
   - task: smoke-test
     file: concourse-up/ci/tasks/smoke-test.yml
     params:
-      BINARY_PATH: binary-linux/concourse-up-linux-amd64
+      BINARY_PATH: binary-linux/((binary-name))-linux-amd64
       GOOGLE_APPLICATION_CREDENTIALS_CONTENTS: ((system_test_google_application_credentials))
       IAAS: GCP
     on_failure:
@@ -374,7 +375,7 @@ jobs:
     params:
       AWS_ACCESS_KEY_ID: ((concourse_up_test_access_key_id))
       AWS_SECRET_ACCESS_KEY: ((concourse_up_test_secret_key))
-      BINARY_PATH: binary-linux/concourse-up-linux-amd64
+      BINARY_PATH: binary-linux/((binary-name))-linux-amd64
       IAAS: AWS
     on_failure:
       put: slack-alert
@@ -416,7 +417,7 @@ jobs:
     params:
       GOOGLE_APPLICATION_CREDENTIALS_CONTENTS: ((system_test_google_application_credentials))
       IAAS: GCP
-      BINARY_PATH: binary-linux/concourse-up-linux-amd64
+      BINARY_PATH: binary-linux/((binary-name))-linux-amd64
     on_failure:
       put: slack-alert
       params:
@@ -435,7 +436,7 @@ jobs:
     params:
       AWS_ACCESS_KEY_ID: ((concourse_up_test_access_key_id))
       AWS_SECRET_ACCESS_KEY: ((concourse_up_test_secret_key))
-      BINARY_PATH: binary-linux/concourse-up-linux-amd64
+      BINARY_PATH: binary-linux/((binary-name))-linux-amd64
       IAAS: AWS
     on_failure:
       put: slack-alert
@@ -453,7 +454,7 @@ jobs:
   - task: run-system-test-update
     file: concourse-up/ci/tasks/system-test-update.yml
     params:
-      BINARY_PATH: binary-linux/concourse-up-linux-amd64
+      BINARY_PATH: binary-linux/((binary-name))-linux-amd64
       GOOGLE_APPLICATION_CREDENTIALS_CONTENTS: ((system_test_google_application_credentials))
       IAAS: GCP
     on_failure:
@@ -474,7 +475,7 @@ jobs:
     params:
       AWS_ACCESS_KEY_ID: ((concourse_up_test_access_key_id))
       AWS_SECRET_ACCESS_KEY: ((concourse_up_test_secret_key))
-      BINARY_PATH: binary-linux/concourse-up-linux-amd64
+      BINARY_PATH: binary-linux/((binary-name))-linux-amd64
     on_failure:
       put: slack-alert
       params:
@@ -494,7 +495,7 @@ jobs:
       IAAS: AWS
       AWS_ACCESS_KEY_ID: ((concourse_up_test_access_key_id))
       AWS_SECRET_ACCESS_KEY: ((concourse_up_test_secret_key))
-      BINARY_PATH: binary-linux/concourse-up-linux-amd64
+      BINARY_PATH: binary-linux/((binary-name))-linux-amd64
     on_failure:
       put: slack-alert
       params:
@@ -513,7 +514,7 @@ jobs:
     params:
       IAAS: GCP
       GOOGLE_APPLICATION_CREDENTIALS_CONTENTS: ((system_test_google_application_credentials))
-      BINARY_PATH: binary-linux/concourse-up-linux-amd64
+      BINARY_PATH: binary-linux/((binary-name))-linux-amd64
     on_failure:
       put: slack-alert
       params:
@@ -533,7 +534,7 @@ jobs:
       IAAS: AWS
       AWS_ACCESS_KEY_ID: ((concourse_up_test_access_key_id))
       AWS_SECRET_ACCESS_KEY: ((concourse_up_test_secret_key))
-      BINARY_PATH: binary-linux/concourse-up-linux-amd64
+      BINARY_PATH: binary-linux/((binary-name))-linux-amd64
       EB_WILDCARD_CERT: ((eb_wildcard.certificate))
       EB_WILDCARD_KEY: ((eb_wildcard.private_key))
       GITHUB_AUTH_CLIENT_ID: ((github_auth_client_id))
@@ -555,7 +556,7 @@ jobs:
     params:
       GOOGLE_APPLICATION_CREDENTIALS_CONTENTS: ((system_test_google_application_credentials))
       IAAS: GCP
-      BINARY_PATH: binary-linux/concourse-up-linux-amd64
+      BINARY_PATH: binary-linux/((binary-name))-linux-amd64
       EB_WILDCARD_CERT: ((eb_wildcard.certificate))
       EB_WILDCARD_KEY: ((eb_wildcard.private_key))
       GITHUB_AUTH_CLIENT_ID: ((github_auth_client_id_gcp))
