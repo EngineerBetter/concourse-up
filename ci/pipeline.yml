@@ -203,6 +203,8 @@ jobs:
     params:
       terraform_source: concourse-up/ci/tf
       env_name: ci
+      vars:
+        bucket-name: ((bucket-name))
 
 - name: unit-tests
   plan:
