@@ -228,10 +228,6 @@ jobs:
   - task: unit-test
     image: pcf-ops
     file: concourse-up/ci/tasks/unit-test.yml
-    params:
-      AWS_ACCESS_KEY_ID: ((concourse_up_test_access_key_id))
-      AWS_SECRET_ACCESS_KEY: ((concourse_up_test_secret_key))
-      AWS_DEFAULT_REGION: ((aws_default_region))
     on_failure:
       put: slack-alert
       params:
