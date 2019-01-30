@@ -32,7 +32,7 @@ resource_types:
 - name: pipeline
   type: docker-image
   source:
-    repository: concourse/concourse-pipeline-resource
+    repository: peterellisjones/concourse-pipeline-resource
 
 - name: slack-notification
   type: docker-image
