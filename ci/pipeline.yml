@@ -3,6 +3,7 @@ groups:
 - name: Main
   jobs:
   - set-pipeline
+  - setup-ci-bucket
   - unit-tests
   - build
   - smoke-test
@@ -49,6 +50,11 @@ resource_types:
   source:
     repository: engineerbetter/bosh-io-release-resource
 
+- name: terraform
+  type: docker-image
+  source:
+    repository: ljfranklin/terraform-resource
+
 resources:
 - name: this-pipeline
   type: pipeline
@@ -59,6 +65,21 @@ resources:
     - name: main
       username: admin
       password: ((atc_main_password))
+
+- name: ci-bucket
+  type: terraform
+  source:
+    storage:
+      bucket_path: ci/tf
+      bucket: concourse-up-ci-artifacts
+      access_key_id: ((concourse_ci_s3_access_key))
+      secret_access_key: ((concourse_ci_s3_secret_key))
+      region_name: eu-west-1
+    vars:
+      region: eu-west-1
+    env:
+      AWS_ACCESS_KEY_ID: ((concourse_ci_s3_access_key))
+      AWS_SECRET_ACCESS_KEY: ((concourse_ci_s3_secret_key))
 
 - name: concourse-up
   type: git
@@ -168,6 +189,17 @@ jobs:
         team: main
         config_file: concourse-up/ci/pipeline.yml
 
+- name: setup-ci-bucket
+  serial: true
+  plan:
+  - get: concourse-up
+    passed: [set-pipeline]
+    trigger: true
+  - put: ci-bucket
+    params:
+      terraform_source: concourse-up/ci/tf
+      env_name: ci
+
 - name: unit-tests
   plan:
   - aggregate:
@@ -207,7 +239,7 @@ jobs:
       passed: [unit-tests]
     - get: concourse-up
       trigger: true
-      passed: [unit-tests]
+      passed: [unit-tests, setup-ci-bucket]
     - get: concourse-up-ops
       trigger: true
       passed: [unit-tests]
