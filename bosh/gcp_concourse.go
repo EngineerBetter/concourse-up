@@ -8,7 +8,7 @@ import (
 
 func (client *GCPClient) deployConcourse(creds []byte, detach bool) (newCreds []byte, err error) {
 
-	concourseManifestPath, err := client.director.SaveFileToWorkingDir(concourseManifestFilename, awsConcourseManifest)
+	concourseManifestPath, err := client.director.SaveFileToWorkingDir(concourseManifestFilename, concourseManifestContents)
 	if err != nil {
 		return []byte{}, err
 	}
