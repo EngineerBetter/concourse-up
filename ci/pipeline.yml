@@ -224,7 +224,7 @@ jobs:
       params:
         channel: "#integrations"
         text: |
-          <!channel> Concourse Up lint failure!
+          <!channel> Concourse Up ((branch)) branch lint failure!
   - task: unit-test
     image: pcf-ops
     file: concourse-up/ci/tasks/unit-test.yml
@@ -233,7 +233,7 @@ jobs:
       params:
         channel: "#integrations"
         text: |
-          <!channel> Concourse Up unit tests failure!
+          <!channel> Concourse Up ((branch)) branch unit tests failure!
 
 - name: build
   plan:
@@ -321,7 +321,7 @@ jobs:
       params:
         channel: "#integrations"
         text: |
-          <!channel> Concourse Up smoke test failure!
+          <!channel> Concourse Up ((branch)) branch smoke test failure!
 
 - name: smoke-test-gcp
   serial_groups:
@@ -340,7 +340,7 @@ jobs:
       params:
         channel: "#integrations"
         text: |
-          <!channel> Concourse Up GCP smoke test failure!
+          <!channel> Concourse Up ((branch)) branch GCP smoke test failure!
 
 - name: system-test
   serial_groups:
@@ -382,7 +382,7 @@ jobs:
       params:
         channel: "#integrations"
         text: |
-          <!channel> Concourse Up system test failure!
+          <!channel> Concourse Up ((branch)) branch system test failure!
 
 - name: system-test-gcp
   serial_groups:
@@ -423,7 +423,7 @@ jobs:
       params:
         channel: "#integrations"
         text: |
-          <!channel> Concourse Up GCP system test failure!
+          <!channel> Concourse Up ((branch)) branch GCP system test failure!
 
 - name: system-test-update
   serial_groups:
@@ -443,7 +443,7 @@ jobs:
       params:
         channel: "#integrations"
         text: |
-          <!channel> Concourse Up update system test failure!
+          <!channel> Concourse Up ((branch)) branch update system test failure!
 
 - name: system-test-update-gcp
   serial_groups:
@@ -462,7 +462,7 @@ jobs:
       params:
         channel: "#integrations"
         text: |
-          <!channel> Concourse Up update system test GCP failure!
+          <!channel> Concourse Up ((branch)) branch update system test GCP failure!
 
 - name: system-test-m5
   serial_groups:
@@ -481,7 +481,7 @@ jobs:
       params:
         channel: "#integrations"
         text: |
-          <!channel> Concourse Up m5 system test failure!
+          <!channel> Concourse Up ((branch)) branch m5 system test failure!
 
 - name: system-test-letsencrypt
   serial_groups:
@@ -501,7 +501,7 @@ jobs:
       params:
         channel: "#integrations"
         text: |
-          <!channel> Concourse Up system letsencrypt AWS test failure!
+          <!channel> Concourse Up ((branch)) branch system letsencrypt AWS test failure!
 
 - name: system-test-letsencrypt-gcp
   serial_groups:
@@ -520,7 +520,7 @@ jobs:
       params:
         channel: "#integrations"
         text: |
-          <!channel> Concourse Up system letsencrypt GCP test failure!
+          <!channel> Concourse Up ((branch)) branch system letsencrypt GCP test failure!
 
 - name: system-test-options-and-destroy
   serial_groups:
@@ -544,7 +544,7 @@ jobs:
       params:
         channel: "#integrations"
         text: |
-          <!channel> Concourse Up system-test-options-and-destroy failure!
+          <!channel> Concourse Up ((branch)) branch system-test-options-and-destroy failure!
 - name: system-test-options-and-destroy-gcp
   serial_groups:
   - system-test-options-and-destroy-gcp
@@ -566,7 +566,7 @@ jobs:
       params:
         channel: "#integrations"
         text: |
-          <!channel> Concourse Up system-test-options-and-destroy-gcp failure!
+          <!channel> Concourse Up ((branch)) branch system-test-options-and-destroy-gcp failure!
 
 - name: auto
   serial: true
