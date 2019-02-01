@@ -1,6 +1,8 @@
 package bosh
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
 	"io"
 
@@ -62,4 +64,48 @@ func New(config config.Config, metadata terraform.IAASMetadata, director directo
 		return NewGCPClient(config, metadata, director, stdout, stderr, provider)
 	}
 	return nil, fmt.Errorf("IAAS not supported: %s", provider.IAAS())
+}
+
+func Instances(client IClient, director director.IClient, stderr io.Writer) ([]Instance, error) {
+	output := new(bytes.Buffer)
+
+	if err := director.RunAuthenticatedCommand(
+		output,
+		stderr,
+		false,
+		"--deployment",
+		concourseDeploymentName,
+		"instances",
+		"--json",
+	); err != nil {
+		return nil, fmt.Errorf("Error running `bosh instances`: %s", output.String())
+	}
+
+	jsonOutput := struct {
+		Tables []struct {
+			Rows []struct {
+				Instance     string `json:"instance"`
+				IPs          string `json:"ips"`
+				ProcessState string `json:"process_state"`
+			} `json:"Rows"`
+		} `json:"Tables"`
+	}{}
+
+	if err := json.NewDecoder(output).Decode(&jsonOutput); err != nil {
+		return nil, err
+	}
+
+	instances := []Instance{}
+
+	for _, table := range jsonOutput.Tables {
+		for _, row := range table.Rows {
+			instances = append(instances, Instance{
+				Name:  row.Instance,
+				IP:    row.IPs,
+				State: row.ProcessState,
+			})
+		}
+	}
+
+	return instances, nil
 }
