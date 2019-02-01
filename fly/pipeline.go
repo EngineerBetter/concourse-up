@@ -4,7 +4,6 @@ package fly
 type Pipeline interface {
 	BuildPipelineParams(deployment, namespace, region, domain string) (Pipeline, error)
 	GetConfigTemplate() string
-	Indent(countStr, field string) string
 }
 
 type PipelineTemplateParams struct {
