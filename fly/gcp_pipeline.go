@@ -137,7 +137,7 @@ jobs:
   plan:
   - get: concourse-up-release
     version: {tag: "{{ .ConcourseUpVersion }}" }
-  - get: every-month
+  - get: every-day
     trigger: true
   - task: update
     params:
@@ -173,8 +173,8 @@ jobs:
           echo "${GCPCreds}" > googlecreds.json
           export GOOGLE_APPLICATION_CREDENTIALS=$PWD/googlecreds.json
           set -euxo pipefail
-` + renewCertsDateCheck + `
           cd concourse-up-release
           chmod +x concourse-up-linux-amd64
+` + renewCertsDateCheck + `
           ./concourse-up-linux-amd64 deploy $DEPLOYMENT
 `

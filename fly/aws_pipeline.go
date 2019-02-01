@@ -134,7 +134,7 @@ jobs:
   plan:
   - get: concourse-up-release
     version: {tag: {{ .ConcourseUpVersion }} }
-  - get: every-month
+  - get: every-day
     trigger: true
   - task: update
     params:
@@ -168,8 +168,9 @@ jobs:
         - -c
         - |
           set -euxo pipefail
-` + renewCertsDateCheck + `
           cd concourse-up-release
           chmod +x concourse-up-linux-amd64
+` + renewCertsDateCheck + `
+          echo Certificates expire in $days_until_expiry days, redeploying to renew them
           ./concourse-up-linux-amd64 deploy $DEPLOYMENT
 `
