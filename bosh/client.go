@@ -15,8 +15,6 @@ import (
 const awsConst = "AWS"
 const gcpConst = "GCP"
 
-const cloudConfigFilename = "cloud-config.yml"
-
 // StateFilename is default name for bosh-init state file
 const StateFilename = "director-state.json"
 
