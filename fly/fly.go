@@ -207,7 +207,7 @@ func (client *Client) writePipelineConfig(pipelinePath string, config config.Con
 	}
 	defer fileHandler.Close()
 
-	params, err := client.pipeline.BuildPipelineParams(config)
+	params, err := client.pipeline.BuildPipelineParams(config.Deployment, config.Namespace, config.Region, config.Domain)
 	if err != nil {
 		return err
 	}

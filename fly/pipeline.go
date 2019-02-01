@@ -1,10 +1,8 @@
 package fly
 
-import "github.com/EngineerBetter/concourse-up/config"
-
 // Pipeline is interface for self update pipeline
 type Pipeline interface {
-	BuildPipelineParams(config config.Config) (Pipeline, error)
+	BuildPipelineParams(deployment, namespace, region, domain string) (Pipeline, error)
 	GetConfigTemplate() string
 }
 
@@ -23,7 +21,7 @@ resources:
 
 const renewCertsDateCheck = `
           now_seconds=$(date +%s)
-          not_after=$(echo | openssl s_client -connect {{.FlagDomain}}:443 2>/dev/null | openssl x509 -noout -enddate)
+          not_after=$(echo | openssl s_client -connect {{.Domain}}:443 2>/dev/null | openssl x509 -noout -enddate)
           expires_on=${not_after#'notAfter='}
           expires_on_seconds=$(date --date="$expires_on" +%s)
           let "seconds_until_expiry = $expires_on_seconds - $now_seconds"

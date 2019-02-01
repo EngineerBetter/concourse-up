@@ -3,26 +3,16 @@ package fly
 import (
 	"io/ioutil"
 	"strings"
-
-	"github.com/EngineerBetter/concourse-up/config"
 )
 
 // GCPPipeline is GCP specific implementation of Pipeline interface
 type GCPPipeline struct {
-	GCPDefaultRegion     string
-	GCPCreds             string
-	Deployment           string
-	FlagGCPRegion        string
-	FlagDomain           string
-	FlagGithubAuthID     string
-	FlagGithubAuthSecret string
-	FlagTLSCert          string
-	FlagTLSKey           string
-	FlagWebSize          string
-	FlagWorkerSize       string
-	FlagWorkers          int
-	ConcourseUpVersion   string
-	Namespace            string
+	GCPCreds           string
+	Deployment         string
+	Domain             string
+	FlagGCPRegion      string
+	ConcourseUpVersion string
+	Namespace          string
 }
 
 // NewGCPPipeline return GCPPipeline
@@ -37,37 +27,15 @@ func NewGCPPipeline(credsPath string) (Pipeline, error) {
 }
 
 //BuildPipelineParams builds params for AWS concourse-up self update pipeline
-func (a GCPPipeline) BuildPipelineParams(config config.Config) (Pipeline, error) {
-	var (
-		domain        string
-		concourseCert string
-		concourseKey  string
-	)
-
-	if !validIP4(config.Domain) {
-		domain = config.Domain
-	}
-
-	if domain != "" {
-		concourseCert = config.ConcourseCert
-		concourseKey = config.ConcourseKey
-	}
-	tempPipe := GCPPipeline{
-		GCPCreds:             a.GCPCreds,
-		Deployment:           strings.TrimPrefix(config.Deployment, "concourse-up-"),
-		FlagGCPRegion:        config.Region,
-		FlagDomain:           domain,
-		FlagGithubAuthID:     config.GithubClientID,
-		FlagGithubAuthSecret: config.GithubClientSecret,
-		FlagTLSCert:          concourseCert,
-		FlagTLSKey:           concourseKey,
-		FlagWebSize:          config.ConcourseWebSize,
-		FlagWorkerSize:       config.ConcourseWorkerSize,
-		FlagWorkers:          config.ConcourseWorkerCount,
-		ConcourseUpVersion:   ConcourseUpVersion,
-		Namespace:            config.Namespace,
-	}
-	return tempPipe, nil
+func (a GCPPipeline) BuildPipelineParams(deployment, namespace, region, domain string) (Pipeline, error) {
+	return GCPPipeline{
+		GCPCreds:           a.GCPCreds,
+		Deployment:         strings.TrimPrefix(deployment, "concourse-up-"),
+		Domain:             domain,
+		FlagGCPRegion:      region,
+		ConcourseUpVersion: ConcourseUpVersion,
+		Namespace:          namespace,
+	}, nil
 }
 
 // GetConfigTemplate returns template for AWS Concourse Up self update pipeline
@@ -85,8 +53,7 @@ func readFileContents(path string) (string, error) {
 }
 
 const gcpPipelineTemplate = `
----
-` + selfUpdateResources + `
+---` + selfUpdateResources + `
 jobs:
 - name: self-update
   serial_groups: [cup]
@@ -97,17 +64,7 @@ jobs:
   - task: update
     params:
       AWS_REGION: "{{ .FlagGCPRegion }}"
-      DOMAIN: "{{ .FlagDomain }}"
-      TLS_CERT: |-
-        {{ .Indent "8" .FlagTLSCert }}
-      TLS_KEY: |-
-        {{ .Indent "8" .FlagTLSKey }}
-      WORKERS: "{{ .FlagWorkers }}"
-      WORKER_SIZE: "{{ .FlagWorkerSize }}"
-      WEB_SIZE: "{{ .FlagWebSize }}"
       DEPLOYMENT: "{{ .Deployment }}"
-      GITHUB_AUTH_CLIENT_ID: "{{ .FlagGithubAuthID }}"
-      GITHUB_AUTH_CLIENT_SECRET: "{{ .FlagGithubAuthSecret }}"
       IAAS: GCP
       SELF_UPDATE: true
       NAMESPACE: {{ .Namespace }}
@@ -142,17 +99,7 @@ jobs:
   - task: update
     params:
       AWS_REGION: "{{ .FlagGCPRegion }}"
-      DOMAIN: "{{ .FlagDomain }}"
-      TLS_CERT: |-
-        {{ .Indent "8" .FlagTLSCert }}
-      TLS_KEY: |-
-        {{ .Indent "8" .FlagTLSKey }}
-      WORKERS: "{{ .FlagWorkers }}"
-      WORKER_SIZE: "{{ .FlagWorkerSize }}"
-      WEB_SIZE: "{{ .FlagWebSize }}"
       DEPLOYMENT: "{{ .Deployment }}"
-      GITHUB_AUTH_CLIENT_ID: "{{ .FlagGithubAuthID }}"
-      GITHUB_AUTH_CLIENT_SECRET: "{{ .FlagGithubAuthSecret }}"
       IAAS: GCP
       SELF_UPDATE: true
       NAMESPACE: "{{ .Namespace }}"
@@ -176,5 +123,6 @@ jobs:
           cd concourse-up-release
           chmod +x concourse-up-linux-amd64
 ` + renewCertsDateCheck + `
+          echo Certificates expire in $days_until_expiry days, redeploying to renew them
           ./concourse-up-linux-amd64 deploy $DEPLOYMENT
 `
