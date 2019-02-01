@@ -59,6 +59,20 @@ variable "project" {
   type = "string"
 	default = "{{ .Project }}"
 }
+variable "public_cidr" {
+  type = "string"
+	default = "{{ .PublicCIDR }}"
+}
+
+variable "private_cidr" {
+  type = "string"
+	default = "{{ .PrivateCIDR }}"
+}
+
+variable "network_cidr" {
+  type = "string"
+	default = "{{ .NetworkCIDR }}"
+}
 
 variable "multi_az_rds" {
   type = "string"
@@ -161,7 +175,7 @@ EOF
 }
 
 resource "aws_vpc" "default" {
-  cidr_block = "10.0.0.0/16"
+  cidr_block = "${var.network_cidr}"
 
   tags {
     Name = "${var.deployment}"
@@ -216,7 +230,7 @@ resource "aws_route_table" "private" {
 resource "aws_subnet" "public" {
   vpc_id                  = "${aws_vpc.default.id}"
   availability_zone       = "${var.availability_zone}"
-  cidr_block              = "10.0.0.0/24"
+  cidr_block              = "${var.public_cidr}"
   map_public_ip_on_launch = true
 
   tags {
@@ -229,7 +243,7 @@ resource "aws_subnet" "public" {
 resource "aws_subnet" "private" {
   vpc_id                  = "${aws_vpc.default.id}"
   availability_zone       = "${var.availability_zone}"
-  cidr_block              = "10.0.1.0/24"
+  cidr_block              = "${var.private_cidr}"
   map_public_ip_on_launch = false
 
   tags {

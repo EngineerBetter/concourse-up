@@ -141,7 +141,9 @@ func TestInputVars_Build(t *testing.T) {
 				"SourceAccessIP":         "sourceaccessip",
 				"TFStatePath":            "tfstatepath",
 				"MultiAZRDS":             true,
-			},
+				"PublicCIDR":             "aPublicCIDR",
+				"PrivateCIDR":            "aPrivateCIDR",
+				"NetworkCIDR":            "aNetworkCIDR"},
 			fakeInputVars: aws.InputVars{},
 		},
 		{

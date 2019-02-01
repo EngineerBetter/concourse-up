@@ -75,6 +75,9 @@ func (client *Client) FetchInfo() (*Info, error) {
 	switch client.provider.IAAS() {
 	case awsConst: // nolint
 		err = environment.Build(map[string]interface{}{
+			"NetworkCIDR":            config.NetworkCIDR,
+			"PublicCIDR":             config.PublicCIDR,
+			"PrivateCIDR":            config.PrivateCIDR,
 			"AllowIPs":               config.AllowIPs,
 			"AvailabilityZone":       config.AvailabilityZone,
 			"ConfigBucket":           config.ConfigBucket,
@@ -107,6 +110,8 @@ func (client *Client) FetchInfo() (*Info, error) {
 			return nil, err1
 		}
 		err1 = environment.Build(map[string]interface{}{
+			"PublicCIDR":         config.PublicCIDR,
+			"PrivateCIDR":        config.PrivateCIDR,
 			"AllowIPs":           config.AllowIPs,
 			"ConfigBucket":       config.ConfigBucket,
 			"DBName":             config.RDSDefaultDatabaseName,

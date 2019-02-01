@@ -140,7 +140,8 @@ func TestInputVars_Build(t *testing.T) {
 				"Namespace":          "Namespace",
 				"DNSManagedZoneName": "aDNSManagedZoneName",
 				"DNSRecordSetPrefix": "aDNSRecordSetPrefix",
-			},
+				"PublicCIDR":         "aPublicCIDR",
+				"PrivateCIDR":        "aPrivateCIDR"},
 			fakeInputVars: gcp.InputVars{},
 		},
 		{
