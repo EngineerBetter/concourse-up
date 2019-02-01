@@ -190,7 +190,7 @@ func (client *Client) FetchInfo() (*Info, error) {
 
 const infoTemplate = `Deployment:
 	Namespace: {{.Config.Namespace}}
-	IAAS:      aws
+	IAAS:      {{.Config.IAAS}}
 	Region:    {{.Config.Region}}
 
 Workers:
