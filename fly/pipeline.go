@@ -29,7 +29,7 @@ const renewCertsDateCheck = `
           let "seconds_until_expiry = $expires_on_seconds - $now_seconds"
           let "days_until_expiry = $seconds_until_expiry / 60 / 60 / 24"
           if [ $days_until_expiry -gt 31 ]; then
-	          echo Not renewing certs, as they do not expire in the next month.
-	          exit 0
+            echo Not renewing certs, as they do not expire in the next month.
+            exit 0
           fi
 `
