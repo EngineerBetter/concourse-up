@@ -125,8 +125,6 @@ func getBoshCLIURL(versionFile []byte) (string, error) {
 		return x["bosh-cli"]["mac"], nil
 	case "linux":
 		return x["bosh-cli"]["linux"], nil
-	case "windows":
-		return x["bosh-cli"]["windows"], nil
 	default:
 		return "", fmt.Errorf("unknown os: `%s`", runtime.GOOS)
 	}

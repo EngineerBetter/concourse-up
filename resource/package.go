@@ -110,15 +110,12 @@ func init() {
 var binaries map[string]binaryPaths
 
 type binaryPaths struct {
-	Windows string `json:"windows"`
-	Mac     string `json:"mac"`
-	Linux   string `json:"linux"`
+	Mac   string `json:"mac"`
+	Linux string `json:"linux"`
 }
 
 func (p binaryPaths) path() string {
 	switch runtime.GOOS {
-	case "windows":
-		return p.Windows
 	case "darwin":
 		return p.Mac
 	case "linux":

@@ -279,8 +279,6 @@ func getFlyURL(versionFile []byte) (string, error) {
 		return x["fly"]["mac"], nil
 	case "linux":
 		return x["fly"]["linux"], nil
-	case "windows":
-		return x["fly"]["windows"], nil
 	default:
 		return "", fmt.Errorf("unknown os: `%s`", runtime.GOOS)
 	}
