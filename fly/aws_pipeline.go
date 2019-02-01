@@ -128,7 +128,7 @@ jobs:
           cd concourse-up-release
           chmod +x concourse-up-linux-amd64
           ./concourse-up-linux-amd64 deploy $DEPLOYMENT
-- name: renew-cert
+- name: renew-https-cert
   serial_groups: [cup]
   serial: true
   plan:

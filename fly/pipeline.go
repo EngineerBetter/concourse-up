@@ -23,12 +23,13 @@ resources:
 
 const renewCertsDateCheck = `
           now_seconds=$(date +%s)
-          expires_on=$(./concourse-up-linux-amd64 info $DEPLOYMENT --cert-expiry)
+          not_after=$(echo | openssl s_client -connect {{.FlagDomain}}:443 2>/dev/null | openssl x509 -noout -enddate)
+          expires_on=${not_after#'notAfter='}
           expires_on_seconds=$(date --date="$expires_on" +%s)
           let "seconds_until_expiry = $expires_on_seconds - $now_seconds"
           let "days_until_expiry = $seconds_until_expiry / 60 / 60 / 24"
-          if [ $days_until_expiry -gt 31 ]; then
-            echo Not renewing certs, as they do not expire in the next month.
+          if [ $days_until_expiry -gt 2 ]; then
+            echo Not renewing HTTPS cert, as they do not expire in the next two days.
             exit 0
           fi
 `
