@@ -7,6 +7,14 @@ type Pipeline interface {
 	Indent(countStr, field string) string
 }
 
+type PipelineTemplateParams struct {
+	ConcourseUpVersion string
+	Deployment         string
+	Domain             string
+	Namespace          string
+	Region             string
+}
+
 const selfUpdateResources = `
 resources:
 - name: concourse-up-release

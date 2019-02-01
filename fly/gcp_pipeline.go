@@ -9,12 +9,8 @@ import (
 
 // GCPPipeline is GCP specific implementation of Pipeline interface
 type GCPPipeline struct {
-	GCPCreds           string
-	Deployment         string
-	Domain             string
-	FlagGCPRegion      string
-	ConcourseUpVersion string
-	Namespace          string
+	PipelineTemplateParams
+	GCPCreds string
 }
 
 // NewGCPPipeline return GCPPipeline
@@ -31,12 +27,14 @@ func NewGCPPipeline(credsPath string) (Pipeline, error) {
 //BuildPipelineParams builds params for AWS concourse-up self update pipeline
 func (a GCPPipeline) BuildPipelineParams(deployment, namespace, region, domain string) (Pipeline, error) {
 	return GCPPipeline{
-		GCPCreds:           a.GCPCreds,
-		Deployment:         strings.TrimPrefix(deployment, "concourse-up-"),
-		Domain:             domain,
-		FlagGCPRegion:      region,
-		ConcourseUpVersion: ConcourseUpVersion,
-		Namespace:          namespace,
+		PipelineTemplateParams: PipelineTemplateParams{
+			ConcourseUpVersion: ConcourseUpVersion,
+			Deployment:         strings.TrimPrefix(deployment, "concourse-up-"),
+			Domain:             domain,
+			Namespace:          namespace,
+			Region:             region,
+		},
+		GCPCreds: a.GCPCreds,
 	}, nil
 }
 
@@ -70,7 +68,7 @@ jobs:
     trigger: true
   - task: update
     params:
-      AWS_REGION: "{{ .FlagGCPRegion }}"
+      AWS_REGION: "{{ .Region }}"
       DEPLOYMENT: "{{ .Deployment }}"
       IAAS: GCP
       SELF_UPDATE: true
@@ -105,7 +103,7 @@ jobs:
     trigger: true
   - task: update
     params:
-      AWS_REGION: "{{ .FlagGCPRegion }}"
+      AWS_REGION: "{{ .Region }}"
       DEPLOYMENT: "{{ .Deployment }}"
       IAAS: GCP
       SELF_UPDATE: true

@@ -9,14 +9,9 @@ import (
 
 // AWSPipeline is AWS specific implementation of Pipeline interface
 type AWSPipeline struct {
+	PipelineTemplateParams
 	AWSAccessKeyID     string
-	AWSDefaultRegion   string
 	AWSSecretAccessKey string
-	Deployment         string
-	Domain             string
-	FlagAWSRegion      string
-	ConcourseUpVersion string
-	Namespace          string
 }
 
 // NewAWSPipeline return AWSPipeline
@@ -37,13 +32,15 @@ func (a AWSPipeline) BuildPipelineParams(deployment, namespace, region, domain s
 	}
 
 	return AWSPipeline{
+		PipelineTemplateParams: PipelineTemplateParams{
+			ConcourseUpVersion: ConcourseUpVersion,
+			Deployment:         strings.TrimPrefix(deployment, "concourse-up-"),
+			Domain:             domain,
+			Namespace:          namespace,
+			Region:             region,
+		},
 		AWSAccessKeyID:     creds.AccessKeyID,
 		AWSSecretAccessKey: creds.SecretAccessKey,
-		Deployment:         strings.TrimPrefix(deployment, "concourse-up-"),
-		Domain:             domain,
-		FlagAWSRegion:      region,
-		ConcourseUpVersion: ConcourseUpVersion,
-		Namespace:          namespace,
 	}, nil
 }
 
@@ -69,7 +66,7 @@ jobs:
     trigger: true
   - task: update
     params:
-      AWS_REGION: "{{ .FlagAWSRegion }}"
+      AWS_REGION: "{{ .Region }}"
       DEPLOYMENT: "{{ .Deployment }}"
       AWS_ACCESS_KEY_ID: "{{ .AWSAccessKeyID }}"
       AWS_SECRET_ACCESS_KEY: "{{ .AWSSecretAccessKey }}"
@@ -103,7 +100,7 @@ jobs:
     trigger: true
   - task: update
     params:
-      AWS_REGION: "{{ .FlagAWSRegion }}"
+      AWS_REGION: "{{ .Region }}"
       DEPLOYMENT: "{{ .Deployment }}"
       AWS_ACCESS_KEY_ID: "{{ .AWSAccessKeyID }}"
       AWS_SECRET_ACCESS_KEY: "{{ .AWSSecretAccessKey }}"
