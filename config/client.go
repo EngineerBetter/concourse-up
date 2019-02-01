@@ -187,6 +187,9 @@ func (client *Client) LoadOrCreate(deployArgs *deploy.Args) (Config, bool, bool,
 		}
 		config.AvailabilityZone = deployArgs.Zone
 	}
+	if newConfigCreated {
+		config.IAAS = deployArgs.IAAS
+	}
 	if newConfigCreated || deployArgs.WorkerCountIsSet {
 		config.ConcourseWorkerCount = deployArgs.WorkerCount
 	}
