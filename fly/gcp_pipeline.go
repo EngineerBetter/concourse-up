@@ -5,7 +5,6 @@ import (
 	"strings"
 
 	"github.com/EngineerBetter/concourse-up/config"
-	"github.com/EngineerBetter/concourse-up/util"
 )
 
 // GCPPipeline is GCP specific implementation of Pipeline interface
@@ -75,11 +74,6 @@ func (a GCPPipeline) BuildPipelineParams(config config.Config) (Pipeline, error)
 func (a GCPPipeline) GetConfigTemplate() string {
 	return gcpPipelineTemplate
 
-}
-
-// Indent is a helper function to indent the field a given number of spaces
-func (a GCPPipeline) Indent(countStr, field string) string {
-	return util.Indent(countStr, field)
 }
 
 func readFileContents(path string) (string, error) {
