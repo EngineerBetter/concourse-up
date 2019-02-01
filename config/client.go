@@ -35,7 +35,6 @@ type Client struct {
 	BucketName   string
 	BucketExists bool
 	BucketError  error
-	Config       *Config
 }
 
 // New instantiates a new client
@@ -54,7 +53,6 @@ func New(iaas iaas.Provider, project, namespace string) *Client {
 		bucketName,
 		exists,
 		err,
-		&Config{},
 	}
 }
 
