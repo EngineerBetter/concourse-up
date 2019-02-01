@@ -16,7 +16,6 @@ gometalinter \
 --enable=goconst \
 --enable=ineffassign \
 --enable=vetshadow \
---enable=golint \
 --enable=deadcode \
 --exclude=bindata \
 --exclude=resource/internal/file \
