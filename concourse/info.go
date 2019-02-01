@@ -181,7 +181,7 @@ func (client *Client) FetchInfo() (*Info, error) {
 
 	instances, err := boshClient.Instances()
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("Error getting BOSH instances: %s", err)
 	}
 
 	return &Info{
