@@ -90,17 +90,7 @@ func (a AWSPipeline) Indent(countStr, field string) string {
 
 const awsPipelineTemplate = `
 ---
-resources:
-- name: concourse-up-release
-  type: github-release
-  source:
-    user: engineerbetter
-    repository: concourse-up
-    pre_release: true
-- name: every-month
-  type: time
-  source: {interval: 730h}
-
+` + selfUpdateResources + `
 jobs:
 - name: self-update
   serial_groups: [cup]
@@ -183,8 +173,8 @@ jobs:
         args:
         - -c
         - |
-          set -eux
-
+          set -euxo pipefail
+` + renewCertsDateCheck + `
           cd concourse-up-release
           chmod +x concourse-up-linux-amd64
           ./concourse-up-linux-amd64 deploy $DEPLOYMENT
