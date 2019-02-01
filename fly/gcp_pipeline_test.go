@@ -1,12 +1,13 @@
 package fly_test
 
 import (
+	"io/ioutil"
+	"os"
+
 	. "github.com/EngineerBetter/concourse-up/fly"
 	"github.com/EngineerBetter/concourse-up/util"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	"io/ioutil"
-	"os"
 )
 
 var _ = Describe("GCPPipeline", func() {
@@ -26,7 +27,7 @@ var _ = Describe("GCPPipeline", func() {
 			params, err := pipeline.BuildPipelineParams("my-deployment", "prod", "europe-west1", "ci.engineerbetter.com")
 			Expect(err).ToNot(HaveOccurred())
 
-			yamlBytes, err := util.RenderTemplate(pipeline.GetConfigTemplate(), params)
+			yamlBytes, err := util.RenderTemplate("self-update pipeline", pipeline.GetConfigTemplate(), params)
 			Expect(err).ToNot(HaveOccurred())
 
 			actual := string(yamlBytes)

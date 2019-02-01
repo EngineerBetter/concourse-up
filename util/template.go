@@ -7,8 +7,8 @@ import (
 )
 
 // RenderTemplate renders a template to a string
-func RenderTemplate(templateStr string, params interface{}) ([]byte, error) {
-	templ, err := template.New("template").Parse(templateStr)
+func RenderTemplate(name string, templateStr string, params interface{}) ([]byte, error) {
+	templ, err := template.New(name).Parse(templateStr)
 	if err != nil {
 		return nil, err
 	}

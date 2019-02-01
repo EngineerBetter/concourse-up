@@ -35,7 +35,7 @@ type InputVars struct {
 
 // ConfigureTerraform interpolates terraform contents and returns terraform config
 func (v *InputVars) ConfigureTerraform(terraformContents string) (string, error) {
-	terraformConfig, err := util.RenderTemplate(terraformContents, v)
+	terraformConfig, err := util.RenderTemplate("terraform", terraformContents, v)
 	if terraformConfig == nil {
 		return "", err
 	}

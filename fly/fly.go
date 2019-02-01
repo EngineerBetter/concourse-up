@@ -211,7 +211,7 @@ func (client *Client) writePipelineConfig(pipelinePath string, config config.Con
 		return err
 	}
 	pipelineTemplate := client.pipeline.GetConfigTemplate()
-	pipelineConfig, err := util.RenderTemplate(pipelineTemplate, params)
+	pipelineConfig, err := util.RenderTemplate("self-update pipeline", pipelineTemplate, params)
 	if err != nil {
 		return err
 	}

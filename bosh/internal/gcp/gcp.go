@@ -85,7 +85,7 @@ func (e Environment) ConfigureDirectorCloudConfig(cloudConfig string) (string, e
 		Network:           e.Network,
 	}
 
-	cc, err := util.RenderTemplate(cloudConfig, templateParams)
+	cc, err := util.RenderTemplate("cloud-config", cloudConfig, templateParams)
 	if cc == nil {
 		return "", err
 	}
