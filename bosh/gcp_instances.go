@@ -3,6 +3,7 @@ package bosh
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 )
 
 // Instances returns the list of Concourse VMs
@@ -19,7 +20,7 @@ func (client *GCPClient) Instances() ([]Instance, error) {
 		"--json",
 	); err != nil {
 		// if there is an error, copy the stdout to the main stdout to help debugging
-		return nil, err
+		return nil, fmt.Errorf("Error running `bosh instances`: %s", output.String())
 	}
 
 	jsonOutput := struct {
