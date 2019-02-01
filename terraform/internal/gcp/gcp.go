@@ -29,8 +29,6 @@ type InputVars struct {
 	Region             string
 	Tags               string
 	Zone               string
-	PublicCIDR         string
-	PrivateCIDR        string
 }
 
 // ConfigureTerraform interpolates terraform contents and returns terraform config

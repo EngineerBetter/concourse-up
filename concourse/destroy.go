@@ -26,9 +26,6 @@ func (client *Client) Destroy() error {
 
 	case awsConst: // nolint
 		err = environment.Build(map[string]interface{}{
-			"NetworkCIDR":            conf.NetworkCIDR,
-			"PublicCIDR":             conf.PublicCIDR,
-			"PrivateCIDR":            conf.PrivateCIDR,
 			"AllowIPs":               conf.AllowIPs,
 			"AvailabilityZone":       conf.AvailabilityZone,
 			"ConfigBucket":           conf.ConfigBucket,
@@ -74,8 +71,6 @@ func (client *Client) Destroy() error {
 		}
 		zone := client.provider.Zone("")
 		err1 = environment.Build(map[string]interface{}{
-			"PublicCIDR":         conf.PublicCIDR,
-			"PrivateCIDR":        conf.PrivateCIDR,
 			"AllowIPs":           conf.AllowIPs,
 			"ConfigBucket":       conf.ConfigBucket,
 			"DBName":             conf.RDSDefaultDatabaseName,

@@ -13,9 +13,6 @@ import (
 
 // InputVars holds all the parameters AWS IAAS needs
 type InputVars struct {
-	NetworkCIDR            string
-	PublicCIDR             string
-	PrivateCIDR            string
 	AllowIPs               string
 	AvailabilityZone       string
 	ConfigBucket           string

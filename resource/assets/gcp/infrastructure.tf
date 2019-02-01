@@ -68,15 +68,6 @@ variable "source_access_ip" {
   type = "string"
   default = "{{ .ExternalIP }}"
 }
-variable "public_cidr" {
-  type = "string"
-  default = "{{ .PublicCIDR }}"
-}
-
-variable "private_cidr" {
-  type = "string"
-  default = "{{ .PrivateCIDR }}"
-}
 
 provider "google" {
     credentials = "{{ .GCPCredentialsJSON }}"
@@ -164,13 +155,13 @@ resource "google_compute_network" "default" {
 
 resource "google_compute_subnetwork" "public" {
   name          = "${var.deployment}-${var.namespace}-public"
-  ip_cidr_range = "${var.public_cidr}"
+  ip_cidr_range = "10.0.0.0/24"
   network       = "${google_compute_network.default.self_link}"
   project       = "${var.project}"
 }
 resource "google_compute_subnetwork" "private" {
   name          = "${var.deployment}-${var.namespace}-private"
-  ip_cidr_range = "${var.private_cidr}"
+  ip_cidr_range = "10.0.1.0/24"
   network       = "${google_compute_network.default.self_link}"
   project       = "${var.project}"
 }

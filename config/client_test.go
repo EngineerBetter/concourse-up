@@ -82,18 +82,6 @@ var _ = Describe("Client", func() {
 			})
 
 			Describe("the default config file", func() {
-				It("Sets the default value network CIDR", func() {
-					Expect(conf.NetworkCIDR).To(Equal("10.0.0.0/16"))
-				})
-
-				It("Sets the default value for the private CIDR", func() {
-					Expect(conf.PrivateCIDR).To(Equal("10.0.1.0/24"))
-				})
-
-				It("Sets the default value for the public CIDR", func() {
-					Expect(conf.PublicCIDR).To(Equal("10.0.0.0/24"))
-				})
-
 				It("Sets the default value for the ConcourseDBName", func() {
 					Expect(conf.ConcourseDBName).To(Equal("concourse_atc"))
 				})
