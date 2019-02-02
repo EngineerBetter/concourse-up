@@ -78,7 +78,7 @@ func Instances(client IClient, director director.IClient, stderr io.Writer) ([]I
 		"instances",
 		"--json",
 	); err != nil {
-		return nil, fmt.Errorf("Error running `bosh instances`: %s", output.String())
+		return nil, fmt.Errorf("Error [%s] running `bosh instances`. stdout: [%s]", err, output.String())
 	}
 
 	jsonOutput := struct {
