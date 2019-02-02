@@ -19,13 +19,6 @@ echo "DEPLOY OLD VERSION"
 
 ./cup deploy "$deployment"
 
-# Wait for previous deployment to finish
-# Otherwise terraform state can get into an invalid state
-# Also wait to make sure the BOSH lock is not taken before
-# starting deploy
-echo "Waiting for 10 minutes to give old deploy time to settle"
-sleep 600
-
 # Assigning a subshell to a variable fails fast; eval "$(... doesn't
 info_output="$(./cup info --env "$deployment")"
 eval "$info_output"
