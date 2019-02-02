@@ -11,21 +11,32 @@ type AWSPipeline struct {
 	PipelineTemplateParams
 	AWSAccessKeyID     string
 	AWSSecretAccessKey string
+	credsGetter AWSCredsGetter
 }
 
 // NewAWSPipeline return AWSPipeline
-func NewAWSPipeline() Pipeline {
-	return AWSPipeline{}
+func NewAWSPipeline(getter AWSCredsGetter) Pipeline {
+	return AWSPipeline{credsGetter: getter}
+}
+
+type AWSCredsGetter = func()(string, string, error)
+var getCredsFromSession = func() (string, string, error) {
+	sess, err := session.NewSession()
+	if err != nil {
+		return "", "", err
+	}
+
+	creds, err := sess.Config.Credentials.Get()
+	if err != nil {
+		return "", "", err
+	}
+
+	return creds.AccessKeyID, creds.SecretAccessKey, nil
 }
 
 //BuildPipelineParams builds params for AWS concourse-up self update pipeline
 func (a AWSPipeline) BuildPipelineParams(deployment, namespace, region, domain string) (Pipeline, error) {
-	sess, err := session.NewSession()
-	if err != nil {
-		return nil, err
-	}
-
-	creds, err := sess.Config.Credentials.Get()
+	accessKeyID, secretAccessKey, err := a.credsGetter()
 	if err != nil {
 		return nil, err
 	}
@@ -38,8 +49,8 @@ func (a AWSPipeline) BuildPipelineParams(deployment, namespace, region, domain s
 			Namespace:          namespace,
 			Region:             region,
 		},
-		AWSAccessKeyID:     creds.AccessKeyID,
-		AWSSecretAccessKey: creds.SecretAccessKey,
+		AWSAccessKeyID:     accessKeyID,
+		AWSSecretAccessKey: secretAccessKey,
 	}, nil
 }
 

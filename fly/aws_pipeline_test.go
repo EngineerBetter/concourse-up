@@ -1,16 +1,13 @@
 package fly_test
 
 import (
-	"io/ioutil"
-	"os"
-
 	. "github.com/EngineerBetter/concourse-up/fly"
 	"github.com/EngineerBetter/concourse-up/util"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
 
-var _ = Describe("GCPPipeline", func() {
+var _ = Describe("AWSPipeline", func() {
 	Describe("Generating a pipeline YAML", func() {
 		var expected = `
 ---
@@ -34,12 +31,12 @@ jobs:
     trigger: true
   - task: update
     params:
-      AWS_REGION: "europe-west1"
+      AWS_REGION: "eu-west-1"
       DEPLOYMENT: "my-deployment"
-      IAAS: GCP
+      AWS_ACCESS_KEY_ID: "access-key"
+      AWS_SECRET_ACCESS_KEY: "secret-key"
       SELF_UPDATE: true
       NAMESPACE: prod
-      GCPCreds: 'creds-content'
     config:
       platform: linux
       image_resource:
@@ -53,10 +50,9 @@ jobs:
         args:
         - -c
         - |
-          cd concourse-up-release
-          echo "${GCPCreds}" > googlecreds.json
-          export GOOGLE_APPLICATION_CREDENTIALS=$PWD/googlecreds.json
           set -eux
+
+          cd concourse-up-release
           chmod +x concourse-up-linux-amd64
           ./concourse-up-linux-amd64 deploy $DEPLOYMENT
 - name: renew-https-cert
@@ -64,17 +60,17 @@ jobs:
   serial: true
   plan:
   - get: concourse-up-release
-    version: {tag: "COMPILE_TIME_VARIABLE_fly_concourse_up_version" }
+    version: {tag: COMPILE_TIME_VARIABLE_fly_concourse_up_version }
   - get: every-day
     trigger: true
   - task: update
     params:
-      AWS_REGION: "europe-west1"
+      AWS_REGION: "eu-west-1"
       DEPLOYMENT: "my-deployment"
-      IAAS: GCP
+      AWS_ACCESS_KEY_ID: "access-key"
+      AWS_SECRET_ACCESS_KEY: "secret-key"
       SELF_UPDATE: true
-      NAMESPACE: "prod"
-      GCPCreds: 'creds-content'
+      NAMESPACE: prod
     config:
       platform: linux
       image_resource:
@@ -88,8 +84,6 @@ jobs:
         args:
         - -c
         - |
-          echo "${GCPCreds}" > googlecreds.json
-          export GOOGLE_APPLICATION_CREDENTIALS=$PWD/googlecreds.json
           set -euxo pipefail
           cd concourse-up-release
           chmod +x concourse-up-linux-amd64
@@ -110,18 +104,13 @@ jobs:
 `
 
 		It("Generates something sensible", func() {
-			tempFile, err := ioutil.TempFile("", "")
-			Expect(err).ToNot(HaveOccurred())
+			fakeCredsGetter := func()(string, string, error) {
+				return "access-key", "secret-key", nil
+			}
 
-			defer os.Remove(tempFile.Name()) // clean up
+			pipeline := NewAWSPipeline(fakeCredsGetter)
 
-			_, err = tempFile.Write([]byte("creds-content"))
-			Expect(err).ToNot(HaveOccurred())
-
-			pipeline, err := NewGCPPipeline(tempFile.Name())
-			Expect(err).ToNot(HaveOccurred())
-
-			params, err := pipeline.BuildPipelineParams("my-deployment", "prod", "europe-west1", "ci.engineerbetter.com")
+			params, err := pipeline.BuildPipelineParams("my-deployment", "prod", "eu-west-1", "ci.engineerbetter.com")
 			Expect(err).ToNot(HaveOccurred())
 
 			yamlBytes, err := util.RenderTemplate("self-update pipeline", pipeline.GetConfigTemplate(), params)
@@ -132,3 +121,4 @@ jobs:
 		})
 	})
 })
+

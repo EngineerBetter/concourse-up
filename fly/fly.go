@@ -89,7 +89,7 @@ func New(provider iaas.Provider, creds Credentials, stdout, stderr io.Writer, ve
 
 	switch provider.IAAS() {
 	case "AWS":
-		pipeline = NewAWSPipeline()
+		pipeline = NewAWSPipeline(getCredsFromSession)
 	case "GCP":
 		GCPCreds, err := provider.Attr("credentials_path")
 		if err != nil {
