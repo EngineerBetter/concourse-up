@@ -74,28 +74,7 @@ func (client *Client) FetchInfo() (*Info, error) {
 	}
 	switch client.provider.IAAS() {
 	case awsConst: // nolint
-		err = environment.Build(map[string]interface{}{
-			"NetworkCIDR":            config.NetworkCIDR,
-			"PublicCIDR":             config.PublicCIDR,
-			"PrivateCIDR":            config.PrivateCIDR,
-			"AllowIPs":               config.AllowIPs,
-			"AvailabilityZone":       config.AvailabilityZone,
-			"ConfigBucket":           config.ConfigBucket,
-			"Deployment":             config.Deployment,
-			"HostedZoneID":           config.HostedZoneID,
-			"HostedZoneRecordPrefix": config.HostedZoneRecordPrefix,
-			"Namespace":              config.Namespace,
-			"Project":                config.Project,
-			"PublicKey":              config.PublicKey,
-			"RDSDefaultDatabaseName": config.RDSDefaultDatabaseName,
-			"RDSInstanceClass":       config.RDSInstanceClass,
-			"RDSPassword":            config.RDSPassword,
-			"RDSUsername":            config.RDSUsername,
-			"Region":                 config.Region,
-			"SourceAccessIP":         config.SourceAccessIP,
-			"TFStatePath":            config.TFStatePath,
-			"MultiAZRDS":             config.MultiAZRDS,
-		})
+		err = environment.Build(awsInputVarsMapFromConfig(config))
 		if err != nil {
 			return nil, err
 		}

@@ -25,28 +25,7 @@ func (client *Client) Destroy() error {
 	switch client.provider.IAAS() {
 
 	case awsConst: // nolint
-		err = environment.Build(map[string]interface{}{
-			"NetworkCIDR":            conf.NetworkCIDR,
-			"PublicCIDR":             conf.PublicCIDR,
-			"PrivateCIDR":            conf.PrivateCIDR,
-			"AllowIPs":               conf.AllowIPs,
-			"AvailabilityZone":       conf.AvailabilityZone,
-			"ConfigBucket":           conf.ConfigBucket,
-			"Deployment":             conf.Deployment,
-			"HostedZoneID":           conf.HostedZoneID,
-			"HostedZoneRecordPrefix": conf.HostedZoneRecordPrefix,
-			"Namespace":              conf.Namespace,
-			"Project":                conf.Project,
-			"PublicKey":              conf.PublicKey,
-			"RDSDefaultDatabaseName": conf.RDSDefaultDatabaseName,
-			"RDSInstanceClass":       conf.RDSInstanceClass,
-			"RDSPassword":            conf.RDSPassword,
-			"RDSUsername":            conf.RDSUsername,
-			"Region":                 conf.Region,
-			"SourceAccessIP":         conf.SourceAccessIP,
-			"TFStatePath":            conf.TFStatePath,
-			"MultiAZRDS":             conf.MultiAZRDS,
-		})
+		err = environment.Build(awsInputVarsMapFromConfig(conf))
 		if err != nil {
 			return err
 		}

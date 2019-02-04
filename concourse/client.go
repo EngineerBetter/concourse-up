@@ -109,3 +109,28 @@ func (client *Client) buildBoshClient(config config.Config, metadata terraform.I
 		client.provider,
 	)
 }
+
+func awsInputVarsMapFromConfig(c config.Config) map[string]interface{} {
+	return map[string]interface{}{
+		"NetworkCIDR":            c.NetworkCIDR,
+		"PublicCIDR":             c.PublicCIDR,
+		"PrivateCIDR":            c.PrivateCIDR,
+		"AllowIPs":               c.AllowIPs,
+		"AvailabilityZone":       c.AvailabilityZone,
+		"ConfigBucket":           c.ConfigBucket,
+		"Deployment":             c.Deployment,
+		"HostedZoneID":           c.HostedZoneID,
+		"HostedZoneRecordPrefix": c.HostedZoneRecordPrefix,
+		"Namespace":              c.Namespace,
+		"Project":                c.Project,
+		"PublicKey":              c.PublicKey,
+		"RDSDefaultDatabaseName": c.RDSDefaultDatabaseName,
+		"RDSInstanceClass":       c.RDSInstanceClass,
+		"RDSPassword":            c.RDSPassword,
+		"RDSUsername":            c.RDSUsername,
+		"Region":                 c.Region,
+		"SourceAccessIP":         c.SourceAccessIP,
+		"TFStatePath":            c.TFStatePath,
+		"MultiAZRDS":             c.MultiAZRDS,
+	}
+}
