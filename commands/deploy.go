@@ -78,13 +78,6 @@ var deployFlags = []cli.Flag{
 		Value:       "small",
 		Destination: &initialDeployArgs.WebSize,
 	},
-	cli.StringFlag{
-		Name:        "iaas",
-		Usage:       "(optional) IAAS, can be AWS or GCP",
-		EnvVar:      "IAAS",
-		Value:       "AWS",
-		Destination: &initialDeployArgs.IAAS,
-	},
 	cli.BoolFlag{
 		Name:        "self-update",
 		Usage:       "(optional) Causes Concourse-up to exit as soon as the BOSH deployment starts. May only be used when upgrading an existing deployment",
@@ -149,7 +142,7 @@ var deployFlags = []cli.Flag{
 	},
 }
 
-func deployAction(c *cli.Context, deployArgs deploy.Args, iaasFactory iaas.Factory) error {
+func deployAction(c *cli.Context, deployArgs deploy.Args, chosenIaas string, iaasFactory iaas.Factory) error {
 	name := c.Args().Get(0)
 	if name == "" {
 		return errors.New("Usage is `concourse-up deploy <name>`")
@@ -162,17 +155,17 @@ func deployAction(c *cli.Context, deployArgs deploy.Args, iaasFactory iaas.Facto
 		return err
 	}
 
-	deployArgs, err = setZoneAndRegion(deployArgs)
+	deployArgs, err = setZoneAndRegion(deployArgs, chosenIaas)
 	if err != nil {
 		return err
 	}
 
-	err = validateNameLength(name, deployArgs)
+	err = validateNameLength(name, deployArgs, chosenIaas)
 	if err != nil {
 		return err
 	}
 
-	client, err := buildClient(name, version, deployArgs, iaasFactory)
+	client, err := buildClient(name, version, deployArgs, chosenIaas, iaasFactory)
 	if err != nil {
 		return err
 	}
@@ -193,9 +186,9 @@ func validateDeployArgs(c *cli.Context, deployArgs deploy.Args) (deploy.Args, er
 	return deployArgs, nil
 }
 
-func setZoneAndRegion(deployArgs deploy.Args) (deploy.Args, error) {
+func setZoneAndRegion(deployArgs deploy.Args, chosenIaas string) (deploy.Args, error) {
 	if !deployArgs.AWSRegionIsSet {
-		switch strings.ToUpper(deployArgs.IAAS) {
+		switch strings.ToUpper(chosenIaas) {
 		case awsConst: //nolint
 			deployArgs.AWSRegion = "eu-west-1" //nolint
 		case gcpConst: //nolint
@@ -236,8 +229,8 @@ func zoneBelongsToRegion(zone, region string) error {
 	return nil
 }
 
-func validateNameLength(name string, args deploy.Args) error {
-	if strings.ToUpper(args.IAAS) == "GCP" {
+func validateNameLength(name string, args deploy.Args, chosenIaas string) error {
+	if strings.ToUpper(chosenIaas) == "GCP" {
 		if len(name) > maxAllowedNameLength {
 			return fmt.Errorf("deployment name %s is too long. %d character limit", name, maxAllowedNameLength)
 		}
@@ -246,8 +239,8 @@ func validateNameLength(name string, args deploy.Args) error {
 	return nil
 }
 
-func buildClient(name, version string, deployArgs deploy.Args, iaasFactory iaas.Factory) (*concourse.Client, error) {
-	awsClient, err := iaasFactory(deployArgs.IAAS, deployArgs.AWSRegion)
+func buildClient(name, version string, deployArgs deploy.Args, chosenIaas string, iaasFactory iaas.Factory) (*concourse.Client, error) {
+	awsClient, err := iaasFactory(chosenIaas, deployArgs.AWSRegion)
 	if err != nil {
 		return nil, err
 	}
@@ -256,7 +249,7 @@ func buildClient(name, version string, deployArgs deploy.Args, iaasFactory iaas.
 		return nil, err
 	}
 
-	maintainer, err := concourse.NewMaintainer(deployArgs.IAAS)
+	maintainer, err := concourse.NewMaintainer(chosenIaas)
 	if err != nil {
 		return nil, err
 	}
@@ -287,6 +280,6 @@ var deployCmd = cli.Command{
 	ArgsUsage: "<name>",
 	Flags:     deployFlags,
 	Action: func(c *cli.Context) error {
-		return deployAction(c, initialDeployArgs, iaas.New)
+		return deployAction(c, initialDeployArgs, chosenIaas, iaas.New)
 	},
 }

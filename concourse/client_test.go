@@ -186,7 +186,7 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 		exampleDirectorCreds = []byte("atc_password: s3cret")
 
 		configClient := &testsupport.FakeConfigClient{
-			FakeLoadOrCreate: func(deployArgs *deploy.Args) (config.Config, bool, bool, error) {
+			FakeLoadOrCreate: func(deployArgs *deploy.Args, chosenIaas string) (config.Config, bool, bool, error) {
 				actions = append(actions, "loading or creating config file")
 				return exampleConfig, false, false, nil
 			},

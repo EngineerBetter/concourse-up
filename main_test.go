@@ -42,6 +42,6 @@ var _ = Describe("concourse-up", func() {
 		session, err := Start(command, GinkgoWriter, GinkgoWriter)
 		Expect(err).ToNot(HaveOccurred(), "Error running CLI: "+cliPath)
 		Eventually(session).Should(Exit(0))
-		Expect(session.Out).To(Say("--non-interactive, -n  Non interactive \\[\\$NON_INTERACTIVE\\]"))
+		Expect(session.Out).To(Say("--non-interactive,\\s+-n\\s+\\(optional\\) Non interactive \\[\\$NON_INTERACTIVE\\]"))
 	})
 })

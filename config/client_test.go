@@ -21,6 +21,7 @@ var _ = Describe("Client", func() {
 	var iaasClient *testsupport.FakeAWSClient
 	var client *Client
 	var deployArgs *deploy.Args
+	var chosenIaas string
 
 	BeforeEach(func() {
 		iaasClient = &testsupport.FakeAWSClient{
@@ -43,7 +44,6 @@ var _ = Describe("Client", func() {
 		client = New(iaasClient, "test", "")
 
 		deployArgs = &deploy.Args{
-			IAAS:        "AWS",
 			AWSRegion:   "eu-west-1",
 			WorkerCount: 1,
 			WorkerSize:  "xlarge",
@@ -53,6 +53,8 @@ var _ = Describe("Client", func() {
 			Spot:        true,
 			Preemptible: true,
 		}
+
+		chosenIaas = "AWS"
 	})
 
 	DescribeTable("parseCDIRBlocks",
@@ -73,7 +75,7 @@ var _ = Describe("Client", func() {
 
 			BeforeEach(func() {
 				var err error
-				conf, createdANewFile, _, err = client.LoadOrCreate(deployArgs)
+				conf, createdANewFile, _, err = client.LoadOrCreate(deployArgs, chosenIaas)
 				Expect(err).To(Succeed())
 			})
 
@@ -189,7 +191,7 @@ var _ = Describe("Client", func() {
 			Describe("github auth flags are present", func() {
 				It("sets the github auth config fields", func() {
 					deployArgs.ModifyGithub("id", "secret", true)
-					conf, createdANewFile, _, err := client.LoadOrCreate(deployArgs)
+					conf, createdANewFile, _, err := client.LoadOrCreate(deployArgs, chosenIaas)
 					Expect(err).To(Succeed())
 					Expect(createdANewFile).To(BeTrue())
 					Expect(conf.GithubClientID).To(Equal("id"))
@@ -429,6 +431,7 @@ func TestClient_LoadOrCreate(t *testing.T) {
 	}
 	type args struct {
 		deployArgs *deploy.Args
+		chosenIaas string
 	}
 	type returnVals struct {
 		config           Config
@@ -474,7 +477,7 @@ func TestClient_LoadOrCreate(t *testing.T) {
 				},
 			},
 			args: args{
-				&deploy.Args{
+				deployArgs: &deploy.Args{
 					AllowIPs:    "0.0.0.0",
 					WorkerCount: 1,
 					WorkerSize:  "xlarge",
@@ -482,6 +485,7 @@ func TestClient_LoadOrCreate(t *testing.T) {
 					DBSize:      "small",
 					Domain:      "FakeDomain",
 				},
+				chosenIaas: "AWS",
 			},
 			wantErr: false,
 			validate: func(c Config, newConfigCreated, isDomainUpdated bool) (bool, string) {
@@ -525,9 +529,10 @@ func TestClient_LoadOrCreate(t *testing.T) {
 				},
 			},
 			args: args{
-				&deploy.Args{
+				deployArgs: &deploy.Args{
 					AllowIPs: "0.0.0.0",
 				},
+				chosenIaas: "AWS",
 			},
 			wantErr: false,
 			validate: func(c Config, newConfigCreated, isDomainUpdated bool) (bool, string) {
@@ -571,7 +576,7 @@ func TestClient_LoadOrCreate(t *testing.T) {
 				},
 			},
 			args: args{
-				&deploy.Args{
+				deployArgs: &deploy.Args{
 					AllowIPs:         "0.0.0.0",
 					WorkerCountIsSet: true,
 					WorkerCount:      1,
@@ -580,6 +585,7 @@ func TestClient_LoadOrCreate(t *testing.T) {
 					Domain:           "FakeDomainTwo",
 					DomainIsSet:      true,
 				},
+				chosenIaas: "AWS",
 			},
 			wantErr: false,
 			validate: func(c Config, newConfigCreated, isDomainUpdated bool) (bool, string) {
@@ -606,7 +612,7 @@ func TestClient_LoadOrCreate(t *testing.T) {
 				BucketExists: tt.fields.BucketExists,
 				BucketError:  tt.fields.BucketError,
 			}
-			config, newConfigCreated, isDomainUpdated, err := client.LoadOrCreate(tt.args.deployArgs)
+			config, newConfigCreated, isDomainUpdated, err := client.LoadOrCreate(tt.args.deployArgs, tt.args.chosenIaas)
 			isValid, message := tt.validate(config, newConfigCreated, isDomainUpdated)
 			if !isValid {
 				t.Errorf("ClientLoadOrCreate()\n %s\n", message)

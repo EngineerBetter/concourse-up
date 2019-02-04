@@ -10,8 +10,6 @@ import (
 
 // Args are arguments passed to the deploy command
 type Args struct {
-	IAAS             string
-	IAASIsSet        bool
 	AWSRegion        string
 	AWSRegionIsSet   bool
 	Domain           string
@@ -72,8 +70,6 @@ func (a *Args) MarkSetFlags(c FlagSetChecker) error {
 				a.WorkerSizeIsSet = true
 			case "web-size":
 				a.WebSizeIsSet = true
-			case "iaas":
-				a.IAASIsSet = true
 			case "self-update":
 				a.SelfUpdateIsSet = true
 			case "db-size":
