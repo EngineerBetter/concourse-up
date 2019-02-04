@@ -3,6 +3,7 @@ package concourse_test
 import (
 	"errors"
 	"fmt"
+	"github.com/EngineerBetter/concourse-up/concourse/concoursefakes"
 	"github.com/xenolf/lego/lego"
 	"io"
 	"reflect"
@@ -298,6 +299,7 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 				ipChecker,
 				testsupport.NewFakeAcmeClient,
 				"some version",
+				concoursefakes.NewFakeMaintainer(),
 			)
 		}
 
@@ -317,6 +319,7 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 				ipChecker,
 				testsupport.NewFakeAcmeClient,
 				"some version",
+				concoursefakes.NewFakeMaintainer(),
 			)
 		}
 	})

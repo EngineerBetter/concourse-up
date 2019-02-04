@@ -32,6 +32,7 @@ type Client struct {
 	acmeClientConstructor func(u *certs.User) (*lego.Client, error)
 	versionFile           []byte
 	version               string
+	maintainer            Maintainer
 }
 
 // IClient represents a concourse-up client
@@ -58,7 +59,8 @@ func NewClient(
 	stdout, stderr io.Writer,
 	ipChecker func() (string, error),
 	acmeClientConstructor func(u *certs.User) (*lego.Client, error),
-	version string) *Client {
+	version string,
+	maintainer Maintainer) *Client {
 	v, _ := provider.Choose(iaas.Choice{
 		AWS: awsVersionFile,
 		GCP: gcpVersionFile,
@@ -77,6 +79,7 @@ func NewClient(
 		acmeClientConstructor: acmeClientConstructor,
 		versionFile:           v,
 		version:               version,
+		maintainer:            maintainer,
 	}
 }
 

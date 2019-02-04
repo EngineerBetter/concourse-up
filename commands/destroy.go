@@ -106,6 +106,12 @@ func buildDestroyClient(name, version string, destroyArgs destroy.Args, iaasFact
 	if err != nil {
 		return nil, err
 	}
+
+	maintainer, err := concourse.NewMaintainer(destroyArgs.IAAS)
+	if err != nil {
+		return nil, err
+	}
+
 	client := concourse.NewClient(
 		awsClient,
 		terraformClient,
@@ -119,6 +125,7 @@ func buildDestroyClient(name, version string, destroyArgs destroy.Args, iaasFact
 		util.FindUserIP,
 		certs.NewAcmeClient,
 		version,
+		maintainer,
 	)
 
 	return client, nil

@@ -255,6 +255,12 @@ func buildClient(name, version string, deployArgs deploy.Args, iaasFactory iaas.
 	if err != nil {
 		return nil, err
 	}
+
+	maintainer, err := concourse.NewMaintainer(deployArgs.IAAS)
+	if err != nil {
+		return nil, err
+	}
+
 	client := concourse.NewClient(
 		awsClient,
 		terraformClient,
@@ -268,6 +274,7 @@ func buildClient(name, version string, deployArgs deploy.Args, iaasFactory iaas.
 		util.FindUserIP,
 		certs.NewAcmeClient,
 		version,
+		maintainer,
 	)
 
 	return client, nil

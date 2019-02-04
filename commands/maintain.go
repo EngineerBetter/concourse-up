@@ -102,6 +102,12 @@ func buildMaintainClient(name, version string, maintainArgs maintain.Args, iaasF
 	if err != nil {
 		return nil, err
 	}
+
+	maintainer, err := concourse.NewMaintainer(maintainArgs.IAAS)
+	if err != nil {
+		return nil, err
+	}
+
 	client := concourse.NewClient(
 		provider,
 		terraformClient,
@@ -115,6 +121,7 @@ func buildMaintainClient(name, version string, maintainArgs maintain.Args, iaasF
 		util.FindUserIP,
 		certs.NewAcmeClient,
 		version,
+		maintainer,
 	)
 
 	return client, nil
