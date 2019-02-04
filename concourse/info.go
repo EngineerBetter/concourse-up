@@ -88,26 +88,7 @@ func (client *Client) FetchInfo() (*Info, error) {
 		if err1 != nil {
 			return nil, err1
 		}
-		err1 = environment.Build(map[string]interface{}{
-			"PublicCIDR":         config.PublicCIDR,
-			"PrivateCIDR":        config.PrivateCIDR,
-			"AllowIPs":           config.AllowIPs,
-			"ConfigBucket":       config.ConfigBucket,
-			"DBName":             config.RDSDefaultDatabaseName,
-			"DBPassword":         config.RDSPassword,
-			"DBTier":             config.RDSInstanceClass,
-			"DBUsername":         config.RDSUsername,
-			"Deployment":         config.Deployment,
-			"DNSManagedZoneName": config.HostedZoneID,
-			"DNSRecordSetPrefix": config.HostedZoneRecordPrefix,
-			"ExternalIP":         config.SourceAccessIP,
-			"GCPCredentialsJSON": credentialspath,
-			"Namespace":          config.Namespace,
-			"Project":            project,
-			"Region":             client.provider.Region(),
-			"Tags":               "",
-			"Zone":               client.provider.Zone(""),
-		})
+		err1 = environment.Build(gcpInputVarsMapFromConfig(config, credentialspath, project, client))
 		if err1 != nil {
 			return nil, err1
 		}

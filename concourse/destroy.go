@@ -52,26 +52,7 @@ func (client *Client) Destroy() error {
 			return err1
 		}
 		zone := client.provider.Zone("")
-		err1 = environment.Build(map[string]interface{}{
-			"PublicCIDR":         conf.PublicCIDR,
-			"PrivateCIDR":        conf.PrivateCIDR,
-			"AllowIPs":           conf.AllowIPs,
-			"ConfigBucket":       conf.ConfigBucket,
-			"DBName":             conf.RDSDefaultDatabaseName,
-			"DBPassword":         conf.RDSPassword,
-			"DBTier":             conf.RDSInstanceClass,
-			"DBUsername":         conf.RDSUsername,
-			"Deployment":         conf.Deployment,
-			"DNSManagedZoneName": conf.HostedZoneID,
-			"DNSRecordSetPrefix": conf.HostedZoneRecordPrefix,
-			"ExternalIP":         conf.SourceAccessIP,
-			"GCPCredentialsJSON": credentialspath,
-			"Namespace":          conf.Namespace,
-			"Project":            project,
-			"Region":             client.provider.Region(),
-			"Tags":               "",
-			"Zone":               zone,
-		})
+		err1 = environment.Build(gcpInputVarsMapFromConfig(conf, credentialspath, project, client))
 		if err1 != nil {
 			return nil
 		}

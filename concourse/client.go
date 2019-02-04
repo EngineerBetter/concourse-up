@@ -134,3 +134,26 @@ func awsInputVarsMapFromConfig(c config.Config) map[string]interface{} {
 		"MultiAZRDS":             c.MultiAZRDS,
 	}
 }
+
+func gcpInputVarsMapFromConfig(c config.Config, credentialspath string, project string, client *Client) map[string]interface{} {
+	return map[string]interface{}{
+		"PublicCIDR":         c.PublicCIDR,
+		"PrivateCIDR":        c.PrivateCIDR,
+		"AllowIPs":           c.AllowIPs,
+		"ConfigBucket":       c.ConfigBucket,
+		"DBName":             c.RDSDefaultDatabaseName,
+		"DBPassword":         c.RDSPassword,
+		"DBTier":             c.RDSInstanceClass,
+		"DBUsername":         c.RDSUsername,
+		"Deployment":         c.Deployment,
+		"DNSManagedZoneName": c.HostedZoneID,
+		"DNSRecordSetPrefix": c.HostedZoneRecordPrefix,
+		"ExternalIP":         c.SourceAccessIP,
+		"GCPCredentialsJSON": credentialspath,
+		"Namespace":          c.Namespace,
+		"Project":            project,
+		"Region":             client.provider.Region(),
+		"Tags":               "",
+		"Zone":               client.provider.Zone(""),
+	}
+}
