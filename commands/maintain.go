@@ -38,7 +38,6 @@ var maintainFlags = []cli.Flag{
 		Usage:       "(optional) IAAS, can be AWS or GCP",
 		EnvVar:      "IAAS",
 		Value:       "AWS",
-		Hidden:      true,
 		Destination: &initialMaintainArgs.IAAS,
 	},
 	cli.StringFlag{

@@ -50,7 +50,6 @@ var infoFlags = []cli.Flag{
 		Usage:       "(optional) IAAS, can be AWS or GCP",
 		EnvVar:      "IAAS",
 		Value:       "AWS",
-		Hidden:      true,
 		Destination: &initialInfoArgs.IAAS,
 	},
 	cli.StringFlag{
