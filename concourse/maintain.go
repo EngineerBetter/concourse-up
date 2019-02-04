@@ -107,6 +107,9 @@ func (client *Client) constructBoshClient() (*bosh.IClient, error) {
 	switch client.provider.IAAS() {
 	case awsConst: // nolint
 		err = environment.Build(map[string]interface{}{
+			"NetworkCIDR":            c.NetworkCIDR,
+			"PublicCIDR":             c.PublicCIDR,
+			"PrivateCIDR":            c.PrivateCIDR,
 			"AllowIPs":               c.AllowIPs,
 			"AvailabilityZone":       c.AvailabilityZone,
 			"ConfigBucket":           c.ConfigBucket,
@@ -138,6 +141,8 @@ func (client *Client) constructBoshClient() (*bosh.IClient, error) {
 			return nil, err1
 		}
 		err1 = environment.Build(map[string]interface{}{
+			"PublicCIDR":         c.PublicCIDR,
+			"PrivateCIDR":        c.PrivateCIDR,
 			"AllowIPs":           c.AllowIPs,
 			"ConfigBucket":       c.ConfigBucket,
 			"DBName":             c.RDSDefaultDatabaseName,
