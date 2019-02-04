@@ -63,6 +63,9 @@ type Config struct {
 	TFStatePath               string   `json:"tf_state_path"`
 	Version                   string   `json:"version"`
 	WorkerType                string   `json:"worker_type"`
+	PrivateCIDR               string   `json:"private_cidr"`
+	PublicCIDR                string   `json:"public_cidr"`
+	NetworkCIDR               string   `json:"network_cidr"`
 }
 
 func generateDefaultConfig(project, deployment, configBucket, region, namespace string) (Config, error) {
@@ -95,7 +98,9 @@ func generateDefaultConfig(project, deployment, configBucket, region, namespace 
 		Region:                   region,
 		TFStatePath:              terraformStateFileName,
 		Namespace:                namespace,
-	}
+		PrivateCIDR:              "10.0.1.0/24",
+		PublicCIDR:               "10.0.0.0/24",
+		NetworkCIDR:              "10.0.0.0/16"}
 
 	return conf, nil
 }
