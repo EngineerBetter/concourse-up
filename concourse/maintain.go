@@ -95,7 +95,7 @@ func (client *Client) renewCert(m maintain.Args) error {
 
 // constructBoshClient creates a boshClient for use in this package
 func (client *Client) constructBoshClient() (*bosh.IClient, error) {
-	c, err := client.configClient.Load()
+	conf, err := client.configClient.Load()
 	if err != nil {
 		return nil, err
 	}
@@ -106,7 +106,7 @@ func (client *Client) constructBoshClient() (*bosh.IClient, error) {
 	}
 	switch client.provider.IAAS() {
 	case awsConst: // nolint
-		err = environment.Build(awsInputVarsMapFromConfig(c))
+		err = environment.Build(awsInputVarsMapFromConfig(conf))
 		if err != nil {
 			return nil, err
 		}
@@ -119,7 +119,7 @@ func (client *Client) constructBoshClient() (*bosh.IClient, error) {
 		if err1 != nil {
 			return nil, err1
 		}
-		err1 = environment.Build(gcpInputVarsMapFromConfig(c, credentialspath, project, client))
+		err1 = environment.Build(gcpInputVarsMapFromConfig(conf, credentialspath, project, client))
 		if err1 != nil {
 			return nil, err1
 		}
@@ -132,7 +132,7 @@ func (client *Client) constructBoshClient() (*bosh.IClient, error) {
 		return nil, err
 	}
 
-	boshClient, err := client.buildBoshClient(c, metadata)
+	boshClient, err := client.buildBoshClient(conf, metadata)
 	if err != nil {
 		return nil, err
 	}

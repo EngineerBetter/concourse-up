@@ -34,7 +34,7 @@ type TerraformInfo struct {
 // FetchInfo fetches and builds the info
 func (client *Client) FetchInfo() (*Info, error) {
 	var gatewayUser string
-	config, err := client.configClient.Load()
+	conf, err := client.configClient.Load()
 	if err != nil {
 		return nil, err
 	}
@@ -74,7 +74,7 @@ func (client *Client) FetchInfo() (*Info, error) {
 	}
 	switch client.provider.IAAS() {
 	case awsConst: // nolint
-		err = environment.Build(awsInputVarsMapFromConfig(config))
+		err = environment.Build(awsInputVarsMapFromConfig(conf))
 		if err != nil {
 			return nil, err
 		}
@@ -88,7 +88,7 @@ func (client *Client) FetchInfo() (*Info, error) {
 		if err1 != nil {
 			return nil, err1
 		}
-		err1 = environment.Build(gcpInputVarsMapFromConfig(config, credentialspath, project, client))
+		err1 = environment.Build(gcpInputVarsMapFromConfig(conf, credentialspath, project, client))
 		if err1 != nil {
 			return nil, err1
 		}
@@ -129,11 +129,11 @@ func (client *Client) FetchInfo() (*Info, error) {
 	}
 
 	if !whitelisted {
-		err1 = fmt.Errorf("Do you need to add your IP %s to the %s-director security group/source range entry for director firewall (for ports 22, 6868, and 25555)?", userIP, config.Deployment)
+		err1 = fmt.Errorf("Do you need to add your IP %s to the %s-director security group/source range entry for director firewall (for ports 22, 6868, and 25555)?", userIP, conf.Deployment)
 		return nil, err1
 	}
 
-	boshClient, err := client.buildBoshClient(config, metadata)
+	boshClient, err := client.buildBoshClient(conf, metadata)
 	if err != nil {
 		return nil, err
 	}
@@ -146,7 +146,7 @@ func (client *Client) FetchInfo() (*Info, error) {
 
 	return &Info{
 		Terraform:   terraformInfo,
-		Config:      config,
+		Config:      conf,
 		Instances:   instances,
 		GatewayUser: gatewayUser,
 		CertExpiry:  certExpiry,

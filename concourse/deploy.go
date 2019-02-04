@@ -51,7 +51,7 @@ func stripVersion(tags []string) []string {
 
 // Deploy deploys a concourse instance
 func (client *Client) Deploy() error {
-	c, createdNewConfig, isDomainUpdated, err := client.configClient.LoadOrCreate(client.deployArgs)
+	conf, createdNewConfig, isDomainUpdated, err := client.configClient.LoadOrCreate(client.deployArgs)
 	if err != nil {
 		return err
 	}
@@ -63,24 +63,24 @@ func (client *Client) Deploy() error {
 	} else {
 		switch client.provider.IAAS() {
 		case awsConst: // nolint
-			c.RDSDefaultDatabaseName = fmt.Sprintf("bosh_%s", util.EightRandomLetters())
+			conf.RDSDefaultDatabaseName = fmt.Sprintf("bosh_%s", util.EightRandomLetters())
 		case gcpConst: // nolint
-			c.RDSDefaultDatabaseName = fmt.Sprintf("bosh-%s", util.EightRandomLetters())
+			conf.RDSDefaultDatabaseName = fmt.Sprintf("bosh-%s", util.EightRandomLetters())
 		}
 
-		client.provider.WorkerType(c.ConcourseWorkerSize)
-		c.AvailabilityZone = client.provider.Zone(client.deployArgs.Zone)
+		client.provider.WorkerType(conf.ConcourseWorkerSize)
+		conf.AvailabilityZone = client.provider.Zone(client.deployArgs.Zone)
 	}
 
-	r, err := client.checkPreTerraformConfigRequirements(c, client.deployArgs.SelfUpdate)
+	r, err := client.checkPreTerraformConfigRequirements(conf, client.deployArgs.SelfUpdate)
 	if err != nil {
 		return err
 	}
-	c.Region = r.Region
-	c.SourceAccessIP = r.SourceAccessIP
-	c.HostedZoneID = r.HostedZoneID
-	c.HostedZoneRecordPrefix = r.HostedZoneRecordPrefix
-	c.Domain = r.Domain
+	conf.Region = r.Region
+	conf.SourceAccessIP = r.SourceAccessIP
+	conf.HostedZoneID = r.HostedZoneID
+	conf.HostedZoneRecordPrefix = r.HostedZoneRecordPrefix
+	conf.Domain = r.Domain
 
 	environment, metadata, err := client.tfCLI.IAAS(client.provider.IAAS())
 	if err != nil {
@@ -88,7 +88,7 @@ func (client *Client) Deploy() error {
 	}
 	switch client.provider.IAAS() {
 	case awsConst: // nolint
-		err = environment.Build(awsInputVarsMapFromConfig(c))
+		err = environment.Build(awsInputVarsMapFromConfig(conf))
 		if err != nil {
 			return err
 		}
@@ -101,7 +101,7 @@ func (client *Client) Deploy() error {
 		if err1 != nil {
 			return err1
 		}
-		err1 = environment.Build(gcpInputVarsMapFromConfig(c, credentialspath, project, client))
+		err1 = environment.Build(gcpInputVarsMapFromConfig(conf, credentialspath, project, client))
 		if err1 != nil {
 			return err1
 		}
@@ -118,50 +118,50 @@ func (client *Client) Deploy() error {
 		return err
 	}
 
-	err = client.configClient.Update(c)
+	err = client.configClient.Update(conf)
 	if err != nil {
 		return err
 	}
-	c.Tags = stripVersion(c.Tags)
-	c.Tags = append([]string{fmt.Sprintf("concourse-up-version=%s", client.version)}, c.Tags...)
+	conf.Tags = stripVersion(conf.Tags)
+	conf.Tags = append([]string{fmt.Sprintf("concourse-up-version=%s", client.version)}, conf.Tags...)
 
-	c.Version = client.version
+	conf.Version = client.version
 
-	cr, err := client.checkPreDeployConfigRequirements(client.acmeClientConstructor, isDomainUpdated, c, metadata)
+	cr, err := client.checkPreDeployConfigRequirements(client.acmeClientConstructor, isDomainUpdated, conf, metadata)
 	if err != nil {
 		return err
 	}
 
-	c.Domain = cr.Domain
-	c.DirectorPublicIP = cr.DirectorPublicIP
-	c.DirectorCACert = cr.DirectorCerts.DirectorCACert
-	c.DirectorCert = cr.DirectorCerts.DirectorCert
-	c.DirectorKey = cr.DirectorCerts.DirectorKey
-	c.ConcourseCert = cr.Certs.ConcourseCert
-	c.ConcourseKey = cr.Certs.ConcourseKey
-	c.ConcourseUserProvidedCert = cr.Certs.ConcourseUserProvidedCert
-	c.ConcourseCACert = cr.Certs.ConcourseCACert
+	conf.Domain = cr.Domain
+	conf.DirectorPublicIP = cr.DirectorPublicIP
+	conf.DirectorCACert = cr.DirectorCerts.DirectorCACert
+	conf.DirectorCert = cr.DirectorCerts.DirectorCert
+	conf.DirectorKey = cr.DirectorCerts.DirectorKey
+	conf.ConcourseCert = cr.Certs.ConcourseCert
+	conf.ConcourseKey = cr.Certs.ConcourseKey
+	conf.ConcourseUserProvidedCert = cr.Certs.ConcourseUserProvidedCert
+	conf.ConcourseCACert = cr.Certs.ConcourseCACert
 
 	var bp BoshParams
 	if client.deployArgs.SelfUpdate {
-		bp, err = client.updateBoshAndPipeline(c, metadata)
+		bp, err = client.updateBoshAndPipeline(conf, metadata)
 	} else {
-		bp, err = client.deployBoshAndPipeline(c, metadata)
+		bp, err = client.deployBoshAndPipeline(conf, metadata)
 	}
 
-	c.CredhubPassword = bp.CredhubPassword
-	c.CredhubAdminClientSecret = bp.CredhubAdminClientSecret
-	c.CredhubCACert = bp.CredhubCACert
-	c.CredhubURL = bp.CredhubURL
-	c.CredhubUsername = bp.CredhubUsername
-	c.ConcourseUsername = bp.ConcourseUsername
-	c.ConcoursePassword = bp.ConcoursePassword
-	c.GrafanaPassword = bp.GrafanaPassword
-	c.DirectorUsername = bp.DirectorUsername
-	c.DirectorPassword = bp.DirectorPassword
-	c.DirectorCACert = bp.DirectorCACert
+	conf.CredhubPassword = bp.CredhubPassword
+	conf.CredhubAdminClientSecret = bp.CredhubAdminClientSecret
+	conf.CredhubCACert = bp.CredhubCACert
+	conf.CredhubURL = bp.CredhubURL
+	conf.CredhubUsername = bp.CredhubUsername
+	conf.ConcourseUsername = bp.ConcourseUsername
+	conf.ConcoursePassword = bp.ConcoursePassword
+	conf.GrafanaPassword = bp.GrafanaPassword
+	conf.DirectorUsername = bp.DirectorUsername
+	conf.DirectorPassword = bp.DirectorPassword
+	conf.DirectorCACert = bp.DirectorCACert
 
-	err1 := client.configClient.Update(c)
+	err1 := client.configClient.Update(conf)
 	if err == nil {
 		err = err1
 	}
