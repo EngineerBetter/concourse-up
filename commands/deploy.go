@@ -142,7 +142,7 @@ var deployFlags = []cli.Flag{
 	},
 }
 
-func deployAction(c *cli.Context, deployArgs deploy.Args, chosenIaas string, iaasFactory iaas.Factory) error {
+func deployAction(c *cli.Context, deployArgs deploy.Args, provider iaas.Provider) error {
 	name := c.Args().Get(0)
 	if name == "" {
 		return errors.New("Usage is `concourse-up deploy <name>`")
@@ -155,17 +155,17 @@ func deployAction(c *cli.Context, deployArgs deploy.Args, chosenIaas string, iaa
 		return err
 	}
 
-	deployArgs, err = setZoneAndRegion(deployArgs, chosenIaas)
+	deployArgs, err = setZoneAndRegion(deployArgs, provider.IAAS())
 	if err != nil {
 		return err
 	}
 
-	err = validateNameLength(name, deployArgs, chosenIaas)
+	err = validateNameLength(name, deployArgs, provider.IAAS())
 	if err != nil {
 		return err
 	}
 
-	client, err := buildClient(name, version, deployArgs, chosenIaas, iaasFactory)
+	client, err := buildClient(name, version, deployArgs, provider)
 	if err != nil {
 		return err
 	}
@@ -239,23 +239,19 @@ func validateNameLength(name string, args deploy.Args, chosenIaas string) error 
 	return nil
 }
 
-func buildClient(name, version string, deployArgs deploy.Args, chosenIaas string, iaasFactory iaas.Factory) (*concourse.Client, error) {
-	awsClient, err := iaasFactory(chosenIaas, deployArgs.AWSRegion)
-	if err != nil {
-		return nil, err
-	}
+func buildClient(name, version string, deployArgs deploy.Args, provider iaas.Provider) (*concourse.Client, error) {
 	terraformClient, err := terraform.New(terraform.DownloadTerraform())
 	if err != nil {
 		return nil, err
 	}
 
-	maintainer, err := concourse.NewMaintainer(chosenIaas)
+	maintainer, err := concourse.NewMaintainer(provider.IAAS())
 	if err != nil {
 		return nil, err
 	}
 
 	client := concourse.NewClient(
-		awsClient,
+		provider,
 		terraformClient,
 		bosh.New,
 		fly.New,
@@ -280,6 +276,10 @@ var deployCmd = cli.Command{
 	ArgsUsage: "<name>",
 	Flags:     deployFlags,
 	Action: func(c *cli.Context) error {
-		return deployAction(c, initialDeployArgs, chosenIaas, iaas.New)
+		provider, err := iaas.New(chosenIaas, initialDeployArgs.AWSRegion)
+		if err != nil {
+			return fmt.Errorf("Error creating IAAS-specific provider before deploy action: [%v]", err)
+		}
+		return deployAction(c, initialDeployArgs, provider)
 	},
 }
