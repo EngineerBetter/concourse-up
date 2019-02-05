@@ -32,7 +32,6 @@ var _ = Describe("commands", func() {
 				Expect(err).ToNot(HaveOccurred(), "Error running CLI: "+cliPath)
 				Eventually(session).Should(Exit(0))
 				Expect(session.Out).To(Say("concourse-up deploy - Deploys or updates a Concourse"))
-				Expect(session.Out).To(Say("--non-interactive,\\s+-n\\s+\\(optional\\) Non interactive \\[\\$NON_INTERACTIVE\\]"))
 				Expect(session.Out).To(Say("--region value"))
 				Expect(session.Out).To(Say("--domain value"))
 				Expect(session.Out).To(Say("--tls-cert value"))

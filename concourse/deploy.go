@@ -51,7 +51,7 @@ func stripVersion(tags []string) []string {
 
 // Deploy deploys a concourse instance
 func (client *Client) Deploy() error {
-	conf, createdNewConfig, isDomainUpdated, err := client.configClient.LoadOrCreate(client.deployArgs, client.provider.IAAS())
+	conf, createdNewConfig, isDomainUpdated, err := client.configClient.LoadOrCreate(client.deployArgs)
 	if err != nil {
 		return err
 	}
@@ -106,7 +106,7 @@ func (client *Client) Deploy() error {
 			return err1
 		}
 	default:
-		return errors.New("concourse:deploy:unsupported iaas " + client.provider.IAAS())
+		return errors.New("concourse:deploy:unsupported iaas " + client.deployArgs.IAAS)
 	}
 
 	err = client.tfCLI.Apply(environment, false)

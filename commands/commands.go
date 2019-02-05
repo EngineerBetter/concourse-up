@@ -13,22 +13,14 @@ var Commands = []cli.Command{
 }
 
 var nonInteractive bool
-var chosenIaas string
 
 // GlobalFlags are the global CLIflags
 var GlobalFlags = []cli.Flag{
 	cli.BoolFlag{
 		Name:        "non-interactive, n",
 		EnvVar:      "NON_INTERACTIVE",
-		Usage:       "(optional) Non interactive",
+		Usage:       "Non interactive",
 		Destination: &nonInteractive,
-	},
-	cli.StringFlag{
-		Name:        "iaas",
-		Usage:       "(optional) IAAS, can be AWS or GCP",
-		EnvVar:      "IAAS",
-		Value:       "AWS",
-		Destination: &chosenIaas,
 	},
 }
 

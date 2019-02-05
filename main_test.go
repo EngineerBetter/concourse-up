@@ -36,12 +36,4 @@ var _ = Describe("concourse-up", func() {
 		Expect(session.Out).To(Say("info, i      Fetches information on a deployed environment"))
 		Expect(session.Out).To(Say("maintain, m  Handles maintainenace operations in concourse-up"))
 	})
-
-	It("displays global args", func() {
-		command := exec.Command(cliPath, "--help")
-		session, err := Start(command, GinkgoWriter, GinkgoWriter)
-		Expect(err).ToNot(HaveOccurred(), "Error running CLI: "+cliPath)
-		Eventually(session).Should(Exit(0))
-		Expect(session.Out).To(Say("--non-interactive,\\s+-n\\s+\\(optional\\) Non interactive \\[\\$NON_INTERACTIVE\\]"))
-	})
 })

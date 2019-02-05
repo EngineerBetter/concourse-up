@@ -20,6 +20,7 @@ import (
 )
 
 var initialInfoArgs info.Args
+var awsClient iaas.Provider
 
 var infoFlags = []cli.Flag{
 	cli.StringFlag{
@@ -124,12 +125,6 @@ func buildInfoClient(name, version string, infoArgs info.Args, iaasFactory iaas.
 	if err != nil {
 		return nil, err
 	}
-
-	maintainer, err := concourse.NewMaintainer(infoArgs.IAAS)
-	if err != nil {
-		return nil, err
-	}
-
 	client := concourse.NewClient(
 		awsClient,
 		terraformClient,
@@ -143,7 +138,6 @@ func buildInfoClient(name, version string, infoArgs info.Args, iaasFactory iaas.
 		util.FindUserIP,
 		certs.NewAcmeClient,
 		version,
-		maintainer,
 	)
 
 	return client, nil

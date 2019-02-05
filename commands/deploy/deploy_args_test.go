@@ -17,6 +17,7 @@ func TestDeployArgs_Validate(t *testing.T) {
 		Domain:                 "",
 		GithubAuthClientID:     "",
 		GithubAuthClientSecret: "",
+		IAAS:                   "AWS",
 		SelfUpdate:             false,
 		TLSCert:                "",
 		TLSKey:                 "",

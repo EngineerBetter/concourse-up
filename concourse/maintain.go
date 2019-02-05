@@ -2,6 +2,7 @@ package concourse
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"regexp"
 	"time"
@@ -103,10 +104,27 @@ func (client *Client) constructBoshClient() (*bosh.IClient, error) {
 	if err != nil {
 		return nil, err
 	}
-
-	environment, err = client.maintainer.GetTFInputVars(client, conf, environment)
-	if err != nil {
-		return nil, err
+	switch client.provider.IAAS() {
+	case awsConst: // nolint
+		err = environment.Build(awsInputVarsMapFromConfig(conf))
+		if err != nil {
+			return nil, err
+		}
+	case gcpConst: // nolint
+		project, err1 := client.provider.Attr("project")
+		if err1 != nil {
+			return nil, err1
+		}
+		credentialspath, err1 := client.provider.Attr("credentials_path")
+		if err1 != nil {
+			return nil, err1
+		}
+		err1 = environment.Build(gcpInputVarsMapFromConfig(conf, credentialspath, project, client))
+		if err1 != nil {
+			return nil, err1
+		}
+	default:
+		return nil, errors.New("concourse:deploy:unsupported iaas " + client.deployArgs.IAAS)
 	}
 
 	err = client.tfCLI.BuildOutput(environment, metadata)

@@ -19,7 +19,7 @@ const configFilePath = "config.json"
 type IClient interface {
 	Load() (Config, error)
 	DeleteAll(config Config) error
-	LoadOrCreate(deployArgs *deploy.Args, chosenIaas string) (Config, bool, bool, error)
+	LoadOrCreate(deployArgs *deploy.Args) (Config, bool, bool, error)
 	Update(Config) error
 	StoreAsset(filename string, contents []byte) error
 	HasAsset(filename string) (bool, error)
@@ -126,7 +126,7 @@ func (client *Client) Load() (Config, error) {
 }
 
 // LoadOrCreate loads an existing config file from S3, or creates a default if one doesn't already exist
-func (client *Client) LoadOrCreate(deployArgs *deploy.Args, chosenIaas string) (Config, bool, bool, error) {
+func (client *Client) LoadOrCreate(deployArgs *deploy.Args) (Config, bool, bool, error) {
 
 	var isDomainUpdated bool
 
@@ -174,6 +174,10 @@ func (client *Client) LoadOrCreate(deployArgs *deploy.Args, chosenIaas string) (
 		return Config{}, newConfigCreated, false, err
 	}
 
+	if newConfigCreated {
+		config.IAAS = deployArgs.IAAS
+	}
+
 	if deployArgs.ZoneIsSet {
 		// This is a safeguard for a redeployment where zone does not belong to the region where the original deployment has happened
 		if !newConfigCreated && deployArgs.Zone != config.AvailabilityZone {
@@ -182,7 +186,7 @@ func (client *Client) LoadOrCreate(deployArgs *deploy.Args, chosenIaas string) (
 		config.AvailabilityZone = deployArgs.Zone
 	}
 	if newConfigCreated {
-		config.IAAS = chosenIaas
+		config.IAAS = deployArgs.IAAS
 	}
 	if newConfigCreated || deployArgs.WorkerCountIsSet {
 		config.ConcourseWorkerCount = deployArgs.WorkerCount
