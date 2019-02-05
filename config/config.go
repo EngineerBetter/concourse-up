@@ -96,6 +96,7 @@ func generateDefaultConfig(project, deployment, configBucket, region, namespace 
 		RDSPassword:              util.GeneratePassword(),
 		RDSUsername:              "admin" + util.GeneratePasswordWithLength(7),
 		Region:                   region,
+		Spot:                     true,
 		TFStatePath:              terraformStateFileName,
 		Namespace:                namespace,
 		PrivateCIDR:              "10.0.1.0/24",
