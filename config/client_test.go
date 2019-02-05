@@ -464,7 +464,7 @@ func TestClient_LoadOrCreate(t *testing.T) {
 						return defaultContents, true, nil
 					},
 					FakeBucketExists: func(name string) (bool, error) {
-						return true, nil
+						return false, nil
 					},
 					FakeRegion: func() string {
 						return "eu-west-1"
