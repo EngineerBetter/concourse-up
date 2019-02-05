@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/stretchr/testify/assert"
 	"reflect"
 	"testing"
 
@@ -485,16 +486,18 @@ func TestClient_LoadOrCreate(t *testing.T) {
 			},
 			wantErr: false,
 			validate: func(c Config, newConfigCreated, isDomainUpdated bool) (bool, string) {
-				isValidConfig :=
-					c.ConcourseWorkerCount == 1 &&
-						c.ConcourseWorkerSize == "xlarge" &&
-						c.ConcourseWebSize == "small" &&
-						c.RDSInstanceClass == "db.t2.small" &&
-						c.Spot == false &&
-						c.Domain == "FakeDomain"
-				isValid := isValidConfig && newConfigCreated
-				message := fmt.Sprintf("Config Key | Expected | \tReceived |\nConcourseWorkerCount| %v |\t%v|\nConcourseWorkerSize | %v |\t%v |\nConcourseWebSize | %v |\t %v |\nRDSInstanceClass |%v |\t| %v |\n|Spot | %v |\t| %v |", 1, c.ConcourseWorkerCount, "xlarge", c.ConcourseWorkerSize, "small", c.ConcourseWebSize, "db.t2.small", c.RDSInstanceClass, false, c.Spot)
-				return isValid, message
+				assert.Equal(t, c.NetworkCIDR, "10.0.0.0/16")
+				assert.Equal(t, c.PublicCIDR, "10.0.0.0/24")
+				assert.Equal(t, c.PrivateCIDR, "10.0.1.0/24")
+
+				assert.Equal(t, c.ConcourseWorkerCount, 1)
+				assert.Equal(t, c.ConcourseWorkerSize, "xlarge")
+				assert.Equal(t, c.ConcourseWebSize, "small")
+				assert.Equal(t, c.RDSInstanceClass, "db.t2.small")
+				assert.False(t, c.Spot)
+				assert.Equal(t, c.Domain, "FakeDomain")
+
+				return true, ""
 			},
 		},
 		{
