@@ -20,7 +20,6 @@ import (
 )
 
 var initialInfoArgs info.Args
-var awsClient iaas.Provider
 
 var infoFlags = []cli.Flag{
 	cli.StringFlag{

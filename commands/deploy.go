@@ -256,7 +256,7 @@ func buildClient(name, version string, deployArgs deploy.Args, provider iaas.Pro
 		bosh.New,
 		fly.New,
 		certs.Generate,
-		config.New(awsClient, name, deployArgs.Namespace),
+		config.New(provider, name, deployArgs.Namespace),
 		&deployArgs,
 		os.Stdout,
 		os.Stderr,
