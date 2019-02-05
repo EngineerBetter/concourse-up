@@ -162,7 +162,17 @@ func TestDeployArgs_Validate(t *testing.T) {
 			wantErr:     true,
 			expectedErr: "`not a real tag` is not in the format `key=value`",
 		},
-	}
+		{
+			name: "vpc-network-range requires public-subnet-range and private-subnet-range",
+			modification: func() Args {
+				args := defaultFields
+				args.NetworkCIDR = "10.0.0.0/16"
+				args.PrivateCIDR = "10.0.1.0/24"
+				return args
+			},
+			wantErr:     true,
+			expectedErr: "--public-subnet-range and --private-subnet-range are required when --vpc-network-range is provided",
+		}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			args := tt.modification()

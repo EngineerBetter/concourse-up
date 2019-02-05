@@ -37,6 +37,9 @@ var _ = Describe("commands", func() {
 				Expect(session.Out).To(Say("--tls-cert value"))
 				Expect(session.Out).To(Say("--tls-key value"))
 				Expect(session.Out).To(Say("--db-size value"))
+				Expect(session.Out).To(Say("--vpc-network-range value\\s+\\(optional\\) VPC network CIDR to deploy into"))
+				Expect(session.Out).To(Say("--public-subnet-range value\\s+\\(optional\\) public network CIDR that must be within --vpc-network-range"))
+				Expect(session.Out).To(Say("--private-subnet-range value\\s+\\(optional\\) private network CIDR that must be within --vpc-network-range"))
 			})
 		})
 

@@ -43,14 +43,20 @@ type Args struct {
 	GithubAuthIsSet bool
 	Tags            cli.StringSlice
 	// TagsIsSet is true if the user has specified tags using --tags
-	TagsIsSet       bool
-	Spot            bool
-	SpotIsSet       bool
-	Preemptible     bool
-	Zone            string
-	ZoneIsSet       bool
-	WorkerType      string
-	WorkerTypeIsSet bool
+	TagsIsSet        bool
+	Spot             bool
+	SpotIsSet        bool
+	Preemptible      bool
+	Zone             string
+	ZoneIsSet        bool
+	WorkerType       string
+	WorkerTypeIsSet  bool
+	NetworkCIDR      string
+	NetworkCIDRIsSet bool
+	PublicCIDR       string
+	PublicCIDRIsSet  bool
+	PrivateCIDR      string
+	PrivateCIDRIsSet bool
 }
 
 // MarkSetFlags is marking the IsSet DeployArgs
@@ -94,6 +100,12 @@ func (a *Args) MarkSetFlags(c FlagSetChecker) error {
 				a.ZoneIsSet = true
 			case "worker-type":
 				a.WorkerTypeIsSet = true
+			case "vpc-network-range":
+				a.NetworkCIDRIsSet = true
+			case "public-subnet-range":
+				a.PublicCIDRIsSet = true
+			case "private-subnet-range":
+				a.PrivateCIDRIsSet = true
 			default:
 				return fmt.Errorf("flag %q is not supported by deployment flags", f)
 			}
@@ -139,6 +151,10 @@ func (a Args) Validate() error {
 	}
 
 	if err := a.validateGithubFields(); err != nil {
+		return err
+	}
+
+	if err := a.validateNetworkRanges(); err != nil {
 		return err
 	}
 
@@ -200,6 +216,16 @@ func (a Args) validateGithubFields() error {
 	}
 	if a.GithubAuthClientID == "" && a.GithubAuthClientSecret != "" {
 		return errors.New("--github-auth-client-secret requires --github-auth-client-id to also be provided")
+	}
+
+	return nil
+}
+
+func (a Args) validateNetworkRanges() error {
+	if a.NetworkCIDR != "" || a.PublicCIDR != "" || a.PrivateCIDR != "" {
+		if a.NetworkCIDR == "" || a.PublicCIDR == "" || a.PrivateCIDR == "" {
+			return errors.New("--public-subnet-range and --private-subnet-range are required when --vpc-network-range is provided")
+		}
 	}
 
 	return nil
