@@ -486,16 +486,16 @@ func TestClient_LoadOrCreate(t *testing.T) {
 			},
 			wantErr: false,
 			validate: func(c Config, newConfigCreated, isDomainUpdated bool) (bool, string) {
-				assert.Equal(t, c.NetworkCIDR, "10.0.0.0/16")
-				assert.Equal(t, c.PublicCIDR, "10.0.0.0/24")
-				assert.Equal(t, c.PrivateCIDR, "10.0.1.0/24")
+				assert.Equal(t, "10.0.0.0/16", c.NetworkCIDR)
+				assert.Equal(t, "10.0.0.0/24", c.PublicCIDR)
+				assert.Equal(t, "10.0.1.0/24", c.PrivateCIDR)
 
-				assert.Equal(t, c.ConcourseWorkerCount, 1)
-				assert.Equal(t, c.ConcourseWorkerSize, "xlarge")
-				assert.Equal(t, c.ConcourseWebSize, "small")
-				assert.Equal(t, c.RDSInstanceClass, "db.t2.small")
+				assert.Equal(t, 1, c.ConcourseWorkerCount)
+				assert.Equal(t, "xlarge", c.ConcourseWorkerSize)
+				assert.Equal(t, "small", c.ConcourseWebSize)
+				assert.Equal(t, "db.t2.small", c.RDSInstanceClass)
 				assert.False(t, c.Spot)
-				assert.Equal(t, c.Domain, "FakeDomain")
+				assert.Equal(t, "FakeDomain", c.Domain)
 
 				return true, ""
 			},

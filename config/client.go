@@ -215,6 +215,14 @@ func (client *Client) LoadOrCreate(deployArgs *deploy.Args) (Config, bool, bool,
 		config.WorkerType = deployArgs.WorkerType
 	}
 
+	if newConfigCreated {
+		if deployArgs.NetworkCIDRIsSet && deployArgs.PublicCIDRIsSet && deployArgs.PrivateCIDRIsSet {
+			config.NetworkCIDR = deployArgs.NetworkCIDR
+			config.PublicCIDR = deployArgs.PublicCIDR
+			config.PrivateCIDR = deployArgs.PrivateCIDR
+		}
+	}
+
 	if newConfigCreated || deployArgs.DomainIsSet {
 		if config.Domain != deployArgs.Domain {
 			isDomainUpdated = true
