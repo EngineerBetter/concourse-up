@@ -20,7 +20,6 @@ import (
 )
 
 var initialInfoArgs info.Args
-var awsClient iaas.Provider
 
 var infoFlags = []cli.Flag{
 	cli.StringFlag{
@@ -117,7 +116,7 @@ func setInfoRegion(infoArgs info.Args) info.Args {
 }
 
 func buildInfoClient(name, version string, infoArgs info.Args, iaasFactory iaas.Factory) (*concourse.Client, error) {
-	awsClient, err := iaasFactory(infoArgs.IAAS, infoArgs.AWSRegion)
+	provider, err := iaasFactory(infoArgs.IAAS, infoArgs.AWSRegion)
 	if err != nil {
 		return nil, err
 	}
@@ -125,13 +124,20 @@ func buildInfoClient(name, version string, infoArgs info.Args, iaasFactory iaas.
 	if err != nil {
 		return nil, err
 	}
+
+	tfInputVarsFactory, err := concourse.NewTFInputVarsFactory(provider)
+	if err != nil {
+		return nil, fmt.Errorf("Error creating TFInputVarsFactory [%v]", err)
+	}
+
 	client := concourse.NewClient(
-		awsClient,
+		provider,
 		terraformClient,
+		tfInputVarsFactory,
 		bosh.New,
 		fly.New,
 		certs.Generate,
-		config.New(awsClient, name, infoArgs.Namespace),
+		config.New(provider, name, infoArgs.Namespace),
 		nil,
 		os.Stdout,
 		os.Stderr,

@@ -3,7 +3,6 @@ package concourse
 import (
 	"crypto/x509"
 	"encoding/pem"
-	"errors"
 	"fmt"
 	"io"
 	"text/template"
@@ -82,32 +81,12 @@ func (client *Client) Deploy() error {
 	conf.HostedZoneRecordPrefix = r.HostedZoneRecordPrefix
 	conf.Domain = r.Domain
 
-	environment, metadata, err := client.tfCLI.IAAS(client.provider.IAAS())
+	_, metadata, err := client.tfCLI.IAAS(client.provider.IAAS())
 	if err != nil {
 		return err
 	}
-	switch client.provider.IAAS() {
-	case awsConst: // nolint
-		err = environment.Build(awsInputVarsMapFromConfig(conf))
-		if err != nil {
-			return err
-		}
-	case gcpConst: // nolint
-		project, err1 := client.provider.Attr("project")
-		if err1 != nil {
-			return err1
-		}
-		credentialspath, err1 := client.provider.Attr("credentials_path")
-		if err1 != nil {
-			return err1
-		}
-		err1 = environment.Build(gcpInputVarsMapFromConfig(conf, credentialspath, project, client))
-		if err1 != nil {
-			return err1
-		}
-	default:
-		return errors.New("concourse:deploy:unsupported iaas " + client.deployArgs.IAAS)
-	}
+
+	environment := client.tfInputVarsFactory.NewInputVars(conf)
 
 	err = client.tfCLI.Apply(environment, false)
 	if err != nil {

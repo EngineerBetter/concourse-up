@@ -5,9 +5,6 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/EngineerBetter/concourse-up/terraform/internal/aws"
-	"github.com/EngineerBetter/concourse-up/terraform/internal/gcp"
-
 	"github.com/EngineerBetter/concourse-up/internal/fakeexec"
 	"github.com/EngineerBetter/concourse-up/terraform"
 	"github.com/stretchr/testify/require"
@@ -140,15 +137,15 @@ func TestCLI_IAAS(t *testing.T) {
 		{
 			name:             "return GCP provider hooks for GCP",
 			args:             "GCP",
-			wantInputVars:    &gcp.InputVars{},
-			wantIAASMetadata: &gcp.Metadata{},
+			wantInputVars:    &terraform.GCPInputVars{},
+			wantIAASMetadata: &terraform.GCPMetadata{},
 			wantErr:          false,
 		},
 		{
 			name:             "return AWS provider hooks for AWS",
 			args:             "AWS",
-			wantInputVars:    &aws.InputVars{},
-			wantIAASMetadata: &aws.Metadata{},
+			wantInputVars:    &terraform.AWSInputVars{},
+			wantIAASMetadata: &terraform.AWSMetadata{},
 			wantErr:          false,
 		},
 		{

@@ -2,6 +2,7 @@ package commands
 
 import (
 	"errors"
+	"fmt"
 	"os"
 	"strings"
 
@@ -102,9 +103,16 @@ func buildMaintainClient(name, version string, maintainArgs maintain.Args, iaasF
 	if err != nil {
 		return nil, err
 	}
+
+	tfInputVarsFactory, err := concourse.NewTFInputVarsFactory(provider)
+	if err != nil {
+		return nil, fmt.Errorf("Error creating TFInputVarsFactory [%v]", err)
+	}
+
 	client := concourse.NewClient(
 		provider,
 		terraformClient,
+		tfInputVarsFactory,
 		bosh.New,
 		fly.New,
 		certs.Generate,

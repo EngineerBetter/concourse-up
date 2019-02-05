@@ -1,14 +1,14 @@
-package gcp_test
+package terraform_test
 
 import (
 	"bytes"
 	"reflect"
 	"testing"
 
-	"github.com/EngineerBetter/concourse-up/terraform/internal/gcp"
+	. "github.com/EngineerBetter/concourse-up/terraform"
 )
 
-func TestInputVars_ConfigureTerraform(t *testing.T) {
+func TestGCPInputVars_ConfigureTerraform(t *testing.T) {
 	type FakeInputVars struct {
 		Zone               string
 		Tags               string
@@ -47,7 +47,7 @@ func TestInputVars_ConfigureTerraform(t *testing.T) {
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			v := &gcp.InputVars{
+			v := &GCPInputVars{
 				Zone:               test.fakeInputVars.Zone,
 				Tags:               test.fakeInputVars.Tags,
 				Project:            test.fakeInputVars.Project,
@@ -66,9 +66,9 @@ func TestInputVars_ConfigureTerraform(t *testing.T) {
 	}
 }
 
-func TestMetadata_Get(t *testing.T) {
+func TestGCPMetadata_Get(t *testing.T) {
 	type fields struct {
-		Network gcp.MetadataStringValue
+		Network MetadataStringValue
 	}
 	tests := []struct {
 		name    string
@@ -79,7 +79,7 @@ func TestMetadata_Get(t *testing.T) {
 	}{{
 		name: "Success",
 		fields: fields{
-			Network: gcp.MetadataStringValue{
+			Network: MetadataStringValue{
 				Value: "fakeNetwork",
 			},
 		},
@@ -89,7 +89,7 @@ func TestMetadata_Get(t *testing.T) {
 		{
 			name: "Failure",
 			fields: fields{
-				Network: gcp.MetadataStringValue{
+				Network: MetadataStringValue{
 					Value: "fakeMetadataStringValue",
 				},
 			},
@@ -100,7 +100,7 @@ func TestMetadata_Get(t *testing.T) {
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			metadata := &gcp.Metadata{
+			metadata := &GCPMetadata{
 				Network: test.fields.Network,
 			}
 			got, err := metadata.Get(test.fakeKey)
@@ -114,61 +114,7 @@ func TestMetadata_Get(t *testing.T) {
 	}
 }
 
-func TestInputVars_Build(t *testing.T) {
-	tests := []struct {
-		fakeInputVars gcp.InputVars
-		name          string
-		data          map[string]interface{}
-		wantErr       bool
-	}{
-		{
-			name: "Success",
-			data: map[string]interface{}{
-				"Region":             "aRegion",
-				"Zone":               "aZone",
-				"Tags":               "someTags",
-				"Project":            "aProject",
-				"GCPCredentialsJSON": "aCredentialsJSONfile",
-				"ExternalIP":         "anExternalIP",
-				"Deployment":         "aDeployment",
-				"ConfigBucket":       "aConfigBucket",
-				"DBName":             "aDBName",
-				"DBUsername":         "aDBUsername",
-				"DBPassword":         "aDBPassword",
-				"DBTier":             "aDBTier",
-				"AllowIPs":           "aAllowIPs",
-				"Namespace":          "Namespace",
-				"DNSManagedZoneName": "aDNSManagedZoneName",
-				"DNSRecordSetPrefix": "aDNSRecordSetPrefix",
-				"PublicCIDR":         "aPublicCIDR",
-				"PrivateCIDR":        "aPrivateCIDR"},
-			fakeInputVars: gcp.InputVars{},
-		},
-		{
-			name: "Failure",
-			data: map[string]interface{}{
-				"Region":             "aRegion",
-				"Zone":               "aZone",
-				"Tags":               "someTags",
-				"Project":            "aProject",
-				"GCPCredentialsJSON": "aCredentialsJSONfile",
-				"ExternalIP":         "anExternalIP",
-				"Deployment":         "aDeployment",
-			},
-			wantErr:       true,
-			fakeInputVars: gcp.InputVars{},
-		},
-	}
-	for _, test := range tests {
-		t.Run(test.name, func(t *testing.T) {
-			if err := test.fakeInputVars.Build(test.data); (err != nil) != test.wantErr {
-				t.Errorf("InputVars.Build() error = %v, wantErr %v", err, test.wantErr)
-			}
-		})
-	}
-}
-
-func TestMetadata_Init(t *testing.T) {
+func TestGCPMetadata_Init(t *testing.T) {
 	tests := []struct {
 		name          string
 		buffer        *bytes.Buffer
@@ -192,7 +138,7 @@ func TestMetadata_Init(t *testing.T) {
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			metadata := &gcp.Metadata{}
+			metadata := &GCPMetadata{}
 			buffer := bytes.NewBuffer(nil)
 			buffer.WriteString(test.data)
 			if err := metadata.Init(buffer); (err != nil) != test.wantErr {

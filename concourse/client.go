@@ -20,6 +20,7 @@ import (
 // Client is a concrete implementation of IClient interface
 type Client struct {
 	provider              iaas.Provider
+	tfInputVarsFactory    TFInputVarsFactory
 	tfCLI                 terraform.CLIInterface
 	boshClientFactory     bosh.ClientFactory
 	flyClientFactory      func(iaas.Provider, fly.Credentials, io.Writer, io.Writer, []byte) (fly.IClient, error)
@@ -50,6 +51,7 @@ var gcpVersionFile = MustAsset("../../concourse-up-ops/director-versions-gcp.jso
 func NewClient(
 	provider iaas.Provider,
 	tfCLI terraform.CLIInterface,
+	tfInputVarsFactory TFInputVarsFactory,
 	boshClientFactory bosh.ClientFactory,
 	flyClientFactory func(iaas.Provider, fly.Credentials, io.Writer, io.Writer, []byte) (fly.IClient, error),
 	certGenerator func(constructor func(u *certs.User) (*lego.Client, error), caName string, provider iaas.Provider, ip ...string) (*certs.Certs, error),
@@ -65,6 +67,7 @@ func NewClient(
 	}).([]byte)
 	return &Client{
 		provider:              provider,
+		tfInputVarsFactory:    tfInputVarsFactory,
 		tfCLI:                 tfCLI,
 		boshClientFactory:     boshClientFactory,
 		flyClientFactory:      flyClientFactory,
@@ -108,52 +111,4 @@ func (client *Client) buildBoshClient(config config.Config, metadata terraform.I
 		client.stderr,
 		client.provider,
 	)
-}
-
-func awsInputVarsMapFromConfig(c config.Config) map[string]interface{} {
-	return map[string]interface{}{
-		"NetworkCIDR":            c.NetworkCIDR,
-		"PublicCIDR":             c.PublicCIDR,
-		"PrivateCIDR":            c.PrivateCIDR,
-		"AllowIPs":               c.AllowIPs,
-		"AvailabilityZone":       c.AvailabilityZone,
-		"ConfigBucket":           c.ConfigBucket,
-		"Deployment":             c.Deployment,
-		"HostedZoneID":           c.HostedZoneID,
-		"HostedZoneRecordPrefix": c.HostedZoneRecordPrefix,
-		"Namespace":              c.Namespace,
-		"Project":                c.Project,
-		"PublicKey":              c.PublicKey,
-		"RDSDefaultDatabaseName": c.RDSDefaultDatabaseName,
-		"RDSInstanceClass":       c.RDSInstanceClass,
-		"RDSPassword":            c.RDSPassword,
-		"RDSUsername":            c.RDSUsername,
-		"Region":                 c.Region,
-		"SourceAccessIP":         c.SourceAccessIP,
-		"TFStatePath":            c.TFStatePath,
-		"MultiAZRDS":             c.MultiAZRDS,
-	}
-}
-
-func gcpInputVarsMapFromConfig(c config.Config, credentialspath string, project string, client *Client) map[string]interface{} {
-	return map[string]interface{}{
-		"PublicCIDR":         c.PublicCIDR,
-		"PrivateCIDR":        c.PrivateCIDR,
-		"AllowIPs":           c.AllowIPs,
-		"ConfigBucket":       c.ConfigBucket,
-		"DBName":             c.RDSDefaultDatabaseName,
-		"DBPassword":         c.RDSPassword,
-		"DBTier":             c.RDSInstanceClass,
-		"DBUsername":         c.RDSUsername,
-		"Deployment":         c.Deployment,
-		"DNSManagedZoneName": c.HostedZoneID,
-		"DNSRecordSetPrefix": c.HostedZoneRecordPrefix,
-		"ExternalIP":         c.SourceAccessIP,
-		"GCPCredentialsJSON": credentialspath,
-		"Namespace":          c.Namespace,
-		"Project":            project,
-		"Region":             client.provider.Region(),
-		"Tags":               "",
-		"Zone":               client.provider.Zone(""),
-	}
 }

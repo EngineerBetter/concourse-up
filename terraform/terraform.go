@@ -12,8 +12,6 @@ import (
 	"strings"
 
 	"github.com/EngineerBetter/concourse-up/resource"
-	"github.com/EngineerBetter/concourse-up/terraform/internal/aws"
-	"github.com/EngineerBetter/concourse-up/terraform/internal/gcp"
 )
 
 const awsConst = "AWS"
@@ -22,7 +20,6 @@ const gcpConst = "GCP"
 // InputVars exposes ConfigureDirectorManifestCPI
 type InputVars interface {
 	ConfigureTerraform(string) (string, error)
-	Build(map[string]interface{}) error
 }
 
 // IAASMetadata holds IAAS specific terraform metadata
@@ -109,10 +106,10 @@ func (c *CLI) IAAS(name string) (InputVars, IAASMetadata, error) {
 	switch strings.ToUpper(name) {
 	case awsConst: // nolint
 		c.iaas = "AWS" // nolint
-		return &aws.InputVars{}, &aws.Metadata{}, nil
+		return &AWSInputVars{}, &AWSMetadata{}, nil
 	case gcpConst: // nolint
 		c.iaas = "GCP" // nolint
-		return &gcp.InputVars{}, &gcp.Metadata{}, nil
+		return &GCPInputVars{}, &GCPMetadata{}, nil
 	}
 	return &NullInputVars{}, &NullMetadata{}, errors.New("terraform: " + name + " not a valid iaas provider")
 

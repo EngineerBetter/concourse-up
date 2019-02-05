@@ -3,6 +3,7 @@ package concourse_test
 import (
 	"errors"
 	"fmt"
+	"github.com/EngineerBetter/concourse-up/terraform/terraformfakes"
 	"github.com/xenolf/lego/lego"
 	"io"
 	"reflect"
@@ -89,6 +90,13 @@ var _ = Describe("Client", func() {
 		},
 		FakeRegion: func() string {
 			return "eu-west-1"
+		},
+	}
+
+	tfInputVarsFactory := &terraformfakes.FakeTFInputVarsFactory{
+		NewInputVarsFn: func(c config.Config) terraform.InputVars {
+			actions = append(actions, "converting config.Config to TFInputVars")
+			return nil
 		},
 	}
 
@@ -217,7 +225,7 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 			FakeIAAS: func(name string) (terraform.InputVars, terraform.IAASMetadata, error) {
 				fakeInputVars := &testsupport.FakeTerraformInputVars{
 					FakeBuild: func(data map[string]interface{}) error {
-						actions = append(actions, "building iaas environment")
+						actions = append(actions, "converting config.Config to TFInputVars")
 						return nil
 					},
 				}
@@ -286,6 +294,7 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 			return concourse.NewClient(
 				awsClient,
 				terraformCLI,
+				tfInputVarsFactory,
 				boshClientFactory,
 				func(iaas.Provider, fly.Credentials, io.Writer, io.Writer, []byte) (fly.IClient, error) {
 					return fakeFlyClient, nil
@@ -305,6 +314,7 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 			return concourse.NewClient(
 				otherRegionClient,
 				terraformCLI,
+				tfInputVarsFactory,
 				boshClientFactory,
 				func(iaas.Provider, fly.Credentials, io.Writer, io.Writer, []byte) (fly.IClient, error) {
 					return fakeFlyClient, nil
@@ -346,7 +356,7 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 			err := client.Deploy()
 			Expect(err).ToNot(HaveOccurred())
 
-			Expect(actions).To(ContainElement("building iaas environment"))
+			Expect(actions).To(ContainElement("converting config.Config to TFInputVars"))
 		})
 
 		It("Loads or creates config file", func() {
@@ -525,7 +535,7 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 			err := client.Destroy()
 			Expect(err).ToNot(HaveOccurred())
 
-			Expect(actions).To(ContainElement("building iaas environment"))
+			Expect(actions).To(ContainElement("converting config.Config to TFInputVars"))
 		})
 		It("Loads terraform output", func() {
 			client := buildClient()
@@ -599,7 +609,7 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 			err := client.Deploy()
 			Expect(err).ToNot(HaveOccurred())
 
-			Expect(actions).To(ContainElement("building iaas environment"))
+			Expect(actions).To(ContainElement("converting config.Config to TFInputVars"))
 		})
 
 		It("Loads terraform output", func() {

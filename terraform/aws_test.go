@@ -1,14 +1,14 @@
-package aws_test
+package terraform_test
 
 import (
 	"bytes"
 	"reflect"
 	"testing"
 
-	"github.com/EngineerBetter/concourse-up/terraform/internal/aws"
+	. "github.com/EngineerBetter/concourse-up/terraform"
 )
 
-func TestInputVars_ConfigureTerraform(t *testing.T) {
+func TestAWSInputVars_ConfigureTerraform(t *testing.T) {
 	type FakeInputVars struct {
 		Deployment     string
 		Project        string
@@ -47,7 +47,7 @@ func TestInputVars_ConfigureTerraform(t *testing.T) {
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			v := &aws.InputVars{
+			v := &AWSInputVars{
 				Deployment:     test.fakeInputVars.Deployment,
 				Project:        test.fakeInputVars.Project,
 				Region:         test.fakeInputVars.Region,
@@ -66,9 +66,9 @@ func TestInputVars_ConfigureTerraform(t *testing.T) {
 	}
 }
 
-func TestMetadata_Get(t *testing.T) {
+func TestAWSMetadata_Get(t *testing.T) {
 	type fields struct {
-		VPCID aws.MetadataStringValue
+		VPCID MetadataStringValue
 	}
 	tests := []struct {
 		name    string
@@ -79,7 +79,7 @@ func TestMetadata_Get(t *testing.T) {
 	}{{
 		name: "Success",
 		fields: fields{
-			VPCID: aws.MetadataStringValue{
+			VPCID: MetadataStringValue{
 				Value: "fakeMetadataStringValue",
 			},
 		},
@@ -89,7 +89,7 @@ func TestMetadata_Get(t *testing.T) {
 		{
 			name: "Failure",
 			fields: fields{
-				VPCID: aws.MetadataStringValue{
+				VPCID: MetadataStringValue{
 					Value: "fakeMetadataStringValue",
 				},
 			},
@@ -100,7 +100,7 @@ func TestMetadata_Get(t *testing.T) {
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			metadata := &aws.Metadata{
+			metadata := &AWSMetadata{
 				VPCID: test.fields.VPCID,
 			}
 			got, err := metadata.Get(test.fakeKey)
@@ -114,72 +114,7 @@ func TestMetadata_Get(t *testing.T) {
 	}
 }
 
-func TestInputVars_Build(t *testing.T) {
-	tests := []struct {
-		fakeInputVars aws.InputVars
-		name          string
-		data          map[string]interface{}
-		wantErr       bool
-	}{
-		{
-			name: "Success",
-			data: map[string]interface{}{
-				"AllowIPs":               "allowips",
-				"AvailabilityZone":       "availabilityzone",
-				"ConfigBucket":           "configbucket",
-				"Deployment":             "deployment",
-				"HostedZoneID":           "hostedzoneid",
-				"HostedZoneRecordPrefix": "hostedzonerecordprefix",
-				"Namespace":              "namespace",
-				"Project":                "project",
-				"PublicKey":              "publickey",
-				"RDSDefaultDatabaseName": "rdsdefaultdatabasename",
-				"RDSInstanceClass":       "rdsinstanceclass",
-				"RDSPassword":            "rdspassword",
-				"RDSUsername":            "rdsusername",
-				"Region":                 "region",
-				"SourceAccessIP":         "sourceaccessip",
-				"TFStatePath":            "tfstatepath",
-				"MultiAZRDS":             true,
-				"PublicCIDR":             "aPublicCIDR",
-				"PrivateCIDR":            "aPrivateCIDR",
-				"NetworkCIDR":            "aNetworkCIDR"},
-			fakeInputVars: aws.InputVars{},
-		},
-		{
-			name: "Failure",
-			data: map[string]interface{}{
-				"AvailabilityZone":       "availabilityzone",
-				"ConfigBucket":           "configbucket",
-				"Deployment":             "deployment",
-				"HostedZoneID":           "hostedzoneid",
-				"HostedZoneRecordPrefix": "hostedzonerecordprefix",
-				"Namespace":              "namespace",
-				"Project":                "project",
-				"PublicKey":              "publickey",
-				"RDSDefaultDatabaseName": "rdsdefaultdatabasename",
-				"RDSInstanceClass":       "rdsinstanceclass",
-				"RDSPassword":            "rdspassword",
-				"RDSUsername":            "rdsusername",
-				"Region":                 "region",
-				"SourceAccessIP":         "sourceaccessip",
-				"TFStatePath":            "tfstatepath",
-				"MultiAZRDS":             true,
-			},
-			wantErr:       true,
-			fakeInputVars: aws.InputVars{},
-		},
-	}
-	for _, test := range tests {
-		t.Run(test.name, func(t *testing.T) {
-			if err := test.fakeInputVars.Build(test.data); (err != nil) != test.wantErr {
-				t.Errorf("InputVars.Build() error = %v, wantErr %v", err, test.wantErr)
-			}
-		})
-	}
-}
-
-func TestMetadata_Init(t *testing.T) {
+func TestAWSMetadata_Init(t *testing.T) {
 	tests := []struct {
 		name          string
 		buffer        *bytes.Buffer
@@ -203,7 +138,7 @@ func TestMetadata_Init(t *testing.T) {
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			metadata := &aws.Metadata{}
+			metadata := &AWSMetadata{}
 			buffer := bytes.NewBuffer(nil)
 			buffer.WriteString(test.data)
 			if err := metadata.Init(buffer); (err != nil) != test.wantErr {

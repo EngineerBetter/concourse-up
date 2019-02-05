@@ -98,7 +98,7 @@ func setRegion(destroyArgs destroy.Args) destroy.Args {
 	return destroyArgs
 }
 func buildDestroyClient(name, version string, destroyArgs destroy.Args, iaasFactory iaas.Factory) (*concourse.Client, error) {
-	awsClient, err := iaasFactory(destroyArgs.IAAS, destroyArgs.AWSRegion)
+	provider, err := iaasFactory(destroyArgs.IAAS, destroyArgs.AWSRegion)
 	if err != nil {
 		return nil, err
 	}
@@ -106,13 +106,20 @@ func buildDestroyClient(name, version string, destroyArgs destroy.Args, iaasFact
 	if err != nil {
 		return nil, err
 	}
+
+	tfInputVarsFactory, err := concourse.NewTFInputVarsFactory(provider)
+	if err != nil {
+		return nil, fmt.Errorf("Error creating TFInputVarsFactory [%v]", err)
+	}
+
 	client := concourse.NewClient(
-		awsClient,
+		provider,
 		terraformClient,
+		tfInputVarsFactory,
 		bosh.New,
 		fly.New,
 		certs.Generate,
-		config.New(awsClient, name, destroyArgs.Namespace),
+		config.New(provider, name, destroyArgs.Namespace),
 		nil,
 		os.Stdout,
 		os.Stderr,

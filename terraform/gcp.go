@@ -1,10 +1,9 @@
-package gcp
+package terraform
 
 import (
 	"bytes"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"reflect"
 
 	"github.com/EngineerBetter/concourse-up/util"
@@ -12,7 +11,7 @@ import (
 )
 
 // InputVars holds all the parameters GCP IAAS needs
-type InputVars struct {
+type GCPInputVars struct {
 	AllowIPs           string
 	ConfigBucket       string
 	DBName             string
@@ -34,7 +33,7 @@ type InputVars struct {
 }
 
 // ConfigureTerraform interpolates terraform contents and returns terraform config
-func (v *InputVars) ConfigureTerraform(terraformContents string) (string, error) {
+func (v *GCPInputVars) ConfigureTerraform(terraformContents string) (string, error) {
 	terraformConfig, err := util.RenderTemplate("terraform", terraformContents, v)
 	if terraformConfig == nil {
 		return "", err
@@ -42,44 +41,8 @@ func (v *InputVars) ConfigureTerraform(terraformContents string) (string, error)
 	return string(terraformConfig), err
 }
 
-// Build fills the InputVars struct with values from the map input
-func (v *InputVars) Build(data map[string]interface{}) error {
-	reflectValue := reflect.ValueOf(v)
-	env := reflectValue.Elem()
-	reflectType := env.Type()
-	for i := 0; i < env.NumField(); i++ {
-		value, ok := data[reflectType.Field(i).Name]
-		if !ok {
-			return errors.New("terraform:gcp field " + reflectType.Field(i).Name + " should be provided")
-		}
-		if !env.Field(i).CanSet() {
-			return errors.New("terraform:gcp field " + reflectType.Field(i).Name + " cannot be set")
-		}
-		switch trueValue := value.(type) {
-		case string:
-			env.Field(i).SetString(trueValue)
-		case bool:
-			env.Field(i).SetBool(trueValue)
-		default:
-			return fmt.Errorf("Value: %v of type %T not supported", value, value)
-		}
-	}
-	i := env.Interface()
-	tempStruct, ok := i.(InputVars)
-	if !ok {
-		return errors.New("could not Build terraform input data")
-	}
-	v = &tempStruct // nolint
-	return nil
-}
-
-// MetadataStringValue is a terraform output string variable
-type MetadataStringValue struct {
-	Value string `json:"value"`
-}
-
 // Metadata represents output from terraform on GCP or GCP
-type Metadata struct {
+type GCPMetadata struct {
 	Network                    MetadataStringValue `json:"network" valid:"required"`
 	PrivateSubnetworkName      MetadataStringValue `json:"private_subnetwork_name" valid:"required"`
 	PublicSubnetworkName       MetadataStringValue `json:"public_subnetwork_name" valid:"required"`
@@ -98,13 +61,13 @@ type Metadata struct {
 }
 
 // AssertValid returns an error if the struct contains any missing fields
-func (metadata *Metadata) AssertValid() error {
+func (metadata *GCPMetadata) AssertValid() error {
 	_, err := govalidator.ValidateStruct(metadata)
 	return err
 }
 
 // Init populates metadata struct with values from the buffer
-func (metadata *Metadata) Init(buffer *bytes.Buffer) error {
+func (metadata *GCPMetadata) Init(buffer *bytes.Buffer) error {
 	if err := json.NewDecoder(buffer).Decode(&metadata); err != nil {
 		return err
 	}
@@ -113,7 +76,7 @@ func (metadata *Metadata) Init(buffer *bytes.Buffer) error {
 }
 
 // Get returns a the specified value from the metadata struct
-func (metadata *Metadata) Get(key string) (string, error) {
+func (metadata *GCPMetadata) Get(key string) (string, error) {
 	reflectValue := reflect.ValueOf(metadata)
 	reflectStruct := reflectValue.Elem()
 	value := reflectStruct.FieldByName(key)

@@ -15,20 +15,18 @@ func (client *Client) Destroy() error {
 		return err
 	}
 
-	environment, metadata, err := client.tfCLI.IAAS(client.provider.IAAS())
+	_, metadata, err := client.tfCLI.IAAS(client.provider.IAAS())
 	if err != nil {
 		return err
 	}
+
+	environment := client.tfInputVarsFactory.NewInputVars(conf)
 
 	var volumesToDelete []string
 
 	switch client.provider.IAAS() {
 
 	case awsConst: // nolint
-		err = environment.Build(awsInputVarsMapFromConfig(conf))
-		if err != nil {
-			return err
-		}
 		err = client.tfCLI.BuildOutput(environment, metadata)
 		if err != nil {
 			return err
@@ -47,15 +45,7 @@ func (client *Client) Destroy() error {
 		if err1 != nil {
 			return err1
 		}
-		credentialspath, err1 := client.provider.Attr("credentials_path")
-		if err1 != nil {
-			return err1
-		}
 		zone := client.provider.Zone("")
-		err1 = environment.Build(gcpInputVarsMapFromConfig(conf, credentialspath, project, client))
-		if err1 != nil {
-			return nil
-		}
 		err1 = client.provider.DeleteVMsInDeployment(zone, project, conf.Deployment)
 		if err1 != nil {
 			return err1

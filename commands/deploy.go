@@ -265,7 +265,7 @@ func validateNameLength(name string, args deploy.Args) error {
 }
 
 func buildClient(name, version string, deployArgs deploy.Args, iaasFactory iaas.Factory) (*concourse.Client, error) {
-	awsClient, err := iaasFactory(deployArgs.IAAS, deployArgs.AWSRegion)
+	provider, err := iaasFactory(deployArgs.IAAS, deployArgs.AWSRegion)
 	if err != nil {
 		return nil, err
 	}
@@ -273,13 +273,20 @@ func buildClient(name, version string, deployArgs deploy.Args, iaasFactory iaas.
 	if err != nil {
 		return nil, err
 	}
+
+	tfInputVarsFactory, err := concourse.NewTFInputVarsFactory(provider)
+	if err != nil {
+		return nil, fmt.Errorf("Error creating TFInputVarsFactory [%v]", err)
+	}
+
 	client := concourse.NewClient(
-		awsClient,
+		provider,
 		terraformClient,
+		tfInputVarsFactory,
 		bosh.New,
 		fly.New,
 		certs.Generate,
-		config.New(awsClient, name, deployArgs.Namespace),
+		config.New(provider, name, deployArgs.Namespace),
 		&deployArgs,
 		os.Stdout,
 		os.Stderr,
