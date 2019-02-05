@@ -598,6 +598,85 @@ func TestClient_LoadOrCreate(t *testing.T) {
 				return isValid, message
 			},
 		},
+		{
+			name: "on initial deploy all flags are reflected in resulting config",
+			fields: fields{
+				Iaas: &testsupport.FakeAWSClient{
+					FakeEnsureFileExists: func(bucket, path string, defaultContents []byte) ([]byte, bool, error) {
+						return defaultContents, true, nil
+					},
+					FakeBucketExists: func(name string) (bool, error) {
+						return false, nil
+					},
+					FakeRegion: func() string {
+						return "europe-west1"
+					},
+					FakeDBType: func(in string) string {
+						return "db.t2." + in
+					},
+				},
+			},
+			args: args{
+				&deploy.Args{
+					IAAS:                        "GCP",
+					AWSRegion:                   "europe-west1",
+					AWSRegionIsSet:              true,
+					Domain:                      "www.concourse-up.com",
+					DomainIsSet:                 true,
+					TLSCert:                     "tls-cert",
+					TLSCertIsSet:                true,
+					TLSKey:                      "tls-key",
+					TLSKeyIsSet:                 true,
+					WorkerCount:                 1,
+					WorkerCountIsSet:            true,
+					WorkerSize:                  "xlarge",
+					WorkerSizeIsSet:             true,
+					WebSize:                     "small",
+					WebSizeIsSet:                true,
+					SelfUpdate:                  true,
+					SelfUpdateIsSet:             true,
+					DBSize:                      "4xlarge",
+					DBSizeIsSet:                 true,
+					AllowIPs:                    "123.123.123.123",
+					AllowIPsIsSet:               true,
+					GithubAuthClientID:          "client-id",
+					GithubAuthClientIDIsSet:     true,
+					GithubAuthClientSecret:      "client-secret",
+					GithubAuthClientSecretIsSet: true,
+					Spot:                        false,
+					SpotIsSet:                   true,
+					Preemptible:                 false,
+					Zone:                        "europe-west1d",
+					ZoneIsSet:                   true,
+					NetworkCIDR:                 "11.0.0.0/16",
+					NetworkCIDRIsSet:            true,
+					PublicCIDR:                  "11.0.0.0/24",
+					PublicCIDRIsSet:             true,
+					PrivateCIDR:                 "11.0.1.0/24",
+					PrivateCIDRIsSet:            true,
+				},
+			},
+			wantErr: false,
+			validate: func(c Config, newConfigCreated, isDomainUpdated bool) (bool, string) {
+				assert.Equal(t, "GCP", c.IAAS)
+				assert.Equal(t, "europe-west1", c.Region)
+				assert.Equal(t, "www.concourse-up.com", c.Domain)
+				assert.Equal(t, 1, c.ConcourseWorkerCount)
+				assert.Equal(t, "xlarge", c.ConcourseWorkerSize)
+				assert.Equal(t, "small", c.ConcourseWebSize)
+				assert.Equal(t, "db.t2.4xlarge", c.RDSInstanceClass)
+				assert.Equal(t, "\"123.123.123.123/32\"", c.AllowIPs)
+				assert.Equal(t, "client-id", c.GithubClientID)
+				assert.Equal(t, "client-secret", c.GithubClientSecret)
+				assert.Equal(t, false, c.Spot)
+				assert.Equal(t, "europe-west1d", c.AvailabilityZone)
+				assert.Equal(t, "11.0.0.0/16", c.NetworkCIDR)
+				assert.Equal(t, "11.0.0.0/24", c.PublicCIDR)
+				assert.Equal(t, "11.0.1.0/24", c.PrivateCIDR)
+
+				return true, ""
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
