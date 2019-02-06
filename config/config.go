@@ -43,7 +43,6 @@ type Config struct {
 	GithubClientID            string   `json:"github_client_id"`
 	GithubClientSecret        string   `json:"github_client_secret"`
 	GrafanaPassword           string   `json:"grafana_password"`
-	GrafanaUsername           string   `json:"grafana_username"`
 	HostedZoneID              string   `json:"hosted_zone_id"`
 	HostedZoneRecordPrefix    string   `json:"hosted_zone_record_prefix"`
 	IAAS                      string   `json:"iaas"`
