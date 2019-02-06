@@ -8,7 +8,7 @@ import (
 
 // RenderTemplate renders a template to a string
 func RenderTemplate(name string, templateStr string, params interface{}) ([]byte, error) {
-	templ, err := template.New(name).Parse(templateStr)
+	templ, err := template.New(name).Option("missingkey=error").Parse(templateStr)
 	if err != nil {
 		return nil, err
 	}
