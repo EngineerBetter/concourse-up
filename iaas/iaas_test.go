@@ -46,7 +46,7 @@ func TestNew(t *testing.T) {
 			want:    "GCP",
 			wantErr: false,
 			setup: func(t *testing.T) string {
-				json := `{"project_id": "fake_id"}`
+				json := `{"project_id": "fake_id", "type": "service_account"}`
 				filePath, err := ioutil.TempFile("", "")
 				if err != nil {
 					t.Error("Could not create GCP credentials file")
@@ -84,7 +84,7 @@ func TestNew(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			tmp := tt.setup(t)
-			got, err := New(tt.args.iaas, tt.args.region, FakeGCPStorage())
+			got, err := New(tt.args.iaas, tt.args.region)
 			tt.cleanup(t, tmp)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("New() error = %v, wantErr %v", err, tt.wantErr)
