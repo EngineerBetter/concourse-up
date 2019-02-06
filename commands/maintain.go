@@ -3,10 +3,8 @@ package commands
 import (
 	"errors"
 	"fmt"
-	"os"
-	"strings"
-
 	"github.com/EngineerBetter/concourse-up/commands/maintain"
+	"os"
 
 	"github.com/EngineerBetter/concourse-up/bosh"
 	"github.com/EngineerBetter/concourse-up/certs"
@@ -16,7 +14,7 @@ import (
 	"github.com/EngineerBetter/concourse-up/iaas"
 	"github.com/EngineerBetter/concourse-up/terraform"
 	"github.com/EngineerBetter/concourse-up/util"
-	cli "gopkg.in/urfave/cli.v1"
+	"gopkg.in/urfave/cli.v1"
 )
 
 var initialMaintainArgs maintain.Args
@@ -68,7 +66,6 @@ func maintainAction(c *cli.Context, maintainArgs maintain.Args, provider iaas.Pr
 		return err
 	}
 
-	maintainArgs = setMaintainRegion(maintainArgs)
 	client, err := buildMaintainClient(name, version, maintainArgs, provider)
 	if err != nil {
 		return err
@@ -79,19 +76,6 @@ func maintainAction(c *cli.Context, maintainArgs maintain.Args, provider iaas.Pr
 	}
 	//this will never run
 	return nil
-}
-
-func setMaintainRegion(maintainArgs maintain.Args) maintain.Args {
-
-	if !maintainArgs.AWSRegionIsSet {
-		switch strings.ToUpper(maintainArgs.IAAS) {
-		case awsConst: //nolint
-			maintainArgs.AWSRegion = "eu-west-1" //nolint
-		case gcpConst: //nolint
-			maintainArgs.AWSRegion = "europe-west1" //nolint
-		}
-	}
-	return maintainArgs
 }
 
 func buildMaintainClient(name, version string, maintainArgs maintain.Args, provider iaas.Provider) (*concourse.Client, error) {

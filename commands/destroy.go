@@ -3,9 +3,6 @@ package commands
 import (
 	"errors"
 	"fmt"
-	"os"
-	"strings"
-
 	"github.com/EngineerBetter/concourse-up/bosh"
 	"github.com/EngineerBetter/concourse-up/certs"
 	"github.com/EngineerBetter/concourse-up/commands/destroy"
@@ -15,8 +12,9 @@ import (
 	"github.com/EngineerBetter/concourse-up/iaas"
 	"github.com/EngineerBetter/concourse-up/terraform"
 	"github.com/EngineerBetter/concourse-up/util"
+	"os"
 
-	cli "gopkg.in/urfave/cli.v1"
+	"gopkg.in/urfave/cli.v1"
 )
 
 const awsConst = "AWS"
@@ -71,7 +69,6 @@ func destroyAction(c *cli.Context, destroyArgs destroy.Args, provider iaas.Provi
 	if err != nil {
 		return err
 	}
-	destroyArgs = setRegion(destroyArgs)
 	client, err := buildDestroyClient(name, version, destroyArgs, provider)
 	if err != nil {
 		return err
@@ -85,18 +82,7 @@ func markSetFlags(c *cli.Context, destroyArgs destroy.Args) (destroy.Args, error
 	}
 	return destroyArgs, nil
 }
-func setRegion(destroyArgs destroy.Args) destroy.Args {
 
-	if !destroyArgs.AWSRegionIsSet {
-		switch strings.ToUpper(destroyArgs.IAAS) {
-		case awsConst: //nolint
-			destroyArgs.AWSRegion = "eu-west-1" //nolint
-		case gcpConst: //nolint
-			destroyArgs.AWSRegion = "europe-west1" //nolint
-		}
-	}
-	return destroyArgs
-}
 func buildDestroyClient(name, version string, destroyArgs destroy.Args, provider iaas.Provider) (*concourse.Client, error) {
 	terraformClient, err := terraform.New(terraform.DownloadTerraform())
 	if err != nil {

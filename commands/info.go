@@ -4,9 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"os"
-	"strings"
-
 	"github.com/EngineerBetter/concourse-up/bosh"
 	"github.com/EngineerBetter/concourse-up/certs"
 	"github.com/EngineerBetter/concourse-up/commands/info"
@@ -16,7 +13,8 @@ import (
 	"github.com/EngineerBetter/concourse-up/iaas"
 	"github.com/EngineerBetter/concourse-up/terraform"
 	"github.com/EngineerBetter/concourse-up/util"
-	cli "gopkg.in/urfave/cli.v1"
+	"gopkg.in/urfave/cli.v1"
+	"os"
 )
 
 var initialInfoArgs info.Args
@@ -72,7 +70,6 @@ func infoAction(c *cli.Context, infoArgs info.Args, provider iaas.Provider) erro
 		return err
 	}
 
-	infoArgs = setInfoRegion(infoArgs)
 	client, err := buildInfoClient(name, version, infoArgs, provider)
 	if err != nil {
 		return err
@@ -100,19 +97,6 @@ func infoAction(c *cli.Context, infoArgs info.Args, provider iaas.Provider) erro
 	}
 	//this will never run
 	return nil
-}
-
-func setInfoRegion(infoArgs info.Args) info.Args {
-
-	if !infoArgs.AWSRegionIsSet {
-		switch strings.ToUpper(infoArgs.IAAS) {
-		case awsConst: //nolint
-			infoArgs.AWSRegion = "eu-west-1" //nolint
-		case gcpConst: //nolint
-			infoArgs.AWSRegion = "europe-west1" //nolint
-		}
-	}
-	return infoArgs
 }
 
 func buildInfoClient(name, version string, infoArgs info.Args, provider iaas.Provider) (*concourse.Client, error) {

@@ -49,8 +49,15 @@ type Factory func(iaasName, region string) (Provider, error)
 func New(iaasName, region string) (Provider, error) {
 	switch strings.ToUpper(iaasName) {
 	case awsConst:
+		if region == "" {
+			region = "eu-west-1"
+		}
+
 		return newAWS(region)
 	case gcpConst:
+		if region == "" {
+			region = "europe-west1"
+		}
 		return newGCP(region, GCPStorage())
 	}
 
