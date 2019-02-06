@@ -28,8 +28,8 @@ type Credentials struct {
 	CACert   string
 }
 
-// Client represents a low-level wrapper for bosh director
-type Client struct {
+// client represents a low-level wrapper for bosh director
+type client struct {
 	tempDir             *util.TempDir
 	creds               Credentials
 	caCertPath          string
@@ -39,8 +39,8 @@ type Client struct {
 
 const caCertFilename = "ca-cert.pem"
 
-// NewClient returns a new client
-func NewClient(creds Credentials, versionFile []byte) (*Client, error) {
+// New returns a new client
+func New(creds Credentials, versionFile []byte) (*client, error) {
 	tempDir, err := util.NewTempDir()
 	if err != nil {
 		return nil, err
@@ -51,7 +51,7 @@ func NewClient(creds Credentials, versionFile []byte) (*Client, error) {
 		return nil, err
 	}
 
-	return &Client{
+	return &client{
 		tempDir:             tempDir,
 		creds:               creds,
 		caCertPath:          caCertPath,
@@ -61,21 +61,21 @@ func NewClient(creds Credentials, versionFile []byte) (*Client, error) {
 }
 
 // SaveFileToWorkingDir saves thegiven file to the temporary director working directory
-func (client *Client) SaveFileToWorkingDir(filename string, contents []byte) (string, error) {
+func (client *client) SaveFileToWorkingDir(filename string, contents []byte) (string, error) {
 	return client.tempDir.Save(filename, contents)
 }
 
 // PathInWorkingDir returns a path for the file in the directos' working directory
-func (client *Client) PathInWorkingDir(filename string) string {
+func (client *client) PathInWorkingDir(filename string) string {
 	return client.tempDir.Path(filename)
 }
 
 // Cleanup removes tempfiles
-func (client *Client) Cleanup() error {
+func (client *client) Cleanup() error {
 	return client.tempDir.Cleanup()
 }
 
-func (client *Client) ensureBinaryDownloaded() error {
+func (client *client) ensureBinaryDownloaded() error {
 	if client.hasDownloadedBinary {
 		return nil
 	}

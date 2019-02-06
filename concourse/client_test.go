@@ -23,7 +23,7 @@ import (
 	"github.com/onsi/gomega/gbytes"
 )
 
-var _ = Describe("Client", func() {
+var _ = Describe("client", func() {
 	var buildClient func() concourse.IClient
 	var buildClientOtherRegion func() concourse.IClient
 	var actions []string

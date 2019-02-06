@@ -11,7 +11,7 @@ import (
 var defaultBoshArgs = []string{"--non-interactive", "--tty", "--no-color"}
 
 // RunAuthenticatedCommand runs a command against the bosh director, after authenticating
-func (client *Client) RunAuthenticatedCommand(stdout, stderr io.Writer, detach bool, args ...string) error {
+func (client *client) RunAuthenticatedCommand(stdout, stderr io.Writer, detach bool, args ...string) error {
 	args = append([]string{
 		"--environment",
 		fmt.Sprintf("https://%s", client.creds.Host),
@@ -32,7 +32,7 @@ func (client *Client) RunAuthenticatedCommand(stdout, stderr io.Writer, detach b
 
 // RunCommand runs a command against the bosh director
 // https://github.com/cloudfoundry/bosh-cli/blob/master/main.go
-func (client *Client) RunCommand(stdout, stderr io.Writer, args ...string) error {
+func (client *client) RunCommand(stdout, stderr io.Writer, args ...string) error {
 	if err := client.ensureBinaryDownloaded(); err != nil {
 		return err
 	}
@@ -45,7 +45,7 @@ func (client *Client) RunCommand(stdout, stderr io.Writer, args ...string) error
 	return cmd.Run()
 }
 
-func (client *Client) runDetachingCommand(stdout, stderr io.Writer, args ...string) error {
+func (client *client) runDetachingCommand(stdout, stderr io.Writer, args ...string) error {
 	if err := client.ensureBinaryDownloaded(); err != nil {
 		return err
 	}

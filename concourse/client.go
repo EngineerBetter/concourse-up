@@ -17,7 +17,7 @@ import (
 	"github.com/xenolf/lego/lego"
 )
 
-// Client is a concrete implementation of IClient interface
+// client is a concrete implementation of IClient interface
 type Client struct {
 	provider              iaas.Provider
 	tfInputVarsFactory    TFInputVarsFactory
@@ -47,7 +47,7 @@ type IClient interface {
 var awsVersionFile = MustAsset("../../concourse-up-ops/director-versions-aws.json")
 var gcpVersionFile = MustAsset("../../concourse-up-ops/director-versions-gcp.json")
 
-// NewClient returns a new Client
+// New returns a new client
 func NewClient(
 	provider iaas.Provider,
 	tfCLI terraform.CLIInterface,
@@ -93,7 +93,7 @@ func (client *Client) buildBoshClient(config config.Config, metadata terraform.I
 		GCP: gcpVersionFile,
 	}).([]byte)
 
-	director, err := director.NewClient(director.Credentials{
+	director, err := director.New(director.Credentials{
 		Username: config.DirectorUsername,
 		Password: config.DirectorPassword,
 		Host:     directorPublicIP,
