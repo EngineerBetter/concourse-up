@@ -185,7 +185,7 @@ func deployAction(c *cli.Context, deployArgs deploy.Args, provider iaas.Provider
 		return err
 	}
 
-	err = validateNameLength(name, deployArgs)
+	err = validateNameLength(name, provider)
 	if err != nil {
 		return err
 	}
@@ -254,8 +254,8 @@ func zoneBelongsToRegion(zone, region string) error {
 	return nil
 }
 
-func validateNameLength(name string, args deploy.Args) error {
-	if strings.ToUpper(args.IAAS) == "GCP" {
+func validateNameLength(name string, provider iaas.Provider) error {
+	if provider.IAAS() == "GCP" {
 		if len(name) > maxAllowedNameLength {
 			return fmt.Errorf("deployment name %s is too long. %d character limit", name, maxAllowedNameLength)
 		}

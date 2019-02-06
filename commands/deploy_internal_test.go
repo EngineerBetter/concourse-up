@@ -2,6 +2,8 @@ package commands
 
 import (
 	"fmt"
+	"github.com/EngineerBetter/concourse-up/iaas"
+	"github.com/EngineerBetter/concourse-up/testsupport"
 	"testing"
 
 	"github.com/EngineerBetter/concourse-up/commands/deploy"
@@ -125,9 +127,20 @@ func Test_setZoneAndRegion(t *testing.T) {
 }
 
 func Test_validateNameLength(t *testing.T) {
+	testsupport.SetupFakeCredsForGCPProvider(t)
+	gcpProvider, err := iaas.New("GCP", "europe-west1")
+	if err != nil {
+		t.Fatalf("Error initialisting iaas.Provider: [%v]", err)
+	}
+
+	awsProvider, err := iaas.New("AWS", "eu-west-1")
+	if err != nil {
+		t.Fatalf("Error initialisting iaas.Provider: [%v]", err)
+	}
+
 	type args struct {
-		name string
-		args deploy.Args
+		name     string
+		provider iaas.Provider
 	}
 	tests := []struct {
 		name    string
@@ -137,67 +150,55 @@ func Test_validateNameLength(t *testing.T) {
 		{
 			name: "It is GCP with a valid name length",
 			args: args{
-				name: "a-name",
-				args: deploy.Args{
-					IAAS: "GCP",
-				},
+				name:     "a-name",
+				provider: gcpProvider,
 			},
 			wantErr: false,
 		},
 		{
 			name: "It is GCP with a invalid name length",
 			args: args{
-				name: "a-name-that-is-long-enough-make-this-fail",
-				args: deploy.Args{
-					IAAS: "GCP",
-				},
+				name:     "a-name-that-is-long-enough-make-this-fail",
+				provider: gcpProvider,
 			},
 			wantErr: true,
 		},
 		{
 			name: "It is gcP with an invalid name length",
 			args: args{
-				name: "a-name",
-				args: deploy.Args{
-					IAAS: "gcP",
-				},
+				name:     "a-name",
+				provider: gcpProvider,
 			},
 			wantErr: false,
 		},
 		{
 			name: "It is gcP with an invalid name length",
 			args: args{
-				name: "a-name-that-is-long-enough-make-this-fail-on-gcp",
-				args: deploy.Args{
-					IAAS: "gcP",
-				},
+				name:     "a-name-that-is-long-enough-make-this-fail-on-gcp",
+				provider: gcpProvider,
 			},
 			wantErr: true,
 		},
 		{
 			name: "It is AWS with a valid name length",
 			args: args{
-				name: "a-name",
-				args: deploy.Args{
-					IAAS: "AWS",
-				},
+				name:     "a-name",
+				provider: awsProvider,
 			},
 			wantErr: false,
 		},
 		{
 			name: "It is AWS with an invalid name length",
 			args: args{
-				name: "a-name-that-is-long-enough-make-this-fail-on-gcp",
-				args: deploy.Args{
-					IAAS: "AWS",
-				},
+				name:     "a-name-that-is-long-enough-make-this-fail-on-gcp",
+				provider: awsProvider,
 			},
 			wantErr: false,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := validateNameLength(tt.args.name, tt.args.args); (err != nil) != tt.wantErr {
+			if err := validateNameLength(tt.args.name, tt.args.provider); (err != nil) != tt.wantErr {
 				t.Errorf("validateNameLength() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})

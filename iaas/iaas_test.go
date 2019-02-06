@@ -1,14 +1,15 @@
-package iaas
+package iaas_test
 
 import (
-	"io/ioutil"
+	"github.com/EngineerBetter/concourse-up/iaas"
+	"github.com/EngineerBetter/concourse-up/testsupport"
 	"os"
 	"reflect"
 	"testing"
 )
 
-func FakeGCPStorage() GCPOption {
-	return func(c *GCPProvider) error {
+func FakeGCPStorage() iaas.GCPOption {
+	return func(c *iaas.GCPProvider) error {
 		return nil
 	}
 }
@@ -46,21 +47,7 @@ func TestNew(t *testing.T) {
 			want:    "GCP",
 			wantErr: false,
 			setup: func(t *testing.T) string {
-				json := `{"project_id": "fake_id", "type": "service_account"}`
-				filePath, err := ioutil.TempFile("", "")
-				if err != nil {
-					t.Error("Could not create GCP credentials file")
-				}
-				_, err = filePath.WriteString(json)
-				if err != nil {
-					t.Error("Could not write in GCP credentials file")
-				}
-				filePath.Close()
-				err = os.Setenv("GOOGLE_APPLICATION_CREDENTIALS", filePath.Name())
-				if err != nil {
-					t.Errorf("cannot set %v", err)
-				}
-				return filePath.Name()
+				return testsupport.SetupFakeCredsForGCPProvider(t)
 			},
 			cleanup: func(t *testing.T, s string) {
 				if err := os.Remove(s); err != nil {
@@ -84,7 +71,7 @@ func TestNew(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			tmp := tt.setup(t)
-			got, err := New(tt.args.iaas, tt.args.region)
+			got, err := iaas.New(tt.args.iaas, tt.args.region)
 			tt.cleanup(t, tmp)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("New() error = %v, wantErr %v", err, tt.wantErr)
