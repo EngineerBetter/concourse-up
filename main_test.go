@@ -34,6 +34,6 @@ var _ = Describe("concourse-up", func() {
 		Expect(session.Out).To(Say("deploy, d    Deploys or updates a Concourse"))
 		Expect(session.Out).To(Say("destroy, x   Destroys a Concourse"))
 		Expect(session.Out).To(Say("info, i      Fetches information on a deployed environment"))
-		Expect(session.Out).To(Say("maintain, m  Handles maintainenace operations in concourse-up"))
+		Expect(session.Out).To(Say("maintain, m  Handles maintenance operations in concourse-up"))
 	})
 })

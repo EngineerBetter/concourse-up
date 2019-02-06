@@ -127,7 +127,7 @@ func buildMaintainClient(name, version string, maintainArgs maintain.Args, provi
 var maintainCmd = cli.Command{
 	Name:      "maintain",
 	Aliases:   []string{"m"},
-	Usage:     "Handles maintainenace operations in concourse-up",
+	Usage:     "Handles maintenance operations in concourse-up",
 	ArgsUsage: "<name>",
 	Flags:     maintainFlags,
 	Action: func(c *cli.Context) error {
