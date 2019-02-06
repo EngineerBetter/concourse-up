@@ -23,17 +23,6 @@ const StateFilename = "director-state.json"
 // CredsFilename is default name for bosh-init creds file
 const CredsFilename = "director-creds.yml"
 
-// Client is a concrete implementation of the IClient interface
-type Client struct {
-	config   config.Config
-	metadata terraform.IAASMetadata
-	director director.IClient
-	db       Opener
-	stdout   io.Writer
-	stderr   io.Writer
-	provider iaas.Provider
-}
-
 // IClient is a client for performing bosh-init commands
 type IClient interface {
 	Deploy([]byte, []byte, bool) ([]byte, []byte, error)
@@ -66,7 +55,7 @@ func New(config config.Config, metadata terraform.IAASMetadata, director directo
 	return nil, fmt.Errorf("IAAS not supported: %s", provider.IAAS())
 }
 
-func Instances(client IClient, director director.IClient, stderr io.Writer) ([]Instance, error) {
+func instances(director director.IClient, stderr io.Writer) ([]Instance, error) {
 	output := new(bytes.Buffer)
 
 	if err := director.RunAuthenticatedCommand(
