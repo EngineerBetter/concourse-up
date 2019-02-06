@@ -167,7 +167,7 @@ var deployFlags = []cli.Flag{
 	},
 }
 
-func deployAction(c *cli.Context, deployArgs deploy.Args, iaasFactory iaas.Factory) error {
+func deployAction(c *cli.Context, deployArgs deploy.Args, provider iaas.Provider) error {
 	name := c.Args().Get(0)
 	if name == "" {
 		return errors.New("Usage is `concourse-up deploy <name>`")
@@ -190,7 +190,7 @@ func deployAction(c *cli.Context, deployArgs deploy.Args, iaasFactory iaas.Facto
 		return err
 	}
 
-	client, err := buildClient(name, version, deployArgs, iaasFactory)
+	client, err := buildClient(name, version, deployArgs, provider)
 	if err != nil {
 		return err
 	}
@@ -264,11 +264,7 @@ func validateNameLength(name string, args deploy.Args) error {
 	return nil
 }
 
-func buildClient(name, version string, deployArgs deploy.Args, iaasFactory iaas.Factory) (*concourse.Client, error) {
-	provider, err := iaasFactory(deployArgs.IAAS, deployArgs.AWSRegion)
-	if err != nil {
-		return nil, err
-	}
+func buildClient(name, version string, deployArgs deploy.Args, provider iaas.Provider) (*concourse.Client, error) {
 	terraformClient, err := terraform.New(terraform.DownloadTerraform())
 	if err != nil {
 		return nil, err
@@ -305,6 +301,10 @@ var deployCmd = cli.Command{
 	ArgsUsage: "<name>",
 	Flags:     deployFlags,
 	Action: func(c *cli.Context) error {
-		return deployAction(c, initialDeployArgs, iaas.New)
+		provider, err := iaas.New(initialDeployArgs.IAAS, initialDeployArgs.AWSRegion)
+		if err != nil {
+			return fmt.Errorf("Error creating IAAS provider on deploy: [%v]", err)
+		}
+		return deployAction(c, initialDeployArgs, provider)
 	},
 }
