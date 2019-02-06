@@ -222,9 +222,9 @@ func (a Args) validateGithubFields() error {
 }
 
 func (a Args) validateNetworkRanges() error {
-	if a.NetworkCIDR != "" || a.PublicCIDR != "" || a.PrivateCIDR != "" {
-		if a.NetworkCIDR == "" || a.PublicCIDR == "" || a.PrivateCIDR == "" {
-			return errors.New("--public-subnet-range and --private-subnet-range are required when --vpc-network-range is provided")
+	if a.PublicCIDR != "" || a.PrivateCIDR != "" {
+		if a.PublicCIDR == "" || a.PrivateCIDR == "" {
+			return errors.New("both --public-subnet-range and --private-subnet-range are required when either is provided")
 		}
 	}
 
