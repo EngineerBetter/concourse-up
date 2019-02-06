@@ -55,7 +55,7 @@ var maintainFlags = []cli.Flag{
 	},
 }
 
-func maintainAction(c *cli.Context, maintainArgs maintain.Args, iaasFactory iaas.Factory) error {
+func maintainAction(c *cli.Context, maintainArgs maintain.Args, provider iaas.Provider) error {
 	name := c.Args().Get(0)
 	if name == "" {
 		return errors.New("Usage is `concourse-up maintain <name>`")
@@ -69,7 +69,7 @@ func maintainAction(c *cli.Context, maintainArgs maintain.Args, iaasFactory iaas
 	}
 
 	maintainArgs = setMaintainRegion(maintainArgs)
-	client, err := buildMaintainClient(name, version, maintainArgs, iaasFactory)
+	client, err := buildMaintainClient(name, version, maintainArgs, provider)
 	if err != nil {
 		return err
 	}
@@ -94,11 +94,7 @@ func setMaintainRegion(maintainArgs maintain.Args) maintain.Args {
 	return maintainArgs
 }
 
-func buildMaintainClient(name, version string, maintainArgs maintain.Args, iaasFactory iaas.Factory) (*concourse.Client, error) {
-	provider, err := iaasFactory(maintainArgs.IAAS, maintainArgs.AWSRegion)
-	if err != nil {
-		return nil, err
-	}
+func buildMaintainClient(name, version string, maintainArgs maintain.Args, provider iaas.Provider) (*concourse.Client, error) {
 	terraformClient, err := terraform.New(terraform.DownloadTerraform())
 	if err != nil {
 		return nil, err
@@ -135,6 +131,11 @@ var maintainCmd = cli.Command{
 	ArgsUsage: "<name>",
 	Flags:     maintainFlags,
 	Action: func(c *cli.Context) error {
-		return maintainAction(c, initialMaintainArgs, iaas.New)
+		provider, err := iaas.New(initialMaintainArgs.IAAS, initialMaintainArgs.AWSRegion)
+		if err != nil {
+			return fmt.Errorf("Error creating IAAS provider on maintain: [%v]", err)
+		}
+
+		return maintainAction(c, initialMaintainArgs, provider)
 	},
 }

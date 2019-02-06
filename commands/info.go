@@ -59,7 +59,7 @@ var infoFlags = []cli.Flag{
 	},
 }
 
-func infoAction(c *cli.Context, infoArgs info.Args, iaasFactory iaas.Factory) error {
+func infoAction(c *cli.Context, infoArgs info.Args, provider iaas.Provider) error {
 	name := c.Args().Get(0)
 	if name == "" {
 		return errors.New("Usage is `concourse-up info <name>`")
@@ -73,7 +73,7 @@ func infoAction(c *cli.Context, infoArgs info.Args, iaasFactory iaas.Factory) er
 	}
 
 	infoArgs = setInfoRegion(infoArgs)
-	client, err := buildInfoClient(name, version, infoArgs, iaasFactory)
+	client, err := buildInfoClient(name, version, infoArgs, provider)
 	if err != nil {
 		return err
 	}
@@ -115,11 +115,7 @@ func setInfoRegion(infoArgs info.Args) info.Args {
 	return infoArgs
 }
 
-func buildInfoClient(name, version string, infoArgs info.Args, iaasFactory iaas.Factory) (*concourse.Client, error) {
-	provider, err := iaasFactory(infoArgs.IAAS, infoArgs.AWSRegion)
-	if err != nil {
-		return nil, err
-	}
+func buildInfoClient(name, version string, infoArgs info.Args, provider iaas.Provider) (*concourse.Client, error) {
 	terraformClient, err := terraform.New(terraform.DownloadTerraform())
 	if err != nil {
 		return nil, err
@@ -156,6 +152,10 @@ var infoCmd = cli.Command{
 	ArgsUsage: "<name>",
 	Flags:     infoFlags,
 	Action: func(c *cli.Context) error {
-		return infoAction(c, initialInfoArgs, iaas.New)
+		provider, err := iaas.New(initialInfoArgs.IAAS, initialInfoArgs.AWSRegion)
+		if err != nil {
+			return fmt.Errorf("Error creating IAAS provider on info: [%v]", err)
+		}
+		return infoAction(c, initialInfoArgs, provider)
 	},
 }

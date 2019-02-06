@@ -47,7 +47,7 @@ var destroyFlags = []cli.Flag{
 	},
 }
 
-func destroyAction(c *cli.Context, destroyArgs destroy.Args, iaasFactory iaas.Factory) error {
+func destroyAction(c *cli.Context, destroyArgs destroy.Args, provider iaas.Provider) error {
 	name := c.Args().Get(0)
 	if name == "" {
 		return errors.New("Usage is `concourse-up destroy <name>`")
@@ -72,7 +72,7 @@ func destroyAction(c *cli.Context, destroyArgs destroy.Args, iaasFactory iaas.Fa
 		return err
 	}
 	destroyArgs = setRegion(destroyArgs)
-	client, err := buildDestroyClient(name, version, destroyArgs, iaasFactory)
+	client, err := buildDestroyClient(name, version, destroyArgs, provider)
 	if err != nil {
 		return err
 	}
@@ -97,11 +97,7 @@ func setRegion(destroyArgs destroy.Args) destroy.Args {
 	}
 	return destroyArgs
 }
-func buildDestroyClient(name, version string, destroyArgs destroy.Args, iaasFactory iaas.Factory) (*concourse.Client, error) {
-	provider, err := iaasFactory(destroyArgs.IAAS, destroyArgs.AWSRegion)
-	if err != nil {
-		return nil, err
-	}
+func buildDestroyClient(name, version string, destroyArgs destroy.Args, provider iaas.Provider) (*concourse.Client, error) {
 	terraformClient, err := terraform.New(terraform.DownloadTerraform())
 	if err != nil {
 		return nil, err
@@ -138,6 +134,10 @@ var destroyCmd = cli.Command{
 	ArgsUsage: "<name>",
 	Flags:     destroyFlags,
 	Action: func(c *cli.Context) error {
-		return destroyAction(c, initialDestroyArgs, iaas.New)
+		provider, err := iaas.New(initialDestroyArgs.IAAS, initialDestroyArgs.AWSRegion)
+		if err != nil {
+			return fmt.Errorf("Error creating IAAS provider on destroy: [%v]", err)
+		}
+		return destroyAction(c, initialDestroyArgs, provider)
 	},
 }
