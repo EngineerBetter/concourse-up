@@ -3,6 +3,7 @@ package commands
 import (
 	"errors"
 	"fmt"
+	"net"
 	"os"
 	"regexp"
 	"strings"
@@ -259,6 +260,35 @@ func validateNameLength(name string, provider iaas.Provider) error {
 		if len(name) > maxAllowedNameLength {
 			return fmt.Errorf("deployment name %s is too long. %d character limit", name, maxAllowedNameLength)
 		}
+	}
+
+	return nil
+}
+
+func validateCidrRanges(provider iaas.Provider, networkCidr, publicCidr, privateCidr string) error {
+	var parsedNetworkCidr, parsedPublicCidr, parsedPrivateCidr *net.IPNet
+
+	if provider.IAAS() == "AWS" {
+		if (privateCidr != "" || publicCidr != "") && networkCidr == "" {
+			return errors.New("error validating CIDR ranges - vpc-network-range must be provided when using AWS")
+		}
+		_, parsedNetworkCidr, err := net.ParseCIDR(networkCidr)
+		if err != nil {
+			return errors.New("error validating CIDR ranges - vpc-network-range is not a valid CIDR")
+		}
+	}
+	if privateCidr != "" || publicCidr != "" {
+		if privateCidr == "" || publicCidr == "" {
+			return errors.New("error validating CIDR ranges - both public-subnet-range and private-subnet-range must be provided")
+		}
+	}
+	_, parsedPublicCidr, err := net.ParseCIDR(publicCidr)
+	if err != nil {
+		return errors.New("error validating CIDR ranges - vpc-network-range is not a valid CIDR")
+	}
+	_, parsedPrivateCidr, err = net.ParseCIDR(privateCidr)
+	if err != nil {
+		return errors.New("error validating CIDR ranges - vpc-network-range is not a valid CIDR")
 	}
 
 	return nil

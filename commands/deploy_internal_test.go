@@ -204,3 +204,132 @@ func Test_validateNameLength(t *testing.T) {
 		})
 	}
 }
+
+func Test_validateCidrRanges(t *testing.T) {
+	testsupport.SetupFakeCredsForGCPProvider(t)
+	gcpProvider, err := iaas.New("GCP", "europe-west1")
+	if err != nil {
+		t.Fatalf("Error creating GCP provider in test: [%v]", err)
+	}
+	awsProvider, err := iaas.New("AWS", "eu-west-1")
+	if err != nil {
+		t.Fatalf("Error creating AWS provider in test: [%v]", err)
+	}
+
+	type args struct {
+		provider    iaas.Provider
+		networkCidr string
+		publicCidr  string
+		privateCidr string
+	}
+	tests := []struct {
+		name          string
+		args          args
+		wantErr       bool
+		desiredErrMsg string
+	}{
+		{
+			name: "errs if public range is provided and private is not",
+			args: args{
+				provider:    gcpProvider,
+				networkCidr: "10.0.0.0/16",
+				publicCidr:  "10.0.0.0/24",
+			},
+			wantErr:       true,
+			desiredErrMsg: "error validating CIDR ranges - both public-subnet-range and private-subnet-range must be provided",
+		},
+		{
+			name: "errs if private range is provided and public is not",
+			args: args{
+				provider:    gcpProvider,
+				networkCidr: "10.0.0.0/16",
+				privateCidr: "10.0.0.0/24",
+			},
+			wantErr:       true,
+			desiredErrMsg: "Error validating CIDR ranges - both private-subnet-range and public-subnet-range must be provided",
+		},
+		{
+			name: "errs if provider is AWS and default range is not provided",
+			args: args{
+				provider:    awsProvider,
+				privateCidr: "10.0.0.0/24",
+				publicCidr:  "10.0.1.0/24",
+			},
+			wantErr:       true,
+			desiredErrMsg: "error validating CIDR ranges - vpc-network-range must be provided when using AWS",
+		},
+		{
+			name: "errs if default range isn't a CIDR",
+			args: args{
+				provider:    awsProvider,
+				networkCidr: "aNetwork",
+				privateCidr: "10.0.0.0/24",
+				publicCidr:  "10.0.1.0/24",
+			},
+			wantErr:       true,
+			desiredErrMsg: "error validating CIDR ranges - vpc-network-range is not a valid CIDR",
+		},
+		{
+			name: "errs if public range isn't a CIDR",
+			args: args{
+				provider:    awsProvider,
+				networkCidr: "10.0.0.0/16",
+				privateCidr: "10.0.0.0/24",
+				publicCidr:  "aPublicNetwork",
+			},
+			wantErr:       true,
+			desiredErrMsg: "error validating CIDR ranges - public-subnet-range is not a valid CIDR",
+		},
+		{
+			name: "errs if private range isn't a CIDR",
+			args: args{
+				provider:    awsProvider,
+				networkCidr: "10.0.0.0/16",
+				privateCidr: "aPrivateNetwork",
+				publicCidr:  "10.0.1.0/24",
+			},
+			wantErr:       true,
+			desiredErrMsg: "error validating CIDR ranges - private-subnet-range is not a valid CIDR",
+		},
+		{
+			name: "errs if provider is AWS and public range is not in default range",
+			args: args{
+				provider:    awsProvider,
+				networkCidr: "10.0.0.0/16",
+				privateCidr: "10.0.0.0/24",
+				publicCidr:  "172.0.0.0/24",
+			},
+			wantErr:       true,
+			desiredErrMsg: "error validating CIDR ranges - public-subnet-range must be within vpc-network-range",
+		},
+		{
+			name: "errs if provider is AWS and private range is not in default range",
+			args: args{
+				provider:    awsProvider,
+				networkCidr: "10.0.0.0/16",
+				privateCidr: "172.0.0.0/24",
+				publicCidr:  "10.0.1.0/24",
+			},
+			wantErr:       true,
+			desiredErrMsg: "error validating CIDR ranges - private-subnet-range must be within vpc-network-range",
+		},
+		{
+			name: "errs if public range overlaps with private range",
+			args: args{
+				provider:    awsProvider,
+				networkCidr: "10.0.0.0/16",
+				privateCidr: "10.0.0.0/24",
+				publicCidr:  "10.0.0.0/24",
+			},
+			wantErr:       true,
+			desiredErrMsg: "error validating CIDR ranges - public-subnet-range must not overlap private-network-range",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if err := validateCidrRanges(tt.args.provider, tt.args.networkCidr, tt.args.publicCidr, tt.args.privateCidr); (err != nil) != tt.wantErr {
+				t.Errorf("validateCidrRanges() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
