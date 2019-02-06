@@ -54,5 +54,5 @@ func New(iaasName, region string) (Provider, error) {
 		return newGCP(region, GCPStorage())
 	}
 
-	return nil, fmt.Errorf("IAAS not supported: %s", iaasName)
+	return nil, fmt.Errorf("IAAS not supported: [%s]", iaasName)
 }
