@@ -5,7 +5,6 @@ import (
 
 	"github.com/xenolf/lego/lego"
 
-	"github.com/EngineerBetter/concourse-up/commands/deploy"
 	"github.com/EngineerBetter/concourse-up/terraform"
 
 	"github.com/EngineerBetter/concourse-up/bosh"
@@ -370,12 +369,13 @@ func (client *FakeFlyClient) CanConnect() (bool, error) {
 type FakeConfigClient struct {
 	FakeLoad         func() (config.Config, error)
 	FakeUpdate       func(config.Config) error
-	FakeLoadOrCreate func(deployArgs *deploy.Args) (config.Config, bool, bool, error)
 	FakeStoreAsset   func(filename string, contents []byte) error
 	FakeLoadAsset    func(filename string) ([]byte, error)
 	FakeDeleteAsset  func(filename string) error
 	FakeDeleteAll    func(config config.Config) error
 	FakeHasAsset     func(filename string) (bool, error)
+	FakeNewConfig    func() config.Config
+	FakeConfigExists func() (bool, error)
 }
 
 // Load delegates to FakeLoad which is dynamically set by the tests
@@ -386,11 +386,6 @@ func (client *FakeConfigClient) Load() (config.Config, error) {
 // Update delegates to FakeUpdate which is dynamically set by the tests
 func (client *FakeConfigClient) Update(config config.Config) error {
 	return client.FakeUpdate(config)
-}
-
-// LoadOrCreate delegates to FakeLoadOrCreate which is dynamically set by the tests
-func (client *FakeConfigClient) LoadOrCreate(deployArgs *deploy.Args) (config.Config, bool, bool, error) {
-	return client.FakeLoadOrCreate(deployArgs)
 }
 
 // StoreAsset delegates to FakeStoreAsset which is dynamically set by the tests
@@ -416,6 +411,14 @@ func (client *FakeConfigClient) DeleteAll(config config.Config) error {
 // HasAsset delegates to FakeHasAsset which is dynamically set by the tests
 func (client *FakeConfigClient) HasAsset(filename string) (bool, error) {
 	return client.FakeHasAsset(filename)
+}
+
+func (client *FakeConfigClient) NewConfig() config.Config {
+	return client.NewConfig()
+}
+
+func (client *FakeConfigClient) ConfigExists() (bool, error) {
+	return client.FakeConfigExists()
 }
 
 // FakeBoshClient implements bosh.IClient for testing

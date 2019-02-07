@@ -126,6 +126,7 @@ var _ = Describe("client", func() {
 	BeforeEach(func() {
 		args = &deploy.Args{
 			AWSRegion:   "eu-west-1",
+			AllowIPs:    "0.0.0.0/0",
 			DBSize:      "small",
 			DBSizeIsSet: false,
 		}
@@ -199,10 +200,6 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 		exampleDirectorCreds = []byte("atc_password: s3cret")
 
 		configClient := &testsupport.FakeConfigClient{
-			FakeLoadOrCreate: func(deployArgs *deploy.Args) (config.Config, bool, bool, error) {
-				actions = append(actions, "loading or creating config file")
-				return exampleConfig, false, false, nil
-			},
 			FakeLoad: func() (config.Config, error) {
 				actions = append(actions, "loading config file")
 				return exampleConfig, nil
@@ -226,12 +223,15 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 				actions = append(actions, "deleting config")
 				return nil
 			},
+			FakeConfigExists: func() (bool, error) {
+				actions = append(actions, "checking to see if config exists")
+				return true, nil
+			},
 		}
 		terraformCLI := &testsupport.FakeCLI{
 			FakeIAAS: func(name iaas.Name) (terraform.Outputs, error) {
 				fakeMetadata := &testsupport.FakeIAASMetadata{
 					FakeGet: func(key string) (string, error) {
-						actions = append(actions, fmt.Sprintf("looking for key %s", key))
 						mm := reflect.ValueOf(&terraformMetadata)
 						m := mm.Elem()
 						mv := m.FieldByName(key)
@@ -351,44 +351,27 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 				Expect(stderr).To(gbytes.Say("WARNING: adding record ci.google.com to DNS zone google.com with name ABC123"))
 			})
 		})
-		It("Builds IAAS environment", func() {
+
+		It("does all the things in the right order", func() {
 			client := buildClient()
 			err := client.Deploy()
 			Expect(err).ToNot(HaveOccurred())
 
-			Expect(actions).To(ContainElement("converting config.Config to TFInputVars"))
-		})
-
-		It("Loads or creates config file", func() {
-			client := buildClient()
-			err := client.Deploy()
-			Expect(err).ToNot(HaveOccurred())
-
-			Expect(actions).To(ContainElement("loading or creating config file"))
-		})
-
-		It("Generates the correct terraform infrastructure", func() {
-			client := buildClient()
-			err := client.Deploy()
-			Expect(err).ToNot(HaveOccurred())
-
-			Expect(actions).To(ContainElement("applying terraform"))
-		})
-
-		It("Generates certificates for bosh", func() {
-			client := buildClient()
-			err := client.Deploy()
-			Expect(err).ToNot(HaveOccurred())
-
-			Expect(actions).To(ContainElement("generating cert ca: concourse-up-happymeal, cn: [99.99.99.99 192.168.0.6]"))
-		})
-
-		It("Generates certificates for concourse", func() {
-			client := buildClient()
-			err := client.Deploy()
-			Expect(err).ToNot(HaveOccurred())
-
-			Expect(actions).To(ContainElement("generating cert ca: concourse-up-happymeal, cn: [77.77.77.77]"))
+			Expect(actions[0]).To(Equal("checking to see if config exists"))
+			Expect(actions[1]).To(Equal("loading config file"))
+			Expect(actions[2]).To(Equal("converting config.Config to TFInputVars"))
+			Expect(actions[3]).To(Equal("applying terraform"))
+			Expect(actions[4]).To(Equal("initializing terraform metadata"))
+			Expect(actions[5]).To(Equal("updating config file"))
+			Expect(actions[6]).To(Equal("generating cert ca: concourse-up-happymeal, cn: [99.99.99.99 192.168.0.6]"))
+			Expect(actions[7]).To(Equal("generating cert ca: concourse-up-happymeal, cn: [77.77.77.77]"))
+			Expect(actions[8]).To(Equal("deploying director"))
+			Expect(actions[9]).To(Equal("storing config asset: director-state.json"))
+			Expect(actions[10]).To(Equal("storing config asset: director-creds.yml"))
+			Expect(actions[11]).To(Equal("cleaning up bosh init"))
+			Expect(actions[12]).To(Equal("setting default pipeline"))
+			Expect(actions[13]).To(Equal("updating config file"))
+			Expect(len(actions)).To(Equal(14))
 		})
 
 		Context("When the user tries to change the region of an existing deployment", func() {
@@ -426,30 +409,6 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 			})
 		})
 
-		It("Updates the config", func() {
-			client := buildClient()
-			err := client.Deploy()
-			Expect(err).ToNot(HaveOccurred())
-
-			Expect(actions).To(ContainElement("updating config file"))
-		})
-
-		It("Deploys the director", func() {
-			client := buildClient()
-			err := client.Deploy()
-			Expect(err).ToNot(HaveOccurred())
-
-			Expect(actions).To(ContainElement("deploying director"))
-		})
-
-		It("Sets the default pipeline, after deploying the bosh director", func() {
-			client := buildClient()
-			err := client.Deploy()
-			Expect(err).ToNot(HaveOccurred())
-
-			Expect(testsupport.CompareActions(actions, "deploying director", "setting default pipeline")).To(BeNumerically("<", 0))
-		})
-
 		Context("When running in self-update mode and the concourse is already deployed", func() {
 			It("Sets the default pipeline, before deploying the bosh director", func() {
 				fakeFlyClient.FakeCanConnect = func() (bool, error) {
@@ -463,22 +422,6 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 
 				Expect(actions).To(ContainElement("deploying director in self-update mode"))
 			})
-		})
-
-		It("Saves the bosh state", func() {
-			client := buildClient()
-			err := client.Deploy()
-			Expect(err).ToNot(HaveOccurred())
-
-			Expect(actions).To(ContainElement("storing config asset: director-state.json"))
-		})
-
-		It("Cleans up the director", func() {
-			client := buildClient()
-			err := client.Deploy()
-			Expect(err).ToNot(HaveOccurred())
-
-			Expect(actions).To(ContainElement("cleaning up bosh init"))
 		})
 
 		It("Warns about access to local machine", func() {
@@ -543,13 +486,6 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 			Expect(err).ToNot(HaveOccurred())
 
 			Expect(actions).To(ContainElement("initializing terraform outputs"))
-		})
-		It("Gets the vpc ID", func() {
-			client := buildClient()
-			err := client.Destroy()
-			Expect(err).ToNot(HaveOccurred())
-
-			Expect(actions).To(ContainElement("looking for key VPCID"))
 		})
 		It("Deletes the vms in the vpcs", func() {
 			client := buildClient()
@@ -620,27 +556,6 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 			Expect(actions).To(ContainElement("initializing terraform outputs"))
 		})
 
-		It("Gets the director public IP", func() {
-			client := buildClient()
-			_, err := client.FetchInfo()
-			Expect(err).ToNot(HaveOccurred())
-
-			Expect(actions).To(ContainElement("looking for key DirectorPublicIP"))
-		})
-		It("Gets the nat gateway IP", func() {
-			client := buildClient()
-			_, err := client.FetchInfo()
-			Expect(err).ToNot(HaveOccurred())
-
-			Expect(actions).To(ContainElement("looking for key NatGatewayIP"))
-		})
-		It("Gets the director security group ID", func() {
-			client := buildClient()
-			_, err := client.FetchInfo()
-			Expect(err).ToNot(HaveOccurred())
-
-			Expect(actions).To(ContainElement("looking for key DirectorSecurityGroupID"))
-		})
 		It("Checks that the IP is whitelisted", func() {
 			client := buildClient()
 			_, err := client.FetchInfo()

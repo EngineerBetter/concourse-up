@@ -19,9 +19,8 @@ import (
 	"github.com/EngineerBetter/concourse-up/config"
 	"github.com/EngineerBetter/concourse-up/fly"
 	"github.com/EngineerBetter/concourse-up/terraform"
-	"github.com/EngineerBetter/concourse-up/util"
 	"github.com/xenolf/lego/lego"
-	yaml "gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v2"
 )
 
 // BoshParams represents the params used and produced by a BOSH deploy
@@ -51,25 +50,9 @@ func stripVersion(tags []string) []string {
 
 // Deploy deploys a concourse instance
 func (client *Client) Deploy() error {
-	conf, createdNewConfig, isDomainUpdated, err := client.configClient.LoadOrCreate(client.deployArgs)
+	conf, isDomainUpdated, err := client.getInitialConfig()
 	if err != nil {
-		return err
-	}
-
-	if !createdNewConfig {
-		if err = writeConfigLoadedSuccessMessage(client.stdout); err != nil {
-			return err
-		}
-	} else {
-		switch client.provider.IAAS() {
-		case iaas.AWS: // nolint
-			conf.RDSDefaultDatabaseName = fmt.Sprintf("bosh_%s", util.EightRandomLetters())
-		case iaas.GCP: // nolint
-			conf.RDSDefaultDatabaseName = fmt.Sprintf("bosh-%s", util.EightRandomLetters())
-		}
-
-		client.provider.WorkerType(conf.ConcourseWorkerSize)
-		conf.AvailabilityZone = client.provider.Zone(client.deployArgs.Zone)
+		return fmt.Errorf("error getting initial config before deploy: [%v]", err)
 	}
 
 	r, err := client.checkPreTerraformConfigRequirements(conf, client.deployArgs.SelfUpdate)

@@ -1,15 +1,9 @@
 package config
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
-	"net"
-	"strings"
-
-	"github.com/EngineerBetter/concourse-up/commands/deploy"
 	"github.com/EngineerBetter/concourse-up/iaas"
-	"github.com/asaskevich/govalidator"
 )
 
 const terraformStateFileName = "terraform.tfstate"
@@ -19,12 +13,13 @@ const configFilePath = "config.json"
 type IClient interface {
 	Load() (Config, error)
 	DeleteAll(config Config) error
-	LoadOrCreate(deployArgs *deploy.Args) (Config, bool, bool, error)
 	Update(Config) error
 	StoreAsset(filename string, contents []byte) error
 	HasAsset(filename string) (bool, error)
+	ConfigExists() (bool, error)
 	LoadAsset(filename string) ([]byte, error)
 	DeleteAsset(filename string) error
+	NewConfig() Config
 }
 
 // Client is a client for loading the config file  from S3
@@ -88,6 +83,11 @@ func (client *Client) HasAsset(filename string) (bool, error) {
 	)
 }
 
+// ConfigExists returns true if the configuration file exists
+func (client *Client) ConfigExists() (bool, error) {
+	return client.HasAsset(configFilePath)
+}
+
 // Update stores the conconcourse up config file to S3
 func (client *Client) Update(config Config) error {
 	bytes, err := json.Marshal(config)
@@ -125,117 +125,15 @@ func (client *Client) Load() (Config, error) {
 	return conf, nil
 }
 
-// LoadOrCreate loads an existing config file from S3, or creates a default if one doesn't already exist
-func (client *Client) LoadOrCreate(deployArgs *deploy.Args) (Config, bool, bool, error) {
-
-	var isDomainUpdated bool
-
-	if client.BucketError != nil {
-		return Config{}, false, false, client.BucketError
+func (client *Client) NewConfig() Config {
+	return Config{
+		ConfigBucket: client.configBucket(),
+		Deployment:   deployment(client.Project),
+		Namespace:    client.Namespace,
+		Project:      client.Project,
+		Region:       client.Iaas.Region(),
+		TFStatePath:  terraformStateFileName,
 	}
-
-	config, err := generateDefaultConfig(
-		client.Project,
-		deployment(client.Project),
-		client.configBucket(),
-		client.Iaas.Region(),
-		client.Namespace,
-	)
-	if err != nil {
-		return Config{}, false, false, err
-	}
-
-	defaultConfigBytes, err := json.Marshal(&config)
-	if err != nil {
-		return Config{}, false, false, err
-	}
-
-	configBytes, newConfigCreated, err := client.Iaas.EnsureFileExists(
-		client.configBucket(),
-		configFilePath,
-		defaultConfigBytes,
-	)
-	if err != nil {
-		return Config{}, newConfigCreated, false, err
-	}
-
-	err = json.Unmarshal(configBytes, &config)
-	if err != nil {
-		return Config{}, newConfigCreated, false, err
-	}
-
-	allow, err := parseAllowedIPsCIDRs(deployArgs.AllowIPs)
-	if err != nil {
-		return Config{}, newConfigCreated, false, err
-	}
-
-	config, err = updateAllowedIPs(config, allow)
-	if err != nil {
-		return Config{}, newConfigCreated, false, err
-	}
-
-	if newConfigCreated {
-		config.IAAS = deployArgs.IAAS
-	}
-
-	if deployArgs.ZoneIsSet {
-		// This is a safeguard for a redeployment where zone does not belong to the region where the original deployment has happened
-		if !newConfigCreated && deployArgs.Zone != config.AvailabilityZone {
-			return Config{}, false, false, fmt.Errorf("Existing deployment uses zone %s and cannot change to zone %s", config.AvailabilityZone, deployArgs.Zone)
-		}
-		config.AvailabilityZone = deployArgs.Zone
-	}
-	if newConfigCreated {
-		config.IAAS = deployArgs.IAAS
-	}
-	if newConfigCreated || deployArgs.WorkerCountIsSet {
-		config.ConcourseWorkerCount = deployArgs.WorkerCount
-	}
-	if newConfigCreated || deployArgs.WorkerSizeIsSet {
-		config.ConcourseWorkerSize = deployArgs.WorkerSize
-	}
-	if newConfigCreated || deployArgs.WebSizeIsSet {
-		config.ConcourseWebSize = deployArgs.WebSize
-	}
-	if newConfigCreated || deployArgs.DBSizeIsSet {
-		config.RDSInstanceClass = client.Iaas.DBType(deployArgs.DBSize)
-	}
-	if newConfigCreated || deployArgs.GithubAuthIsSet {
-		config.GithubClientID = deployArgs.GithubAuthClientID
-		config.GithubClientSecret = deployArgs.GithubAuthClientSecret
-		config.GithubAuthIsSet = deployArgs.GithubAuthIsSet
-	}
-	if newConfigCreated || deployArgs.TagsIsSet {
-		config.Tags = deployArgs.Tags
-	}
-	if newConfigCreated || deployArgs.SpotIsSet {
-		config.Spot = deployArgs.Spot && deployArgs.Preemptible
-	}
-	if newConfigCreated || deployArgs.WorkerTypeIsSet {
-		config.WorkerType = deployArgs.WorkerType
-	}
-
-	if newConfigCreated {
-		if deployArgs.PublicCIDRIsSet && deployArgs.PrivateCIDRIsSet {
-			config.NetworkCIDR = deployArgs.NetworkCIDR
-			config.PublicCIDR = deployArgs.PublicCIDR
-			config.PrivateCIDR = deployArgs.PrivateCIDR
-			config.Rds1CIDR = deployArgs.Rds1CIDR
-			config.Rds2CIDR = deployArgs.Rds2CIDR
-		}
-	}
-
-	if newConfigCreated || deployArgs.DomainIsSet {
-		if config.Domain != deployArgs.Domain {
-			isDomainUpdated = true
-		}
-		config.Domain = deployArgs.Domain
-	} else {
-		if govalidator.IsIPv4(config.Domain) {
-			config.Domain = ""
-		}
-	}
-	return config, newConfigCreated, isDomainUpdated, nil
 }
 
 func (client *Client) configBucket() string {
@@ -273,45 +171,6 @@ func determineBucketName(iaas iaas.Provider, namespace, project string) (string,
 	default:
 		return namespaceBucketName, foundOne, nil
 	}
-}
-
-type cidrBlocks []*net.IPNet
-
-func parseAllowedIPsCIDRs(s string) (cidrBlocks, error) {
-	var x cidrBlocks
-	for _, ip := range strings.Split(s, ",") {
-		ip = strings.TrimSpace(ip)
-		_, ipNet, err := net.ParseCIDR(ip)
-		if err != nil {
-			ipNet = &net.IPNet{
-				IP:   net.ParseIP(ip),
-				Mask: net.CIDRMask(32, 32),
-			}
-		}
-		if ipNet.IP == nil {
-			return nil, fmt.Errorf("could not parse %q as an IP address or CIDR range", ip)
-		}
-		x = append(x, ipNet)
-	}
-	return x, nil
-}
-
-func (b cidrBlocks) String() (string, error) {
-	var buf bytes.Buffer
-	for i, ipNet := range b {
-		if i > 0 {
-			_, err := fmt.Fprintf(&buf, ", %q", ipNet)
-			if err != nil {
-				return "", err
-			}
-		} else {
-			_, err := fmt.Fprintf(&buf, "%q", ipNet)
-			if err != nil {
-				return "", err
-			}
-		}
-	}
-	return buf.String(), nil
 }
 
 func determineNamespace(namespace, region string) string {

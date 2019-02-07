@@ -1,11 +1,5 @@
 package config
 
-import (
-	"strings"
-
-	"github.com/EngineerBetter/concourse-up/util"
-)
-
 // Config represents a concourse-up configuration file
 type Config struct {
 	AllowIPs                  string   `json:"allow_ips"`
@@ -65,52 +59,4 @@ type Config struct {
 	NetworkCIDR               string   `json:"network_cidr"`
 	Rds1CIDR                  string   `json:"rds1_cidr"`
 	Rds2CIDR                  string   `json:"rds2_cidr"`
-}
-
-func generateDefaultConfig(project, deployment, configBucket, region, namespace string) (Config, error) {
-	privateKey, publicKey, _, err := util.GenerateSSHKeyPair()
-	if err != nil {
-		return Config{}, err
-	}
-
-	conf := Config{
-		AvailabilityZone:         "",
-		ConcourseWorkerCount:     1,
-		ConcourseWebSize:         "small",
-		ConcourseWorkerSize:      "xlarge",
-		ConfigBucket:             configBucket,
-		Deployment:               deployment,
-		DirectorHMUserPassword:   util.GeneratePassword(),
-		DirectorMbusPassword:     util.GeneratePassword(),
-		DirectorNATSPassword:     util.GeneratePassword(),
-		DirectorPassword:         util.GeneratePassword(),
-		DirectorRegistryPassword: util.GeneratePassword(),
-		DirectorUsername:         "admin",
-		EncryptionKey:            util.GeneratePasswordWithLength(32),
-		PrivateKey:               strings.TrimSpace(string(privateKey)),
-		Project:                  project,
-		PublicKey:                strings.TrimSpace(string(publicKey)),
-		RDSPassword:              util.GeneratePassword(),
-		RDSUsername:              "admin" + util.GeneratePasswordWithLength(7),
-		Region:                   region,
-		Spot:                     true,
-		TFStatePath:              terraformStateFileName,
-		Namespace:                namespace,
-		PrivateCIDR:              "10.0.1.0/24",
-		PublicCIDR:               "10.0.0.0/24",
-		NetworkCIDR:              "10.0.0.0/16",
-		Rds1CIDR:                 "10.0.4.0/24",
-		Rds2CIDR:                 "10.0.5.0/24",
-	}
-
-	return conf, nil
-}
-
-func updateAllowedIPs(c Config, ingressAddresses cidrBlocks) (Config, error) {
-	addr, err := ingressAddresses.String()
-	if err != nil {
-		return c, err
-	}
-	c.AllowIPs = addr
-	return c, nil
 }
