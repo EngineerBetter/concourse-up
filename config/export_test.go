@@ -1,3 +1,3 @@
 package config
 
-var ParseCIDRBlocks = parseCIDRBlocks
+var ParseCIDRBlocks = parseAllowedIPsCIDRs

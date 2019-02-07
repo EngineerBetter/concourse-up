@@ -164,7 +164,7 @@ func (client *Client) LoadOrCreate(deployArgs *deploy.Args) (Config, bool, bool,
 		return Config{}, newConfigCreated, false, err
 	}
 
-	allow, err := parseCIDRBlocks(deployArgs.AllowIPs)
+	allow, err := parseAllowedIPsCIDRs(deployArgs.AllowIPs)
 	if err != nil {
 		return Config{}, newConfigCreated, false, err
 	}
@@ -275,7 +275,7 @@ func determineBucketName(iaas iaas.Provider, namespace, project string) (string,
 
 type cidrBlocks []*net.IPNet
 
-func parseCIDRBlocks(s string) (cidrBlocks, error) {
+func parseAllowedIPsCIDRs(s string) (cidrBlocks, error) {
 	var x cidrBlocks
 	for _, ip := range strings.Split(s, ",") {
 		ip = strings.TrimSpace(ip)
