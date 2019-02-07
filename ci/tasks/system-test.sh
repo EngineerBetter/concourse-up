@@ -107,18 +107,6 @@ echo "$config" | jq -r '.config.concourse_cert' > generated-ca-cert.pem
 cert="generated-ca-cert.pem"
 
 assertPipelineIsRunnable
-
-if [ "$IAAS" = "AWS" ]
-then
-    # shellcheck disable=SC2034
-    region=eu-west-1
-
-elif [ "$IAAS" = "GCP" ]
-then
-    # shellcheck disable=SC2034
-    region=europe-west1
-fi
-
 assertPipelinesCanReadFromCredhub
 
 # Check nats certificate renewal
