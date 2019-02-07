@@ -246,7 +246,7 @@ func Test_validateCidrRanges(t *testing.T) {
 				privateCidr: "10.0.0.0/24",
 			},
 			wantErr:       true,
-			desiredErrMsg: "Error validating CIDR ranges - both private-subnet-range and public-subnet-range must be provided",
+			desiredErrMsg: "error validating CIDR ranges - both public-subnet-range and private-subnet-range must be provided",
 		},
 		{
 			name: "errs if provider is AWS and default range is not provided",
@@ -327,8 +327,16 @@ func Test_validateCidrRanges(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := validateCidrRanges(tt.args.provider, tt.args.networkCidr, tt.args.publicCidr, tt.args.privateCidr); (err != nil) != tt.wantErr {
+			err := validateCidrRanges(tt.args.provider, tt.args.networkCidr, tt.args.publicCidr, tt.args.privateCidr)
+
+			if (err == nil && tt.wantErr) || (err != nil && ! tt.wantErr){
 				t.Errorf("validateCidrRanges() error = %v, wantErr %v", err, tt.wantErr)
+			}
+
+			if err != nil && tt.wantErr {
+				if err.Error() != tt.desiredErrMsg {
+					t.Errorf("validateCidrRanges() error message = [%v], desiredErrMsg [%v]", err.Error(), tt.desiredErrMsg)
+				}
 			}
 		})
 	}

@@ -290,11 +290,11 @@ func validateCidrRanges(provider iaas.Provider, networkCidr, publicCidr, private
 	}
 	_, parsedPublicCidr, err = net.ParseCIDR(publicCidr)
 	if err != nil {
-		return errors.New("error validating CIDR ranges - vpc-network-range is not a valid CIDR")
+		return errors.New("error validating CIDR ranges - public-subnet-range is not a valid CIDR")
 	}
 	_, parsedPrivateCidr, err = net.ParseCIDR(privateCidr)
 	if err != nil {
-		return errors.New("error validating CIDR ranges - vpc-network-range is not a valid CIDR")
+		return errors.New("error validating CIDR ranges - private-subnet-range is not a valid CIDR")
 	}
 
 	if provider.IAAS() == awsConst {
