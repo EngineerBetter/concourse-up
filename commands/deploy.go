@@ -150,19 +150,19 @@ var deployFlags = []cli.Flag{
 	},
 	cli.StringFlag{
 		Name:        "vpc-network-range",
-		Usage:       "(optional) VPC network CIDR to deploy into",
+		Usage:       "(optional) VPC network CIDR to deploy into, only required if IAAS is AWS",
 		EnvVar:      "VPC_NETWORK_RANGE",
 		Destination: &initialDeployArgs.NetworkCIDR,
 	},
 	cli.StringFlag{
 		Name:        "public-subnet-range",
-		Usage:       "(optional) public network CIDR that must be within --vpc-network-range",
+		Usage:       "(optional) public network CIDR (if IAAS is AWS must be within --vpc-network-range)",
 		EnvVar:      "PUBLIC_SUBNET_RANGE",
 		Destination: &initialDeployArgs.PublicCIDR,
 	},
 	cli.StringFlag{
 		Name:        "private-subnet-range",
-		Usage:       "(optional) private network CIDR that must be within --vpc-network-range",
+		Usage:       "(optional) private network CIDR (if IAAS is AWS must be within --vpc-network-range)",
 		EnvVar:      "PRIVATE_SUBNET_RANGE",
 		Destination: &initialDeployArgs.PrivateCIDR,
 	},
