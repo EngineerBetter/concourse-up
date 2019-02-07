@@ -8,6 +8,8 @@ setDeploymentName sys
 
 # shellcheck disable=SC1091
 source concourse-up/ci/tasks/lib/check-db.sh
+# shellcheck disable=SC1091
+source concourse-up/ci/tasks/lib/check-cidr-ranges.sh
 
 trapDefaultCleanup
 
@@ -68,6 +70,9 @@ fi
 # Check RDS instance class is db.t2.small
 assertDbCorrect
 
+# Check CIDR ranges correct
+assertNetworkCidrsCorrect
+
 # shellcheck disable=SC2034
 cert="generated-ca-cert.pem"
 # shellcheck disable=SC2034
@@ -78,7 +83,6 @@ job="hello"
 domain=$custom_domain
 
 assertPipelineIsSettableAndRunnable
-
 
 echo "DEPLOY 2 LARGE WORKERS, FIREWALLED TO MY IP"
 
