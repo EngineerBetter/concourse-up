@@ -229,6 +229,13 @@ func Test_validateCidrRanges(t *testing.T) {
 		desiredErrMsg string
 	}{
 		{
+			name: "does not err if no flags provided",
+			args: args{
+				provider:    awsProvider,
+			},
+			wantErr:       false,
+		},
+		{
 			name: "errs if public range is provided and private is not",
 			args: args{
 				provider:    gcpProvider,

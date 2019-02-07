@@ -274,6 +274,10 @@ func validateCidrRanges(provider iaas.Provider, networkCidr, publicCidr, private
 	var parsedNetworkCidr, parsedPublicCidr, parsedPrivateCidr *net.IPNet
 	var err error
 
+	if networkCidr == "" && publicCidr == "" && privateCidr == "" {
+		return nil
+	}
+
 	if provider.IAAS() == awsConst {
 		if (privateCidr != "" || publicCidr != "") && networkCidr == "" {
 			return errors.New("error validating CIDR ranges - vpc-network-range must be provided when using AWS")
