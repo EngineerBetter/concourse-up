@@ -12,4 +12,7 @@ elif [ "$IAAS" = "GCP" ]; then
     setGoogleCreds
     # shellcheck disable=SC2034
     region=europe-west1
+
+    gcloud auth activate-service-account --key-file="$GOOGLE_APPLICATION_CREDENTIALS"
+    export CLOUDSDK_CORE_PROJECT=concourse-up
 fi

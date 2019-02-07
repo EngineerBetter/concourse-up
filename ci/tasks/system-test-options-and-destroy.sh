@@ -33,8 +33,6 @@ elif [ "$IAAS" = "GCP" ]
 then
     # shellcheck disable=SC2034
     region=europe-west2
-    gcloud auth activate-service-account --key-file="$GOOGLE_APPLICATION_CREDENTIALS"
-    export CLOUDSDK_CORE_PROJECT=concourse-up
     args+=(--domain cup.gcp.engineerbetter.com)
 fi
 
