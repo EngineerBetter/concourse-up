@@ -5,8 +5,6 @@
 
 # shellcheck disable=SC1091
 source concourse-up/ci/tasks/lib/test-setup.sh
-# shellcheck disable=SC1091
-source concourse-up/ci/tasks/lib/check-cidr-ranges.sh
 
 handleVerboseMode
 
@@ -20,7 +18,6 @@ chmod +x ./cup
 echo "DEPLOY OLD VERSION"
 
 ./cup deploy "$deployment"
-assertNetworkCidrsCorrect
 
 # Assigning a subshell to a variable fails fast; eval "$(... doesn't
 info_output="$(./cup info --env "$deployment")"
@@ -80,4 +77,3 @@ manifest="$(dirname "$0")/hello.yml"
 job="hello"
 
 assertPipelineIsSettableAndRunnable
-assertNetworkCidrsCorrect
