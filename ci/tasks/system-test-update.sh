@@ -39,7 +39,6 @@ done
 echo "Bosh lock available - Proceeding"
 
 echo "UPDATE TO NEW VERSION"
-# export SELF_UPDATE=true
 rm -rf cup
 cp "$BINARY_PATH" ./cup
 chmod +x ./cup
