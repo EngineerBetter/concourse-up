@@ -191,6 +191,11 @@ func deployAction(c *cli.Context, deployArgs deploy.Args, provider iaas.Provider
 		return err
 	}
 
+	err = validateCidrRanges(provider, deployArgs.NetworkCIDR, deployArgs.PublicCIDR, deployArgs.PrivateCIDR)
+	if err != nil {
+		return err
+	}
+
 	client, err := buildClient(name, version, deployArgs, provider)
 	if err != nil {
 		return err
@@ -267,12 +272,13 @@ func validateNameLength(name string, provider iaas.Provider) error {
 
 func validateCidrRanges(provider iaas.Provider, networkCidr, publicCidr, privateCidr string) error {
 	var parsedNetworkCidr, parsedPublicCidr, parsedPrivateCidr *net.IPNet
+	var err error
 
-	if provider.IAAS() == "AWS" {
+	if provider.IAAS() == awsConst {
 		if (privateCidr != "" || publicCidr != "") && networkCidr == "" {
 			return errors.New("error validating CIDR ranges - vpc-network-range must be provided when using AWS")
 		}
-		_, parsedNetworkCidr, err := net.ParseCIDR(networkCidr)
+		_, parsedNetworkCidr, err = net.ParseCIDR(networkCidr)
 		if err != nil {
 			return errors.New("error validating CIDR ranges - vpc-network-range is not a valid CIDR")
 		}
@@ -282,13 +288,27 @@ func validateCidrRanges(provider iaas.Provider, networkCidr, publicCidr, private
 			return errors.New("error validating CIDR ranges - both public-subnet-range and private-subnet-range must be provided")
 		}
 	}
-	_, parsedPublicCidr, err := net.ParseCIDR(publicCidr)
+	_, parsedPublicCidr, err = net.ParseCIDR(publicCidr)
 	if err != nil {
 		return errors.New("error validating CIDR ranges - vpc-network-range is not a valid CIDR")
 	}
 	_, parsedPrivateCidr, err = net.ParseCIDR(privateCidr)
 	if err != nil {
 		return errors.New("error validating CIDR ranges - vpc-network-range is not a valid CIDR")
+	}
+
+	if provider.IAAS() == awsConst {
+		if !parsedNetworkCidr.Contains(parsedPublicCidr.IP) {
+			return errors.New("error validating CIDR ranges - public-subnet-range must be within vpc-network-range")
+		}
+
+		if !parsedNetworkCidr.Contains(parsedPrivateCidr.IP) {
+			return errors.New("error validating CIDR ranges - private-subnet-range must be within vpc-network-range")
+		}
+
+		if parsedPublicCidr.Contains(parsedPrivateCidr.IP) || parsedPrivateCidr.Contains(parsedPublicCidr.IP) {
+			return errors.New("error validating CIDR ranges - public-subnet-range must not overlap private-network-range")
+		}
 	}
 
 	return nil
