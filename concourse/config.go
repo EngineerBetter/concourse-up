@@ -85,7 +85,6 @@ func populateConfigWithDefaults(conf config.Config) (config.Config, error) {
 	}
 
 	conf.AvailabilityZone = ""
-	conf.ConcourseDBName = "concourse_atc"
 	conf.ConcourseWorkerCount = 1
 	conf.ConcourseWebSize = "small"
 	conf.ConcourseWorkerSize = "xlarge"
@@ -96,7 +95,6 @@ func populateConfigWithDefaults(conf config.Config) (config.Config, error) {
 	conf.DirectorRegistryPassword = util.GeneratePassword()
 	conf.DirectorUsername = "admin"
 	conf.EncryptionKey = util.GeneratePasswordWithLength(32)
-	conf.MultiAZRDS = false
 	conf.PrivateKey = strings.TrimSpace(string(privateKey))
 	conf.PublicKey = strings.TrimSpace(string(publicKey))
 	conf.RDSPassword = util.GeneratePassword()
