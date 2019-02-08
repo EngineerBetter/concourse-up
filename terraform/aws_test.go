@@ -15,9 +15,6 @@ func TestAWSInputVars_ConfigureTerraform(t *testing.T) {
 		Region         string
 		SourceAccessIP string
 	}
-	type args struct {
-		terraformContents string
-	}
 	tests := []struct {
 		name          string
 		fakeInputVars FakeInputVars
