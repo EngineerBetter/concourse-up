@@ -95,10 +95,6 @@ var _ = Describe("Client", func() {
 					Expect(conf.PublicCIDR).To(Equal("10.0.0.0/24"))
 				})
 
-				It("Sets the default value for the ConcourseDBName", func() {
-					Expect(conf.ConcourseDBName).To(Equal("concourse_atc"))
-				})
-
 				It("Sets the default value for the ConcourseWorkerCount", func() {
 					Expect(conf.ConcourseWorkerCount).To(Equal(1))
 				})

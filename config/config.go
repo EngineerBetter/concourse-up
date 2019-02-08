@@ -12,7 +12,6 @@ type Config struct {
 	AvailabilityZone          string   `json:"availability_zone"`
 	ConcourseCACert           string   `json:"concourse_ca_cert"`
 	ConcourseCert             string   `json:"concourse_cert"`
-	ConcourseDBName           string   `json:"concourse_db_name"`
 	ConcourseKey              string   `json:"concourse_key"`
 	ConcoursePassword         string   `json:"concourse_password"`
 	ConcourseUsername         string   `json:"concourse_username"`
@@ -75,7 +74,6 @@ func generateDefaultConfig(project, deployment, configBucket, region, namespace 
 
 	conf := Config{
 		AvailabilityZone:         "",
-		ConcourseDBName:          "concourse_atc",
 		ConcourseWorkerCount:     1,
 		ConcourseWebSize:         "small",
 		ConcourseWorkerSize:      "xlarge",
