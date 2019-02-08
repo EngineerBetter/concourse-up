@@ -58,7 +58,7 @@ class Cleaner
     puts '==================================================================='
 
     vpc_id = orphan.vpc_id
-    if orphan.vpc_id_valid?
+    if orphan.vpc_id_valid?(vpc_id)
       orphan.delete_db_instance(vpc_id)
       orphan.delete_vpc(vpc_id)
     else
