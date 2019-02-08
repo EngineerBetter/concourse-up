@@ -22,7 +22,7 @@ class Cleaner
   end
 
   def clean
-    orphans_with_state_files = []
+    destroyable_orphans = []
     buckets = iaas.bucket_names
 
     if buckets.empty?
@@ -40,13 +40,13 @@ class Cleaner
       end
 
       if bucket.key_files?
-        orphans_with_state_files.push(orphan)
+        destroyable_orphans.push(orphan)
       else
         cleanup_via_iaas(orphan)
       end
     end
 
-    cleanup_with_concourse_up(orphans_with_state_files) unless orphans_with_state_files.empty?
+    cleanup_with_concourse_up(destroyable_orphans) unless destroyable_orphans.empty?
   end
 
   def cleanup_via_iaas(orphan)
