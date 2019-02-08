@@ -22,7 +22,7 @@ class Cleaner
   end
 
   def clean
-    non_empty = []
+    orphans_with_state_files = []
     buckets = iaas.bucket_names
 
     if buckets.empty?
@@ -34,36 +34,42 @@ class Cleaner
       puts "Processing [#{orphan.bucket.name}]"
       bucket = orphan.bucket
 
-      if bucket.exists?
-        if bucket.key_files?
-          non_empty.push(orphan)
-        else
-          puts "#{bucket.name} is missing key files"
-          puts 'Attempting to delete VPC'
-          puts '==================================================================='
-          puts "MANUAL CLEANUP MAY BE REQUIRED FOR #{bucket.name}"
-          puts '==================================================================='
-
-          vpc_id = orphan.vpc_id
-          if orphan.vpc_id_valid?
-            orphan.delete_db_instance(vpc_id)
-            orphan.delete_vpc(vpc_id)
-          else
-            puts "VPC for [#{orphan.deployment}] not found"
-          end
-          bucket.delete
-          puts "Deleted bucket [#{bucket.name}]"
-        end
-      else
+      if bucket.not_exists?
         printf "Bucket [#{bucket.name}] doesn't really exist\n"
+        next
+      end
+
+      if bucket.key_files?
+        orphans_with_state_files.push(orphan)
+      else
+        cleanup_via_iaas(orphan)
       end
     end
 
-    if non_empty.empty?
-      return
-    end
+    cleanup_with_concourse_up(orphans_with_state_files) unless orphans_with_state_files.empty?
+  end
 
-    non_empty.each do |orphan|
+  def cleanup_via_iaas(orphan)
+    bucket = orphan.bucket
+    puts "#{bucket.name} is missing key files"
+    puts 'Attempting to delete VPC'
+    puts '==================================================================='
+    puts "MANUAL CLEANUP MAY BE REQUIRED FOR #{bucket.name}"
+    puts '==================================================================='
+
+    vpc_id = orphan.vpc_id
+    if orphan.vpc_id_valid?
+      orphan.delete_db_instance(vpc_id)
+      orphan.delete_vpc(vpc_id)
+    else
+      puts "VPC for [#{orphan.deployment}] not found"
+    end
+    bucket.delete
+    puts "Deleted bucket [#{bucket.name}]"
+  end
+
+  def cleanup_with_concourse_up(orphans_with_state_files)
+    orphans_with_state_files.each do |orphan|
       command = "./cup destroy --region #{orphan.region} #{orphan.project}"
       puts "Attempting to run #{command}"
       str = sprintf("yes yes | ./cup destroy --region %s %s", orphan.region, orphan.project)

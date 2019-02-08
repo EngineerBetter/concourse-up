@@ -28,6 +28,11 @@ class AWSBucket
     $?.success?
   end
 
+  def not_exists?
+    `aws s3 ls s3://#{name} > /dev/null`
+    !($?.success?)
+  end
+
   def contents
     `aws s3 ls s3://#{name}`
   end
