@@ -45,7 +45,6 @@ type Config struct {
 	HostedZoneID              string   `json:"hosted_zone_id"`
 	HostedZoneRecordPrefix    string   `json:"hosted_zone_record_prefix"`
 	IAAS                      string   `json:"iaas"`
-	MultiAZRDS                bool     `json:"multi_az_rds"`
 	Namespace                 string   `json:"namespace"`
 	PrivateKey                string   `json:"private_key"`
 	Project                   string   `json:"project"`
@@ -86,7 +85,6 @@ func generateDefaultConfig(project, deployment, configBucket, region, namespace 
 		DirectorRegistryPassword: util.GeneratePassword(),
 		DirectorUsername:         "admin",
 		EncryptionKey:            util.GeneratePasswordWithLength(32),
-		MultiAZRDS:               false,
 		PrivateKey:               strings.TrimSpace(string(privateKey)),
 		Project:                  project,
 		PublicKey:                strings.TrimSpace(string(publicKey)),

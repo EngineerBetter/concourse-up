@@ -74,11 +74,6 @@ variable "network_cidr" {
 	default = "{{ .NetworkCIDR }}"
 }
 
-variable "multi_az_rds" {
-  type = "string"
-  default = {{if .MultiAZRDS }}true{{else}}false{{end}}
-}
-
 {{if .HostedZoneID }}
 variable "hosted_zone_id" {
   type = "string"
@@ -589,7 +584,7 @@ resource "aws_db_instance" "default" {
   username               = "${var.rds_instance_username}"
   password               = "${var.rds_instance_password}"
   publicly_accessible    = false
-  multi_az               = "${var.multi_az_rds}"
+  multi_az               = false
   vpc_security_group_ids = ["${aws_security_group.rds.id}"]
   db_subnet_group_name   = "${aws_db_subnet_group.default.name}"
   skip_final_snapshot    = true

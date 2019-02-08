@@ -14,7 +14,6 @@ func TestAWSInputVars_ConfigureTerraform(t *testing.T) {
 		Project        string
 		Region         string
 		SourceAccessIP string
-		MultiAZRDS     bool
 	}
 	type args struct {
 		terraformContents string
@@ -32,10 +31,9 @@ func TestAWSInputVars_ConfigureTerraform(t *testing.T) {
 				Project:        "fakeProject",
 				Region:         "eu-west-1",
 				SourceAccessIP: "fakeSourceIP",
-				MultiAZRDS:     true,
 			},
-			args:    "{{ .Region }}\n {{ .Deployment }}\n {{ .Project }}\n {{ .SourceAccessIP }}\n {{ .MultiAZRDS }}\n",
-			want:    "eu-west-1\n fakeDeployment\n fakeProject\n fakeSourceIP\n true\n",
+			args:    "{{ .Region }}\n {{ .Deployment }}\n {{ .Project }}\n {{ .SourceAccessIP }}\n",
+			want:    "eu-west-1\n fakeDeployment\n fakeProject\n fakeSourceIP\n",
 			wantErr: false,
 		},
 		{name: "Failure",
@@ -52,7 +50,6 @@ func TestAWSInputVars_ConfigureTerraform(t *testing.T) {
 				Project:        test.fakeInputVars.Project,
 				Region:         test.fakeInputVars.Region,
 				SourceAccessIP: test.fakeInputVars.SourceAccessIP,
-				MultiAZRDS:     test.fakeInputVars.MultiAZRDS,
 			}
 			got, err := v.ConfigureTerraform(test.args)
 			if (err != nil) != test.wantErr {

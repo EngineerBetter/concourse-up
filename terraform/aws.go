@@ -31,7 +31,6 @@ type AWSInputVars struct {
 	Region                 string
 	SourceAccessIP         string
 	TFStatePath            string
-	MultiAZRDS             bool
 }
 
 // ConfigureTerraform interpolates terraform contents and returns terraform config

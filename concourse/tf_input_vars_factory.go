@@ -59,7 +59,6 @@ func (f *AWSInputVarsFactory) NewInputVars(c config.Config) terraform.InputVars 
 		Region:                 c.Region,
 		SourceAccessIP:         c.SourceAccessIP,
 		TFStatePath:            c.TFStatePath,
-		MultiAZRDS:             c.MultiAZRDS,
 	}
 }
 

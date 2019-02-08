@@ -143,10 +143,6 @@ var _ = Describe("Client", func() {
 					Expect(conf.GrafanaPassword).To(Equal(conf.ConcoursePassword))
 				})
 
-				It("Sets the default value for the MultiAZRDS", func() {
-					Expect(conf.MultiAZRDS).To(Equal(false))
-				})
-
 				It("Generates a random RSA private key for PrivateKey", func() {
 					Expect(conf.PrivateKey).To(HavePrefix("-----BEGIN RSA PRIVATE KEY-----"))
 				})
