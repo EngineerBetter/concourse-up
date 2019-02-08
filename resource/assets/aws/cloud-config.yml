@@ -197,36 +197,29 @@ disk_types:
     encrypted: true
 
 networks:
-- name: public
-  type: manual
-  subnets:
-  - range: 10.0.0.0/24
-    gateway: 10.0.0.1
-    dns:
-    - 10.0.0.2
-    az: z1
-    static:
-    - 10.0.0.6
-    - 10.0.0.7
-    reserved:
-    - 10.0.0.1-10.0.0.5
-    cloud_properties:
-      subnet: {{ .PublicSubnetID }}
-- name: private
-  type: manual
-  subnets:
-  - range: 10.0.1.0/24
-    gateway: 10.0.1.1
-    dns:
-    - 10.0.0.2
-    az: z1
-    reserved:
-    - 10.0.1.1-10.0.1.5
-    cloud_properties:
-      subnet: {{ .PrivateSubnetID }}
-
-- name: vip
-  type: vip
+  - name: public
+    type: manual
+    subnets:
+      - range: {{ .PublicCIDR }}
+        gateway: {{ .PublicCIDRGateway }}
+        dns: [{{ .PublicCIDRDNS }}] // 10.0.0.2
+        az: z1
+        static: [{{ .PublicCIDRStatic }}] // 10.0.0.6, 10.0.0.7
+        reserved: [{{ .PublicCIDRReserved }}] // 10.0.0.1-10.0.0.5
+        cloud_properties:
+          subnet: {{ .PublicSubnetID }}
+  - name: private
+    type: manual
+    subnets:
+      - range: {{ .PrivateCIDR }}
+        gateway: {{ .PrivateCIDRGAteway }} // 10.0.1.1
+        dns: [{{ .PrivateCIDRDNS }}] // 10.0.0.2
+        az: z1
+        reserved: [{{ .PrivateCIDRReserved }}] // 10.0.1.1-10.0.1.5
+        cloud_properties:
+          subnet: {{ .PrivateSubnetID }}
+  - name: vip
+    type: vip
 
 
 vm_extensions:

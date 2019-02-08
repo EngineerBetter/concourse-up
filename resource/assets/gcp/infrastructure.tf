@@ -52,6 +52,21 @@ variable "namespace" {
   default = "{{ .Namespace }}"
 }
 
+variable "source_access_ip" {
+  type = "string"
+  default = "{{ .ExternalIP }}"
+}
+
+variable "public_cidr" {
+  type = "string"
+  default = "{{ .PublicCIDR }}"
+}
+
+variable "private_cidr" {
+  type = "string"
+  default = "{{ .PrivateCIDR }}"
+}
+
 {{if .DNSManagedZoneName }}
 variable "dns_managed_zone_name" {
   type = "string"
@@ -63,20 +78,6 @@ variable "dns_record_set_prefix" {
   default = "{{ .DNSRecordSetPrefix }}"
 }
 {{end}}
-
-variable "source_access_ip" {
-  type = "string"
-  default = "{{ .ExternalIP }}"
-}
-variable "public_cidr" {
-  type = "string"
-  default = "{{ .PublicCIDR }}"
-}
-
-variable "private_cidr" {
-  type = "string"
-  default = "{{ .PrivateCIDR }}"
-}
 
 provider "google" {
     credentials = "{{ .GCPCredentialsJSON }}"
@@ -345,9 +346,11 @@ resource "google_sql_user" "director" {
   host     = "*"
   password = "${var.db_password}"
 }
+
 output "network" {
 value = "${google_compute_network.default.name}"
 }
+
 output "director_firewall_name" {
 value = "${google_compute_firewall.director.name}"
 }
@@ -355,6 +358,7 @@ value = "${google_compute_firewall.director.name}"
 output "private_subnetwork_name" {
 value = "${google_compute_subnetwork.private.name}"
 }
+
 output "public_subnetwork_name" {
 value = "${google_compute_subnetwork.public.name}"
 }
@@ -362,6 +366,7 @@ value = "${google_compute_subnetwork.public.name}"
 output "public_subnetwork_cidr" {
 value = "${google_compute_subnetwork.public.ip_cidr_range}"
 }
+
 output "private_subnetwork_cidr" {
 value = "${google_compute_subnetwork.private.ip_cidr_range}"
 }
@@ -369,6 +374,7 @@ value = "${google_compute_subnetwork.private.ip_cidr_range}"
 output "private_subnetwor_internal_gw" {
 value = "${google_compute_subnetwork.private.gateway_address}"
 }
+
 output "public_subnetwor_internal_gw" {
 value = "${google_compute_subnetwork.public.gateway_address}"
 }
@@ -396,6 +402,7 @@ output "db_name" {
 output "nat_gateway_ip" {
   value = "${google_compute_instance.nat-instance.network_interface.0.access_config.0.nat_ip}"
 }
+
 output "server_ca_cert" {
   value = "${google_sql_database_instance.director.server_ca_cert.0.cert}"
 }

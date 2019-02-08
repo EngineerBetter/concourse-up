@@ -349,14 +349,14 @@ resource "aws_security_group" "vms" {
     from_port   = 6868
     to_port     = 6868
     protocol    = "tcp"
-    cidr_blocks = ["10.0.0.0/16"]
+    cidr_blocks = ["${var.network_cidr}"]
   }
 
   ingress {
     from_port   = 4222
     to_port     = 4222
     protocol    = "tcp"
-    cidr_blocks = ["10.0.0.0/16"]
+    cidr_blocks = ["${var.network_cidr}"]
   }
 
 
@@ -364,70 +364,70 @@ resource "aws_security_group" "vms" {
     from_port   = 25250
     to_port     = 25250
     protocol    = "tcp"
-    cidr_blocks = ["10.0.0.0/16"]
+    cidr_blocks = ["${var.network_cidr}"]
   }
 
   ingress {
     from_port   = 25555
     to_port     = 25555
     protocol    = "tcp"
-    cidr_blocks = ["10.0.0.0/16"]
+    cidr_blocks = ["${var.network_cidr}"]
   }
 
   ingress {
     from_port   = 25777
     to_port     = 25777
     protocol    = "tcp"
-    cidr_blocks = ["10.0.0.0/16"]
+    cidr_blocks = ["${var.network_cidr}"]
   }
 
   ingress {
     from_port   = 53
     to_port     = 53
     protocol    = "udp"
-    cidr_blocks = ["10.0.0.0/16"]
+    cidr_blocks = ["${var.network_cidr}"]
   }
 
   ingress {
     from_port   = 2222
     to_port     = 2222
     protocol    = "tcp"
-    cidr_blocks = ["10.0.0.0/16"]
+    cidr_blocks = ["${var.network_cidr}"]
   }
 
   ingress {
     from_port   = 5555
     to_port     = 5555
     protocol    = "tcp"
-    cidr_blocks = ["10.0.0.0/16"]
+    cidr_blocks = ["${var.network_cidr}"]
   }
 
   ingress {
     from_port   = 7777
     to_port     = 7777
     protocol    = "tcp"
-    cidr_blocks = ["10.0.0.0/16"]
+    cidr_blocks = ["${var.network_cidr}"]
   }
 
   ingress {
     from_port   = 7788
     to_port     = 7788
     protocol    = "tcp"
-    cidr_blocks = ["10.0.0.0/16"]
+    cidr_blocks = ["${var.network_cidr}"]
   }
 
   ingress {
     from_port   = 7799
     to_port     = 7799
     protocol    = "tcp"
-    cidr_blocks = ["10.0.0.0/16"]
+    cidr_blocks = ["${var.network_cidr}"]
   }
 
   ingress {
     from_port   = 0
     to_port     = 0
     protocol    = "icmp"
-    cidr_blocks = ["10.0.0.0/16"]
+    cidr_blocks = ["${var.network_cidr}"]
   }
   ingress {
     from_port = 22
@@ -459,7 +459,7 @@ resource "aws_security_group" "rds" {
     from_port   = 5432
     to_port     = 5432
     protocol    = "tcp"
-    cidr_blocks = ["10.0.0.0/16"]
+    cidr_blocks = ["${var.network_cidr}"]
   }
 }
 
@@ -642,6 +642,18 @@ output "public_subnet_id" {
 
 output "private_subnet_id" {
   value = "${aws_subnet.private.id}"
+}
+
+output "public_cidr" {
+  value = "${var.public_cidr}"
+}
+
+output "private_cidr" {
+  value = "${var.private_cidr}"
+}
+
+output "network_cidr" {
+  value = "${var.network_cidr}"
 }
 
 output "blobstore_bucket" {

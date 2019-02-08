@@ -45,6 +45,15 @@ type Environment struct {
 	VMSecurityGroup       string
 	WorkerType            string
 	CustomOperations      string
+	PublicCIDR            string
+	PublicCIDRGateway     string
+	PublicCIDRDNS         string
+	PublicCIDRStatic      string
+	PublicCIDRReserved    string
+	PrivateCIDR           string
+	PrivateCIDRGAteway    string
+	PrivateCIDRDNS        string
+	PrivateCIDRReserved   string
 }
 
 var allOperations = resource.AWSCPIOps + resource.ExternalIPOps + resource.AWSDirectorCustomOps

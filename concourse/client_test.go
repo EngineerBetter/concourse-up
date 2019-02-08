@@ -53,6 +53,9 @@ var _ = Describe("client", func() {
 		PublicSubnetID           string
 		VMsSecurityGroupID       string
 		VPCID                    string
+		NetworkCIDR      string
+		PublicCIDR       string
+		PrivateCIDR      string
 	}
 	var terraformMetadata TerraformMetadata
 

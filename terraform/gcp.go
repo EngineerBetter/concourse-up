@@ -24,12 +24,12 @@ type GCPInputVars struct {
 	ExternalIP         string
 	GCPCredentialsJSON string
 	Namespace          string
+	PrivateCIDR        string
 	Project            string
+	PublicCIDR         string
 	Region             string
 	Tags               string
 	Zone               string
-	PublicCIDR         string
-	PrivateCIDR        string
 }
 
 // ConfigureTerraform interpolates terraform contents and returns terraform config

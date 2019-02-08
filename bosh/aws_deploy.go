@@ -147,10 +147,22 @@ func (client *AWSClient) createEnv(bosh *boshenv.BOSHCLI, state, creds []byte, c
 	if err1 != nil {
 		return state, creds, err1
 	}
+	networkCIDR, err1 := client.metadata.Get("NetworkCIDR")
+	if err1 != nil {
+		return state, creds, err1
+	}
+	privateCIDR, err1 := client.metadata.Get("PrivateCIDR")
+	if err1 != nil {
+		return state, creds, err1
+	}
+	publicCIDR, err1 := client.metadata.Get("PublicCIDR")
+	if err1 != nil {
+		return state, creds, err1
+	}
 	err1 = bosh.CreateEnv(store, aws.Environment{
-		InternalCIDR:    "10.0.0.0/24",
-		InternalGateway: "10.0.0.1",
-		InternalIP:      "10.0.0.6",
+		InternalCIDR:    privateCIDR,
+		InternalGateway: gatewayOf(privateCIDR),            // "10.0.0.1"
+		InternalIP:      directorInternalIPOf(privateCIDR), // "10.0.0.6"
 		AccessKeyID:     boshUserAccessKeyID,
 		SecretAccessKey: boshSecretAccessKey,
 		Region:          client.config.Region,
@@ -206,15 +218,61 @@ func (client *AWSClient) updateCloudConfig(bosh *boshenv.BOSHCLI) error {
 	if err != nil {
 		return err
 	}
+	publicCIDR, err := client.metadata.Get("PublicCIDR")
+	if err != nil {
+		return err
+	}
+	publicCIDRGateway, err := client.metadata.Get("PublicCIDRGateway")
+	if err != nil {
+		return err
+	}
+	publicCIDRDNS, err := client.metadata.Get("PublicCIDRDNS")
+	if err != nil {
+		return err
+	}
+	publicCIDRStatic, err := client.metadata.Get("PublicCIDRStatic") // [10.0.0.6, 10.0.0.7]
+	if err != nil {
+		return err
+	}
+	publicCIDRReserved, err := client.metadata.Get("PublicCIDRReserved") // [10.0.0.1-10.0.0.5]
+	if err != nil {
+		return err
+	}
+	privateCIDR, err := client.metadata.Get("PrivateCIDR")
+	if err != nil {
+		return err
+	}
+	privateCIDRGAteway, err := client.metadata.Get("PrivateCIDRGAteway") // 10.0.1.1
+	if err != nil {
+		return err
+	}
+	privateCIDRDNS, err := client.metadata.Get("PrivateCIDRDNS") // [10.0.0.2]
+	if err != nil {
+		return err
+	}
+	privateCIDRReserved, err := client.metadata.Get("PrivateCIDRReserved") // [10.0.1.1-10.0.1.5]
+	if err != nil {
+		return err
+	}
+
 	return bosh.UpdateCloudConfig(aws.Environment{
-		AZ:               client.config.AvailabilityZone,
-		PublicSubnetID:   publicSubnetID,
-		PrivateSubnetID:  privateSubnetID,
-		ATCSecurityGroup: aTCSecurityGroupID,
-		VMSecurityGroup:  vMsSecurityGroupID,
-		Spot:             client.config.Spot,
-		ExternalIP:       directorPublicIP,
-		WorkerType:       client.config.WorkerType,
+		AZ:                  client.config.AvailabilityZone,
+		PublicSubnetID:      publicSubnetID,
+		PrivateSubnetID:     privateSubnetID,
+		ATCSecurityGroup:    aTCSecurityGroupID,
+		VMSecurityGroup:     vMsSecurityGroupID,
+		Spot:                client.config.Spot,
+		ExternalIP:          directorPublicIP,
+		WorkerType:          client.config.WorkerType,
+		PublicCIDR:          publicCIDR,
+		PublicCIDRGateway:   publicCIDRGateway,
+		PublicCIDRDNS:       publicCIDRDNS,
+		PublicCIDRStatic:    publicCIDRStatic,// [10.0.0.6, 10.0.0.7]
+		PublicCIDRReserved:  publicCIDRReserved,// [10.0.0.1-10.0.0.5]
+		PrivateCIDR:         privateCIDR,
+		PrivateCIDRGAteway:  privateCIDRGAteway,// 10.0.1.1
+		PrivateCIDRDNS:      privateCIDRDNS,
+		PrivateCIDRReserved: privateCIDRReserved,
 	}, directorPublicIP, client.config.DirectorPassword, client.config.DirectorCACert)
 }
 func (client *AWSClient) uploadConcourseStemcell(bosh *boshenv.BOSHCLI) error {
