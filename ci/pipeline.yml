@@ -26,7 +26,8 @@ groups:
   - detect-versions
 - name: Cleanup
   jobs:
-  - cleanup
+  - cleanup-aws
+  - cleanup-gcp
 
 resource_types:
 - name: pipeline
@@ -771,9 +772,10 @@ jobs:
         $TEXT_FILE_CONTENT
       text_file: output/message
 
-- name: cleanup
+- name: cleanup-aws
   serial: true
   serial_groups:
+  - smoke-test
   - system-test
   - system-test-update
   - system-test-m5
@@ -790,9 +792,36 @@ jobs:
     params:
       AWS_ACCESS_KEY_ID: ((concourse_up_test_access_key_id))
       AWS_SECRET_ACCESS_KEY: ((concourse_up_test_secret_key))
+      IAAS: AWS
     on_failure:
       put: slack-alert
       params:
         channel: "#integrations"
         text: |
-          Concourse-Up cleanup failure!
+          Concourse-Up AWS cleanup failure!
+
+- name: cleanup-gcp
+  serial: true
+  serial_groups:
+  - smoke-test-gcp
+  - system-test-gcp
+  - system-test-update-gcp
+  - system-test-letsencrypt-gcp
+  - system-test-options-and-destroy-gcp
+  plan:
+  - aggregate:
+    - get: concourse-up
+    - get: once-daily
+      trigger: true
+    - get: binary-linux
+  - task: cleanup
+    file: concourse-up/ci/tasks/cleanup-tests.yml
+    params:
+      GOOGLE_APPLICATION_CREDENTIALS_CONTENTS: ((system_test_google_application_credentials))
+      IAAS: GCP
+    on_failure:
+      put: slack-alert
+      params:
+        channel: "#integrations"
+        text: |
+          Concourse-Up GCP cleanup failure!

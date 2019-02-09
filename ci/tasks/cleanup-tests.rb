@@ -1,9 +1,22 @@
 #!/usr/bin/env ruby
 
-require_relative('ruby-lib/aws.rb')
+require_relative("ruby-lib/#{ENV.fetch('IAAS').downcase}.rb")
+
+class Orphan
+  attr_reader :bucket, :deployment, :project, :region
+
+  def initialize(bucket, deployment, project, region)
+    @bucket = bucket
+    @deployment = deployment
+    @project = project
+    @region = region
+  end
+end
+
 class Cleaner
   private
-    attr_reader :iaas
+  attr_reader :iaas
+
   public
 
   def initialize(iaas)
@@ -12,12 +25,7 @@ class Cleaner
 
   def orphans(buckets)
     buckets.map do |bucket_name|
-      bucket_name = bucket_name.strip
-      deployment = bucket_name.split('-')[0..4].join('-')
-      project = bucket_name.split('-')[2..4].join('-')
-      region = bucket_name.split('-')[5..7].join('-')
-
-      iaas.new_orphan(bucket_name, deployment, project, region)
+      iaas.new_orphan(bucket_name)
     end
   end
 
@@ -42,37 +50,18 @@ class Cleaner
       if bucket.key_files?
         destroyable_orphans.push(orphan)
       else
-        cleanup_via_iaas(orphan)
+        iaas.cleanup(orphan)
       end
     end
 
     cleanup_with_concourse_up(destroyable_orphans) unless destroyable_orphans.empty?
   end
 
-  def cleanup_via_iaas(orphan)
-    bucket = orphan.bucket
-    puts "#{bucket.name} is missing key files"
-    puts 'Attempting to delete VPC'
-    puts '==================================================================='
-    puts "MANUAL CLEANUP MAY BE REQUIRED FOR #{bucket.name}"
-    puts '==================================================================='
-
-    vpc_id = orphan.vpc_id
-    if orphan.vpc_id_valid?(vpc_id)
-      orphan.delete_db_instance(vpc_id)
-      orphan.delete_vpc(vpc_id)
-    else
-      puts "VPC for [#{orphan.deployment}] not found"
-    end
-    bucket.delete
-    puts "Deleted bucket [#{bucket.name}]"
-  end
-
   def cleanup_with_concourse_up(orphans_with_state_files)
     orphans_with_state_files.each do |orphan|
       command = "./cup destroy --region #{orphan.region} #{orphan.project}"
       puts "Attempting to run #{command}"
-      str = sprintf("yes yes | ./cup destroy --region %s %s", orphan.region, orphan.project)
+      str = sprintf("yes yes | ./cup destroy --iaas #{iaas.name} --region %s %s", orphan.region, orphan.project)
       `echo '#{str}' >> to_delete`
     end
 
@@ -88,5 +77,5 @@ end
 `cp binary-linux/concourse-up-linux-amd64 ./cup`
 `chmod +x ./cup`
 
-cleaner = Cleaner.new(AWS.new('concourse-up-ts'))
+cleaner = Cleaner.new(IAAS.new('concourse-up-ts'))
 cleaner.clean
