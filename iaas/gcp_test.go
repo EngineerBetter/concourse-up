@@ -31,12 +31,12 @@ func TestGCPProvider_IAAS(t *testing.T) {
 	tests := []struct {
 		name   string
 		fields fields
-		want   string
+		want   Name
 	}{
 		{
 			name:   "returns the proper IAAS name",
 			fields: fields{},
-			want:   "GCP",
+			want:   GCP,
 		},
 	}
 	for _, tt := range tests {

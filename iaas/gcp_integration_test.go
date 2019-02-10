@@ -23,7 +23,7 @@ func TestGCPProvider_CreateDatabases(t *testing.T) {
 	_, passwordErr, err := runCommand("gcloud", "sql", "users", "set-password", "postgres", "--instance", dbName, "--password", "password")
 	failIfErr(t, err, "Unable to set password with err [%v] and stderr [%v]", passwordErr)
 
-	gcp, err := iaas.New("GCP", "europe-west1")
+	gcp, err := iaas.New(iaas.GCP, "europe-west1")
 	failIfErr(t, err, "Unable to create GCP instance: %v")
 
 	err = gcp.CreateDatabases(dbName, "postgres", "password")

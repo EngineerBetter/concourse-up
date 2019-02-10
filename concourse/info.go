@@ -3,6 +3,7 @@ package concourse
 import (
 	"bytes"
 	"fmt"
+	"github.com/EngineerBetter/concourse-up/iaas"
 	"io/ioutil"
 	"os"
 	"os/exec"
@@ -76,9 +77,9 @@ func (client *Client) FetchInfo() (*Info, error) {
 	environment := client.tfInputVarsFactory.NewInputVars(conf)
 
 	switch client.provider.IAAS() {
-	case awsConst: // nolint
+	case iaas.AWS: // nolint
 		gatewayUser = "vcap"
-	case gcpConst: // nolint
+	case iaas.GCP: // nolint
 		gatewayUser = "jumpbox"
 	}
 

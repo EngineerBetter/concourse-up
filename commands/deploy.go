@@ -261,7 +261,7 @@ func zoneBelongsToRegion(zone, region string) error {
 }
 
 func validateNameLength(name string, provider iaas.Provider) error {
-	if provider.IAAS() == "GCP" {
+	if provider.IAAS() == iaas.GCP {
 		if len(name) > maxAllowedNameLength {
 			return fmt.Errorf("deployment name %s is too long. %d character limit", name, maxAllowedNameLength)
 		}
@@ -278,7 +278,7 @@ func validateCidrRanges(provider iaas.Provider, networkCidr, publicCidr, private
 		return nil
 	}
 
-	if provider.IAAS() == awsConst {
+	if provider.IAAS() == iaas.AWS {
 		if (privateCidr != "" || publicCidr != "") && networkCidr == "" {
 			return errors.New("error validating CIDR ranges - vpc-network-range must be provided when using AWS")
 		}
@@ -301,7 +301,7 @@ func validateCidrRanges(provider iaas.Provider, networkCidr, publicCidr, private
 		return errors.New("error validating CIDR ranges - private-subnet-range is not a valid CIDR")
 	}
 
-	if provider.IAAS() == awsConst {
+	if provider.IAAS() == iaas.AWS {
 		if !parsedNetworkCidr.Contains(parsedPublicCidr.IP) {
 			return errors.New("error validating CIDR ranges - public-subnet-range must be within vpc-network-range")
 		}
@@ -355,7 +355,11 @@ var deployCmd = cli.Command{
 	ArgsUsage: "<name>",
 	Flags:     deployFlags,
 	Action: func(c *cli.Context) error {
-		provider, err := iaas.New(initialDeployArgs.IAAS, initialDeployArgs.AWSRegion)
+		iaasName, err := iaas.Assosiate(initialDeployArgs.IAAS)
+		if err != nil {
+			return err
+		}
+		provider, err := iaas.New(iaasName, initialDeployArgs.AWSRegion)
 		if err != nil {
 			return fmt.Errorf("Error creating IAAS provider on deploy: [%v]", err)
 		}

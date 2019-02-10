@@ -127,7 +127,7 @@ func Generate(constructor func(u *User) (*lego.Client, error), caName string, pr
 	c.Challenge.Remove(challenge.TLSALPN01)
 
 	switch provider.IAAS() {
-	case "AWS":
+	case iaas.AWS:
 		dnsConfig := route53.NewDefaultConfig()
 		dnsConfig.PropagationTimeout = 10 * time.Minute
 		dnsConfig.PollingInterval = 30 * time.Second
@@ -140,7 +140,7 @@ func Generate(constructor func(u *User) (*lego.Client, error), caName string, pr
 		if err1 != nil {
 			return nil, err1
 		}
-	case "GCP":
+	case iaas.GCP:
 		dnsConfig := gcloud.NewDefaultConfig()
 		dnsConfig.PropagationTimeout = 10 * time.Minute
 		dnsConfig.PollingInterval = 30 * time.Second

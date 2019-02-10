@@ -222,7 +222,7 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 			},
 		}
 		terraformCLI := &testsupport.FakeCLI{
-			FakeIAAS: func(name string) (terraform.InputVars, terraform.IAASMetadata, error) {
+			FakeIAAS: func(name iaas.Name) (terraform.InputVars, terraform.IAASMetadata, error) {
 				fakeInputVars := &testsupport.FakeTerraformInputVars{
 					FakeBuild: func(data map[string]interface{}) error {
 						actions = append(actions, "converting config.Config to TFInputVars")

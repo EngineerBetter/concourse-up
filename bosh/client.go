@@ -14,9 +14,6 @@ import (
 	"github.com/EngineerBetter/concourse-up/director"
 )
 
-const awsConst = "AWS"
-const gcpConst = "GCP"
-
 // StateFilename is default name for bosh-init state file
 const StateFilename = "director-state.json"
 
@@ -47,9 +44,9 @@ type ClientFactory func(config config.Config, metadata terraform.IAASMetadata, d
 //New returns an IAAS specific implementation of BOSH client
 func New(config config.Config, metadata terraform.IAASMetadata, director director.IClient, stdout, stderr io.Writer, provider iaas.Provider) (IClient, error) {
 	switch provider.IAAS() {
-	case awsConst:
+	case iaas.AWS:
 		return NewAWSClient(config, metadata, director, stdout, stderr, provider)
-	case gcpConst:
+	case iaas.GCP:
 		return NewGCPClient(config, metadata, director, stdout, stderr, provider)
 	}
 	return nil, fmt.Errorf("IAAS not supported: %s", provider.IAAS())

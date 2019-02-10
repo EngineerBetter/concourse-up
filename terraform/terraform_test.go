@@ -2,6 +2,7 @@ package terraform_test
 
 import (
 	"bytes"
+	"github.com/EngineerBetter/concourse-up/iaas"
 	"reflect"
 	"testing"
 
@@ -35,7 +36,7 @@ func TestCLI_Apply(t *testing.T) {
 	defer e.Finish()
 	mockCLIent, err := terraform.New(terraform.FakeExec(e.Cmd()))
 	require.NoError(t, err)
-	mockCLIent.IAAS("AWS")
+	mockCLIent.IAAS(iaas.AWS)
 
 	config := &mockTerraformInputVars{}
 
@@ -60,7 +61,7 @@ func TestCLI_ApplyPlan(t *testing.T) {
 	defer e.Finish()
 	mockCLIent, err := terraform.New(terraform.FakeExec(e.Cmd()))
 	require.NoError(t, err)
-	mockCLIent.IAAS("AWS")
+	mockCLIent.IAAS(iaas.AWS)
 
 	config := &mockTerraformInputVars{}
 
@@ -82,7 +83,7 @@ func TestCLI_Destroy(t *testing.T) {
 	defer e.Finish()
 	mockCLIent, err := terraform.New(terraform.FakeExec(e.Cmd()))
 	require.NoError(t, err)
-	mockCLIent.IAAS("AWS")
+	mockCLIent.IAAS(iaas.AWS)
 
 	config := &mockTerraformInputVars{}
 
@@ -106,7 +107,7 @@ func TestCLI_BuildOutput(t *testing.T) {
 	defer e.Finish()
 	mockCLIent, err := terraform.New(terraform.FakeExec(e.Cmd()))
 	require.NoError(t, err)
-	mockCLIent.IAAS("AWS")
+	mockCLIent.IAAS(iaas.AWS)
 
 	config := &mockTerraformInputVars{}
 	metadata := &mockIAASMetadata{}
@@ -129,28 +130,28 @@ func TestCLI_BuildOutput(t *testing.T) {
 func TestCLI_IAAS(t *testing.T) {
 	tests := []struct {
 		name             string
-		args             string
+		args             iaas.Name
 		wantInputVars    terraform.InputVars
 		wantIAASMetadata terraform.IAASMetadata
 		wantErr          bool
 	}{
 		{
 			name:             "return GCP provider hooks for GCP",
-			args:             "GCP",
+			args:             iaas.GCP,
 			wantInputVars:    &terraform.GCPInputVars{},
 			wantIAASMetadata: &terraform.GCPMetadata{},
 			wantErr:          false,
 		},
 		{
 			name:             "return AWS provider hooks for AWS",
-			args:             "AWS",
+			args:             iaas.AWS,
 			wantInputVars:    &terraform.AWSInputVars{},
 			wantIAASMetadata: &terraform.AWSMetadata{},
 			wantErr:          false,
 		},
 		{
 			name:             "return null provider hooks for unknown provider",
-			args:             "aProvider",
+			args:             iaas.Unknown,
 			wantInputVars:    &terraform.NullInputVars{},
 			wantIAASMetadata: &terraform.NullMetadata{},
 			wantErr:          true,

@@ -115,7 +115,11 @@ var maintainCmd = cli.Command{
 	ArgsUsage: "<name>",
 	Flags:     maintainFlags,
 	Action: func(c *cli.Context) error {
-		provider, err := iaas.New(initialMaintainArgs.IAAS, initialMaintainArgs.AWSRegion)
+		iaasName, err := iaas.Assosiate(initialMaintainArgs.IAAS)
+		if err != nil {
+			return err
+		}
+		provider, err := iaas.New(iaasName, initialMaintainArgs.AWSRegion)
 		if err != nil {
 			return fmt.Errorf("Error creating IAAS provider on maintain: [%v]", err)
 		}

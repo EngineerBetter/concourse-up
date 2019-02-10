@@ -12,10 +12,33 @@ type Choice struct {
 	GCP interface{}
 }
 
+type Name int
+
 const (
-	awsConst = "AWS"
-	gcpConst = "GCP"
+	Unknown = iota
+	AWS
+	GCP
 )
+
+var names = []string{
+	"Unknown",
+	"AWS",
+	"GCP",
+}
+
+func (n Name) String() string {
+	return names[n]
+}
+
+func Assosiate(name string) (Name, error) {
+	name = strings.ToUpper(name)
+	for n := len(names) - 1; n > 0; n-- {
+		if name == names[n] {
+			return Name(n), nil
+		}
+	}
+	return Unknown, fmt.Errorf("cannot map iaas [%s] as any of %+v", name, names[1:])
+}
 
 // Provider represents actions taken against AWS
 type Provider interface {
@@ -33,7 +56,7 @@ type Provider interface {
 	FindLongestMatchingHostedZone(subdomain string) (string, string, error)
 	HasFile(bucket, path string) (bool, error)
 	DBType(name string) string
-	IAAS() string
+	IAAS() Name
 	LoadFile(bucket, path string) ([]byte, error)
 	Region() string
 	WorkerType(string)
@@ -46,15 +69,15 @@ type Provider interface {
 type Factory func(iaasName, region string) (Provider, error)
 
 // New returns a new IAAS client for a particular IAAS and region
-func New(iaasName, region string) (Provider, error) {
-	switch strings.ToUpper(iaasName) {
-	case awsConst:
+func New(iaasName Name, region string) (Provider, error) {
+	switch iaasName {
+	case AWS:
 		if region == "" {
 			region = "eu-west-1"
 		}
 
 		return newAWS(region)
-	case gcpConst:
+	case GCP:
 		if region == "" {
 			region = "europe-west1"
 		}

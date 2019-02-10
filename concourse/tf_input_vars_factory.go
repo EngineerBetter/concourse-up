@@ -12,9 +12,9 @@ type TFInputVarsFactory interface {
 }
 
 func NewTFInputVarsFactory(provider iaas.Provider) (TFInputVarsFactory, error) {
-	if provider.IAAS() == "AWS" {
+	if provider.IAAS() == iaas.AWS {
 		return &AWSInputVarsFactory{}, nil
-	} else if provider.IAAS() == "GCP" {
+	} else if provider.IAAS() == iaas.GCP {
 		credentialsPath, err := provider.Attr("credentials_path")
 		if err != nil {
 			return &GCPInputVarsFactory{}, fmt.Errorf("Error finding attribute [credentials_path]: [%v]", err)

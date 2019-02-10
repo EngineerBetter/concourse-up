@@ -5,17 +5,13 @@ import (
 	"crypto/rand"
 	"errors"
 	"fmt"
+	"github.com/EngineerBetter/concourse-up/iaas"
+	"github.com/EngineerBetter/concourse-up/resource"
 	"io/ioutil"
 	"os"
 	"os/exec"
 	"path"
-	"strings"
-
-	"github.com/EngineerBetter/concourse-up/resource"
 )
-
-const awsConst = "AWS"
-const gcpConst = "GCP"
 
 // InputVars exposes ConfigureDirectorManifestCPI
 type InputVars interface {
@@ -31,7 +27,7 @@ type IAASMetadata interface {
 
 //CLIInterface is interface the abstraction of execCmd
 type CLIInterface interface {
-	IAAS(string) (InputVars, IAASMetadata, error)
+	IAAS(iaas.Name) (InputVars, IAASMetadata, error)
 	Apply(InputVars, bool) error
 	Destroy(InputVars) error
 	BuildOutput(InputVars, IAASMetadata) error
@@ -41,7 +37,7 @@ type CLIInterface interface {
 type CLI struct {
 	execCmd func(string, ...string) *exec.Cmd
 	Path    string
-	iaas    string
+	iaas    iaas.Name
 }
 
 // Option defines the arbitary element of Options for New
@@ -102,16 +98,16 @@ func (n *NullMetadata) Init(*bytes.Buffer) error { return nil }
 func (n *NullMetadata) Get(string) (string, error) { return "", nil }
 
 // IAAS is returning the IAAS specific metadata and environment
-func (c *CLI) IAAS(name string) (InputVars, IAASMetadata, error) {
-	switch strings.ToUpper(name) {
-	case awsConst: // nolint
-		c.iaas = "AWS" // nolint
+func (c *CLI) IAAS(name iaas.Name) (InputVars, IAASMetadata, error) {
+	switch name {
+	case iaas.AWS: // nolint
+		c.iaas = iaas.AWS // nolint
 		return &AWSInputVars{}, &AWSMetadata{}, nil
-	case gcpConst: // nolint
-		c.iaas = "GCP" // nolint
+	case iaas.GCP: // nolint
+		c.iaas = iaas.GCP // nolint
 		return &GCPInputVars{}, &GCPMetadata{}, nil
 	}
-	return &NullInputVars{}, &NullMetadata{}, errors.New("terraform: " + name + " not a valid iaas provider")
+	return &NullInputVars{}, &NullMetadata{}, errors.New("terraform: " + name.String() + " not a valid iaas provider")
 
 }
 
@@ -121,18 +117,16 @@ func (c *CLI) init(config InputVars) (string, error) {
 		err      error
 	)
 	switch c.iaas {
-	case awsConst: // nolint
+	case iaas.AWS: // nolint
 		tfConfig, err = config.ConfigureTerraform(resource.AWSTerraformConfig)
 		if err != nil {
 			return "", err
 		}
-	case gcpConst: // nolint
+	case iaas.GCP: // nolint
 		tfConfig, err = config.ConfigureTerraform(resource.GCPTerraformConfig)
 		if err != nil {
 			return "", err
 		}
-	default:
-		return "", errors.New("terraform: init cannot choose a provider")
 	}
 
 	terraformConfigPath, err := writeTempFile([]byte(tfConfig))

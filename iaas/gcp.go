@@ -243,8 +243,8 @@ func (g *GCPProvider) Zone(input string) string {
 }
 
 // IAAS returns the name of the Provider
-func (g *GCPProvider) IAAS() string {
-	return "GCP"
+func (g *GCPProvider) IAAS() Name {
+	return GCP
 }
 
 // EnsureFileExists checks for the named file in GCP storage and creates it if it doesn't exist

@@ -4,6 +4,7 @@ import (
 	"crypto/x509"
 	"encoding/pem"
 	"fmt"
+	"github.com/EngineerBetter/concourse-up/iaas"
 	"io"
 	"text/template"
 	"time"
@@ -19,9 +20,6 @@ import (
 	"github.com/xenolf/lego/lego"
 	yaml "gopkg.in/yaml.v2"
 )
-
-const awsConst = "AWS"
-const gcpConst = "GCP"
 
 // BoshParams represents the params used and produced by a BOSH deploy
 type BoshParams struct {
@@ -61,9 +59,9 @@ func (client *Client) Deploy() error {
 		}
 	} else {
 		switch client.provider.IAAS() {
-		case awsConst: // nolint
+		case iaas.AWS: // nolint
 			conf.RDSDefaultDatabaseName = fmt.Sprintf("bosh_%s", util.EightRandomLetters())
-		case gcpConst: // nolint
+		case iaas.GCP: // nolint
 			conf.RDSDefaultDatabaseName = fmt.Sprintf("bosh-%s", util.EightRandomLetters())
 		}
 

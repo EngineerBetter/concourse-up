@@ -136,7 +136,11 @@ var infoCmd = cli.Command{
 	ArgsUsage: "<name>",
 	Flags:     infoFlags,
 	Action: func(c *cli.Context) error {
-		provider, err := iaas.New(initialInfoArgs.IAAS, initialInfoArgs.AWSRegion)
+		iaasName, err := iaas.Assosiate(initialInfoArgs.IAAS)
+		if err != nil {
+			return err
+		}
+		provider, err := iaas.New(iaasName, initialInfoArgs.AWSRegion)
 		if err != nil {
 			return fmt.Errorf("Error creating IAAS provider on info: [%v]", err)
 		}

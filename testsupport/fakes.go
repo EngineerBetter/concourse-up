@@ -29,7 +29,7 @@ type FakeProvider struct {
 	FakeEnsureFileExists              func(bucket, path string, defaultContents []byte) ([]byte, bool, error)
 	FakeFindLongestMatchingHostedZone func(subdomain string) (string, string, error)
 	FakeHasFile                       func(bucket, path string) (bool, error)
-	FakeIAAS                          func() string
+	FakeIAAS                          func() iaas.Name
 	FakeLoadFile                      func(bucket, path string) ([]byte, error)
 	FakeRegion                        func() string
 	FakeWorkerType                    func(string)
@@ -105,7 +105,7 @@ func (fakeProvider *FakeProvider) HasFile(bucket, path string) (bool, error) {
 }
 
 // IAAS is a fake iaas
-func (fakeProvider *FakeProvider) IAAS() string {
+func (fakeProvider *FakeProvider) IAAS() iaas.Name {
 	return fakeProvider.FakeIAAS()
 }
 
@@ -184,14 +184,14 @@ func (fakeTerraformInputVars *FakeTerraformInputVars) Build(data map[string]inte
 
 // FakeCLI implements terraform.CLI for testing
 type FakeCLI struct {
-	FakeIAAS        func(name string) (terraform.InputVars, terraform.IAASMetadata, error)
+	FakeIAAS        func(name iaas.Name) (terraform.InputVars, terraform.IAASMetadata, error)
 	FakeApply       func(conf terraform.InputVars, dryrun bool) error
 	FakeDestroy     func(conf terraform.InputVars) error
 	FakeBuildOutput func(conf terraform.InputVars, metadata terraform.IAASMetadata) error
 }
 
 // IAAS delegates to FakeIAAS which is dynamically set by the tests
-func (client *FakeCLI) IAAS(name string) (terraform.InputVars, terraform.IAASMetadata, error) {
+func (client *FakeCLI) IAAS(name iaas.Name) (terraform.InputVars, terraform.IAASMetadata, error) {
 	return client.FakeIAAS(name)
 }
 
@@ -240,8 +240,8 @@ func (client *FakeAWSClient) WorkerType(w string) {
 }
 
 // IAAS is here to implement iaas.IClient
-func (client *FakeAWSClient) IAAS() string {
-	return "AWS"
+func (client *FakeAWSClient) IAAS() iaas.Name {
+	return iaas.AWS
 }
 
 // DeleteVMsInDeployment delegates to FakeDeleteVMsInDeployment which is dynamically set by the tests

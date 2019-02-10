@@ -128,12 +128,12 @@ func Test_setZoneAndRegion(t *testing.T) {
 
 func Test_validateNameLength(t *testing.T) {
 	testsupport.SetupFakeCredsForGCPProvider(t)
-	gcpProvider, err := iaas.New("GCP", "europe-west1")
+	gcpProvider, err := iaas.New(iaas.GCP, "europe-west1")
 	if err != nil {
 		t.Fatalf("Error initialisting iaas.Provider: [%v]", err)
 	}
 
-	awsProvider, err := iaas.New("AWS", "eu-west-1")
+	awsProvider, err := iaas.New(iaas.AWS, "eu-west-1")
 	if err != nil {
 		t.Fatalf("Error initialisting iaas.Provider: [%v]", err)
 	}
@@ -207,11 +207,11 @@ func Test_validateNameLength(t *testing.T) {
 
 func Test_validateCidrRanges(t *testing.T) {
 	testsupport.SetupFakeCredsForGCPProvider(t)
-	gcpProvider, err := iaas.New("GCP", "europe-west1")
+	gcpProvider, err := iaas.New(iaas.GCP, "europe-west1")
 	if err != nil {
 		t.Fatalf("Error creating GCP provider in test: [%v]", err)
 	}
-	awsProvider, err := iaas.New("AWS", "eu-west-1")
+	awsProvider, err := iaas.New(iaas.AWS, "eu-west-1")
 	if err != nil {
 		t.Fatalf("Error creating AWS provider in test: [%v]", err)
 	}

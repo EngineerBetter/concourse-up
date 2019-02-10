@@ -101,8 +101,8 @@ func (a *AWSProvider) Region() string {
 }
 
 // IAAS returns the iaas to operate against
-func (a *AWSProvider) IAAS() string {
-	return "AWS"
+func (a *AWSProvider) IAAS() Name {
+	return AWS
 }
 
 func (a *AWSProvider) listZones() ([]string, error) {

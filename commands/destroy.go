@@ -120,7 +120,11 @@ var destroyCmd = cli.Command{
 	ArgsUsage: "<name>",
 	Flags:     destroyFlags,
 	Action: func(c *cli.Context) error {
-		provider, err := iaas.New(initialDestroyArgs.IAAS, initialDestroyArgs.AWSRegion)
+		iaasName, err := iaas.Assosiate(initialDestroyArgs.IAAS)
+		if err != nil {
+			return err
+		}
+		provider, err := iaas.New(iaasName, initialDestroyArgs.AWSRegion)
 		if err != nil {
 			return fmt.Errorf("Error creating IAAS provider on destroy: [%v]", err)
 		}

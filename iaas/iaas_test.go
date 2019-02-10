@@ -1,11 +1,12 @@
 package iaas_test
 
 import (
-	"github.com/EngineerBetter/concourse-up/iaas"
-	"github.com/EngineerBetter/concourse-up/testsupport"
 	"os"
 	"reflect"
 	"testing"
+
+	"github.com/EngineerBetter/concourse-up/iaas"
+	"github.com/EngineerBetter/concourse-up/testsupport"
 )
 
 func FakeGCPStorage() iaas.GCPOption {
@@ -15,7 +16,7 @@ func FakeGCPStorage() iaas.GCPOption {
 }
 func TestNew(t *testing.T) {
 	type args struct {
-		iaas    string
+		iaas    iaas.Name
 		region  string
 		project string
 	}
@@ -23,7 +24,7 @@ func TestNew(t *testing.T) {
 	tests := []struct {
 		name    string
 		args    args
-		want    string
+		want    iaas.Name
 		wantErr bool
 		setup   func(t *testing.T) string
 		cleanup func(t *testing.T, s string)
@@ -31,20 +32,20 @@ func TestNew(t *testing.T) {
 		{
 			name: "return aws provider",
 			args: args{
-				iaas:   "AWS", // it should not matter if it is capitals
+				iaas:   iaas.AWS, // it should not matter if it is capitals
 				region: "aRegion",
 			},
-			want:    "AWS",
+			want:    iaas.AWS,
 			wantErr: false,
 			setup:   func(t *testing.T) string { return "" },
 			cleanup: func(t *testing.T, s string) {},
 		}, {
 			name: "return gcp provider",
 			args: args{
-				iaas:   "GCP", // it should not matter if it is capitals
+				iaas:   iaas.GCP, // it should not matter if it is capitals
 				region: "aRegion",
 			},
-			want:    "GCP",
+			want:    iaas.GCP,
 			wantErr: false,
 			setup: func(t *testing.T) string {
 				return testsupport.SetupFakeCredsForGCPProvider(t)
@@ -58,10 +59,10 @@ func TestNew(t *testing.T) {
 		{
 			name: "does not care about case",
 			args: args{
-				iaas:   "aws", // it should not matter if it is capitals
+				iaas:   iaas.AWS, // it should not matter if it is capitals
 				region: "aRegion",
 			},
-			want:    "AWS",
+			want:    iaas.AWS,
 			wantErr: false,
 			setup:   func(t *testing.T) string { return "" },
 			cleanup: func(t *testing.T, s string) {},
@@ -79,6 +80,52 @@ func TestNew(t *testing.T) {
 			}
 			if !reflect.DeepEqual(got.IAAS(), tt.want) {
 				t.Errorf("New() = %v, want %v", got.IAAS(), tt.want)
+			}
+		})
+	}
+}
+
+func TestAssosiate(t *testing.T) {
+	tests := []struct {
+		name    string
+		arg     string
+		want    iaas.Name
+		wantErr bool
+	}{
+		{
+			name:    "get the GCP Name successfully",
+			arg:     "GCP",
+			want:    iaas.GCP,
+			wantErr: false,
+		},
+		{
+			name:    "get the GCP Name successfully case insensitive",
+			arg:     "GcP",
+			want:    iaas.GCP,
+			wantErr: false,
+		},
+		{
+			name:    "get the AWS Name successfully",
+			arg:     "AWS",
+			want:    iaas.AWS,
+			wantErr: false,
+		},
+		{
+			name:    "fail on unknown iaas name",
+			arg:     "aProvider",
+			want:    iaas.Unknown,
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := iaas.Assosiate(tt.arg)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Assosiate() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if got != tt.want {
+				t.Errorf("Assosiate() = %v, want %v", got, tt.want)
 			}
 		})
 	}
