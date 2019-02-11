@@ -43,21 +43,19 @@ func (v *GCPInputVars) ConfigureTerraform(terraformContents string) (string, err
 
 // Metadata represents output from terraform on GCP or GCP
 type GCPOutputs struct {
+	Network                    MetadataStringValue `json:"network" valid:"required"`
+	PrivateSubnetworkName      MetadataStringValue `json:"private_subnetwork_name" valid:"required"`
+	PublicSubnetworkName       MetadataStringValue `json:"public_subnetwork_name" valid:"required"`
+	PrivateSubnetworInternalGw MetadataStringValue `json:"private_subnetwor_internal_gw" valid:"required"`
+	PublicSubnetworInternalGw  MetadataStringValue `json:"public_subnetwor_internal_gw" valid:"required"`
 	ATCPublicIP                MetadataStringValue `json:"atc_public_ip" valid:"required"`
-	BoshDBAddress              MetadataStringValue `json:"bosh_db_address" valid:"required"`
-	DBName                     MetadataStringValue `json:"db_name" valid:"required"`
 	DirectorAccountCreds       MetadataStringValue `json:"director_account_creds" valid:"required"`
 	DirectorPublicIP           MetadataStringValue `json:"director_public_ip" valid:"required"`
-	DirectorSecurityGroupID    MetadataStringValue `json:"director_firewall_name" valid:"required"`
+	BoshDBAddress              MetadataStringValue `json:"bosh_db_address" valid:"required"`
+	DBName                     MetadataStringValue `json:"db_name" valid:"required"`
 	NatGatewayIP               MetadataStringValue `json:"nat_gateway_ip" valid:"required"`
-	Network                    MetadataStringValue `json:"network" valid:"required"`
-	PrivateSubnetworInternalGw MetadataStringValue `json:"private_subnetwor_internal_gw" valid:"required"`
-	PrivateSubnetworkCidr      MetadataStringValue `json:"private_subnetwork_cidr" valid:"required"`
-	PrivateSubnetworkName      MetadataStringValue `json:"private_subnetwork_name" valid:"required"`
-	PublicSubnetworInternalGw  MetadataStringValue `json:"public_subnetwor_internal_gw" valid:"required"`
-	PublicSubnetworkCidr       MetadataStringValue `json:"public_subnetwork_cidr" valid:"required"`
-	PublicSubnetworkName       MetadataStringValue `json:"public_subnetwork_name" valid:"required"`
 	SQLServerCert              MetadataStringValue `json:"server_ca_cert" valid:"required"`
+	DirectorSecurityGroupID    MetadataStringValue `json:"director_firewall_name" valid:"required"`
 }
 
 // AssertValid returns an error if the struct contains any missing fields

@@ -363,14 +363,6 @@ output "public_subnetwork_name" {
 value = "${google_compute_subnetwork.public.name}"
 }
 
-output "public_subnetwork_cidr" {
-value = "${google_compute_subnetwork.public.ip_cidr_range}"
-}
-
-output "private_subnetwork_cidr" {
-value = "${google_compute_subnetwork.private.ip_cidr_range}"
-}
-
 output "private_subnetwor_internal_gw" {
 value = "${google_compute_subnetwork.private.gateway_address}"
 }

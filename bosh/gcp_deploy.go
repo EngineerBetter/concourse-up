@@ -3,6 +3,8 @@ package bosh
 import (
 	"github.com/EngineerBetter/concourse-up/bosh/internal/boshenv"
 	"github.com/EngineerBetter/concourse-up/bosh/internal/gcp"
+	"github.com/apparentlymart/go-cidr/cidr"
+	"net"
 )
 
 // Deploy deploys a new Bosh director or converges an existing deployment
@@ -98,10 +100,24 @@ func (client *GCPClient) createEnv(bosh *boshenv.BOSHCLI, state, creds []byte, c
 	if err1 != nil {
 		return state, creds, err1
 	}
+
+	publicCIDR := client.config.PublicCIDR
+	_, pubCIDR, err1 := net.ParseCIDR(publicCIDR)
+	if err1 != nil {
+		return state, creds, err1
+	}
+	internalGateway, err1 := cidr.Host(pubCIDR, 1)
+	if err1 != nil {
+		return state, creds, err1
+	}
+	directorInternalIP, err1 := cidr.Host(pubCIDR, 6)
+	if err1 != nil {
+		return state, creds, err1
+	}
 	err1 = bosh.CreateEnv(store, gcp.Environment{
-		InternalCIDR:       "10.0.0.0/24",
-		InternalGW:         "10.0.0.1",
-		InternalIP:         "10.0.0.6",
+		InternalCIDR:       client.config.PublicCIDR,
+		InternalGW:         internalGateway.String(),
+		InternalIP:         directorInternalIP.String(),
 		DirectorName:       "bosh",
 		Zone:               client.provider.Zone(""),
 		Network:            network,
@@ -156,12 +172,66 @@ func (client *GCPClient) updateCloudConfig(bosh *boshenv.BOSHCLI) error {
 		return err
 	}
 	zone := client.provider.Zone("")
+
+	publicCIDR := client.config.PublicCIDR
+	_, pubCIDR, err := net.ParseCIDR(publicCIDR)
+	if err != nil {
+		return err
+	}
+	pubGateway, err := cidr.Host(pubCIDR, 1)
+	if err != nil {
+		return err
+	}
+	publicCIDRGateway := pubGateway.String()
+
+	publicCIDRDNS, err := formatIPRange(publicCIDR, "", []int{2})
+	if err != nil {
+		return err
+	}
+
+	publicCIDRStatic, err := formatIPRange(publicCIDR, ", ", []int{6, 7})
+	if err != nil {
+		return err
+	}
+	publicCIDRReserved, err := formatIPRange(publicCIDR, "-", []int{1, 5})
+	if err != nil {
+		return err
+	}
+
+	privateCIDR := client.config.PrivateCIDR
+	_, privCIDR, err := net.ParseCIDR(privateCIDR)
+	if err != nil {
+		return err
+	}
+	privGateway, err := cidr.Host(privCIDR, 1)
+	if err != nil {
+		return err
+	}
+	privateCIDRGateway := privGateway.String()
+
+	privateCIDRDNS, err := formatIPRange(privateCIDR, "", []int{2})
+	if err != nil {
+		return err
+	}
+	privateCIDRReserved, err := formatIPRange(privateCIDR, "-", []int{1, 5})
+	if err != nil {
+		return err
+	}
 	return bosh.UpdateCloudConfig(gcp.Environment{
-		Spot:              client.config.Spot,
-		PublicSubnetwork:  publicSubnetwork,
-		PrivateSubnetwork: privateSubnetwork,
-		Zone:              zone,
-		Network:           network,
+		PublicCIDR:          client.config.PublicCIDR,
+		PublicCIDRGateway:   publicCIDRGateway,
+		PublicCIDRDNS:       publicCIDRDNS,
+		PublicCIDRStatic:    publicCIDRStatic,
+		PublicCIDRReserved:  publicCIDRReserved,
+		PrivateCIDRGateway:  privateCIDRGateway,
+		PrivateCIDRDNS:      privateCIDRDNS,
+		PrivateCIDRReserved: privateCIDRReserved,
+		PrivateCIDR:         client.config.PrivateCIDR,
+		Spot:                client.config.Spot,
+		PublicSubnetwork:    publicSubnetwork,
+		PrivateSubnetwork:   privateSubnetwork,
+		Zone:                zone,
+		Network:             network,
 	}, directorPublicIP, client.config.DirectorPassword, client.config.DirectorCACert)
 }
 func (client *GCPClient) uploadConcourseStemcell(bosh *boshenv.BOSHCLI) error {

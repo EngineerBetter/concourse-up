@@ -119,7 +119,7 @@ networks:
     type: manual
     subnets:
       - range: {{ .PrivateCIDR }}
-        gateway: {{ .PrivateCIDRGAteway }} // 10.0.1.1
+        gateway: {{ .PrivateCIDRGateway }} // 10.0.1.1
         dns: {{ .PrivateCIDRDNS }} // [10.0.0.2]
         az: z1
         reserved: {{ .PrivateCIDRReserved }} // [10.0.1.1-10.0.1.5]

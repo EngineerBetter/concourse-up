@@ -33,7 +33,18 @@ type Environment struct {
 	Spot               bool
 	PublicKey          string
 	CustomOperations   string
+	PublicCIDR string
+	PublicCIDRGateway string
+	PublicCIDRDNS string
+	PublicCIDRStatic  string
+	PublicCIDRReserved  string
+	PrivateCIDR string
+	PrivateCIDRGateway  string
+	PrivateCIDRDNS  string
+	PrivateCIDRReserved  string
+
 }
+
 
 var allOperations = resource.GCPCPIOps + resource.GCPExternalIPOps + resource.GCPDirectorCustomOps + resource.GCPJumpboxUserOps
 
@@ -67,6 +78,15 @@ type gcpCloudConfigParams struct {
 	PublicSubnetwork  string
 	PrivateSubnetwork string
 	Network           string
+	PublicCIDR string
+	PublicCIDRGateway string
+	PublicCIDRDNS string
+	PublicCIDRStatic  string
+	PublicCIDRReserved  string
+	PrivateCIDR string
+	PrivateCIDRGateway  string
+	PrivateCIDRDNS  string
+	PrivateCIDRReserved  string
 }
 
 // IAASCheck returns the IAAS provider
@@ -83,6 +103,15 @@ func (e Environment) ConfigureDirectorCloudConfig(cloudConfig string) (string, e
 		PrivateSubnetwork: e.PrivateSubnetwork,
 		Spot:              e.Spot,
 		Network:           e.Network,
+		PublicCIDR: e.PublicCIDR,
+		PublicCIDRGateway: e.PublicCIDRGateway,
+		PublicCIDRDNS: e.PublicCIDRDNS,
+		PublicCIDRStatic: e.PublicCIDRStatic,
+		PublicCIDRReserved: e.PublicCIDRReserved,
+		PrivateCIDR: e.PrivateCIDR,
+		PrivateCIDRGateway: e.PrivateCIDRGateway,
+		PrivateCIDRDNS: e.PrivateCIDRDNS,
+		PrivateCIDRReserved: e.PrivateCIDRReserved,
 	}
 
 	cc, err := util.RenderTemplate("cloud-config", cloudConfig, templateParams)
