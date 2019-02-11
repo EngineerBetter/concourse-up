@@ -125,7 +125,6 @@ var _ = Describe("client", func() {
 
 	BeforeEach(func() {
 		args = &deploy.Args{
-			AWSRegion:   "eu-west-1",
 			AllowIPs:    "0.0.0.0/0",
 			DBSize:      "small",
 			DBSizeIsSet: false,
@@ -332,6 +331,30 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 	})
 
 	Describe("Deploy", func() {
+		Context("when there is an existing config and no CLI args", func() {
+			It("does all the things in the right order", func() {
+				client := buildClient()
+				err := client.Deploy()
+				Expect(err).ToNot(HaveOccurred())
+
+				Expect(actions[0]).To(Equal("checking to see if config exists"))
+				Expect(actions[1]).To(Equal("loading config file"))
+				Expect(actions[2]).To(Equal("converting config.Config to TFInputVars"))
+				Expect(actions[3]).To(Equal("applying terraform"))
+				Expect(actions[4]).To(Equal("initializing terraform metadata"))
+				Expect(actions[5]).To(Equal("updating config file"))
+				Expect(actions[6]).To(Equal("generating cert ca: concourse-up-happymeal, cn: [99.99.99.99 192.168.0.6]"))
+				Expect(actions[7]).To(Equal("generating cert ca: concourse-up-happymeal, cn: [77.77.77.77]"))
+				Expect(actions[8]).To(Equal("deploying director"))
+				Expect(actions[9]).To(Equal("storing config asset: director-state.json"))
+				Expect(actions[10]).To(Equal("storing config asset: director-creds.yml"))
+				Expect(actions[11]).To(Equal("cleaning up bosh init"))
+				Expect(actions[12]).To(Equal("setting default pipeline"))
+				Expect(actions[13]).To(Equal("updating config file"))
+				Expect(len(actions)).To(Equal(14))
+			})
+		})
+
 		It("Prints a warning about changing the sourceIP", func() {
 			client := buildClient()
 			err := client.Deploy()
@@ -350,28 +373,6 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 
 				Expect(stderr).To(gbytes.Say("WARNING: adding record ci.google.com to DNS zone google.com with name ABC123"))
 			})
-		})
-
-		It("does all the things in the right order", func() {
-			client := buildClient()
-			err := client.Deploy()
-			Expect(err).ToNot(HaveOccurred())
-
-			Expect(actions[0]).To(Equal("checking to see if config exists"))
-			Expect(actions[1]).To(Equal("loading config file"))
-			Expect(actions[2]).To(Equal("converting config.Config to TFInputVars"))
-			Expect(actions[3]).To(Equal("applying terraform"))
-			Expect(actions[4]).To(Equal("initializing terraform metadata"))
-			Expect(actions[5]).To(Equal("updating config file"))
-			Expect(actions[6]).To(Equal("generating cert ca: concourse-up-happymeal, cn: [99.99.99.99 192.168.0.6]"))
-			Expect(actions[7]).To(Equal("generating cert ca: concourse-up-happymeal, cn: [77.77.77.77]"))
-			Expect(actions[8]).To(Equal("deploying director"))
-			Expect(actions[9]).To(Equal("storing config asset: director-state.json"))
-			Expect(actions[10]).To(Equal("storing config asset: director-creds.yml"))
-			Expect(actions[11]).To(Equal("cleaning up bosh init"))
-			Expect(actions[12]).To(Equal("setting default pipeline"))
-			Expect(actions[13]).To(Equal("updating config file"))
-			Expect(len(actions)).To(Equal(14))
 		})
 
 		Context("When the user tries to change the region of an existing deployment", func() {
