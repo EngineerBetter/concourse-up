@@ -58,19 +58,22 @@ class Cleaner
   end
 
   def cleanup_with_concourse_up(orphans_with_state_files)
+    threads = []
+
     orphans_with_state_files.each do |orphan|
-      command = "./cup destroy --region #{orphan.region} #{orphan.project}"
-      puts "Attempting to run #{command}"
-      str = sprintf("yes yes | ./cup destroy --iaas #{iaas.name} --region %s %s", orphan.region, orphan.project)
-      `echo '#{str}' >> to_delete`
+      command = sprintf("./cup destroy --iaas #{iaas.name} --region %s %s", orphan.region, orphan.project)
+
+      threads << Thread.new do
+        puts "Attempting to run #{command}"
+        `yes yes | #{command}`
+        if !($?.success?)
+          puts "concourse-up destroy #{orphan.project} failed, attempting IAAS cleanup"
+          iaas.cleanup(orphan)
+        end
+      end
     end
 
-    # Do deletes in Bash so we can see STDOUT as it happens without needing any Gems
-    `set -x && \
-    sort -u to_delete \
-    | xargs -P 8 -I {} bash -c '{}'`
-
-    `rm -f to_delete`
+    threads.each { |thread| thread.join }
   end
 end
 
