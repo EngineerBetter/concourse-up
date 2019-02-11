@@ -100,7 +100,9 @@ var _ = Describe("client", func() {
 	tfInputVarsFactory := &terraformfakes.FakeTFInputVarsFactory{
 		NewInputVarsFn: func(c config.Config) terraform.InputVars {
 			actions = append(actions, "converting config.Config to TFInputVars")
-			return nil
+			return &testsupport.FakeTerraformInputVars{
+				Key: "spaghetti",
+			}
 		},
 	}
 
@@ -242,8 +244,9 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 				}
 				return fakeMetadata, nil
 			},
-			FakeApply: func(conf terraform.InputVars, dryrun bool) error {
+			FakeApply: func(inputVars terraform.InputVars, dryrun bool) error {
 				Expect(dryrun).To(BeFalse())
+
 				actions = append(actions, "applying terraform")
 				return nil
 			},

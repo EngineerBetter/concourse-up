@@ -145,6 +145,7 @@ func (fakeProvider *FakeProvider) Choose(c iaas.Choice) interface{} {
 
 // FakeTerraformInputVars implements terraform.TerraformInputVars for testing
 type FakeTerraformInputVars struct {
+	Key                    string
 	FakeConfigureTerraform func(config string) (string, error)
 	FakeBuild              func(data map[string]interface{}) error
 }
