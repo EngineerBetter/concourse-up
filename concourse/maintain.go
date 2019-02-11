@@ -104,9 +104,9 @@ func (client *Client) constructBoshClient() (*bosh.IClient, error) {
 		return nil, err
 	}
 
-	environment := client.tfInputVarsFactory.NewInputVars(conf)
+	tfInputVars := client.tfInputVarsFactory.NewInputVars(conf)
 
-	err = client.tfCLI.BuildOutput(environment, metadata)
+	err = client.tfCLI.BuildOutput(tfInputVars, metadata)
 	if err != nil {
 		return nil, err
 	}

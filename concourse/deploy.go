@@ -84,13 +84,13 @@ func (client *Client) Deploy() error {
 		return err
 	}
 
-	environment := client.tfInputVarsFactory.NewInputVars(conf)
+	tfInputVars := client.tfInputVarsFactory.NewInputVars(conf)
 
-	err = client.tfCLI.Apply(environment, false)
+	err = client.tfCLI.Apply(tfInputVars, false)
 	if err != nil {
 		return err
 	}
-	err = client.tfCLI.BuildOutput(environment, metadata)
+	err = client.tfCLI.BuildOutput(tfInputVars, metadata)
 	if err != nil {
 		return err
 	}

@@ -20,14 +20,14 @@ func (client *Client) Destroy() error {
 		return err
 	}
 
-	environment := client.tfInputVarsFactory.NewInputVars(conf)
+	tfInputVars := client.tfInputVarsFactory.NewInputVars(conf)
 
 	var volumesToDelete []string
 
 	switch client.provider.IAAS() {
 
 	case iaas.AWS: // nolint
-		err = client.tfCLI.BuildOutput(environment, metadata)
+		err = client.tfCLI.BuildOutput(tfInputVars, metadata)
 		if err != nil {
 			return err
 		}
@@ -52,7 +52,7 @@ func (client *Client) Destroy() error {
 		}
 	}
 
-	err = client.tfCLI.Destroy(environment)
+	err = client.tfCLI.Destroy(tfInputVars)
 	if err != nil {
 		return err
 	}

@@ -74,7 +74,7 @@ func (client *Client) FetchInfo() (*Info, error) {
 		return nil, err
 	}
 
-	environment := client.tfInputVarsFactory.NewInputVars(conf)
+	tfInputVars := client.tfInputVarsFactory.NewInputVars(conf)
 
 	switch client.provider.IAAS() {
 	case iaas.AWS: // nolint
@@ -83,7 +83,7 @@ func (client *Client) FetchInfo() (*Info, error) {
 		gatewayUser = "jumpbox"
 	}
 
-	err = client.tfCLI.BuildOutput(environment, metadata)
+	err = client.tfCLI.BuildOutput(tfInputVars, metadata)
 	if err != nil {
 		return nil, err
 	}
