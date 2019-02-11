@@ -21,9 +21,6 @@ groups:
   - major
   - minor
   - patch
-- name: Notifications
-  jobs:
-  - detect-versions
 - name: Cleanup
   jobs:
   - cleanup-aws
@@ -157,11 +154,6 @@ resources:
   type: slack-notification
   source:
     url: ((slack_webhook))
-
-- name: cup-slack-alert
-  type: slack-notification
-  source:
-    url: ((cup_slack_webhook))
 
 - name: once-daily
   type: time
@@ -733,44 +725,6 @@ jobs:
     params:
       channel: "#integrations"
       text_file: release-vars/slackmsg
-
-- name: detect-versions
-  serial_groups: [deployment]
-  serial: true
-  plan:
-  - aggregate:
-    - get: release
-      trigger: true
-    - get: concourse-up
-    - get: pcf-ops
-  - task: detect-majors
-    image: pcf-ops
-    config:
-      platform: linux
-      inputs:
-      - name: release
-      - name: concourse-up
-      outputs:
-      - name: output
-      run:
-        path: bash
-        args:
-          - -xeuc
-          - |
-            touch output/message
-            concourse-up/ci/tasks/get-versions.rb > output/message
-  - put: slack-alert
-    params:
-      channel: "#integrations"
-      text: |
-        $TEXT_FILE_CONTENT
-      text_file: output/message
-  - put: cup-slack-alert
-    params:
-      channel: ((cup_slack_channel))
-      text: |
-        $TEXT_FILE_CONTENT
-      text_file: output/message
 
 - name: cleanup-aws
   serial: true
