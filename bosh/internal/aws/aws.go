@@ -51,7 +51,7 @@ type Environment struct {
 	PublicCIDRStatic      string
 	PublicCIDRReserved    string
 	PrivateCIDR           string
-	PrivateCIDRGAteway    string
+	PrivateCIDRGateway    string
 	PrivateCIDRDNS        string
 	PrivateCIDRReserved   string
 }
@@ -102,6 +102,15 @@ type awsCloudConfigParams struct {
 	Spot               bool
 	VMsSecurityGroupID string
 	WorkerType         string
+	PublicCIDR string
+	PublicCIDRStatic string
+	PublicCIDRReserved string
+	PublicCIDRGateway string
+	PublicCIDRDNS string
+	PrivateCIDR string
+	PrivateCIDRGateway string
+	PrivateCIDRDNS string
+	PrivateCIDRReserved string
 }
 
 // IAASCheck returns the IAAS provider
@@ -120,6 +129,16 @@ func (e Environment) ConfigureDirectorCloudConfig(cloudConfig string) (string, e
 		PrivateSubnetID:    e.PrivateSubnetID,
 		Spot:               e.Spot,
 		WorkerType:         e.WorkerType,
+		PublicCIDR: e.PublicCIDR,
+		PublicCIDRGateway: e.PublicCIDRGateway,
+		PublicCIDRDNS: e.PublicCIDRDNS,
+		PublicCIDRReserved: e.PublicCIDRReserved,
+		PublicCIDRStatic: e.PublicCIDRStatic,
+		PrivateCIDR: e.PrivateCIDR,
+		PrivateCIDRGateway: e.PrivateCIDRGateway,
+		PrivateCIDRDNS: e.PrivateCIDRDNS,
+		PrivateCIDRReserved: e.PrivateCIDRReserved,
+
 	}
 
 	cc, err := util.RenderTemplate("cloud-config", cloudConfig, templateParams)

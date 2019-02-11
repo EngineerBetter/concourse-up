@@ -2,6 +2,8 @@ package bosh
 
 import (
 	"fmt"
+	"github.com/apparentlymart/go-cidr/cidr"
+	"net"
 	"strings"
 )
 
@@ -45,4 +47,19 @@ func splitTags(ts []string) (map[string]string, error) {
 		m[ss[0]] = ss[1]
 	}
 	return m, nil
+}
+
+func formatIPRange(forCIDR, sep string, positions []int) (string, error) {
+	var ips []string
+	_, parsedCIDR, err := net.ParseCIDR(forCIDR)
+	if err != nil {
+		return "", err
+	}
+	for _, pos := range positions {
+		ip, _ := cidr.Host(parsedCIDR, pos)
+		ips = append(ips, ip.String())
+
+	}
+	s := fmt.Sprintf(`[%s]`, strings.Join(ips, sep))
+	return s, nil
 }

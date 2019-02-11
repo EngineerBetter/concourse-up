@@ -644,18 +644,6 @@ output "private_subnet_id" {
   value = "${aws_subnet.private.id}"
 }
 
-output "public_cidr" {
-  value = "${var.public_cidr}"
-}
-
-output "private_cidr" {
-  value = "${var.private_cidr}"
-}
-
-output "network_cidr" {
-  value = "${var.network_cidr}"
-}
-
 output "blobstore_bucket" {
   value = "${aws_s3_bucket.blobstore.id}"
 }

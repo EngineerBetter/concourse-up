@@ -4,6 +4,8 @@ import (
 	"github.com/EngineerBetter/concourse-up/bosh/internal/aws"
 	"github.com/EngineerBetter/concourse-up/bosh/internal/boshenv"
 	"github.com/EngineerBetter/concourse-up/db"
+	"github.com/apparentlymart/go-cidr/cidr"
+	"net"
 )
 
 // Deploy implements deploy for AWS client
@@ -147,22 +149,25 @@ func (client *AWSClient) createEnv(bosh *boshenv.BOSHCLI, state, creds []byte, c
 	if err1 != nil {
 		return state, creds, err1
 	}
-	networkCIDR, err1 := client.metadata.Get("NetworkCIDR")
+
+	publicCIDR := client.config.PublicCIDR
+	_, pubCIDR, err1 := net.ParseCIDR(publicCIDR)
 	if err1 != nil {
 		return state, creds, err1
 	}
-	privateCIDR, err1 := client.metadata.Get("PrivateCIDR")
+	internalGateway, err1 := cidr.Host(pubCIDR, 1)
 	if err1 != nil {
 		return state, creds, err1
 	}
-	publicCIDR, err1 := client.metadata.Get("PublicCIDR")
+	directorInternalIP, err1 := cidr.Host(pubCIDR, 6)
 	if err1 != nil {
 		return state, creds, err1
 	}
+
 	err1 = bosh.CreateEnv(store, aws.Environment{
-		InternalCIDR:    privateCIDR,
-		InternalGateway: gatewayOf(privateCIDR),            // "10.0.0.1"
-		InternalIP:      directorInternalIPOf(privateCIDR), // "10.0.0.6"
+		InternalCIDR:    client.config.PublicCIDR,
+		InternalGateway: internalGateway.String(),
+		InternalIP:      directorInternalIP.String(),
 		AccessKeyID:     boshUserAccessKeyID,
 		SecretAccessKey: boshSecretAccessKey,
 		Region:          client.config.Region,
@@ -218,39 +223,48 @@ func (client *AWSClient) updateCloudConfig(bosh *boshenv.BOSHCLI) error {
 	if err != nil {
 		return err
 	}
-	publicCIDR, err := client.metadata.Get("PublicCIDR")
+
+	publicCIDR := client.config.PublicCIDR
+	_, pubCIDR, err := net.ParseCIDR(publicCIDR)
 	if err != nil {
 		return err
 	}
-	publicCIDRGateway, err := client.metadata.Get("PublicCIDRGateway")
+	pubGateway, err := cidr.Host(pubCIDR, 1)
 	if err != nil {
 		return err
 	}
-	publicCIDRDNS, err := client.metadata.Get("PublicCIDRDNS")
+	publicCIDRGateway := pubGateway.String()
+
+
+	publicCIDRDNS, err := formatIPRange(publicCIDR, "", []int{2})
 	if err != nil {
 		return err
 	}
-	publicCIDRStatic, err := client.metadata.Get("PublicCIDRStatic") // [10.0.0.6, 10.0.0.7]
+	publicCIDRStatic, err := formatIPRange(publicCIDR, ", ", []int{6, 7})
 	if err != nil {
 		return err
 	}
-	publicCIDRReserved, err := client.metadata.Get("PublicCIDRReserved") // [10.0.0.1-10.0.0.5]
+	publicCIDRReserved, err := formatIPRange(publicCIDR, "-", []int{1, 5})
 	if err != nil {
 		return err
 	}
-	privateCIDR, err := client.metadata.Get("PrivateCIDR")
+
+	privateCIDR := client.config.PrivateCIDR
+	_, privCIDR, err := net.ParseCIDR(privateCIDR)
 	if err != nil {
 		return err
 	}
-	privateCIDRGAteway, err := client.metadata.Get("PrivateCIDRGAteway") // 10.0.1.1
+	privGateway, err := cidr.Host(privCIDR, 1)
 	if err != nil {
 		return err
 	}
-	privateCIDRDNS, err := client.metadata.Get("PrivateCIDRDNS") // [10.0.0.2]
+	privateCIDRGateway := privGateway.String()
+
+	privateCIDRDNS, err := formatIPRange(privateCIDR, "", []int{2})
 	if err != nil {
 		return err
 	}
-	privateCIDRReserved, err := client.metadata.Get("PrivateCIDRReserved") // [10.0.1.1-10.0.1.5]
+	privateCIDRReserved, err := formatIPRange(privateCIDR, "-", []int{1, 5})
 	if err != nil {
 		return err
 	}
@@ -267,10 +281,10 @@ func (client *AWSClient) updateCloudConfig(bosh *boshenv.BOSHCLI) error {
 		PublicCIDR:          publicCIDR,
 		PublicCIDRGateway:   publicCIDRGateway,
 		PublicCIDRDNS:       publicCIDRDNS,
-		PublicCIDRStatic:    publicCIDRStatic,// [10.0.0.6, 10.0.0.7]
-		PublicCIDRReserved:  publicCIDRReserved,// [10.0.0.1-10.0.0.5]
+		PublicCIDRStatic:    publicCIDRStatic,
+		PublicCIDRReserved:  publicCIDRReserved,
 		PrivateCIDR:         privateCIDR,
-		PrivateCIDRGAteway:  privateCIDRGAteway,// 10.0.1.1
+		PrivateCIDRGateway:  privateCIDRGateway,
 		PrivateCIDRDNS:      privateCIDRDNS,
 		PrivateCIDRReserved: privateCIDRReserved,
 	}, directorPublicIP, client.config.DirectorPassword, client.config.DirectorCACert)

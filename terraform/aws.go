@@ -63,10 +63,7 @@ type AWSOutputs struct {
 	DirectorPublicIP         MetadataStringValue `json:"director_public_ip" valid:"required"`
 	DirectorSecurityGroupID  MetadataStringValue `json:"director_security_group_id" valid:"required"`
 	NatGatewayIP             MetadataStringValue `json:"nat_gateway_ip" valid:"required"`
-	NetworkCIDR              MetadataStringValue `json:"network_cidr" valid:"required"`
-	PrivateCIDR              MetadataStringValue `json:"private_cidr" valid:"required"`
 	PrivateSubnetID          MetadataStringValue `json:"private_subnet_id" valid:"required"`
-	PublicCIDR               MetadataStringValue `json:"public_cidr" valid:"required"`
 	PublicSubnetID           MetadataStringValue `json:"public_subnet_id" valid:"required"`
 	SourceAccessIP           MetadataStringValue `json:"source_access_ip"`
 	VMsSecurityGroupID       MetadataStringValue `json:"vms_security_group_id" valid:"required"`

@@ -1,17 +1,19 @@
 # cloud.google.com/go v0.31.0
 cloud.google.com/go/storage
+cloud.google.com/go/compute/metadata
 cloud.google.com/go/iam
 cloud.google.com/go/internal
 cloud.google.com/go/internal/optional
 cloud.google.com/go/internal/trace
 cloud.google.com/go/internal/version
-cloud.google.com/go/compute/metadata
 # github.com/GoogleCloudPlatform/cloudsql-proxy v0.0.0-20181129011958-60b5f58da796
 github.com/GoogleCloudPlatform/cloudsql-proxy/proxy/dialers/postgres
 github.com/GoogleCloudPlatform/cloudsql-proxy/proxy/proxy
 github.com/GoogleCloudPlatform/cloudsql-proxy/logging
 github.com/GoogleCloudPlatform/cloudsql-proxy/proxy/certs
 github.com/GoogleCloudPlatform/cloudsql-proxy/proxy/util
+# github.com/apparentlymart/go-cidr v1.0.0
+github.com/apparentlymart/go-cidr/cidr
 # github.com/asaskevich/govalidator v0.0.0-20171111151018-521b25f4b05f
 github.com/asaskevich/govalidator
 # github.com/aws/aws-sdk-go v1.15.31
