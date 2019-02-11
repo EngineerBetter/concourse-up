@@ -48,7 +48,7 @@ type MetadataStringValue struct {
 }
 
 // Metadata represents output from terraform on AWS or GCP
-type AWSMetadata struct {
+type AWSOutputs struct {
 	ATCPublicIP              MetadataStringValue `json:"atc_public_ip" valid:"required"`
 	ATCSecurityGroupID       MetadataStringValue `json:"atc_security_group_id" valid:"required"`
 	BlobstoreBucket          MetadataStringValue `json:"blobstore_bucket" valid:"required"`
@@ -70,23 +70,23 @@ type AWSMetadata struct {
 }
 
 // AssertValid returns an error if the struct contains any missing fields
-func (metadata *AWSMetadata) AssertValid() error {
-	_, err := govalidator.ValidateStruct(metadata)
+func (outputs *AWSOutputs) AssertValid() error {
+	_, err := govalidator.ValidateStruct(outputs)
 	return err
 }
 
-// Init populates metadata struct with values from the buffer
-func (metadata *AWSMetadata) Init(buffer *bytes.Buffer) error {
-	if err := json.NewDecoder(buffer).Decode(&metadata); err != nil {
+// Init populates outputs struct with values from the buffer
+func (outputs *AWSOutputs) Init(buffer *bytes.Buffer) error {
+	if err := json.NewDecoder(buffer).Decode(&outputs); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-// Get returns a the specified value from the metadata struct
-func (metadata *AWSMetadata) Get(key string) (string, error) {
-	reflectValue := reflect.ValueOf(metadata)
+// Get returns a the specified value from the outputs struct
+func (outputs *AWSOutputs) Get(key string) (string, error) {
+	reflectValue := reflect.ValueOf(outputs)
 	reflectStruct := reflectValue.Elem()
 	value := reflectStruct.FieldByName(key)
 	if !value.IsValid() {

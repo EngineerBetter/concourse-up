@@ -53,21 +53,21 @@ func (client *GCPClient) deployConcourse(creds []byte, detach bool) (newCreds []
 		return []byte{}, err
 	}
 
-	boshDBAddress, err := client.metadata.Get("BoshDBAddress")
+	boshDBAddress, err := client.outputs.Get("BoshDBAddress")
 	if err != nil {
 		return []byte{}, err
 	}
-	atcPublicIP, err := client.metadata.Get("ATCPublicIP")
-	if err != nil {
-		return []byte{}, err
-	}
-
-	networkName, err := client.metadata.Get("Network")
+	atcPublicIP, err := client.outputs.Get("ATCPublicIP")
 	if err != nil {
 		return []byte{}, err
 	}
 
-	SQLServerCert, err := client.metadata.Get("SQLServerCert")
+	networkName, err := client.outputs.Get("Network")
+	if err != nil {
+		return []byte{}, err
+	}
+
+	SQLServerCert, err := client.outputs.Get("SQLServerCert")
 	if err != nil {
 		return []byte{}, err
 	}

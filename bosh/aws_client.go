@@ -16,7 +16,7 @@ import (
 //AWSClient is an AWS specific implementation of IClient
 type AWSClient struct {
 	config   config.Config
-	metadata terraform.IAASMetadata
+	outputs  terraform.Outputs
 	director director.IClient
 	db       Opener
 	stdout   io.Writer
@@ -25,8 +25,8 @@ type AWSClient struct {
 }
 
 //NewAWSClient returns a AWS specific implementation of IClient
-func NewAWSClient(config config.Config, metadata terraform.IAASMetadata, director director.IClient, stdout, stderr io.Writer, provider iaas.Provider) (IClient, error) {
-	directorPublicIP, err := metadata.Get("DirectorPublicIP")
+func NewAWSClient(config config.Config, outputs terraform.Outputs, director director.IClient, stdout, stderr io.Writer, provider iaas.Provider) (IClient, error) {
+	directorPublicIP, err := outputs.Get("DirectorPublicIP")
 	if err != nil {
 		return nil, err
 	}
@@ -42,11 +42,11 @@ func NewAWSClient(config config.Config, metadata terraform.IAASMetadata, directo
 	}
 	var boshDBAddress, boshDBPort string
 
-	boshDBAddress, err = metadata.Get("BoshDBAddress")
+	boshDBAddress, err = outputs.Get("BoshDBAddress")
 	if err != nil {
 		return nil, err
 	}
-	boshDBPort, err = metadata.Get("BoshDBPort")
+	boshDBPort, err = outputs.Get("BoshDBPort")
 	if err != nil {
 		return nil, err
 	}
@@ -65,7 +65,7 @@ func NewAWSClient(config config.Config, metadata terraform.IAASMetadata, directo
 	}
 	return &AWSClient{
 		config:   config,
-		metadata: metadata,
+		outputs:  outputs,
 		director: director,
 		db:       db,
 		stdout:   stdout,

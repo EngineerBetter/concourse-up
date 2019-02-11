@@ -51,7 +51,7 @@ func (client *GCPClient) Recreate() error {
 	if err != nil {
 		return err
 	}
-	directorPublicIP, err := client.metadata.Get("DirectorPublicIP")
+	directorPublicIP, err := client.outputs.Get("DirectorPublicIP")
 	if err != nil {
 		return err
 	}
@@ -73,19 +73,19 @@ func (client *GCPClient) createEnv(bosh *boshenv.BOSHCLI, state, creds []byte, c
 		"state.json": state,
 	}
 
-	network, err1 := client.metadata.Get("Network")
+	network, err1 := client.outputs.Get("Network")
 	if err1 != nil {
 		return state, creds, err1
 	}
-	publicSubnetwork, err1 := client.metadata.Get("PublicSubnetworkName")
+	publicSubnetwork, err1 := client.outputs.Get("PublicSubnetworkName")
 	if err1 != nil {
 		return state, creds, err1
 	}
-	privateSubnetwork, err1 := client.metadata.Get("PrivateSubnetworkName")
+	privateSubnetwork, err1 := client.outputs.Get("PrivateSubnetworkName")
 	if err1 != nil {
 		return state, creds, err1
 	}
-	directorPublicIP, err1 := client.metadata.Get("DirectorPublicIP")
+	directorPublicIP, err1 := client.outputs.Get("DirectorPublicIP")
 	if err1 != nil {
 		return state, creds, err1
 	}
@@ -127,7 +127,7 @@ func (client *GCPClient) Locks() ([]byte, error) {
 	if err != nil {
 		return []byte{}, err
 	}
-	directorPublicIP, err := client.metadata.Get("DirectorPublicIP")
+	directorPublicIP, err := client.outputs.Get("DirectorPublicIP")
 	if err != nil {
 		return nil, err
 	}
@@ -139,19 +139,19 @@ func (client *GCPClient) Locks() ([]byte, error) {
 
 func (client *GCPClient) updateCloudConfig(bosh *boshenv.BOSHCLI) error {
 
-	privateSubnetwork, err := client.metadata.Get("PrivateSubnetworkName")
+	privateSubnetwork, err := client.outputs.Get("PrivateSubnetworkName")
 	if err != nil {
 		return err
 	}
-	publicSubnetwork, err := client.metadata.Get("PublicSubnetworkName")
+	publicSubnetwork, err := client.outputs.Get("PublicSubnetworkName")
 	if err != nil {
 		return err
 	}
-	directorPublicIP, err := client.metadata.Get("DirectorPublicIP")
+	directorPublicIP, err := client.outputs.Get("DirectorPublicIP")
 	if err != nil {
 		return err
 	}
-	network, err := client.metadata.Get("Network")
+	network, err := client.outputs.Get("Network")
 	if err != nil {
 		return err
 	}
@@ -165,7 +165,7 @@ func (client *GCPClient) updateCloudConfig(bosh *boshenv.BOSHCLI) error {
 	}, directorPublicIP, client.config.DirectorPassword, client.config.DirectorCACert)
 }
 func (client *GCPClient) uploadConcourseStemcell(bosh *boshenv.BOSHCLI) error {
-	directorPublicIP, err := client.metadata.Get("DirectorPublicIP")
+	directorPublicIP, err := client.outputs.Get("DirectorPublicIP")
 	if err != nil {
 		return err
 	}

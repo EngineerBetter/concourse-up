@@ -94,10 +94,10 @@ func TestAWSMetadata_Get(t *testing.T) {
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			metadata := &AWSMetadata{
+			outputs := &AWSOutputs{
 				VPCID: test.fields.VPCID,
 			}
-			got, err := metadata.Get(test.fakeKey)
+			got, err := outputs.Get(test.fakeKey)
 			if (err != nil) != test.wantErr {
 				t.Errorf("Metadata.Get() test case  \"%s\" failed\nReturned error %v\nExpects an error: %v", test.name, err, test.wantErr)
 			}
@@ -132,13 +132,13 @@ func TestAWSMetadata_Init(t *testing.T) {
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			metadata := &AWSMetadata{}
+			outputs := &AWSOutputs{}
 			buffer := bytes.NewBuffer(nil)
 			buffer.WriteString(test.data)
-			if err := metadata.Init(buffer); (err != nil) != test.wantErr {
+			if err := outputs.Init(buffer); (err != nil) != test.wantErr {
 				t.Errorf("Metadata.Init() error = %v, wantErr %v", err, test.wantErr)
 			}
-			mm := reflect.ValueOf(metadata)
+			mm := reflect.ValueOf(outputs)
 			m := mm.Elem()
 			mv := m.FieldByName(test.keyToSet)
 			value := mv.FieldByName("Value").String()

@@ -18,8 +18,8 @@ type InputVars interface {
 	ConfigureTerraform(string) (string, error)
 }
 
-// IAASMetadata holds IAAS specific terraform metadata
-type IAASMetadata interface {
+// Outputs holds IAAS specific terraform outputs
+type Outputs interface {
 	AssertValid() error
 	Init(*bytes.Buffer) error
 	Get(string) (string, error)
@@ -27,10 +27,10 @@ type IAASMetadata interface {
 
 //CLIInterface is interface the abstraction of execCmd
 type CLIInterface interface {
-	IAAS(iaas.Name) (IAASMetadata, error)
+	IAAS(iaas.Name) (Outputs, error)
 	Apply(InputVars, bool) error
 	Destroy(InputVars) error
-	BuildOutput(InputVars, IAASMetadata) error
+	BuildOutput(InputVars, Outputs) error
 }
 
 // CLI struct holds the abstraction of execCmd
@@ -85,29 +85,28 @@ func (n *NullInputVars) ConfigureTerraform(string) (string, error) { return "", 
 // Build is a nullified function
 func (n *NullInputVars) Build(map[string]interface{}) error { return nil }
 
-// NullMetadata holds IAAS specific terraform metadata
-type NullMetadata struct{}
+// NullOutputs holds IAAS specific terraform outputs
+type NullOutputs struct{}
 
 // AssertValid is a nullified function
-func (n *NullMetadata) AssertValid() error { return nil }
+func (n *NullOutputs) AssertValid() error { return nil }
 
 // Init is a nullified function
-func (n *NullMetadata) Init(*bytes.Buffer) error { return nil }
+func (n *NullOutputs) Init(*bytes.Buffer) error { return nil }
 
 // Get is a nullified function
-func (n *NullMetadata) Get(string) (string, error) { return "", nil }
+func (n *NullOutputs) Get(string) (string, error) { return "", nil }
 
-// IAAS is returning the IAAS specific metadata
-func (c *CLI) IAAS(name iaas.Name) (IAASMetadata, error) {
+func (c *CLI) IAAS(name iaas.Name) (Outputs, error) {
 	switch name {
 	case iaas.AWS: // nolint
 		c.iaas = iaas.AWS // nolint
-		return &AWSMetadata{}, nil
+		return &AWSOutputs{}, nil
 	case iaas.GCP: // nolint
 		c.iaas = iaas.GCP // nolint
-		return &GCPMetadata{}, nil
+		return &GCPOutputs{}, nil
 	}
-	return &NullMetadata{}, errors.New("terraform: " + name.String() + " not a valid iaas provider")
+	return &NullOutputs{}, errors.New("terraform: " + name.String() + " not a valid iaas provider")
 }
 
 func (c *CLI) init(config InputVars) (string, error) {
@@ -182,8 +181,8 @@ func (c *CLI) Destroy(config InputVars) error {
 	return cmd.Run()
 }
 
-// BuildOutput builds the terraform output/metadata
-func (c *CLI) BuildOutput(config InputVars, metadata IAASMetadata) error {
+// BuildOutput builds the terraform output
+func (c *CLI) BuildOutput(config InputVars, outputs Outputs) error {
 	terraformConfigPath, err := c.init(config)
 	if err != nil {
 		return err
@@ -200,7 +199,7 @@ func (c *CLI) BuildOutput(config InputVars, metadata IAASMetadata) error {
 		return err
 	}
 
-	return metadata.Init(stdoutBuffer)
+	return outputs.Init(stdoutBuffer)
 }
 
 func writeTempFile(data []byte) (string, error) {

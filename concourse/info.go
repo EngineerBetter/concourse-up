@@ -69,7 +69,7 @@ func (client *Client) FetchInfo() (*Info, error) {
 		}
 	}
 
-	metadata, err := client.tfCLI.IAAS(client.provider.IAAS())
+	tfOutputs, err := client.tfCLI.IAAS(client.provider.IAAS())
 	if err != nil {
 		return nil, err
 	}
@@ -83,17 +83,17 @@ func (client *Client) FetchInfo() (*Info, error) {
 		gatewayUser = "jumpbox"
 	}
 
-	err = client.tfCLI.BuildOutput(tfInputVars, metadata)
+	err = client.tfCLI.BuildOutput(tfInputVars, tfOutputs)
 	if err != nil {
 		return nil, err
 	}
 
-	directorPublicIP, err := metadata.Get("DirectorPublicIP")
+	directorPublicIP, err := tfOutputs.Get("DirectorPublicIP")
 	if err != nil {
 		return nil, err
 	}
 
-	natGatewayIP, err := metadata.Get("NatGatewayIP")
+	natGatewayIP, err := tfOutputs.Get("NatGatewayIP")
 	if err != nil {
 		return nil, err
 	}
@@ -108,7 +108,7 @@ func (client *Client) FetchInfo() (*Info, error) {
 		return nil, err1
 	}
 
-	directorSecurityGroupID, err1 := metadata.Get("DirectorSecurityGroupID")
+	directorSecurityGroupID, err1 := tfOutputs.Get("DirectorSecurityGroupID")
 	if err1 != nil {
 		return nil, err1
 	}
@@ -122,7 +122,7 @@ func (client *Client) FetchInfo() (*Info, error) {
 		return nil, err1
 	}
 
-	boshClient, err := client.buildBoshClient(conf, metadata)
+	boshClient, err := client.buildBoshClient(conf, tfOutputs)
 	if err != nil {
 		return nil, err
 	}

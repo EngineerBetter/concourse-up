@@ -15,7 +15,7 @@ func (client *Client) Destroy() error {
 		return err
 	}
 
-	metadata, err := client.tfCLI.IAAS(client.provider.IAAS())
+	tfOutputs, err := client.tfCLI.IAAS(client.provider.IAAS())
 	if err != nil {
 		return err
 	}
@@ -27,11 +27,11 @@ func (client *Client) Destroy() error {
 	switch client.provider.IAAS() {
 
 	case iaas.AWS: // nolint
-		err = client.tfCLI.BuildOutput(tfInputVars, metadata)
+		err = client.tfCLI.BuildOutput(tfInputVars, tfOutputs)
 		if err != nil {
 			return err
 		}
-		vpcID, err1 := metadata.Get("VPCID")
+		vpcID, err1 := tfOutputs.Get("VPCID")
 		if err1 != nil {
 			return err1
 		}

@@ -79,7 +79,7 @@ func (client *Client) Deploy() error {
 	conf.HostedZoneRecordPrefix = r.HostedZoneRecordPrefix
 	conf.Domain = r.Domain
 
-	metadata, err := client.tfCLI.IAAS(client.provider.IAAS())
+	tfOutputs, err := client.tfCLI.IAAS(client.provider.IAAS())
 	if err != nil {
 		return err
 	}
@@ -90,7 +90,7 @@ func (client *Client) Deploy() error {
 	if err != nil {
 		return err
 	}
-	err = client.tfCLI.BuildOutput(tfInputVars, metadata)
+	err = client.tfCLI.BuildOutput(tfInputVars, tfOutputs)
 	if err != nil {
 		return err
 	}
@@ -104,7 +104,7 @@ func (client *Client) Deploy() error {
 
 	conf.Version = client.version
 
-	cr, err := client.checkPreDeployConfigRequirements(client.acmeClientConstructor, isDomainUpdated, conf, metadata)
+	cr, err := client.checkPreDeployConfigRequirements(client.acmeClientConstructor, isDomainUpdated, conf, tfOutputs)
 	if err != nil {
 		return err
 	}
@@ -121,9 +121,9 @@ func (client *Client) Deploy() error {
 
 	var bp BoshParams
 	if client.deployArgs.SelfUpdate {
-		bp, err = client.updateBoshAndPipeline(conf, metadata)
+		bp, err = client.updateBoshAndPipeline(conf, tfOutputs)
 	} else {
-		bp, err = client.deployBoshAndPipeline(conf, metadata)
+		bp, err = client.deployBoshAndPipeline(conf, tfOutputs)
 	}
 
 	conf.CredhubPassword = bp.CredhubPassword
@@ -145,7 +145,7 @@ func (client *Client) Deploy() error {
 	return err
 }
 
-func (client *Client) deployBoshAndPipeline(c config.Config, metadata terraform.IAASMetadata) (BoshParams, error) {
+func (client *Client) deployBoshAndPipeline(c config.Config, tfOutputs terraform.Outputs) (BoshParams, error) {
 	// When we are deploying for the first time rather than updating
 	// ensure that the pipeline is set _after_ the concourse is deployed
 
@@ -163,7 +163,7 @@ func (client *Client) deployBoshAndPipeline(c config.Config, metadata terraform.
 		DirectorCACert:           c.DirectorCACert,
 	}
 
-	bp, err := client.deployBosh(c, metadata, false)
+	bp, err := client.deployBosh(c, tfOutputs, false)
 	if err != nil {
 		return bp, err
 	}
@@ -192,10 +192,10 @@ func (client *Client) deployBoshAndPipeline(c config.Config, metadata terraform.
 	c.ConcourseUsername = bp.ConcourseUsername
 	c.ConcoursePassword = bp.ConcoursePassword
 
-	return bp, writeDeploySuccessMessage(c, metadata, client.stdout)
+	return bp, writeDeploySuccessMessage(c, tfOutputs, client.stdout)
 }
 
-func (client *Client) updateBoshAndPipeline(c config.Config, metadata terraform.IAASMetadata) (BoshParams, error) {
+func (client *Client) updateBoshAndPipeline(c config.Config, tfOutputs terraform.Outputs) (BoshParams, error) {
 	// If concourse is already running this is an update rather than a fresh deploy
 	// When updating we need to deploy the BOSH as the final step in order to
 	// Detach from the update, so the update job can exit
@@ -243,7 +243,7 @@ func (client *Client) updateBoshAndPipeline(c config.Config, metadata terraform.
 		return bp, err
 	}
 
-	bp, err = client.deployBosh(c, metadata, true)
+	bp, err = client.deployBosh(c, tfOutputs, true)
 	if err != nil {
 		return bp, err
 	}
@@ -323,14 +323,14 @@ type Requirements struct {
 	Certs            Certs
 }
 
-func (client *Client) checkPreDeployConfigRequirements(c func(u *certs.User) (*lego.Client, error), isDomainUpdated bool, cfg config.Config, metadata terraform.IAASMetadata) (Requirements, error) {
+func (client *Client) checkPreDeployConfigRequirements(c func(u *certs.User) (*lego.Client, error), isDomainUpdated bool, cfg config.Config, tfOutputs terraform.Outputs) (Requirements, error) {
 	cr := Requirements{
 		Domain:           cfg.Domain,
 		DirectorPublicIP: cfg.DirectorPublicIP,
 	}
 
 	if cfg.Domain == "" {
-		domain, err := metadata.Get("ATCPublicIP")
+		domain, err := tfOutputs.Get("ATCPublicIP")
 		if err != nil {
 			return cr, err
 		}
@@ -343,7 +343,7 @@ func (client *Client) checkPreDeployConfigRequirements(c func(u *certs.User) (*l
 		DirectorKey:    cfg.DirectorKey,
 	}
 
-	dc, err := client.ensureDirectorCerts(c, dc, cfg.Deployment, metadata)
+	dc, err := client.ensureDirectorCerts(c, dc, cfg.Deployment, tfOutputs)
 	if err != nil {
 		return cr, err
 	}
@@ -364,7 +364,7 @@ func (client *Client) checkPreDeployConfigRequirements(c func(u *certs.User) (*l
 
 	cr.Certs = cc
 
-	cr.DirectorPublicIP, err = metadata.Get("DirectorPublicIP")
+	cr.DirectorPublicIP, err = tfOutputs.Get("DirectorPublicIP")
 	if err != nil {
 		return cr, err
 	}
@@ -372,7 +372,7 @@ func (client *Client) checkPreDeployConfigRequirements(c func(u *certs.User) (*l
 	return cr, nil
 }
 
-func (client *Client) ensureDirectorCerts(c func(u *certs.User) (*lego.Client, error), dc DirectorCerts, deployment string, metadata terraform.IAASMetadata) (DirectorCerts, error) {
+func (client *Client) ensureDirectorCerts(c func(u *certs.User) (*lego.Client, error), dc DirectorCerts, deployment string, tfOutputs terraform.Outputs) (DirectorCerts, error) {
 	// If we already have director certificates, don't regenerate as changing them will
 	// force a bosh director re-deploy even if there are no other changes
 	certs := dc
@@ -380,7 +380,7 @@ func (client *Client) ensureDirectorCerts(c func(u *certs.User) (*lego.Client, e
 		return certs, nil
 	}
 
-	ip, err := metadata.Get("DirectorPublicIP")
+	ip, err := tfOutputs.Get("DirectorPublicIP")
 	if err != nil {
 		return certs, err
 	}
@@ -444,7 +444,7 @@ func (client *Client) ensureConcourseCerts(c func(u *certs.User) (*lego.Client, 
 	return certs, nil
 }
 
-func (client *Client) deployBosh(config config.Config, metadata terraform.IAASMetadata, detach bool) (BoshParams, error) {
+func (client *Client) deployBosh(config config.Config, tfOutputs terraform.Outputs, detach bool) (BoshParams, error) {
 	bp := BoshParams{
 		CredhubPassword:          config.CredhubPassword,
 		CredhubAdminClientSecret: config.CredhubAdminClientSecret,
@@ -459,7 +459,7 @@ func (client *Client) deployBosh(config config.Config, metadata terraform.IAASMe
 		DirectorCACert:           config.DirectorCACert,
 	}
 
-	boshClient, err := client.buildBoshClient(config, metadata)
+	boshClient, err := client.buildBoshClient(config, tfOutputs)
 	if err != nil {
 		return bp, err
 	}
@@ -577,7 +577,7 @@ Log into credhub with:
 eval "$(concourse-up info --region {{.Region}} {{ if ne .Namespace .Region }} --namespace {{ .Namespace }} {{ end }} --iaas {{ .IAAS }} --env {{.Project}})"
 `
 
-func writeDeploySuccessMessage(config config.Config, metadata terraform.IAASMetadata, stdout io.Writer) error {
+func writeDeploySuccessMessage(config config.Config, tfOutputs terraform.Outputs, stdout io.Writer) error {
 	t := template.Must(template.New("deploy").Parse(deployMsg))
 	return t.Execute(stdout, config)
 }

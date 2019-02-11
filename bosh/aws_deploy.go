@@ -43,7 +43,7 @@ func (client *AWSClient) Locks() ([]byte, error) {
 		return []byte{}, err
 	}
 
-	directorPublicIP, err := client.metadata.Get("DirectorPublicIP")
+	directorPublicIP, err := client.outputs.Get("DirectorPublicIP")
 	if err != nil {
 		return nil, err
 	}
@@ -69,7 +69,7 @@ func (client *AWSClient) Recreate() error {
 		return err
 	}
 
-	directorPublicIP, err := client.metadata.Get("DirectorPublicIP")
+	directorPublicIP, err := client.outputs.Get("DirectorPublicIP")
 	if err != nil {
 		return err
 	}
@@ -91,59 +91,59 @@ func (client *AWSClient) createEnv(bosh *boshenv.BOSHCLI, state, creds []byte, c
 		"state.json": state,
 	}
 
-	boshUserAccessKeyID, err1 := client.metadata.Get("BoshUserAccessKeyID")
+	boshUserAccessKeyID, err1 := client.outputs.Get("BoshUserAccessKeyID")
 	if err1 != nil {
 		return state, creds, err1
 	}
-	boshSecretAccessKey, err1 := client.metadata.Get("BoshSecretAccessKey")
+	boshSecretAccessKey, err1 := client.outputs.Get("BoshSecretAccessKey")
 	if err1 != nil {
 		return state, creds, err1
 	}
-	publicSubnetID, err1 := client.metadata.Get("PublicSubnetID")
+	publicSubnetID, err1 := client.outputs.Get("PublicSubnetID")
 	if err1 != nil {
 		return state, creds, err1
 	}
-	privateSubnetID, err1 := client.metadata.Get("PrivateSubnetID")
+	privateSubnetID, err1 := client.outputs.Get("PrivateSubnetID")
 	if err1 != nil {
 		return state, creds, err1
 	}
-	directorPublicIP, err1 := client.metadata.Get("DirectorPublicIP")
+	directorPublicIP, err1 := client.outputs.Get("DirectorPublicIP")
 	if err1 != nil {
 		return state, creds, err1
 	}
-	atcSecurityGroupID, err1 := client.metadata.Get("ATCSecurityGroupID")
+	atcSecurityGroupID, err1 := client.outputs.Get("ATCSecurityGroupID")
 	if err1 != nil {
 		return state, creds, err1
 	}
-	vmSecurityGroupID, err1 := client.metadata.Get("VMsSecurityGroupID")
+	vmSecurityGroupID, err1 := client.outputs.Get("VMsSecurityGroupID")
 	if err1 != nil {
 		return state, creds, err1
 	}
-	blobstoreBucket, err1 := client.metadata.Get("BlobstoreBucket")
+	blobstoreBucket, err1 := client.outputs.Get("BlobstoreBucket")
 	if err1 != nil {
 		return state, creds, err1
 	}
-	boshDBAddress, err1 := client.metadata.Get("BoshDBAddress")
+	boshDBAddress, err1 := client.outputs.Get("BoshDBAddress")
 	if err1 != nil {
 		return state, creds, err1
 	}
-	boshDbPort, err1 := client.metadata.Get("BoshDBPort")
+	boshDbPort, err1 := client.outputs.Get("BoshDBPort")
 	if err1 != nil {
 		return state, creds, err1
 	}
-	blobstoreUserAccessKeyID, err1 := client.metadata.Get("BlobstoreUserAccessKeyID")
+	blobstoreUserAccessKeyID, err1 := client.outputs.Get("BlobstoreUserAccessKeyID")
 	if err1 != nil {
 		return state, creds, err1
 	}
-	blobstoreSecretAccessKey, err1 := client.metadata.Get("BlobstoreSecretAccessKey")
+	blobstoreSecretAccessKey, err1 := client.outputs.Get("BlobstoreSecretAccessKey")
 	if err1 != nil {
 		return state, creds, err1
 	}
-	directorKeyPair, err1 := client.metadata.Get("DirectorKeyPair")
+	directorKeyPair, err1 := client.outputs.Get("DirectorKeyPair")
 	if err1 != nil {
 		return state, creds, err1
 	}
-	directorSecurityGroup, err1 := client.metadata.Get("DirectorSecurityGroupID")
+	directorSecurityGroup, err1 := client.outputs.Get("DirectorSecurityGroupID")
 	if err1 != nil {
 		return state, creds, err1
 	}
@@ -186,23 +186,23 @@ func (client *AWSClient) createEnv(bosh *boshenv.BOSHCLI, state, creds []byte, c
 }
 
 func (client *AWSClient) updateCloudConfig(bosh *boshenv.BOSHCLI) error {
-	publicSubnetID, err := client.metadata.Get("PublicSubnetID")
+	publicSubnetID, err := client.outputs.Get("PublicSubnetID")
 	if err != nil {
 		return err
 	}
-	privateSubnetID, err := client.metadata.Get("PrivateSubnetID")
+	privateSubnetID, err := client.outputs.Get("PrivateSubnetID")
 	if err != nil {
 		return err
 	}
-	aTCSecurityGroupID, err := client.metadata.Get("ATCSecurityGroupID")
+	aTCSecurityGroupID, err := client.outputs.Get("ATCSecurityGroupID")
 	if err != nil {
 		return err
 	}
-	vMsSecurityGroupID, err := client.metadata.Get("VMsSecurityGroupID")
+	vMsSecurityGroupID, err := client.outputs.Get("VMsSecurityGroupID")
 	if err != nil {
 		return err
 	}
-	directorPublicIP, err := client.metadata.Get("DirectorPublicIP")
+	directorPublicIP, err := client.outputs.Get("DirectorPublicIP")
 	if err != nil {
 		return err
 	}
@@ -218,7 +218,7 @@ func (client *AWSClient) updateCloudConfig(bosh *boshenv.BOSHCLI) error {
 	}, directorPublicIP, client.config.DirectorPassword, client.config.DirectorCACert)
 }
 func (client *AWSClient) uploadConcourseStemcell(bosh *boshenv.BOSHCLI) error {
-	directorPublicIP, err := client.metadata.Get("DirectorPublicIP")
+	directorPublicIP, err := client.outputs.Get("DirectorPublicIP")
 	if err != nil {
 		return err
 	}

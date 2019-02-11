@@ -150,7 +150,7 @@ type FakeTerraformInputVars struct {
 	FakeBuild              func(data map[string]interface{}) error
 }
 
-// FakeIAASMetadata implements terraform.IAASMetadata for testing
+// FakeIAASMetadata implements terraform.Outputs for testing
 type FakeIAASMetadata struct {
 	FakeAssertValid func() error
 	FakeInit        func(*bytes.Buffer) error
@@ -184,14 +184,14 @@ func (fakeTerraformInputVars *FakeTerraformInputVars) Build(data map[string]inte
 
 // FakeCLI implements terraform.CLI for testing
 type FakeCLI struct {
-	FakeIAAS        func(name iaas.Name) (terraform.IAASMetadata, error)
+	FakeIAAS        func(name iaas.Name) (terraform.Outputs, error)
 	FakeApply       func(conf terraform.InputVars, dryrun bool) error
 	FakeDestroy     func(conf terraform.InputVars) error
-	FakeBuildOutput func(conf terraform.InputVars, metadata terraform.IAASMetadata) error
+	FakeBuildOutput func(conf terraform.InputVars, outputs terraform.Outputs) error
 }
 
 // IAAS delegates to FakeIAAS which is dynamically set by the tests
-func (client *FakeCLI) IAAS(name iaas.Name) (terraform.IAASMetadata, error) {
+func (client *FakeCLI) IAAS(name iaas.Name) (terraform.Outputs, error) {
 	return client.FakeIAAS(name)
 }
 
@@ -206,8 +206,8 @@ func (client *FakeCLI) Destroy(conf terraform.InputVars) error {
 }
 
 // BuildOutput delegates to FakeBuildOutput which is dynamically set by the tests
-func (client *FakeCLI) BuildOutput(conf terraform.InputVars, metadata terraform.IAASMetadata) error {
-	return client.FakeBuildOutput(conf, metadata)
+func (client *FakeCLI) BuildOutput(conf terraform.InputVars, outputs terraform.Outputs) error {
+	return client.FakeBuildOutput(conf, outputs)
 }
 
 // FakeAWSClient implements iaas.IClient for testing

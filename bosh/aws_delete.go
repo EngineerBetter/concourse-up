@@ -29,59 +29,59 @@ func (client *AWSClient) Delete(stateFileBytes []byte) ([]byte, error) {
 		return store["state.json"], err
 	}
 
-	boshUserAccessKeyID, err := client.metadata.Get("BoshUserAccessKeyID")
+	boshUserAccessKeyID, err := client.outputs.Get("BoshUserAccessKeyID")
 	if err != nil {
 		return store["state.json"], err
 	}
-	boshSecretAccessKey, err := client.metadata.Get("BoshSecretAccessKey")
+	boshSecretAccessKey, err := client.outputs.Get("BoshSecretAccessKey")
 	if err != nil {
 		return store["state.json"], err
 	}
-	publicSubnetID, err := client.metadata.Get("PublicSubnetID")
+	publicSubnetID, err := client.outputs.Get("PublicSubnetID")
 	if err != nil {
 		return store["state.json"], err
 	}
-	privateSubnetID, err := client.metadata.Get("PrivateSubnetID")
+	privateSubnetID, err := client.outputs.Get("PrivateSubnetID")
 	if err != nil {
 		return store["state.json"], err
 	}
-	directorPublicIP, err := client.metadata.Get("DirectorPublicIP")
+	directorPublicIP, err := client.outputs.Get("DirectorPublicIP")
 	if err != nil {
 		return store["state.json"], err
 	}
-	atcSecurityGroupID, err := client.metadata.Get("ATCSecurityGroupID")
+	atcSecurityGroupID, err := client.outputs.Get("ATCSecurityGroupID")
 	if err != nil {
 		return store["state.json"], err
 	}
-	vmSecurityGroupID, err := client.metadata.Get("VMsSecurityGroupID")
+	vmSecurityGroupID, err := client.outputs.Get("VMsSecurityGroupID")
 	if err != nil {
 		return store["state.json"], err
 	}
-	blobstoreBucket, err := client.metadata.Get("BlobstoreBucket")
+	blobstoreBucket, err := client.outputs.Get("BlobstoreBucket")
 	if err != nil {
 		return store["state.json"], err
 	}
-	boshDBAddress, err := client.metadata.Get("BoshDBAddress")
+	boshDBAddress, err := client.outputs.Get("BoshDBAddress")
 	if err != nil {
 		return store["state.json"], err
 	}
-	boshDbPort, err := client.metadata.Get("BoshDBPort")
+	boshDbPort, err := client.outputs.Get("BoshDBPort")
 	if err != nil {
 		return store["state.json"], err
 	}
-	blobstoreUserAccessKeyID, err := client.metadata.Get("BlobstoreUserAccessKeyID")
+	blobstoreUserAccessKeyID, err := client.outputs.Get("BlobstoreUserAccessKeyID")
 	if err != nil {
 		return store["state.json"], err
 	}
-	blobstoreSecretAccessKey, err := client.metadata.Get("BlobstoreSecretAccessKey")
+	blobstoreSecretAccessKey, err := client.outputs.Get("BlobstoreSecretAccessKey")
 	if err != nil {
 		return store["state.json"], err
 	}
-	directorKeyPair, err := client.metadata.Get("DirectorKeyPair")
+	directorKeyPair, err := client.outputs.Get("DirectorKeyPair")
 	if err != nil {
 		return store["state.json"], err
 	}
-	directorSecurityGroup, err := client.metadata.Get("DirectorSecurityGroupID")
+	directorSecurityGroup, err := client.outputs.Get("DirectorSecurityGroupID")
 	if err != nil {
 		return store["state.json"], err
 	}

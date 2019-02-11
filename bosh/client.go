@@ -39,15 +39,15 @@ type Instance struct {
 }
 
 // ClientFactory creates a new IClient
-type ClientFactory func(config config.Config, metadata terraform.IAASMetadata, director director.IClient, stdout, stderr io.Writer, provider iaas.Provider) (IClient, error)
+type ClientFactory func(config config.Config, outputs terraform.Outputs, director director.IClient, stdout, stderr io.Writer, provider iaas.Provider) (IClient, error)
 
 //New returns an IAAS specific implementation of BOSH client
-func New(config config.Config, metadata terraform.IAASMetadata, director director.IClient, stdout, stderr io.Writer, provider iaas.Provider) (IClient, error) {
+func New(config config.Config, outputs terraform.Outputs, director director.IClient, stdout, stderr io.Writer, provider iaas.Provider) (IClient, error) {
 	switch provider.IAAS() {
 	case iaas.AWS:
-		return NewAWSClient(config, metadata, director, stdout, stderr, provider)
+		return NewAWSClient(config, outputs, director, stdout, stderr, provider)
 	case iaas.GCP:
-		return NewGCPClient(config, metadata, director, stdout, stderr, provider)
+		return NewGCPClient(config, outputs, director, stdout, stderr, provider)
 	}
 	return nil, fmt.Errorf("IAAS not supported: %s", provider.IAAS())
 }

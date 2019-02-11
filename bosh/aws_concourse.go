@@ -49,15 +49,15 @@ func (client *AWSClient) deployConcourse(creds []byte, detach bool) (newCreds []
 	if err != nil {
 		return nil, err
 	}
-	boshDBAddress, err := client.metadata.Get("BoshDBAddress")
+	boshDBAddress, err := client.outputs.Get("BoshDBAddress")
 	if err != nil {
 		return nil, err
 	}
-	boshDBPort, err := client.metadata.Get("BoshDBPort")
+	boshDBPort, err := client.outputs.Get("BoshDBPort")
 	if err != nil {
 		return nil, err
 	}
-	atcPublicIP, err := client.metadata.Get("ATCPublicIP")
+	atcPublicIP, err := client.outputs.Get("ATCPublicIP")
 	if err != nil {
 		return nil, err
 	}

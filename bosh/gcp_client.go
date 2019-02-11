@@ -12,7 +12,7 @@ import (
 //GCPClient is an GCP specific implementation of IClient
 type GCPClient struct {
 	config   config.Config
-	metadata terraform.IAASMetadata
+	outputs  terraform.Outputs
 	director director.IClient
 	stdout   io.Writer
 	stderr   io.Writer
@@ -20,10 +20,10 @@ type GCPClient struct {
 }
 
 //NewGCPClient returns a GCP specific implementation of IClient
-func NewGCPClient(config config.Config, metadata terraform.IAASMetadata, director director.IClient, stdout, stderr io.Writer, provider iaas.Provider) (IClient, error) {
+func NewGCPClient(config config.Config, outputs terraform.Outputs, director director.IClient, stdout, stderr io.Writer, provider iaas.Provider) (IClient, error) {
 	return &GCPClient{
 		config:   config,
-		metadata: metadata,
+		outputs:  outputs,
 		director: director,
 		stdout:   stdout,
 		stderr:   stderr,

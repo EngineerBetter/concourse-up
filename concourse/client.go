@@ -83,8 +83,8 @@ func NewClient(
 	}
 }
 
-func (client *Client) buildBoshClient(config config.Config, metadata terraform.IAASMetadata) (bosh.IClient, error) {
-	directorPublicIP, err := metadata.Get("DirectorPublicIP")
+func (client *Client) buildBoshClient(config config.Config, tfOutputs terraform.Outputs) (bosh.IClient, error) {
+	directorPublicIP, err := tfOutputs.Get("DirectorPublicIP")
 	if err != nil {
 		return nil, err
 	}
@@ -105,7 +105,7 @@ func (client *Client) buildBoshClient(config config.Config, metadata terraform.I
 
 	return client.boshClientFactory(
 		config,
-		metadata,
+		tfOutputs,
 		director,
 		client.stdout,
 		client.stderr,

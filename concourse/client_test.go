@@ -222,7 +222,7 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 			},
 		}
 		terraformCLI := &testsupport.FakeCLI{
-			FakeIAAS: func(name iaas.Name) (terraform.IAASMetadata, error) {
+			FakeIAAS: func(name iaas.Name) (terraform.Outputs, error) {
 				fakeMetadata := &testsupport.FakeIAASMetadata{
 					FakeGet: func(key string) (string, error) {
 						actions = append(actions, fmt.Sprintf("looking for key %s", key))
@@ -246,13 +246,13 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 				actions = append(actions, "destroying terraform")
 				return nil
 			},
-			FakeBuildOutput: func(conf terraform.InputVars, metadata terraform.IAASMetadata) error {
-				actions = append(actions, "initializing terraform metadata")
+			FakeBuildOutput: func(conf terraform.InputVars, outputs terraform.Outputs) error {
+				actions = append(actions, "initializing terraform outputs")
 				return nil
 			},
 		}
 
-		boshClientFactory := func(config config.Config, metadata terraform.IAASMetadata, director director.IClient, stdout, stderr io.Writer, provider iaas.Provider) (bosh.IClient, error) {
+		boshClientFactory := func(config config.Config, outputs terraform.Outputs, director director.IClient, stdout, stderr io.Writer, provider iaas.Provider) (bosh.IClient, error) {
 			return &testsupport.FakeBoshClient{
 				FakeDeploy: func(stateFileBytes, credsFileBytes []byte, detach bool) ([]byte, []byte, error) {
 					if detach {
@@ -536,7 +536,7 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 			err := client.Destroy()
 			Expect(err).ToNot(HaveOccurred())
 
-			Expect(actions).To(ContainElement("initializing terraform metadata"))
+			Expect(actions).To(ContainElement("initializing terraform outputs"))
 		})
 		It("Gets the vpc ID", func() {
 			client := buildClient()
@@ -611,7 +611,7 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 			_, err := client.FetchInfo()
 			Expect(err).ToNot(HaveOccurred())
 
-			Expect(actions).To(ContainElement("initializing terraform metadata"))
+			Expect(actions).To(ContainElement("initializing terraform outputs"))
 		})
 
 		It("Gets the director public IP", func() {

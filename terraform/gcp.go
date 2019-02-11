@@ -42,7 +42,7 @@ func (v *GCPInputVars) ConfigureTerraform(terraformContents string) (string, err
 }
 
 // Metadata represents output from terraform on GCP or GCP
-type GCPMetadata struct {
+type GCPOutputs struct {
 	Network                    MetadataStringValue `json:"network" valid:"required"`
 	PrivateSubnetworkName      MetadataStringValue `json:"private_subnetwork_name" valid:"required"`
 	PublicSubnetworkName       MetadataStringValue `json:"public_subnetwork_name" valid:"required"`
@@ -61,23 +61,23 @@ type GCPMetadata struct {
 }
 
 // AssertValid returns an error if the struct contains any missing fields
-func (metadata *GCPMetadata) AssertValid() error {
-	_, err := govalidator.ValidateStruct(metadata)
+func (outputs *GCPOutputs) AssertValid() error {
+	_, err := govalidator.ValidateStruct(outputs)
 	return err
 }
 
-// Init populates metadata struct with values from the buffer
-func (metadata *GCPMetadata) Init(buffer *bytes.Buffer) error {
-	if err := json.NewDecoder(buffer).Decode(&metadata); err != nil {
+// Init populates outputs struct with values from the buffer
+func (outputs *GCPOutputs) Init(buffer *bytes.Buffer) error {
+	if err := json.NewDecoder(buffer).Decode(&outputs); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-// Get returns a the specified value from the metadata struct
-func (metadata *GCPMetadata) Get(key string) (string, error) {
-	reflectValue := reflect.ValueOf(metadata)
+// Get returns a the specified value from the outputs struct
+func (outputs *GCPOutputs) Get(key string) (string, error) {
+	reflectValue := reflect.ValueOf(outputs)
 	reflectStruct := reflectValue.Elem()
 	value := reflectStruct.FieldByName(key)
 	if !value.IsValid() {

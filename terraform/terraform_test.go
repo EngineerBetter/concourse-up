@@ -12,15 +12,15 @@ import (
 )
 
 type mockTerraformInputVars struct{}
-type mockIAASMetadata struct{}
+type mockOutputs struct{}
 
-func (mockIAASMD *mockIAASMetadata) AssertValid() error {
+func (mockIAASMD *mockOutputs) AssertValid() error {
 	return nil
 }
-func (mockIAASMD *mockIAASMetadata) Init(buffer *bytes.Buffer) error {
+func (mockIAASMD *mockOutputs) Init(buffer *bytes.Buffer) error {
 	return nil
 }
-func (mockIAASMD *mockIAASMetadata) Get(key string) (string, error) {
+func (mockIAASMD *mockOutputs) Get(key string) (string, error) {
 	return "", nil
 }
 
@@ -110,7 +110,7 @@ func TestCLI_BuildOutput(t *testing.T) {
 	mockCLIent.IAAS(iaas.AWS)
 
 	config := &mockTerraformInputVars{}
-	metadata := &mockIAASMetadata{}
+	outputs := &mockOutputs{}
 
 	e.ExpectFunc(func(t testing.TB, command string, args ...string) {
 		require.Equal(t, "terraform", command)
@@ -123,7 +123,7 @@ func TestCLI_BuildOutput(t *testing.T) {
 		require.Equal(t, args[1], "-json")
 
 	})
-	err = mockCLIent.BuildOutput(config, metadata)
+	err = mockCLIent.BuildOutput(config, outputs)
 	require.NoError(t, err)
 }
 
@@ -132,25 +132,25 @@ func TestCLI_IAAS(t *testing.T) {
 		name             string
 		args             iaas.Name
 		wantInputVars    terraform.InputVars
-		wantIAASMetadata terraform.IAASMetadata
+		wantIAASMetadata terraform.Outputs
 		wantErr          bool
 	}{
 		{
 			name:             "return GCP provider hooks for GCP",
 			args:             iaas.GCP,
-			wantIAASMetadata: &terraform.GCPMetadata{},
+			wantIAASMetadata: &terraform.GCPOutputs{},
 			wantErr:          false,
 		},
 		{
 			name:             "return AWS provider hooks for AWS",
 			args:             iaas.AWS,
-			wantIAASMetadata: &terraform.AWSMetadata{},
+			wantIAASMetadata: &terraform.AWSOutputs{},
 			wantErr:          false,
 		},
 		{
 			name:             "return null provider hooks for unknown provider",
 			args:             iaas.Unknown,
-			wantIAASMetadata: &terraform.NullMetadata{},
+			wantIAASMetadata: &terraform.NullOutputs{},
 			wantErr:          true,
 		},
 	}
