@@ -192,7 +192,7 @@ func (client *Client) deployBoshAndPipeline(c config.Config, tfOutputs terraform
 	c.ConcourseUsername = bp.ConcourseUsername
 	c.ConcoursePassword = bp.ConcoursePassword
 
-	return bp, writeDeploySuccessMessage(c, tfOutputs, client.stdout)
+	return bp, writeDeploySuccessMessage(c, client.stdout)
 }
 
 func (client *Client) updateBoshAndPipeline(c config.Config, tfOutputs terraform.Outputs) (BoshParams, error) {
@@ -577,7 +577,7 @@ Log into credhub with:
 eval "$(concourse-up info --region {{.Region}} {{ if ne .Namespace .Region }} --namespace {{ .Namespace }} {{ end }} --iaas {{ .IAAS }} --env {{.Project}})"
 `
 
-func writeDeploySuccessMessage(config config.Config, tfOutputs terraform.Outputs, stdout io.Writer) error {
+func writeDeploySuccessMessage(config config.Config, stdout io.Writer) error {
 	t := template.Must(template.New("deploy").Parse(deployMsg))
 	return t.Execute(stdout, config)
 }
