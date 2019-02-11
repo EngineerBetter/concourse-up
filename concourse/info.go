@@ -69,7 +69,7 @@ func (client *Client) FetchInfo() (*Info, error) {
 		}
 	}
 
-	tfOutputs, err := client.tfCLI.IAAS(client.provider.IAAS())
+	tfOutputs, err := client.tfCLI.OutputsFor(client.provider.IAAS())
 	if err != nil {
 		return nil, err
 	}

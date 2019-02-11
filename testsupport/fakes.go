@@ -191,7 +191,7 @@ type FakeCLI struct {
 }
 
 // IAAS delegates to FakeIAAS which is dynamically set by the tests
-func (client *FakeCLI) IAAS(name iaas.Name) (terraform.Outputs, error) {
+func (client *FakeCLI) OutputsFor(name iaas.Name) (terraform.Outputs, error) {
 	return client.FakeIAAS(name)
 }
 

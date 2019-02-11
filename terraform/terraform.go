@@ -27,10 +27,10 @@ type Outputs interface {
 
 //CLIInterface is interface the abstraction of execCmd
 type CLIInterface interface {
-	IAAS(iaas.Name) (Outputs, error)
 	Apply(InputVars, bool) error
 	Destroy(InputVars) error
 	BuildOutput(InputVars, Outputs) error
+	OutputsFor(iaas.Name) (Outputs, error)
 }
 
 // CLI struct holds the abstraction of execCmd
@@ -97,7 +97,7 @@ func (n *NullOutputs) Init(*bytes.Buffer) error { return nil }
 // Get is a nullified function
 func (n *NullOutputs) Get(string) (string, error) { return "", nil }
 
-func (c *CLI) IAAS(name iaas.Name) (Outputs, error) {
+func (c *CLI) OutputsFor(name iaas.Name) (Outputs, error) {
 	switch name {
 	case iaas.AWS: // nolint
 		c.iaas = iaas.AWS // nolint

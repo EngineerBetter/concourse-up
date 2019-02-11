@@ -36,7 +36,7 @@ func TestCLI_Apply(t *testing.T) {
 	defer e.Finish()
 	mockCLIent, err := terraform.New(terraform.FakeExec(e.Cmd()))
 	require.NoError(t, err)
-	mockCLIent.IAAS(iaas.AWS)
+	mockCLIent.OutputsFor(iaas.AWS)
 
 	config := &mockTerraformInputVars{}
 
@@ -61,7 +61,7 @@ func TestCLI_ApplyPlan(t *testing.T) {
 	defer e.Finish()
 	mockCLIent, err := terraform.New(terraform.FakeExec(e.Cmd()))
 	require.NoError(t, err)
-	mockCLIent.IAAS(iaas.AWS)
+	mockCLIent.OutputsFor(iaas.AWS)
 
 	config := &mockTerraformInputVars{}
 
@@ -83,7 +83,7 @@ func TestCLI_Destroy(t *testing.T) {
 	defer e.Finish()
 	mockCLIent, err := terraform.New(terraform.FakeExec(e.Cmd()))
 	require.NoError(t, err)
-	mockCLIent.IAAS(iaas.AWS)
+	mockCLIent.OutputsFor(iaas.AWS)
 
 	config := &mockTerraformInputVars{}
 
@@ -107,7 +107,7 @@ func TestCLI_BuildOutput(t *testing.T) {
 	defer e.Finish()
 	mockCLIent, err := terraform.New(terraform.FakeExec(e.Cmd()))
 	require.NoError(t, err)
-	mockCLIent.IAAS(iaas.AWS)
+	mockCLIent.OutputsFor(iaas.AWS)
 
 	config := &mockTerraformInputVars{}
 	outputs := &mockOutputs{}
@@ -161,7 +161,7 @@ func TestCLI_IAAS(t *testing.T) {
 			c, err := terraform.New(terraform.FakeExec(e.Cmd()))
 			require.NoError(t, err)
 
-			gotIAASMetadata, err := c.IAAS(tt.args)
+			gotIAASMetadata, err := c.OutputsFor(tt.args)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("CLI.IAAS() error = %v, wantErr %v", err, tt.wantErr)
 				return

@@ -15,7 +15,7 @@ func (client *Client) Destroy() error {
 		return err
 	}
 
-	tfOutputs, err := client.tfCLI.IAAS(client.provider.IAAS())
+	tfOutputs, err := client.tfCLI.OutputsFor(client.provider.IAAS())
 	if err != nil {
 		return err
 	}

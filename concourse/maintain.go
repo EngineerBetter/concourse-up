@@ -99,7 +99,7 @@ func (client *Client) constructBoshClient() (*bosh.IClient, error) {
 		return nil, err
 	}
 
-	tfOutputs, err := client.tfCLI.IAAS(client.provider.IAAS())
+	tfOutputs, err := client.tfCLI.OutputsFor(client.provider.IAAS())
 	if err != nil {
 		return nil, err
 	}
