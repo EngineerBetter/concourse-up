@@ -76,25 +76,18 @@ func New(ops ...Option) (*CLI, error) {
 	return cli, nil
 }
 
-// NullInputVars exposes ConfigureDirectorManifestCPI
 type NullInputVars struct{}
 
-// ConfigureTerraform is a nullified function
 func (n *NullInputVars) ConfigureTerraform(string) (string, error) { return "", nil }
 
-// Build is a nullified function
 func (n *NullInputVars) Build(map[string]interface{}) error { return nil }
 
-// NullOutputs holds IAAS specific terraform outputs
 type NullOutputs struct{}
 
-// AssertValid is a nullified function
 func (n *NullOutputs) AssertValid() error { return nil }
 
-// Init is a nullified function
 func (n *NullOutputs) Init(*bytes.Buffer) error { return nil }
 
-// Get is a nullified function
 func (n *NullOutputs) Get(string) (string, error) { return "", nil }
 
 func (c *CLI) OutputsFor(name iaas.Name) (Outputs, error) {
