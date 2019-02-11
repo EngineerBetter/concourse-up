@@ -1,3 +1,5 @@
+require 'json'
+
 pwd = `echo $PWD`.strip
 creds_path = pwd+'googlecreds.json'
 File.write(creds_path, ENV.fetch('GOOGLE_APPLICATION_CREDENTIALS_CONTENTS'))
@@ -39,8 +41,28 @@ class GCP
     if bucket.contents.empty?
       bucket.delete_empty
     else
-      puts 'full cleanup for deployments without key Terraform and state files not supported on GCP'
+      delete_components('compute instances', "labels.deployment:bosh AND labels.concourse-up-project:#{orphan.project}", 'name')
+      delete_components('compute instances', "labels.concourse-up-project:#{orphan.project}", 'name')
+      delete_components('compute instances', "name:'#{orphan.deployment}-nat-instance'", 'name')
+      delete_components('compute networks subnets', "name~'.*#{orphan.project}.*'", 'name')
+      delete_components('compute routes', "network~'.*#{orphan.deployment}.*'", 'name')
+      delete_components('compute firewall-rules', "name~'.*#{orphan.project}.*'", 'name')
+      delete_components('compute networks', "name~'.*#{orphan.project}.*'", 'name')
+      delete_components('sql instances', "name~'.*#{orphan.project}.*'", 'name')
+      delete_components('iam service-accounts', "email~'.*#{orphan.project}.*'", 'uniqueId')
+      delete_components('compute addresses', "name~'.*#{orphan.project}.*'", 'name')
+
+      bucket.delete
     end
+  end
+
+  private
+
+  def delete_components(component_type, filter, identifier_key)
+    componentsJson = `gcloud --format json #{component_type} list --filter="#{filter}"`
+    components = JSON.parse(componentsJson)
+    componentIdentifiers = components.map { |component| component.fetch("#{identifier_key}") }
+    componentIdentifiers.each { |componentIdentifier| `gcloud --quiet #{component_type} delete #{componentIdentifier}` }
   end
 end
 
@@ -72,8 +94,7 @@ class GCPBucket
   end
 
   def delete
-    puts "Would run gsutil rm -r gs://#{name}"
-    # `gsutil rm -r gs://#{name}`
+    `gsutil rm -r gs://#{name}`
   end
 
   def delete_empty
