@@ -63,9 +63,9 @@ func newConfig(configClient config.IClient, deployArgs *deploy.Args, provider ia
 
 	// Stuff from concourse.Deploy()
 	switch provider.IAAS() {
-	case awsConst: // nolint
+	case iaas.AWS: // nolint
 		conf.RDSDefaultDatabaseName = fmt.Sprintf("bosh_%s", util.EightRandomLetters())
-	case gcpConst: // nolint
+	case iaas.GCP: // nolint
 		conf.RDSDefaultDatabaseName = fmt.Sprintf("bosh-%s", util.EightRandomLetters())
 	}
 
