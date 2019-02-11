@@ -184,14 +184,14 @@ func (fakeTerraformInputVars *FakeTerraformInputVars) Build(data map[string]inte
 
 // FakeCLI implements terraform.CLI for testing
 type FakeCLI struct {
-	FakeIAAS        func(name iaas.Name) (terraform.InputVars, terraform.IAASMetadata, error)
+	FakeIAAS        func(name iaas.Name) (terraform.IAASMetadata, error)
 	FakeApply       func(conf terraform.InputVars, dryrun bool) error
 	FakeDestroy     func(conf terraform.InputVars) error
 	FakeBuildOutput func(conf terraform.InputVars, metadata terraform.IAASMetadata) error
 }
 
 // IAAS delegates to FakeIAAS which is dynamically set by the tests
-func (client *FakeCLI) IAAS(name iaas.Name) (terraform.InputVars, terraform.IAASMetadata, error) {
+func (client *FakeCLI) IAAS(name iaas.Name) (terraform.IAASMetadata, error) {
 	return client.FakeIAAS(name)
 }
 

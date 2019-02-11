@@ -99,7 +99,7 @@ func (client *Client) constructBoshClient() (*bosh.IClient, error) {
 		return nil, err
 	}
 
-	_, metadata, err := client.tfCLI.IAAS(client.provider.IAAS())
+	metadata, err := client.tfCLI.IAAS(client.provider.IAAS())
 	if err != nil {
 		return nil, err
 	}

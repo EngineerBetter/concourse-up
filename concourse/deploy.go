@@ -79,7 +79,7 @@ func (client *Client) Deploy() error {
 	conf.HostedZoneRecordPrefix = r.HostedZoneRecordPrefix
 	conf.Domain = r.Domain
 
-	_, metadata, err := client.tfCLI.IAAS(client.provider.IAAS())
+	metadata, err := client.tfCLI.IAAS(client.provider.IAAS())
 	if err != nil {
 		return err
 	}

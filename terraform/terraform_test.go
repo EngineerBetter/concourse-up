@@ -138,21 +138,18 @@ func TestCLI_IAAS(t *testing.T) {
 		{
 			name:             "return GCP provider hooks for GCP",
 			args:             iaas.GCP,
-			wantInputVars:    &terraform.GCPInputVars{},
 			wantIAASMetadata: &terraform.GCPMetadata{},
 			wantErr:          false,
 		},
 		{
 			name:             "return AWS provider hooks for AWS",
 			args:             iaas.AWS,
-			wantInputVars:    &terraform.AWSInputVars{},
 			wantIAASMetadata: &terraform.AWSMetadata{},
 			wantErr:          false,
 		},
 		{
 			name:             "return null provider hooks for unknown provider",
 			args:             iaas.Unknown,
-			wantInputVars:    &terraform.NullInputVars{},
 			wantIAASMetadata: &terraform.NullMetadata{},
 			wantErr:          true,
 		},
@@ -164,13 +161,10 @@ func TestCLI_IAAS(t *testing.T) {
 			c, err := terraform.New(terraform.FakeExec(e.Cmd()))
 			require.NoError(t, err)
 
-			gotInputVars, gotIAASMetadata, err := c.IAAS(tt.args)
+			gotIAASMetadata, err := c.IAAS(tt.args)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("CLI.IAAS() error = %v, wantErr %v", err, tt.wantErr)
 				return
-			}
-			if !reflect.DeepEqual(gotInputVars, tt.wantInputVars) {
-				t.Errorf("CLI.IAAS() gotInputVars = %v, wantInputVars %v", gotInputVars, tt.wantInputVars)
 			}
 			if !reflect.DeepEqual(gotIAASMetadata, tt.wantIAASMetadata) {
 				t.Errorf("CLI.IAAS() gotIAASMetadata = %v, wantIAASMetadata %v", gotIAASMetadata, tt.wantIAASMetadata)

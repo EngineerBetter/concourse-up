@@ -222,13 +222,7 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 			},
 		}
 		terraformCLI := &testsupport.FakeCLI{
-			FakeIAAS: func(name iaas.Name) (terraform.InputVars, terraform.IAASMetadata, error) {
-				fakeInputVars := &testsupport.FakeTerraformInputVars{
-					FakeBuild: func(data map[string]interface{}) error {
-						actions = append(actions, "converting config.Config to TFInputVars")
-						return nil
-					},
-				}
+			FakeIAAS: func(name iaas.Name) (terraform.IAASMetadata, error) {
 				fakeMetadata := &testsupport.FakeIAASMetadata{
 					FakeGet: func(key string) (string, error) {
 						actions = append(actions, fmt.Sprintf("looking for key %s", key))
@@ -241,7 +235,7 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 						return mv.String(), nil
 					},
 				}
-				return fakeInputVars, fakeMetadata, nil
+				return fakeMetadata, nil
 			},
 			FakeApply: func(conf terraform.InputVars, dryrun bool) error {
 				Expect(dryrun).To(BeFalse())

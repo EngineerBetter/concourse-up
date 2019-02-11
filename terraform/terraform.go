@@ -27,7 +27,7 @@ type IAASMetadata interface {
 
 //CLIInterface is interface the abstraction of execCmd
 type CLIInterface interface {
-	IAAS(iaas.Name) (InputVars, IAASMetadata, error)
+	IAAS(iaas.Name) (IAASMetadata, error)
 	Apply(InputVars, bool) error
 	Destroy(InputVars) error
 	BuildOutput(InputVars, IAASMetadata) error
@@ -97,18 +97,17 @@ func (n *NullMetadata) Init(*bytes.Buffer) error { return nil }
 // Get is a nullified function
 func (n *NullMetadata) Get(string) (string, error) { return "", nil }
 
-// IAAS is returning the IAAS specific metadata and environment
-func (c *CLI) IAAS(name iaas.Name) (InputVars, IAASMetadata, error) {
+// IAAS is returning the IAAS specific metadata
+func (c *CLI) IAAS(name iaas.Name) (IAASMetadata, error) {
 	switch name {
 	case iaas.AWS: // nolint
 		c.iaas = iaas.AWS // nolint
-		return &AWSInputVars{}, &AWSMetadata{}, nil
+		return &AWSMetadata{}, nil
 	case iaas.GCP: // nolint
 		c.iaas = iaas.GCP // nolint
-		return &GCPInputVars{}, &GCPMetadata{}, nil
+		return &GCPMetadata{}, nil
 	}
-	return &NullInputVars{}, &NullMetadata{}, errors.New("terraform: " + name.String() + " not a valid iaas provider")
-
+	return &NullMetadata{}, errors.New("terraform: " + name.String() + " not a valid iaas provider")
 }
 
 func (c *CLI) init(config InputVars) (string, error) {

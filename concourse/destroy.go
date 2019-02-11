@@ -15,7 +15,7 @@ func (client *Client) Destroy() error {
 		return err
 	}
 
-	_, metadata, err := client.tfCLI.IAAS(client.provider.IAAS())
+	metadata, err := client.tfCLI.IAAS(client.provider.IAAS())
 	if err != nil {
 		return err
 	}
