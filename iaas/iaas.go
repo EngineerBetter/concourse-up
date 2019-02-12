@@ -40,6 +40,7 @@ func Assosiate(name string) (Name, error) {
 	return Unknown, fmt.Errorf("cannot map iaas [%s] as any of %+v", name, names[1:])
 }
 
+//go:generate counterfeiter . Provider
 // Provider represents actions taken against AWS
 type Provider interface {
 	Attr(string) (string, error)

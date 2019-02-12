@@ -6,6 +6,7 @@ import (
 	"github.com/EngineerBetter/concourse-up/concourse/concoursefakes"
 
 	"github.com/EngineerBetter/concourse-up/fly/flyfakes"
+	"github.com/EngineerBetter/concourse-up/iaas/iaasfakes"
 	"github.com/EngineerBetter/concourse-up/terraform/terraformfakes"
 	"github.com/xenolf/lego/lego"
 	"io"
@@ -73,34 +74,27 @@ var _ = Describe("client", func() {
 			}, nil
 		}
 
-		awsClient := &testsupport.FakeAWSClient{
-			FakeDBType: func(size string) string {
-				return "db.t2.small"
-			},
-			FakeFindLongestMatchingHostedZone: func(subdomain string) (string, string, error) {
-				if subdomain == "ci.google.com" {
-					return "google.com", "ABC123", nil
-				}
+		awsClient := &iaasfakes.FakeProvider{}
+		awsClient.DBTypeReturns("db.t2.small")
+		awsClient.RegionReturns("eu-west-1")
+		awsClient.IAASReturns(iaas.AWS)
+		awsClient.CheckForWhitelistedIPStub = func(ip, securityGroup string) (bool, error) {
+			actions = append(actions, "checking security group for IP")
+			if ip == "1.2.3.4" {
+				return false, nil
+			}
+			return true, nil
+		}
+		awsClient.DeleteVMsInVPCStub = func(vpcID string) ([]string, error) {
+			actions = append(actions, fmt.Sprintf("deleting vms in %s", vpcID))
+			return nil, nil
+		}
+		awsClient.FindLongestMatchingHostedZoneStub = func(subdomain string) (string, string, error) {
+			if subdomain == "ci.google.com" {
+				return "google.com", "ABC123", nil
+			}
 
-				return "", "", errors.New("hosted zone not found")
-			},
-			FakeCheckForWhitelistedIP: func(ip, securityGroup string) (bool, error) {
-				actions = append(actions, "checking security group for IP")
-				if ip == "1.2.3.4" {
-					return false, nil
-				}
-				return true, nil
-			},
-			FakeDeleteVMsInVPC: func(vpcID string) ([]string, error) {
-				actions = append(actions, fmt.Sprintf("deleting vms in %s", vpcID))
-				return nil, nil
-			},
-			FakeDeleteVolumes: func(volumesToDelete []string, deleteVolume func(ec2Client iaas.IEC2, volumeID *string) error) error {
-				return nil
-			},
-			FakeRegion: func() string {
-				return "eu-west-1"
-			},
+			return "", "", errors.New("hosted zone not found")
 		}
 
 		tfInputVarsFactory = &concoursefakes.FakeTFInputVarsFactory{}
@@ -114,11 +108,9 @@ var _ = Describe("client", func() {
 			return awsInputVarsFactory.NewInputVars(i)
 		}
 
-		otherRegionClient := &testsupport.FakeAWSClient{
-			FakeRegion: func() string {
-				return "eu-central-1"
-			},
-		}
+		otherRegionClient := &iaasfakes.FakeProvider{}
+		otherRegionClient.IAASReturns(iaas.AWS)
+		otherRegionClient.RegionReturns("eu-central-1")
 
 		flyClient = &flyfakes.FakeIClient{}
 		flyClient.SetDefaultPipelineStub = func(config config.Config, allowFlyVersionDiscrepancy bool) error {

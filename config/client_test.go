@@ -3,39 +3,29 @@ package config_test
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/EngineerBetter/concourse-up/iaas/iaasfakes"
 	"reflect"
 	"testing"
 
 	. "github.com/EngineerBetter/concourse-up/config"
 	"github.com/EngineerBetter/concourse-up/iaas"
-	"github.com/EngineerBetter/concourse-up/testsupport"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
 
 var _ = Describe("Client", func() {
-	var iaasClient *testsupport.FakeAWSClient
+	var provider *iaasfakes.FakeProvider
 	var client *Client
 
 	BeforeEach(func() {
-		iaasClient = &testsupport.FakeAWSClient{
-			FakeRegion: func() string {
-				return "eu-west-1"
-			},
-			FakeCreateBucket: func(name string) error {
-				return nil
-			},
-			FakeBucketExists: func(name string) (bool, error) {
-				return false, nil
-			},
-			FakeEnsureFileExists: func(bucket, path string, defaultContents []byte) ([]byte, bool, error) {
-				return defaultContents, true, nil
-			},
-			FakeDBType: func(string) string {
-				return "db.t2.medium"
-			},
+		provider = &iaasfakes.FakeProvider{}
+		provider.RegionReturns("eu-west-1")
+		provider.DBTypeReturns("db.t2.medium")
+		provider.EnsureFileExistsStub = func(bucket, path string, defaultContents []byte) ([]byte, bool, error) {
+			return defaultContents, true, nil
 		}
-		client = New(iaasClient, "test", "")
+
+		client = New(provider, "test", "")
 	})
 
 	Describe("NewConfig", func() {
@@ -52,20 +42,12 @@ var _ = Describe("Client", func() {
 })
 
 func TestNew(t *testing.T) {
-	var iaasClient *testsupport.FakeAWSClient
-	iaasClient = &testsupport.FakeAWSClient{
-		FakeRegion: func() string {
-			return "eu-west-1"
-		},
-		FakeCreateBucket: func(name string) error {
-			return nil
-		},
-		FakeEnsureFileExists: func(bucket, path string, defaultContents []byte) ([]byte, bool, error) {
-			return defaultContents, true, nil
-		},
-		FakeDBType: func(string) string {
-			return "db.t2.small"
-		},
+	var provider *iaasfakes.FakeProvider
+	provider = &iaasfakes.FakeProvider{}
+	provider.RegionReturns("eu-west-1")
+	provider.DBTypeReturns("db.t2.medium")
+	provider.EnsureFileExistsStub = func(bucket, path string, defaultContents []byte) ([]byte, bool, error) {
+		return defaultContents, true, nil
 	}
 
 	type args struct {
@@ -82,12 +64,12 @@ func TestNew(t *testing.T) {
 		{
 			name: "default",
 			args: args{
-				iaas:      iaasClient,
+				iaas:      provider,
 				project:   "aProject",
 				namespace: "",
 			},
 			want: &Client{
-				Iaas:         iaasClient,
+				Iaas:         provider,
 				Project:      "aProject",
 				Namespace:    "eu-west-1",
 				BucketName:   "concourse-up-aProject-eu-west-1-config",
@@ -101,12 +83,12 @@ func TestNew(t *testing.T) {
 		{
 			name: "with Namespace",
 			args: args{
-				iaas:      iaasClient,
+				iaas:      provider,
 				project:   "aProject",
 				namespace: "someNamespace",
 			},
 			want: &Client{
-				Iaas:         iaasClient,
+				Iaas:         provider,
 				Project:      "aProject",
 				Namespace:    "someNamespace",
 				BucketName:   "concourse-up-aProject-someNamespace-config",
@@ -120,12 +102,12 @@ func TestNew(t *testing.T) {
 		{
 			name: "with Namespace and region based bucket",
 			args: args{
-				iaas:      iaasClient,
+				iaas:      provider,
 				project:   "aProject",
 				namespace: "someNamespace",
 			},
 			want: &Client{
-				Iaas:         iaasClient,
+				Iaas:         provider,
 				Project:      "aProject",
 				Namespace:    "someNamespace",
 				BucketName:   "concourse-up-aProject-eu-west-1-config",
@@ -142,12 +124,12 @@ func TestNew(t *testing.T) {
 		{
 			name: "with Namespace and namespace based bucket",
 			args: args{
-				iaas:      iaasClient,
+				iaas:      provider,
 				project:   "aProject",
 				namespace: "someNamespace",
 			},
 			want: &Client{
-				Iaas:         iaasClient,
+				Iaas:         provider,
 				Project:      "aProject",
 				Namespace:    "someNamespace",
 				BucketName:   "concourse-up-aProject-someNamespace-config",
@@ -164,12 +146,12 @@ func TestNew(t *testing.T) {
 		{
 			name: "with Namespace and bucket existing and namespace == region",
 			args: args{
-				iaas:      iaasClient,
+				iaas:      provider,
 				project:   "aProject",
 				namespace: "eu-west-1",
 			},
 			want: &Client{
-				Iaas:         iaasClient,
+				Iaas:         provider,
 				Project:      "aProject",
 				Namespace:    "eu-west-1",
 				BucketName:   "concourse-up-aProject-eu-west-1-config",
@@ -183,7 +165,7 @@ func TestNew(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			iaasClient.FakeBucketExists = tt.FakeBucketExists
+			provider.BucketExistsStub = tt.FakeBucketExists
 			if got := New(tt.args.iaas, tt.args.project, tt.args.namespace); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("New() = %v,\n want %v", got, tt.want)
 			}
@@ -192,25 +174,18 @@ func TestNew(t *testing.T) {
 }
 
 func TestClient_Load(t *testing.T) {
-	var iaasClient *testsupport.FakeAWSClient
-	iaasClient = &testsupport.FakeAWSClient{
-		FakeRegion: func() string {
-			return "eu-west-1"
-		},
-		FakeCreateBucket: func(name string) error {
-			return nil
-		},
-		FakeEnsureFileExists: func(bucket, path string, defaultContents []byte) ([]byte, bool, error) {
-			return defaultContents, true, nil
-		},
-		FakeLoadFile: func(bucket, path string) ([]byte, error) {
-			bytes, _ := json.Marshal(Config{})
-			return bytes, nil
-		},
-		FakeDBType: func(string) string {
-			return "db.t2.small"
-		},
+	var provider *iaasfakes.FakeProvider
+	provider = &iaasfakes.FakeProvider{}
+	provider.RegionReturns("eu-west-1")
+	provider.DBTypeReturns("db.t2.medium")
+	provider.EnsureFileExistsStub = func(bucket, path string, defaultContents []byte) ([]byte, bool, error) {
+		return defaultContents, true, nil
 	}
+	provider.LoadFileStub = func(bucket, path string) ([]byte, error) {
+		bytes, _ := json.Marshal(Config{})
+		return bytes, nil
+	}
+
 	tests := []struct {
 		name    string
 		prepare func() *Client
@@ -221,7 +196,7 @@ func TestClient_Load(t *testing.T) {
 			name: "BucketError is raised",
 			prepare: func() *Client {
 				return &Client{
-					Iaas:         iaasClient,
+					Iaas:         provider,
 					Project:      "",
 					Namespace:    "",
 					BucketName:   "",
@@ -236,7 +211,7 @@ func TestClient_Load(t *testing.T) {
 			name: "default",
 			prepare: func() *Client {
 				return &Client{
-					Iaas:         iaasClient,
+					Iaas:         provider,
 					Project:      "",
 					Namespace:    "",
 					BucketName:   "",
@@ -264,25 +239,18 @@ func TestClient_Load(t *testing.T) {
 }
 
 func TestClient_HasConfig(t *testing.T) {
-	var iaasClient *testsupport.FakeAWSClient
-	iaasClient = &testsupport.FakeAWSClient{
-		FakeRegion: func() string {
-			return "eu-west-1"
-		},
-		FakeCreateBucket: func(name string) error {
-			return nil
-		},
-		FakeEnsureFileExists: func(bucket, path string, defaultContents []byte) ([]byte, bool, error) {
-			return defaultContents, true, nil
-		},
-		FakeLoadFile: func(bucket, path string) ([]byte, error) {
-			bytes, _ := json.Marshal(Config{})
-			return bytes, nil
-		},
-		FakeDBType: func(string) string {
-			return "db.t2.small"
-		},
+	var provider *iaasfakes.FakeProvider
+	provider = &iaasfakes.FakeProvider{}
+	provider.RegionReturns("eu-west-1")
+	provider.DBTypeReturns("db.t2.medium")
+	provider.EnsureFileExistsStub = func(bucket, path string, defaultContents []byte) ([]byte, bool, error) {
+		return defaultContents, true, nil
 	}
+	provider.LoadFileStub = func(bucket, path string) ([]byte, error) {
+		bytes, _ := json.Marshal(Config{})
+		return bytes, nil
+	}
+
 	tests := []struct {
 		name    string
 		prepare func() *Client
@@ -293,7 +261,7 @@ func TestClient_HasConfig(t *testing.T) {
 			name: "BucketError is raised",
 			prepare: func() *Client {
 				return &Client{
-					Iaas:         iaasClient,
+					Iaas:         provider,
 					Project:      "",
 					Namespace:    "",
 					BucketName:   "",
@@ -308,7 +276,7 @@ func TestClient_HasConfig(t *testing.T) {
 			name: "default",
 			prepare: func() *Client {
 				return &Client{
-					Iaas:         iaasClient,
+					Iaas:         provider,
 					Project:      "",
 					Namespace:    "",
 					BucketName:   "",
