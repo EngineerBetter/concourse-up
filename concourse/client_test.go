@@ -35,12 +35,13 @@ var _ = Describe("client", func() {
 	var stderr *gbytes.Buffer
 	var deleteBoshDirectorError error
 	var args *deploy.Args
-	var configInBucket, configBeforeTerraform config.Config
+	var configInBucket, configAfterLoad config.Config
 	var ipChecker func() (string, error)
 	var exampleDirectorCreds []byte
 	var tfInputVarsFactory *concoursefakes.FakeTFInputVarsFactory
 	var flyClient *flyfakes.FakeIClient
 	var terraformCLI *terraformfakes.FakeCLIInterface
+	var configClient *configfakes.FakeIClient
 
 	var setupFakeAwsProvider = func() *iaasfakes.FakeProvider {
 		provider := &iaasfakes.FakeProvider{}
@@ -146,7 +147,7 @@ var _ = Describe("client", func() {
 		awsClient := setupFakeAwsProvider()
 		otherRegionClient := setupFakeOtherRegionProvider()
 		tfInputVarsFactory = setupFakeTfInputVarsFactory()
-		configClient := setupFakeConfigClient()
+		configClient = setupFakeConfigClient()
 
 		flyClient = &flyfakes.FakeIClient{}
 		flyClient.SetDefaultPipelineStub = func(config config.Config, allowFlyVersionDiscrepancy bool) error {
@@ -226,10 +227,10 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 			PrivateCIDR:       "192.168.1.0/24",
 		}
 
-		//Mutations we expect to have been done after load, but before calling Terraform
-		configBeforeTerraform = configInBucket
-		configBeforeTerraform.AllowIPs = "\"0.0.0.0/0\""
-		configBeforeTerraform.SourceAccessIP = "192.0.2.0"
+		//Mutations we expect to have been done after load
+		configAfterLoad = configInBucket
+		configAfterLoad.AllowIPs = "\"0.0.0.0/0\""
+		configAfterLoad.SourceAccessIP = "192.0.2.0"
 
 		exampleDirectorCreds = []byte("atc_password: s3cret")
 
@@ -316,25 +317,25 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 				err := client.Deploy()
 
 				terraformInputVars := &terraform.AWSInputVars{
-					NetworkCIDR:            configBeforeTerraform.NetworkCIDR,
-					PublicCIDR:             configBeforeTerraform.PublicCIDR,
-					PrivateCIDR:            configBeforeTerraform.PrivateCIDR,
-					AllowIPs:               configBeforeTerraform.AllowIPs,
-					AvailabilityZone:       configBeforeTerraform.AvailabilityZone,
-					ConfigBucket:           configBeforeTerraform.ConfigBucket,
-					Deployment:             configBeforeTerraform.Deployment,
-					HostedZoneID:           configBeforeTerraform.HostedZoneID,
-					HostedZoneRecordPrefix: configBeforeTerraform.HostedZoneRecordPrefix,
-					Namespace:              configBeforeTerraform.Namespace,
-					Project:                configBeforeTerraform.Project,
-					PublicKey:              configBeforeTerraform.PublicKey,
-					RDSDefaultDatabaseName: configBeforeTerraform.RDSDefaultDatabaseName,
-					RDSInstanceClass:       configBeforeTerraform.RDSInstanceClass,
-					RDSPassword:            configBeforeTerraform.RDSPassword,
-					RDSUsername:            configBeforeTerraform.RDSUsername,
-					Region:                 configBeforeTerraform.Region,
-					SourceAccessIP:         configBeforeTerraform.SourceAccessIP,
-					TFStatePath:            configBeforeTerraform.TFStatePath,
+					NetworkCIDR:            configAfterLoad.NetworkCIDR,
+					PublicCIDR:             configAfterLoad.PublicCIDR,
+					PrivateCIDR:            configAfterLoad.PrivateCIDR,
+					AllowIPs:               configAfterLoad.AllowIPs,
+					AvailabilityZone:       configAfterLoad.AvailabilityZone,
+					ConfigBucket:           configAfterLoad.ConfigBucket,
+					Deployment:             configAfterLoad.Deployment,
+					HostedZoneID:           configAfterLoad.HostedZoneID,
+					HostedZoneRecordPrefix: configAfterLoad.HostedZoneRecordPrefix,
+					Namespace:              configAfterLoad.Namespace,
+					Project:                configAfterLoad.Project,
+					PublicKey:              configAfterLoad.PublicKey,
+					RDSDefaultDatabaseName: configAfterLoad.RDSDefaultDatabaseName,
+					RDSInstanceClass:       configAfterLoad.RDSInstanceClass,
+					RDSPassword:            configAfterLoad.RDSPassword,
+					RDSUsername:            configAfterLoad.RDSUsername,
+					Region:                 configAfterLoad.Region,
+					SourceAccessIP:         configAfterLoad.SourceAccessIP,
+					TFStatePath:            configAfterLoad.TFStatePath,
 				}
 
 				tfInputVarsFactory.NewInputVarsReturns(terraformInputVars)
@@ -344,12 +345,13 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 				Expect(actions[0]).To(Equal("checking to see if config exists"))
 				Expect(actions[1]).To(Equal("loading config file"))
 				Expect(actions[2]).To(Equal("converting config.Config to TFInputVars"))
-				Expect(tfInputVarsFactory).To(HaveReceived("NewInputVars").With(configBeforeTerraform))
+				Expect(tfInputVarsFactory).To(HaveReceived("NewInputVars").With(configAfterLoad))
 				Expect(actions[3]).To(Equal("applying terraform"))
 				Expect(terraformCLI).To(HaveReceived("Apply").With(terraformInputVars, false))
 				Expect(actions[4]).To(Equal("initializing terraform outputs"))
 				Expect(terraformCLI).To(HaveReceived("BuildOutput").With(terraformInputVars))
 				Expect(actions[5]).To(Equal("updating config file"))
+				Expect(configClient).To(HaveReceived("Update").With(configAfterLoad))
 				Expect(actions[6]).To(Equal("generating cert ca: concourse-up-happymeal, cn: [99.99.99.99 192.168.0.6]"))
 				Expect(actions[7]).To(Equal("generating cert ca: concourse-up-happymeal, cn: [77.77.77.77]"))
 				Expect(actions[8]).To(Equal("deploying director"))
@@ -551,7 +553,7 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 			client := buildClient()
 			err := client.Deploy()
 			Expect(err).ToNot(HaveOccurred())
-			Expect(tfInputVarsFactory).To(HaveReceived("NewInputVars").With(configBeforeTerraform))
+			Expect(tfInputVarsFactory).To(HaveReceived("NewInputVars").With(configAfterLoad))
 		})
 
 		It("Loads terraform output", func() {
