@@ -5,7 +5,6 @@ package certs_test
 import (
 	. "github.com/EngineerBetter/concourse-up/certs"
 	"github.com/EngineerBetter/concourse-up/iaas/iaasfakes"
-	"github.com/EngineerBetter/concourse-up/testsupport"
 	"github.com/EngineerBetter/concourse-up/util"
 
 	. "github.com/onsi/ginkgo"
@@ -13,7 +12,7 @@ import (
 )
 
 var _ = Describe("Certs", func() {
-	var constructor = testsupport.NewFakeAcmeClient
+	var constructor = certsfakes.NewFakeAcmeClient
 	var provider = &iaasfakes.FakeProvider{}
 
 	It("Generates a cert for an IP address", func() {

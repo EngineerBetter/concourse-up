@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/EngineerBetter/concourse-up/bosh/boshfakes"
+	"github.com/EngineerBetter/concourse-up/certs/certsfakes"
 	"github.com/EngineerBetter/concourse-up/concourse/concoursefakes"
 	"github.com/EngineerBetter/concourse-up/config/configfakes"
 	"github.com/EngineerBetter/concourse-up/fly/flyfakes"
@@ -22,7 +23,6 @@ import (
 	"github.com/EngineerBetter/concourse-up/fly"
 	"github.com/EngineerBetter/concourse-up/iaas"
 	"github.com/EngineerBetter/concourse-up/terraform"
-	"github.com/EngineerBetter/concourse-up/testsupport"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/onsi/gomega/gbytes"
@@ -296,7 +296,7 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 				stdout,
 				stderr,
 				ipChecker,
-				testsupport.NewFakeAcmeClient,
+				certsfakes.NewFakeAcmeClient,
 				"some version",
 			)
 		}
@@ -316,7 +316,7 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 				stdout,
 				stderr,
 				ipChecker,
-				testsupport.NewFakeAcmeClient,
+				certsfakes.NewFakeAcmeClient,
 				"some version",
 			)
 		}
