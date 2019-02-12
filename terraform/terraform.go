@@ -18,6 +18,7 @@ type InputVars interface {
 	ConfigureTerraform(string) (string, error)
 }
 
+//go:generate counterfeiter . Outputs
 // Outputs holds IAAS specific terraform outputs
 type Outputs interface {
 	AssertValid() error
@@ -25,7 +26,8 @@ type Outputs interface {
 	Get(string) (string, error)
 }
 
-//CLIInterface is interface the abstraction of execCmd
+//go:generate counterfeiter . CLIInterface
+//CLIInterface is the abstraction of execCmd
 type CLIInterface interface {
 	Apply(InputVars, bool) error
 	Destroy(InputVars) error

@@ -6,11 +6,10 @@ import (
 	"github.com/EngineerBetter/concourse-up/concourse/concoursefakes"
 
 	"github.com/EngineerBetter/concourse-up/fly/flyfakes"
-	"io"
-	"reflect"
-
 	"github.com/EngineerBetter/concourse-up/terraform/terraformfakes"
 	"github.com/xenolf/lego/lego"
+	"io"
+	"reflect"
 
 	"github.com/EngineerBetter/concourse-up/bosh"
 	"github.com/EngineerBetter/concourse-up/certs"
@@ -230,35 +229,33 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 				return true, nil
 			},
 		}
-		terraformCLI := &testsupport.FakeCLI{
-			FakeIAAS: func(name iaas.Name) (terraform.Outputs, error) {
-				fakeMetadata := &testsupport.FakeIAASMetadata{
-					FakeGet: func(key string) (string, error) {
-						mm := reflect.ValueOf(&terraformMetadata)
-						m := mm.Elem()
-						mv := m.FieldByName(key)
-						if !mv.IsValid() {
-							return "", errors.New(key + " key not found")
-						}
-						return mv.String(), nil
-					},
+		terraformCLI := &terraformfakes.FakeCLIInterface{}
+		terraformCLI.OutputsForStub = func(name iaas.Name) (terraform.Outputs, error) {
+			fakeMetadata := &terraformfakes.FakeOutputs{}
+			fakeMetadata.GetStub = func(key string) (string, error) {
+				mm := reflect.ValueOf(&terraformMetadata)
+				m := mm.Elem()
+				mv := m.FieldByName(key)
+				if !mv.IsValid() {
+					return "", errors.New(key + " key not found")
 				}
-				return fakeMetadata, nil
-			},
-			FakeApply: func(inputVars terraform.InputVars, dryrun bool) error {
-				Expect(dryrun).To(BeFalse())
+				return mv.String(), nil
+			}
 
-				actions = append(actions, "applying terraform")
-				return nil
-			},
-			FakeDestroy: func(conf terraform.InputVars) error {
-				actions = append(actions, "destroying terraform")
-				return nil
-			},
-			FakeBuildOutput: func(conf terraform.InputVars, outputs terraform.Outputs) error {
-				actions = append(actions, "initializing terraform outputs")
-				return nil
-			},
+			return fakeMetadata, nil
+		}
+		terraformCLI.ApplyStub = func(inputVars terraform.InputVars, dryrun bool) error {
+			Expect(dryrun).To(BeFalse())
+			actions = append(actions, "applying terraform")
+			return nil
+		}
+		terraformCLI.DestroyStub = func(conf terraform.InputVars) error {
+			actions = append(actions, "destroying terraform")
+			return nil
+		}
+		terraformCLI.BuildOutputStub = func(conf terraform.InputVars, outputs terraform.Outputs) error {
+			actions = append(actions, "initializing terraform outputs")
+			return nil
 		}
 
 		boshClientFactory := func(config config.Config, outputs terraform.Outputs, director director.IClient, stdout, stderr io.Writer, provider iaas.Provider) (bosh.IClient, error) {

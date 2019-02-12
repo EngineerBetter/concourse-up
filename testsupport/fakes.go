@@ -1,11 +1,7 @@
 package testsupport
 
 import (
-	"bytes"
-
 	"github.com/xenolf/lego/lego"
-
-	"github.com/EngineerBetter/concourse-up/terraform"
 
 	"github.com/EngineerBetter/concourse-up/bosh"
 	"github.com/EngineerBetter/concourse-up/certs"
@@ -150,28 +146,6 @@ type FakeTerraformInputVars struct {
 	FakeBuild              func(data map[string]interface{}) error
 }
 
-// FakeIAASMetadata implements terraform.Outputs for testing
-type FakeIAASMetadata struct {
-	FakeAssertValid func() error
-	FakeInit        func(*bytes.Buffer) error
-	FakeGet         func(string) (string, error)
-}
-
-// AssertValid delegates to FakeAssertValid which is dynamically set by the tests
-func (fakeIAASMetadata *FakeIAASMetadata) AssertValid() error {
-	return fakeIAASMetadata.FakeAssertValid()
-}
-
-// Init delegates to FakeInit which is dynamically set by the tests
-func (fakeIAASMetadata *FakeIAASMetadata) Init(data *bytes.Buffer) error {
-	return fakeIAASMetadata.FakeInit(data)
-}
-
-// Get delegates to FakeGet which is dynamically set by the tests
-func (fakeIAASMetadata *FakeIAASMetadata) Get(key string) (string, error) {
-	return fakeIAASMetadata.FakeGet(key)
-}
-
 // ConfigureTerraform delegates to FakeConfigureTerraform which is dynamically set by the tests
 func (fakeTerraformInputVars *FakeTerraformInputVars) ConfigureTerraform(config string) (string, error) {
 	return fakeTerraformInputVars.FakeConfigureTerraform(config)
@@ -180,34 +154,6 @@ func (fakeTerraformInputVars *FakeTerraformInputVars) ConfigureTerraform(config 
 // Build delegates to FakeBuild which is dynamically set by the tests
 func (fakeTerraformInputVars *FakeTerraformInputVars) Build(data map[string]interface{}) error {
 	return fakeTerraformInputVars.FakeBuild(data)
-}
-
-// FakeCLI implements terraform.CLI for testing
-type FakeCLI struct {
-	FakeIAAS        func(name iaas.Name) (terraform.Outputs, error)
-	FakeApply       func(conf terraform.InputVars, dryrun bool) error
-	FakeDestroy     func(conf terraform.InputVars) error
-	FakeBuildOutput func(conf terraform.InputVars, outputs terraform.Outputs) error
-}
-
-// IAAS delegates to FakeIAAS which is dynamically set by the tests
-func (client *FakeCLI) OutputsFor(name iaas.Name) (terraform.Outputs, error) {
-	return client.FakeIAAS(name)
-}
-
-// Apply delegates to FakeApply which is dynamically set by the tests
-func (client *FakeCLI) Apply(conf terraform.InputVars, dryrun bool) error {
-	return client.FakeApply(conf, dryrun)
-}
-
-// Destroy delegates to FakeDestroy which is dynamically set by the tests
-func (client *FakeCLI) Destroy(conf terraform.InputVars) error {
-	return client.FakeDestroy(conf)
-}
-
-// BuildOutput delegates to FakeBuildOutput which is dynamically set by the tests
-func (client *FakeCLI) BuildOutput(conf terraform.InputVars, outputs terraform.Outputs) error {
-	return client.FakeBuildOutput(conf, outputs)
 }
 
 // FakeAWSClient implements iaas.IClient for testing
