@@ -3,6 +3,7 @@ package concourse_test
 import (
 	"errors"
 	"fmt"
+	"github.com/EngineerBetter/concourse-up/bosh/boshfakes"
 	"github.com/EngineerBetter/concourse-up/concourse/concoursefakes"
 
 	"github.com/EngineerBetter/concourse-up/fly/flyfakes"
@@ -251,28 +252,29 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 		}
 
 		boshClientFactory := func(config config.Config, outputs terraform.Outputs, director director.IClient, stdout, stderr io.Writer, provider iaas.Provider) (bosh.IClient, error) {
-			return &testsupport.FakeBoshClient{
-				FakeDeploy: func(stateFileBytes, credsFileBytes []byte, detach bool) ([]byte, []byte, error) {
-					if detach {
-						actions = append(actions, "deploying director in self-update mode")
-					} else {
-						actions = append(actions, "deploying director")
-					}
-					return nil, exampleDirectorCreds, nil
-				},
-				FakeDelete: func([]byte) ([]byte, error) {
-					actions = append(actions, "deleting director")
-					return nil, deleteBoshDirectorError
-				},
-				FakeCleanup: func() error {
-					actions = append(actions, "cleaning up bosh init")
-					return nil
-				},
-				FakeInstances: func() ([]bosh.Instance, error) {
-					actions = append(actions, "listing bosh instances")
-					return nil, nil
-				},
-			}, nil
+			client := &boshfakes.FakeIClient{}
+			client.DeployStub = func(stateFileBytes, credsFileBytes []byte, detach bool) ([]byte, []byte, error) {
+				if detach {
+					actions = append(actions, "deploying director in self-update mode")
+				} else {
+					actions = append(actions, "deploying director")
+				}
+				return nil, exampleDirectorCreds, nil
+			}
+			client.DeleteStub = func([]byte) ([]byte, error) {
+				actions = append(actions, "deleting director")
+				return nil, deleteBoshDirectorError
+			}
+			client.CleanupStub = func() error {
+				actions = append(actions, "cleaning up bosh init")
+				return nil
+			}
+			client.InstancesStub = func() ([]bosh.Instance, error) {
+				actions = append(actions, "listing bosh instances")
+				return nil, nil
+			}
+
+			return client, nil
 		}
 
 		ipChecker = func() (string, error) {

@@ -3,7 +3,6 @@ package testsupport
 import (
 	"github.com/xenolf/lego/lego"
 
-	"github.com/EngineerBetter/concourse-up/bosh"
 	"github.com/EngineerBetter/concourse-up/certs"
 	"github.com/EngineerBetter/concourse-up/config"
 	"github.com/EngineerBetter/concourse-up/iaas"
@@ -210,52 +209,6 @@ func (client *FakeConfigClient) NewConfig() config.Config {
 
 func (client *FakeConfigClient) ConfigExists() (bool, error) {
 	return client.FakeConfigExists()
-}
-
-// FakeBoshClient implements bosh.IClient for testing
-type FakeBoshClient struct {
-	FakeDeploy    func([]byte, []byte, bool) ([]byte, []byte, error)
-	FakeDelete    func([]byte) ([]byte, error)
-	FakeCleanup   func() error
-	FakeInstances func() ([]bosh.Instance, error)
-	FakeCreateEnv func([]byte, []byte, string) ([]byte, []byte, error)
-	FakeRecreate  func() error
-	FakeLocks     func() ([]byte, error)
-}
-
-// Deploy delegates to FakeDeploy which is dynamically set by the tests
-func (client *FakeBoshClient) Deploy(stateFileBytes, credsFileBytes []byte, detach bool) ([]byte, []byte, error) {
-	return client.FakeDeploy(stateFileBytes, credsFileBytes, detach)
-}
-
-// Delete delegates to FakeDelete which is dynamically set by the tests
-func (client *FakeBoshClient) Delete(stateFileBytes []byte) ([]byte, error) {
-	return client.FakeDelete(stateFileBytes)
-}
-
-// Cleanup delegates to FakeCleanup which is dynamically set by the tests
-func (client *FakeBoshClient) Cleanup() error {
-	return client.FakeCleanup()
-}
-
-// Instances delegates to FakeInstances which is dynamically set by the tests
-func (client *FakeBoshClient) Instances() ([]bosh.Instance, error) {
-	return client.FakeInstances()
-}
-
-// CreateEnv delegates to FakeCreateEnv which is dynamically set by the tests
-func (client *FakeBoshClient) CreateEnv(state, creds []byte, customOps string) ([]byte, []byte, error) {
-	return client.FakeCreateEnv(state, creds, customOps)
-}
-
-// Recreate delegates to FakeRecreate which is dynamically set by the tests
-func (client *FakeBoshClient) Recreate() error {
-	return client.FakeRecreate()
-}
-
-// Locks delegates to FakeLocks which is dynamically set by the tests
-func (client *FakeBoshClient) Locks() ([]byte, error) {
-	return client.FakeLocks()
 }
 
 // NewFakeAcmeClient returns a new FakeAcmeClient

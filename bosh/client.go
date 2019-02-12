@@ -20,6 +20,7 @@ const StateFilename = "director-state.json"
 // CredsFilename is default name for bosh-init creds file
 const CredsFilename = "director-creds.yml"
 
+//go:generate counterfeiter . IClient
 // IClient is a client for performing bosh-init commands
 type IClient interface {
 	Deploy([]byte, []byte, bool) ([]byte, []byte, error)
