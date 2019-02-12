@@ -4,7 +4,6 @@ import (
 	"github.com/xenolf/lego/lego"
 
 	"github.com/EngineerBetter/concourse-up/certs"
-	"github.com/EngineerBetter/concourse-up/config"
 	"github.com/EngineerBetter/concourse-up/iaas"
 )
 
@@ -153,62 +152,6 @@ func (fakeTerraformInputVars *FakeTerraformInputVars) ConfigureTerraform(config 
 // Build delegates to FakeBuild which is dynamically set by the tests
 func (fakeTerraformInputVars *FakeTerraformInputVars) Build(data map[string]interface{}) error {
 	return fakeTerraformInputVars.FakeBuild(data)
-}
-
-// FakeConfigClient implements config.IClient for testing
-type FakeConfigClient struct {
-	FakeLoad         func() (config.Config, error)
-	FakeUpdate       func(config.Config) error
-	FakeStoreAsset   func(filename string, contents []byte) error
-	FakeLoadAsset    func(filename string) ([]byte, error)
-	FakeDeleteAsset  func(filename string) error
-	FakeDeleteAll    func(config config.Config) error
-	FakeHasAsset     func(filename string) (bool, error)
-	FakeNewConfig    func() config.Config
-	FakeConfigExists func() (bool, error)
-}
-
-// Load delegates to FakeLoad which is dynamically set by the tests
-func (client *FakeConfigClient) Load() (config.Config, error) {
-	return client.FakeLoad()
-}
-
-// Update delegates to FakeUpdate which is dynamically set by the tests
-func (client *FakeConfigClient) Update(config config.Config) error {
-	return client.FakeUpdate(config)
-}
-
-// StoreAsset delegates to FakeStoreAsset which is dynamically set by the tests
-func (client *FakeConfigClient) StoreAsset(filename string, contents []byte) error {
-	return client.FakeStoreAsset(filename, contents)
-}
-
-// LoadAsset delegates to FakeLoadAsset which is dynamically set by the tests
-func (client *FakeConfigClient) LoadAsset(filename string) ([]byte, error) {
-	return client.FakeLoadAsset(filename)
-}
-
-// DeleteAsset delegates to FakeDeleteAsset which is dynamically set by the tests
-func (client *FakeConfigClient) DeleteAsset(filename string) error {
-	return client.FakeDeleteAsset(filename)
-}
-
-// DeleteAll delegates to FakeDeleteAll which is dynamically set by the tests
-func (client *FakeConfigClient) DeleteAll(config config.Config) error {
-	return client.FakeDeleteAll(config)
-}
-
-// HasAsset delegates to FakeHasAsset which is dynamically set by the tests
-func (client *FakeConfigClient) HasAsset(filename string) (bool, error) {
-	return client.FakeHasAsset(filename)
-}
-
-func (client *FakeConfigClient) NewConfig() config.Config {
-	return client.NewConfig()
-}
-
-func (client *FakeConfigClient) ConfigExists() (bool, error) {
-	return client.FakeConfigExists()
 }
 
 // NewFakeAcmeClient returns a new FakeAcmeClient

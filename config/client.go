@@ -9,6 +9,7 @@ import (
 const terraformStateFileName = "terraform.tfstate"
 const configFilePath = "config.json"
 
+//go:generate counterfeiter . IClient
 type IClient interface {
 	Load() (Config, error)
 	DeleteAll(config Config) error

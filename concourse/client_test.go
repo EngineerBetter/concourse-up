@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/EngineerBetter/concourse-up/bosh/boshfakes"
 	"github.com/EngineerBetter/concourse-up/concourse/concoursefakes"
-
+	"github.com/EngineerBetter/concourse-up/config/configfakes"
 	"github.com/EngineerBetter/concourse-up/fly/flyfakes"
 	"github.com/EngineerBetter/concourse-up/iaas/iaasfakes"
 	"github.com/EngineerBetter/concourse-up/terraform/terraformfakes"
@@ -193,35 +193,32 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 
 		exampleDirectorCreds = []byte("atc_password: s3cret")
 
-		configClient := &testsupport.FakeConfigClient{
-			FakeLoad: func() (config.Config, error) {
-				actions = append(actions, "loading config file")
-				return configInBucket, nil
-			},
-			FakeDeleteAsset: func(filename string) error {
-				actions = append(actions, fmt.Sprintf("deleting config asset: %s", filename))
-				return nil
-			},
-			FakeUpdate: func(config config.Config) error {
-				actions = append(actions, "updating config file")
-				return nil
-			},
-			FakeStoreAsset: func(filename string, contents []byte) error {
-				actions = append(actions, fmt.Sprintf("storing config asset: %s", filename))
-				return nil
-			},
-			FakeHasAsset: func(filename string) (bool, error) {
-				return false, nil
-			},
-			FakeDeleteAll: func(config config.Config) error {
-				actions = append(actions, "deleting config")
-				return nil
-			},
-			FakeConfigExists: func() (bool, error) {
-				actions = append(actions, "checking to see if config exists")
-				return true, nil
-			},
+		configClient := &configfakes.FakeIClient{}
+		configClient.LoadStub = func() (config.Config, error) {
+			actions = append(actions, "loading config file")
+			return configInBucket, nil
 		}
+		configClient.DeleteAssetStub = func(filename string) error {
+			actions = append(actions, fmt.Sprintf("deleting config asset: %s", filename))
+			return nil
+		}
+		configClient.UpdateStub = func(config config.Config) error {
+			actions = append(actions, "updating config file")
+			return nil
+		}
+		configClient.StoreAssetStub = func(filename string, contents []byte) error {
+			actions = append(actions, fmt.Sprintf("storing config asset: %s", filename))
+			return nil
+		}
+		configClient.DeleteAllStub = func(config config.Config) error {
+			actions = append(actions, "deleting config")
+			return nil
+		}
+		configClient.ConfigExistsStub = func() (bool, error) {
+			actions = append(actions, "checking to see if config exists")
+			return true, nil
+		}
+
 		terraformCLI := &terraformfakes.FakeCLIInterface{}
 		terraformCLI.OutputsForStub = func(name iaas.Name) (terraform.Outputs, error) {
 			fakeMetadata := &terraformfakes.FakeOutputs{}
