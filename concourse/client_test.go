@@ -43,29 +43,6 @@ var _ = Describe("client", func() {
 	var tfInputVarsFactory *concoursefakes.FakeTFInputVarsFactory
 	var flyClient *flyfakes.FakeIClient
 
-	type TerraformMetadata struct {
-		ATCPublicIP              string
-		ATCSecurityGroupID       string
-		BlobstoreBucket          string
-		BlobstoreSecretAccessKey string
-		BlobstoreUserAccessKeyID string
-		BoshDBAddress            string
-		BoshDBPort               string
-		BoshSecretAccessKey      string
-		BoshUserAccessKeyID      string
-		DirectorKeyPair          string
-		DirectorPublicIP         string
-		DirectorSecurityGroupID  string
-		NatGatewayIP             string
-		PrivateSubnetID          string
-		PublicSubnetID           string
-		VMsSecurityGroupID       string
-		VPCID                    string
-		NetworkCIDR              string
-		PublicCIDR               string
-		PrivateCIDR              string
-	}
-
 	var setupFakeAwsProvider = func() *iaasfakes.FakeProvider {
 		provider := &iaasfakes.FakeProvider{}
 		provider.DBTypeReturns("db.t2.small")
@@ -142,7 +119,7 @@ var _ = Describe("client", func() {
 		return configClient
 	}
 
-	var setupFakeTerraformCLI = func(terraformMetadata TerraformMetadata) *terraformfakes.FakeCLIInterface {
+	var setupFakeTerraformCLI = func(terraformMetadata terraform.AWSOutputs) *terraformfakes.FakeCLIInterface {
 		terraformCLI := &terraformfakes.FakeCLIInterface{}
 		terraformCLI.OutputsForStub = func(name iaas.Name) (terraform.Outputs, error) {
 			fakeMetadata := &terraformfakes.FakeOutputs{}
@@ -153,7 +130,7 @@ var _ = Describe("client", func() {
 				if !mv.IsValid() {
 					return "", errors.New(key + " key not found")
 				}
-				return mv.String(), nil
+				return mv.FieldByName("Value").String(), nil
 			}
 
 			return fakeMetadata, nil
@@ -199,24 +176,24 @@ var _ = Describe("client", func() {
 			DBSizeIsSet: false,
 		}
 
-		terraformMetadata := TerraformMetadata{
-			ATCPublicIP:              "77.77.77.77",
-			ATCSecurityGroupID:       "sg-999",
-			BlobstoreBucket:          "blobs.aws.com",
-			BlobstoreSecretAccessKey: "abc123",
-			BlobstoreUserAccessKeyID: "abc123",
-			BoshDBAddress:            "rds.aws.com",
-			BoshDBPort:               "5432",
-			BoshSecretAccessKey:      "abc123",
-			BoshUserAccessKeyID:      "abc123",
-			DirectorKeyPair:          "-- KEY --",
-			DirectorPublicIP:         "99.99.99.99",
-			DirectorSecurityGroupID:  "sg-123",
-			NatGatewayIP:             "88.88.88.88",
-			PrivateSubnetID:          "sn-private-123",
-			PublicSubnetID:           "sn-public-123",
-			VMsSecurityGroupID:       "sg-456",
-			VPCID:                    "vpc-112233",
+		terraformMetadata := terraform.AWSOutputs{
+			ATCPublicIP:              terraform.MetadataStringValue{Value: "77.77.77.77"},
+			ATCSecurityGroupID:       terraform.MetadataStringValue{Value: "sg-999"},
+			BlobstoreBucket:          terraform.MetadataStringValue{Value: "blobs.aws.com"},
+			BlobstoreSecretAccessKey: terraform.MetadataStringValue{Value: "abc123"},
+			BlobstoreUserAccessKeyID: terraform.MetadataStringValue{Value: "abc123"},
+			BoshDBAddress:            terraform.MetadataStringValue{Value: "rds.aws.com"},
+			BoshDBPort:               terraform.MetadataStringValue{Value: "5432"},
+			BoshSecretAccessKey:      terraform.MetadataStringValue{Value: "abc123"},
+			BoshUserAccessKeyID:      terraform.MetadataStringValue{Value: "abc123"},
+			DirectorKeyPair:          terraform.MetadataStringValue{Value: "-- KEY --"},
+			DirectorPublicIP:         terraform.MetadataStringValue{Value: "99.99.99.99"},
+			DirectorSecurityGroupID:  terraform.MetadataStringValue{Value: "sg-123"},
+			NatGatewayIP:             terraform.MetadataStringValue{Value: "88.88.88.88"},
+			PrivateSubnetID:          terraform.MetadataStringValue{Value: "sn-private-123"},
+			PublicSubnetID:           terraform.MetadataStringValue{Value: "sn-public-123"},
+			VMsSecurityGroupID:       terraform.MetadataStringValue{Value: "sg-456"},
+			VPCID:                    terraform.MetadataStringValue{Value: "vpc-112233"},
 		}
 
 		deleteBoshDirectorError = nil
