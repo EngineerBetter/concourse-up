@@ -102,33 +102,32 @@ disk_types:
     type: pd-ssd
 
 networks:
-  - name: public
-    type: manual
-    subnets:
-      - range: {{ .PublicCIDR }}
-        gateway: {{ .PublicCIDRGateway }}
-        dns:
-          - {{ .PublicCIDRDNS }}
-        az: z1
-        static: {{ .PublicCIDRStatic }} // [10.0.0.6, 10.0.0.7]
-        reserved: {{ .PublicCIDRReserved }} // [10.0.0.1-10.0.0.5]
-      cloud_properties:
-        network_name: {{ .Network }}
-        subnetwork_name: {{ .PublicSubnetwork }}
-  - name: private
-    type: manual
-    subnets:
-      - range: {{ .PrivateCIDR }}
-        gateway: {{ .PrivateCIDRGateway }} // 10.0.1.1
-        dns: {{ .PrivateCIDRDNS }} // [10.0.0.2]
-        az: z1
-        reserved: {{ .PrivateCIDRReserved }} // [10.0.1.1-10.0.1.5]
-      cloud_properties:
-        network_name: {{ .Network }}
-        subnetwork_name: {{ .PrivateSubnetwork }}
-        tags: [no-ip]
-  - name: vip
-    type: vip
+- name: public
+  type: manual
+  subnets:
+  - range: {{ .PublicCIDR }}
+    gateway: {{ .PublicCIDRGateway }}
+    dns: {{ .PublicCIDRDNS }}
+    az: z1
+    static: {{ .PublicCIDRStatic }}
+    reserved: {{ .PublicCIDRReserved }}
+  cloud_properties:
+    network_name: {{ .Network }}
+    subnetwork_name: {{ .PublicSubnetwork }}
+- name: private
+  type: manual
+  subnets:
+  - range: {{ .PrivateCIDR }}
+    gateway: {{ .PrivateCIDRGateway }}
+    dns: {{ .PrivateCIDRDNS }}
+    az: z1
+    reserved: {{ .PrivateCIDRReserved }}
+  cloud_properties:
+    network_name: {{ .Network }}
+    subnetwork_name: {{ .PrivateSubnetwork }}
+    tags: [no-ip]
+- name: vip
+  type: vip
 
 vm_extensions:
 - name: atc

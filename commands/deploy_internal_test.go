@@ -331,6 +331,39 @@ func Test_validateCidrRanges(t *testing.T) {
 			wantErr:       true,
 			desiredErrMsg: "error validating CIDR ranges - public-subnet-range must not overlap private-network-range",
 		},
+		{
+			name: "errs if network cidr range is not big enough (16 usable IPs)",
+			args: args{
+				provider:    awsProvider,
+				networkCidr: "10.0.0.0/28",
+				privateCidr: "10.0.0.0/32",
+				publicCidr:  "10.0.0.0/24",
+			},
+			wantErr:       true,
+			desiredErrMsg: "error validating CIDR ranges - vpc-network-range is not big enough, at least 16 usable IPs needed.",
+		},
+		{
+			name: "errs if private cidr range is not big enough (8 usable IPs)",
+			args: args{
+				provider:    awsProvider,
+				networkCidr: "10.0.0.0/16",
+				privateCidr: "10.0.0.0/32",
+				publicCidr:  "10.0.0.0/24",
+			},
+			wantErr:       true,
+			desiredErrMsg: "error validating CIDR ranges - private-subnet-range is not big enough, at least 8 usable IPs needed.",
+		},
+		{
+			name: "errs if public cidr range is not big enough  (8 usable IPs)",
+			args: args{
+				provider:    awsProvider,
+				networkCidr: "10.0.0.0/16",
+				privateCidr: "10.0.0.0/24",
+				publicCidr:  "10.0.0.0/32",
+			},
+			wantErr:       true,
+			desiredErrMsg: "error validating CIDR ranges - public-subnet-range is not big enough, at least 8 usable IPs needed.",
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

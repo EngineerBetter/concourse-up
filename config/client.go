@@ -216,7 +216,7 @@ func (client *Client) LoadOrCreate(deployArgs *deploy.Args) (Config, bool, bool,
 	}
 
 	if newConfigCreated {
-		if deployArgs.NetworkCIDRIsSet && deployArgs.PublicCIDRIsSet && deployArgs.PrivateCIDRIsSet {
+		if deployArgs.PublicCIDRIsSet && deployArgs.PrivateCIDRIsSet {
 			config.NetworkCIDR = deployArgs.NetworkCIDR
 			config.PublicCIDR = deployArgs.PublicCIDR
 			config.PrivateCIDR = deployArgs.PrivateCIDR

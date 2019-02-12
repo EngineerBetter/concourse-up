@@ -18,33 +18,31 @@ import (
 
 // Environment holds all the parameters GCP IAAS needs
 type Environment struct {
-	InternalCIDR       string
-	InternalGW         string
-	InternalIP         string
-	DirectorName       string
-	Zone               string
-	Network            string
-	PublicSubnetwork   string
-	PrivateSubnetwork  string
-	Tags               string
-	ProjectID          string
-	GcpCredentialsJSON string
-	ExternalIP         string
-	Spot               bool
-	PublicKey          string
-	CustomOperations   string
-	PublicCIDR string
-	PublicCIDRGateway string
-	PublicCIDRDNS string
-	PublicCIDRStatic  string
+	InternalCIDR        string
+	InternalGW          string
+	InternalIP          string
+	DirectorName        string
+	Zone                string
+	Network             string
+	PublicSubnetwork    string
+	PrivateSubnetwork   string
+	Tags                string
+	ProjectID           string
+	GcpCredentialsJSON  string
+	ExternalIP          string
+	Spot                bool
+	PublicKey           string
+	CustomOperations    string
+	PublicCIDR          string
+	PublicCIDRGateway   string
+	PublicCIDRDNS       string
+	PublicCIDRStatic    string
 	PublicCIDRReserved  string
-	PrivateCIDR string
+	PrivateCIDR         string
 	PrivateCIDRGateway  string
-	PrivateCIDRDNS  string
-	PrivateCIDRReserved  string
-
+	PrivateCIDRDNS      string
+	PrivateCIDRReserved string
 }
-
 
 var allOperations = resource.GCPCPIOps + resource.GCPExternalIPOps + resource.GCPDirectorCustomOps + resource.GCPJumpboxUserOps
 
@@ -73,20 +71,20 @@ func (e Environment) ConfigureDirectorManifestCPI(manifest string) (string, erro
 }
 
 type gcpCloudConfigParams struct {
-	Zone              string
-	Spot              bool
-	PublicSubnetwork  string
-	PrivateSubnetwork string
-	Network           string
-	PublicCIDR string
-	PublicCIDRGateway string
-	PublicCIDRDNS string
-	PublicCIDRStatic  string
+	Zone                string
+	Spot                bool
+	PublicSubnetwork    string
+	PrivateSubnetwork   string
+	Network             string
+	PublicCIDR          string
+	PublicCIDRGateway   string
+	PublicCIDRDNS       string
+	PublicCIDRStatic    string
 	PublicCIDRReserved  string
-	PrivateCIDR string
+	PrivateCIDR         string
 	PrivateCIDRGateway  string
-	PrivateCIDRDNS  string
-	PrivateCIDRReserved  string
+	PrivateCIDRDNS      string
+	PrivateCIDRReserved string
 }
 
 // IAASCheck returns the IAAS provider
@@ -98,19 +96,19 @@ func (e Environment) IAASCheck() string {
 func (e Environment) ConfigureDirectorCloudConfig(cloudConfig string) (string, error) {
 
 	templateParams := gcpCloudConfigParams{
-		Zone:              e.Zone,
-		PublicSubnetwork:  e.PublicSubnetwork,
-		PrivateSubnetwork: e.PrivateSubnetwork,
-		Spot:              e.Spot,
-		Network:           e.Network,
-		PublicCIDR: e.PublicCIDR,
-		PublicCIDRGateway: e.PublicCIDRGateway,
-		PublicCIDRDNS: e.PublicCIDRDNS,
-		PublicCIDRStatic: e.PublicCIDRStatic,
-		PublicCIDRReserved: e.PublicCIDRReserved,
-		PrivateCIDR: e.PrivateCIDR,
-		PrivateCIDRGateway: e.PrivateCIDRGateway,
-		PrivateCIDRDNS: e.PrivateCIDRDNS,
+		Zone:                e.Zone,
+		PublicSubnetwork:    e.PublicSubnetwork,
+		PrivateSubnetwork:   e.PrivateSubnetwork,
+		Spot:                e.Spot,
+		Network:             e.Network,
+		PublicCIDR:          e.PublicCIDR,
+		PublicCIDRGateway:   e.PublicCIDRGateway,
+		PublicCIDRDNS:       e.PublicCIDRDNS,
+		PublicCIDRStatic:    e.PublicCIDRStatic,
+		PublicCIDRReserved:  e.PublicCIDRReserved,
+		PrivateCIDR:         e.PrivateCIDR,
+		PrivateCIDRGateway:  e.PrivateCIDRGateway,
+		PrivateCIDRDNS:      e.PrivateCIDRDNS,
 		PrivateCIDRReserved: e.PrivateCIDRReserved,
 	}
 
