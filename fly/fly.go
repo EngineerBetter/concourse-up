@@ -23,7 +23,7 @@ import (
 // ConcourseUpVersion is a compile-time variable set with -ldflags
 var ConcourseUpVersion = "COMPILE_TIME_VARIABLE_fly_concourse_up_version"
 
-// IClient represents an interface for a client
+//go:generate counterfeiter . IClient
 type IClient interface {
 	CanConnect() (bool, error)
 	SetDefaultPipeline(config config.Config, allowFlyVersionDiscrepancy bool) error

@@ -4,6 +4,8 @@ import (
 	"errors"
 	"fmt"
 	"github.com/EngineerBetter/concourse-up/concourse/concoursefakes"
+
+	"github.com/EngineerBetter/concourse-up/fly/flyfakes"
 	"io"
 	"reflect"
 
@@ -38,7 +40,7 @@ var _ = Describe("client", func() {
 	var ipChecker func() (string, error)
 	var exampleDirectorCreds []byte
 	var tfInputVarsFactory *concoursefakes.FakeTFInputVarsFactory
-	var fakeFlyClient *testsupport.FakeFlyClient
+	var flyClient *flyfakes.FakeIClient
 
 	type TerraformMetadata struct {
 		ATCPublicIP              string
@@ -119,17 +121,10 @@ var _ = Describe("client", func() {
 			},
 		}
 
-		fakeFlyClient = &testsupport.FakeFlyClient{
-			FakeSetDefaultPipeline: func(config config.Config, allowFlyVersionDiscrepancy bool) error {
-				actions = append(actions, "setting default pipeline")
-				return nil
-			},
-			FakeCleanup: func() error {
-				return nil
-			},
-			FakeCanConnect: func() (bool, error) {
-				return false, nil
-			},
+		flyClient = &flyfakes.FakeIClient{}
+		flyClient.SetDefaultPipelineStub = func(config config.Config, allowFlyVersionDiscrepancy bool) error {
+			actions = append(actions, "setting default pipeline")
+			return nil
 		}
 
 		args = &deploy.Args{
@@ -305,7 +300,7 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 				tfInputVarsFactory,
 				boshClientFactory,
 				func(iaas.Provider, fly.Credentials, io.Writer, io.Writer, []byte) (fly.IClient, error) {
-					return fakeFlyClient, nil
+					return flyClient, nil
 				},
 				certGenerator,
 				configClient,
@@ -325,7 +320,7 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 				tfInputVarsFactory,
 				boshClientFactory,
 				func(iaas.Provider, fly.Credentials, io.Writer, io.Writer, []byte) (fly.IClient, error) {
-					return fakeFlyClient, nil
+					return flyClient, nil
 				},
 				certGenerator,
 				configClient,
@@ -421,7 +416,7 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 
 		Context("When running in self-update mode and the concourse is already deployed", func() {
 			It("Sets the default pipeline, before deploying the bosh director", func() {
-				fakeFlyClient.FakeCanConnect = func() (bool, error) {
+				flyClient.CanConnectStub = func() (bool, error) {
 					return true, nil
 				}
 				args.SelfUpdate = true

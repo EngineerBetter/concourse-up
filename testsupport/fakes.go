@@ -344,28 +344,6 @@ func (client *FakeAWSClient) Choose(c iaas.Choice) interface{} {
 	return c.AWS
 }
 
-// FakeFlyClient implements fly.IClient for testing
-type FakeFlyClient struct {
-	FakeSetDefaultPipeline func(config config.Config, allowFlyVersionDiscrepancy bool) error
-	FakeCleanup            func() error
-	FakeCanConnect         func() (bool, error)
-}
-
-// SetDefaultPipeline delegates to FakeSetDefaultPipeline which is dynamically set by the tests
-func (client *FakeFlyClient) SetDefaultPipeline(config config.Config, allowFlyVersionDiscrepancy bool) error {
-	return client.FakeSetDefaultPipeline(config, allowFlyVersionDiscrepancy)
-}
-
-// Cleanup delegates to FakeCleanup which is dynamically set by the tests
-func (client *FakeFlyClient) Cleanup() error {
-	return client.FakeCleanup()
-}
-
-// CanConnect delegates to FakeCanConnect which is dynamically set by the tests
-func (client *FakeFlyClient) CanConnect() (bool, error) {
-	return client.FakeCanConnect()
-}
-
 // FakeConfigClient implements config.IClient for testing
 type FakeConfigClient struct {
 	FakeLoad         func() (config.Config, error)
