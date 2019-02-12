@@ -26,18 +26,21 @@ require (
 	github.com/mattn/go-isatty v0.0.3 // indirect
 	github.com/miekg/dns v1.0.3 // indirect
 	github.com/nu7hatch/gouuid v0.0.0-20131221200532-179d4d0c4d8d // indirect
-	github.com/onsi/ginkgo v1.4.0
-	github.com/onsi/gomega v1.3.0
+	github.com/onsi/ginkgo v1.7.0
+	github.com/onsi/gomega v1.4.3
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/smartystreets/assertions v0.0.0-20180803164922-886ec427f6b9 // indirect
 	github.com/smartystreets/goconvey v0.0.0-20180222194500-ef6db91d284a // indirect
 	github.com/square/certstrap v1.1.1
 	github.com/stretchr/testify v1.2.2
+	github.com/tjarratt/gcounterfeiter v0.0.0-20160901063240-8a4c307ac402
 	github.com/xenolf/lego v2.1.0+incompatible
 	go.opencensus.io v0.17.0 // indirect
 	golang.org/x/crypto v0.0.0-20180111101123-5f55bce93ad2
-	golang.org/x/net v0.0.0-20180906233101-161cd47e91fd
+	golang.org/x/net v0.0.0-20190206173232-65e2d4e15006
 	golang.org/x/oauth2 v0.0.0-20181017192945-9dcd33a902f4
+	golang.org/x/sync v0.0.0-20181221193216-37e7f081c4d4 // indirect
+	golang.org/x/sys v0.0.0-20190209173611-3b5209105503 // indirect
 	google.golang.org/api v0.0.0-20181114235557-83a9d304b1e6
 	google.golang.org/genproto v0.0.0-20181016170114-94acd270e44e // indirect
 	google.golang.org/grpc v1.15.0 // indirect
@@ -45,5 +48,5 @@ require (
 	gopkg.in/ini.v1 v1.38.1 // indirect
 	gopkg.in/square/go-jose.v2 v2.2.2 // indirect
 	gopkg.in/urfave/cli.v1 v1.20.0
-	gopkg.in/yaml.v2 v2.0.0
+	gopkg.in/yaml.v2 v2.2.2
 )

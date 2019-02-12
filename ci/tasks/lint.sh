@@ -10,6 +10,7 @@ mv concourse-up-ops/* "$GOPATH/src/github.com/EngineerBetter/concourse-up-ops"
 cd "$GOPATH/src/github.com/EngineerBetter/concourse-up" || exit 1
 
 go get -u github.com/mattn/go-bindata/...
+go get -u github.com/maxbrunsfeld/counterfeiter
 go generate github.com/EngineerBetter/concourse-up/...
 gometalinter \
 --disable-all \

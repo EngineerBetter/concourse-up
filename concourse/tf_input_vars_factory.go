@@ -7,6 +7,7 @@ import (
 	"github.com/EngineerBetter/concourse-up/terraform"
 )
 
+//go:generate counterfeiter . TFInputVarsFactory
 type TFInputVarsFactory interface {
 	NewInputVars(conf config.Config) terraform.InputVars
 }

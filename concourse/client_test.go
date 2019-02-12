@@ -3,6 +3,7 @@ package concourse_test
 import (
 	"errors"
 	"fmt"
+	"github.com/EngineerBetter/concourse-up/concourse/concoursefakes"
 	"io"
 	"reflect"
 
@@ -22,6 +23,7 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/onsi/gomega/gbytes"
+	. "github.com/tjarratt/gcounterfeiter"
 )
 
 var _ = Describe("client", func() {
@@ -32,9 +34,11 @@ var _ = Describe("client", func() {
 	var stderr *gbytes.Buffer
 	var deleteBoshDirectorError error
 	var args *deploy.Args
-	var exampleConfig config.Config
+	var configInBucket config.Config
 	var ipChecker func() (string, error)
 	var exampleDirectorCreds []byte
+	var tfInputVarsFactory *concoursefakes.FakeTFInputVarsFactory
+	var fakeFlyClient *testsupport.FakeFlyClient
 
 	type TerraformMetadata struct {
 		ATCPublicIP              string
@@ -60,72 +64,74 @@ var _ = Describe("client", func() {
 	}
 	var terraformMetadata TerraformMetadata
 
-	certGenerator := func(c func(u *certs.User) (*lego.Client, error), caName string, provider iaas.Provider, ip ...string) (*certs.Certs, error) {
-		actions = append(actions, fmt.Sprintf("generating cert ca: %s, cn: %s", caName, ip))
-		return &certs.Certs{
-			CACert: []byte("----EXAMPLE CERT----"),
-		}, nil
-	}
-
-	awsClient := &testsupport.FakeAWSClient{
-		FakeDBType: func(size string) string {
-			return "db.t2.small"
-		},
-		FakeFindLongestMatchingHostedZone: func(subdomain string) (string, string, error) {
-			if subdomain == "ci.google.com" {
-				return "google.com", "ABC123", nil
-			}
-
-			return "", "", errors.New("hosted zone not found")
-		},
-		FakeCheckForWhitelistedIP: func(ip, securityGroup string) (bool, error) {
-			actions = append(actions, "checking security group for IP")
-			if ip == "1.2.3.4" {
-				return false, nil
-			}
-			return true, nil
-		},
-		FakeDeleteVMsInVPC: func(vpcID string) ([]string, error) {
-			actions = append(actions, fmt.Sprintf("deleting vms in %s", vpcID))
-			return nil, nil
-		},
-		FakeDeleteVolumes: func(volumesToDelete []string, deleteVolume func(ec2Client iaas.IEC2, volumeID *string) error) error {
-			return nil
-		},
-		FakeRegion: func() string {
-			return "eu-west-1"
-		},
-	}
-
-	tfInputVarsFactory := &terraformfakes.FakeTFInputVarsFactory{
-		NewInputVarsFn: func(c config.Config) terraform.InputVars {
-			actions = append(actions, "converting config.Config to TFInputVars")
-			return &testsupport.FakeTerraformInputVars{
-				Key: "spaghetti",
-			}
-		},
-	}
-
-	otherRegionClient := &testsupport.FakeAWSClient{
-		FakeRegion: func() string {
-			return "eu-central-1"
-		},
-	}
-
-	fakeFlyClient := &testsupport.FakeFlyClient{
-		FakeSetDefaultPipeline: func(config config.Config, allowFlyVersionDiscrepancy bool) error {
-			actions = append(actions, "setting default pipeline")
-			return nil
-		},
-		FakeCleanup: func() error {
-			return nil
-		},
-		FakeCanConnect: func() (bool, error) {
-			return false, nil
-		},
-	}
-
 	BeforeEach(func() {
+		certGenerator := func(c func(u *certs.User) (*lego.Client, error), caName string, provider iaas.Provider, ip ...string) (*certs.Certs, error) {
+			actions = append(actions, fmt.Sprintf("generating cert ca: %s, cn: %s", caName, ip))
+			return &certs.Certs{
+				CACert: []byte("----EXAMPLE CERT----"),
+			}, nil
+		}
+
+		awsClient := &testsupport.FakeAWSClient{
+			FakeDBType: func(size string) string {
+				return "db.t2.small"
+			},
+			FakeFindLongestMatchingHostedZone: func(subdomain string) (string, string, error) {
+				if subdomain == "ci.google.com" {
+					return "google.com", "ABC123", nil
+				}
+
+				return "", "", errors.New("hosted zone not found")
+			},
+			FakeCheckForWhitelistedIP: func(ip, securityGroup string) (bool, error) {
+				actions = append(actions, "checking security group for IP")
+				if ip == "1.2.3.4" {
+					return false, nil
+				}
+				return true, nil
+			},
+			FakeDeleteVMsInVPC: func(vpcID string) ([]string, error) {
+				actions = append(actions, fmt.Sprintf("deleting vms in %s", vpcID))
+				return nil, nil
+			},
+			FakeDeleteVolumes: func(volumesToDelete []string, deleteVolume func(ec2Client iaas.IEC2, volumeID *string) error) error {
+				return nil
+			},
+			FakeRegion: func() string {
+				return "eu-west-1"
+			},
+		}
+
+		tfInputVarsFactory = &concoursefakes.FakeTFInputVarsFactory{}
+
+		provider, err := iaas.New(iaas.AWS, "eu-west-1")
+		Expect(err).ToNot(HaveOccurred())
+		awsInputVarsFactory, err := concourse.NewTFInputVarsFactory(provider)
+		Expect(err).ToNot(HaveOccurred())
+		tfInputVarsFactory.NewInputVarsStub = func(i config.Config) terraform.InputVars {
+			actions = append(actions, "converting config.Config to TFInputVars")
+			return awsInputVarsFactory.NewInputVars(i)
+		}
+
+		otherRegionClient := &testsupport.FakeAWSClient{
+			FakeRegion: func() string {
+				return "eu-central-1"
+			},
+		}
+
+		fakeFlyClient = &testsupport.FakeFlyClient{
+			FakeSetDefaultPipeline: func(config config.Config, allowFlyVersionDiscrepancy bool) error {
+				actions = append(actions, "setting default pipeline")
+				return nil
+			},
+			FakeCleanup: func() error {
+				return nil
+			},
+			FakeCanConnect: func() (bool, error) {
+				return false, nil
+			},
+		}
+
 		args = &deploy.Args{
 			AllowIPs:    "0.0.0.0/0",
 			DBSize:      "small",
@@ -154,7 +160,7 @@ var _ = Describe("client", func() {
 
 		deleteBoshDirectorError = nil
 		actions = []string{}
-		exampleConfig = config.Config{
+		configInBucket = config.Config{
 			PublicKey: "example-public-key",
 			PrivateKey: `-----BEGIN RSA PRIVATE KEY-----
 MIIEpAIBAAKCAQEA2spClkDkFfy2c91Z7N3AImPf0v3o5OoqXUS6nE2NbV2bP/o7
@@ -203,7 +209,7 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 		configClient := &testsupport.FakeConfigClient{
 			FakeLoad: func() (config.Config, error) {
 				actions = append(actions, "loading config file")
-				return exampleConfig, nil
+				return configInBucket, nil
 			},
 			FakeDeleteAsset: func(filename string) error {
 				actions = append(actions, fmt.Sprintf("deleting config asset: %s", filename))
@@ -344,7 +350,7 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 				Expect(actions[1]).To(Equal("loading config file"))
 				Expect(actions[2]).To(Equal("converting config.Config to TFInputVars"))
 				Expect(actions[3]).To(Equal("applying terraform"))
-				Expect(actions[4]).To(Equal("initializing terraform metadata"))
+				Expect(actions[4]).To(Equal("initializing terraform outputs"))
 				Expect(actions[5]).To(Equal("updating config file"))
 				Expect(actions[6]).To(Equal("generating cert ca: concourse-up-happymeal, cn: [99.99.99.99 192.168.0.6]"))
 				Expect(actions[7]).To(Equal("generating cert ca: concourse-up-happymeal, cn: [77.77.77.77]"))
@@ -368,7 +374,7 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 
 		Context("When a custom domain is required", func() {
 			It("Prints a warning about adding a DNS record", func() {
-				exampleConfig.Domain = "ci.google.com"
+				configInBucket.Domain = "ci.google.com"
 
 				client := buildClient()
 				err := client.Deploy()
@@ -403,7 +409,7 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 
 		Context("When a custom domain is required", func() {
 			It("Generates certificates for that domain and not the public IP", func() {
-				exampleConfig.Domain = "ci.google.com"
+				configInBucket.Domain = "ci.google.com"
 
 				client := buildClient()
 				err := client.Deploy()
@@ -446,7 +452,7 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 
 		Context("When a custom cert is provided", func() {
 			It("Prints the correct domain and not suggest using --insecure", func() {
-				exampleConfig.Domain = "ci.google.com"
+				configInBucket.Domain = "ci.google.com"
 				args.TLSCert = "--- CERTIFICATE ---"
 				args.TLSKey = "--- KEY ---"
 
@@ -481,8 +487,7 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 			client := buildClient()
 			err := client.Destroy()
 			Expect(err).ToNot(HaveOccurred())
-
-			Expect(actions).To(ContainElement("converting config.Config to TFInputVars"))
+			Expect(tfInputVarsFactory).To(HaveReceived("NewInputVars").With(configInBucket))
 		})
 		It("Loads terraform output", func() {
 			client := buildClient()
@@ -544,12 +549,15 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 
 			Expect(actions).To(ContainElement("loading config file"))
 		})
-		It("Builds IAAS environment", func() {
+		It("calls TFInputVarsFactory, having populated AllowIPs and SourceAccessIPs", func() {
 			client := buildClient()
 			err := client.Deploy()
 			Expect(err).ToNot(HaveOccurred())
 
-			Expect(actions).To(ContainElement("converting config.Config to TFInputVars"))
+			expectedConfig := configInBucket
+			expectedConfig.AllowIPs = "\"0.0.0.0/0\""
+			expectedConfig.SourceAccessIP = "192.0.2.0"
+			Expect(tfInputVarsFactory).To(HaveReceived("NewInputVars").With(expectedConfig))
 		})
 
 		It("Loads terraform output", func() {

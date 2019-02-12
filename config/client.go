@@ -9,7 +9,6 @@ import (
 const terraformStateFileName = "terraform.tfstate"
 const configFilePath = "config.json"
 
-// IClient is an interface for the config file client
 type IClient interface {
 	Load() (Config, error)
 	DeleteAll(config Config) error
