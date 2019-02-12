@@ -100,7 +100,7 @@ func infoAction(c *cli.Context, infoArgs info.Args, provider iaas.Provider) erro
 }
 
 func buildInfoClient(name, version string, infoArgs info.Args, provider iaas.Provider) (*concourse.Client, error) {
-	terraformClient, err := terraform.New(terraform.DownloadTerraform())
+	terraformClient, err := terraform.New(provider.IAAS(), terraform.DownloadTerraform())
 	if err != nil {
 		return nil, err
 	}

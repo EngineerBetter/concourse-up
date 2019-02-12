@@ -69,11 +69,6 @@ func (client *Client) FetchInfo() (*Info, error) {
 		}
 	}
 
-	tfOutputs, err := client.tfCLI.OutputsFor(client.provider.IAAS())
-	if err != nil {
-		return nil, err
-	}
-
 	tfInputVars := client.tfInputVarsFactory.NewInputVars(conf)
 
 	switch client.provider.IAAS() {
@@ -83,7 +78,7 @@ func (client *Client) FetchInfo() (*Info, error) {
 		gatewayUser = "jumpbox"
 	}
 
-	err = client.tfCLI.BuildOutput(tfInputVars, tfOutputs)
+	tfOutputs, err := client.tfCLI.BuildOutput(tfInputVars)
 	if err != nil {
 		return nil, err
 	}

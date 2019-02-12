@@ -65,18 +65,14 @@ func (client *Client) Deploy() error {
 	conf.HostedZoneRecordPrefix = r.HostedZoneRecordPrefix
 	conf.Domain = r.Domain
 
-	tfOutputs, err := client.tfCLI.OutputsFor(client.provider.IAAS())
-	if err != nil {
-		return err
-	}
-
 	tfInputVars := client.tfInputVarsFactory.NewInputVars(conf)
 
 	err = client.tfCLI.Apply(tfInputVars, false)
 	if err != nil {
 		return err
 	}
-	err = client.tfCLI.BuildOutput(tfInputVars, tfOutputs)
+
+	tfOutputs, err := client.tfCLI.BuildOutput(tfInputVars)
 	if err != nil {
 		return err
 	}

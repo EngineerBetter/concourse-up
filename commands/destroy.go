@@ -84,7 +84,7 @@ func markSetFlags(c *cli.Context, destroyArgs destroy.Args) (destroy.Args, error
 }
 
 func buildDestroyClient(name, version string, destroyArgs destroy.Args, provider iaas.Provider) (*concourse.Client, error) {
-	terraformClient, err := terraform.New(terraform.DownloadTerraform())
+	terraformClient, err := terraform.New(provider.IAAS(), terraform.DownloadTerraform())
 	if err != nil {
 		return nil, err
 	}

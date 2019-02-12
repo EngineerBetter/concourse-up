@@ -4,7 +4,6 @@ package terraformfakes
 import (
 	"sync"
 
-	"github.com/EngineerBetter/concourse-up/iaas"
 	"github.com/EngineerBetter/concourse-up/terraform"
 )
 
@@ -21,17 +20,18 @@ type FakeCLIInterface struct {
 	applyReturnsOnCall map[int]struct {
 		result1 error
 	}
-	BuildOutputStub        func(terraform.InputVars, terraform.Outputs) error
+	BuildOutputStub        func(terraform.InputVars) (terraform.Outputs, error)
 	buildOutputMutex       sync.RWMutex
 	buildOutputArgsForCall []struct {
 		arg1 terraform.InputVars
-		arg2 terraform.Outputs
 	}
 	buildOutputReturns struct {
-		result1 error
+		result1 terraform.Outputs
+		result2 error
 	}
 	buildOutputReturnsOnCall map[int]struct {
-		result1 error
+		result1 terraform.Outputs
+		result2 error
 	}
 	DestroyStub        func(terraform.InputVars) error
 	destroyMutex       sync.RWMutex
@@ -43,19 +43,6 @@ type FakeCLIInterface struct {
 	}
 	destroyReturnsOnCall map[int]struct {
 		result1 error
-	}
-	OutputsForStub        func(iaas.Name) (terraform.Outputs, error)
-	outputsForMutex       sync.RWMutex
-	outputsForArgsForCall []struct {
-		arg1 iaas.Name
-	}
-	outputsForReturns struct {
-		result1 terraform.Outputs
-		result2 error
-	}
-	outputsForReturnsOnCall map[int]struct {
-		result1 terraform.Outputs
-		result2 error
 	}
 	invocations      map[string][][]interface{}
 	invocationsMutex sync.RWMutex
@@ -122,23 +109,22 @@ func (fake *FakeCLIInterface) ApplyReturnsOnCall(i int, result1 error) {
 	}{result1}
 }
 
-func (fake *FakeCLIInterface) BuildOutput(arg1 terraform.InputVars, arg2 terraform.Outputs) error {
+func (fake *FakeCLIInterface) BuildOutput(arg1 terraform.InputVars) (terraform.Outputs, error) {
 	fake.buildOutputMutex.Lock()
 	ret, specificReturn := fake.buildOutputReturnsOnCall[len(fake.buildOutputArgsForCall)]
 	fake.buildOutputArgsForCall = append(fake.buildOutputArgsForCall, struct {
 		arg1 terraform.InputVars
-		arg2 terraform.Outputs
-	}{arg1, arg2})
-	fake.recordInvocation("BuildOutput", []interface{}{arg1, arg2})
+	}{arg1})
+	fake.recordInvocation("BuildOutput", []interface{}{arg1})
 	fake.buildOutputMutex.Unlock()
 	if fake.BuildOutputStub != nil {
-		return fake.BuildOutputStub(arg1, arg2)
+		return fake.BuildOutputStub(arg1)
 	}
 	if specificReturn {
-		return ret.result1
+		return ret.result1, ret.result2
 	}
 	fakeReturns := fake.buildOutputReturns
-	return fakeReturns.result1
+	return fakeReturns.result1, fakeReturns.result2
 }
 
 func (fake *FakeCLIInterface) BuildOutputCallCount() int {
@@ -147,40 +133,43 @@ func (fake *FakeCLIInterface) BuildOutputCallCount() int {
 	return len(fake.buildOutputArgsForCall)
 }
 
-func (fake *FakeCLIInterface) BuildOutputCalls(stub func(terraform.InputVars, terraform.Outputs) error) {
+func (fake *FakeCLIInterface) BuildOutputCalls(stub func(terraform.InputVars) (terraform.Outputs, error)) {
 	fake.buildOutputMutex.Lock()
 	defer fake.buildOutputMutex.Unlock()
 	fake.BuildOutputStub = stub
 }
 
-func (fake *FakeCLIInterface) BuildOutputArgsForCall(i int) (terraform.InputVars, terraform.Outputs) {
+func (fake *FakeCLIInterface) BuildOutputArgsForCall(i int) terraform.InputVars {
 	fake.buildOutputMutex.RLock()
 	defer fake.buildOutputMutex.RUnlock()
 	argsForCall := fake.buildOutputArgsForCall[i]
-	return argsForCall.arg1, argsForCall.arg2
+	return argsForCall.arg1
 }
 
-func (fake *FakeCLIInterface) BuildOutputReturns(result1 error) {
+func (fake *FakeCLIInterface) BuildOutputReturns(result1 terraform.Outputs, result2 error) {
 	fake.buildOutputMutex.Lock()
 	defer fake.buildOutputMutex.Unlock()
 	fake.BuildOutputStub = nil
 	fake.buildOutputReturns = struct {
-		result1 error
-	}{result1}
+		result1 terraform.Outputs
+		result2 error
+	}{result1, result2}
 }
 
-func (fake *FakeCLIInterface) BuildOutputReturnsOnCall(i int, result1 error) {
+func (fake *FakeCLIInterface) BuildOutputReturnsOnCall(i int, result1 terraform.Outputs, result2 error) {
 	fake.buildOutputMutex.Lock()
 	defer fake.buildOutputMutex.Unlock()
 	fake.BuildOutputStub = nil
 	if fake.buildOutputReturnsOnCall == nil {
 		fake.buildOutputReturnsOnCall = make(map[int]struct {
-			result1 error
+			result1 terraform.Outputs
+			result2 error
 		})
 	}
 	fake.buildOutputReturnsOnCall[i] = struct {
-		result1 error
-	}{result1}
+		result1 terraform.Outputs
+		result2 error
+	}{result1, result2}
 }
 
 func (fake *FakeCLIInterface) Destroy(arg1 terraform.InputVars) error {
@@ -243,69 +232,6 @@ func (fake *FakeCLIInterface) DestroyReturnsOnCall(i int, result1 error) {
 	}{result1}
 }
 
-func (fake *FakeCLIInterface) OutputsFor(arg1 iaas.Name) (terraform.Outputs, error) {
-	fake.outputsForMutex.Lock()
-	ret, specificReturn := fake.outputsForReturnsOnCall[len(fake.outputsForArgsForCall)]
-	fake.outputsForArgsForCall = append(fake.outputsForArgsForCall, struct {
-		arg1 iaas.Name
-	}{arg1})
-	fake.recordInvocation("OutputsFor", []interface{}{arg1})
-	fake.outputsForMutex.Unlock()
-	if fake.OutputsForStub != nil {
-		return fake.OutputsForStub(arg1)
-	}
-	if specificReturn {
-		return ret.result1, ret.result2
-	}
-	fakeReturns := fake.outputsForReturns
-	return fakeReturns.result1, fakeReturns.result2
-}
-
-func (fake *FakeCLIInterface) OutputsForCallCount() int {
-	fake.outputsForMutex.RLock()
-	defer fake.outputsForMutex.RUnlock()
-	return len(fake.outputsForArgsForCall)
-}
-
-func (fake *FakeCLIInterface) OutputsForCalls(stub func(iaas.Name) (terraform.Outputs, error)) {
-	fake.outputsForMutex.Lock()
-	defer fake.outputsForMutex.Unlock()
-	fake.OutputsForStub = stub
-}
-
-func (fake *FakeCLIInterface) OutputsForArgsForCall(i int) iaas.Name {
-	fake.outputsForMutex.RLock()
-	defer fake.outputsForMutex.RUnlock()
-	argsForCall := fake.outputsForArgsForCall[i]
-	return argsForCall.arg1
-}
-
-func (fake *FakeCLIInterface) OutputsForReturns(result1 terraform.Outputs, result2 error) {
-	fake.outputsForMutex.Lock()
-	defer fake.outputsForMutex.Unlock()
-	fake.OutputsForStub = nil
-	fake.outputsForReturns = struct {
-		result1 terraform.Outputs
-		result2 error
-	}{result1, result2}
-}
-
-func (fake *FakeCLIInterface) OutputsForReturnsOnCall(i int, result1 terraform.Outputs, result2 error) {
-	fake.outputsForMutex.Lock()
-	defer fake.outputsForMutex.Unlock()
-	fake.OutputsForStub = nil
-	if fake.outputsForReturnsOnCall == nil {
-		fake.outputsForReturnsOnCall = make(map[int]struct {
-			result1 terraform.Outputs
-			result2 error
-		})
-	}
-	fake.outputsForReturnsOnCall[i] = struct {
-		result1 terraform.Outputs
-		result2 error
-	}{result1, result2}
-}
-
 func (fake *FakeCLIInterface) Invocations() map[string][][]interface{} {
 	fake.invocationsMutex.RLock()
 	defer fake.invocationsMutex.RUnlock()
@@ -315,8 +241,6 @@ func (fake *FakeCLIInterface) Invocations() map[string][][]interface{} {
 	defer fake.buildOutputMutex.RUnlock()
 	fake.destroyMutex.RLock()
 	defer fake.destroyMutex.RUnlock()
-	fake.outputsForMutex.RLock()
-	defer fake.outputsForMutex.RUnlock()
 	copiedInvocations := map[string][][]interface{}{}
 	for key, value := range fake.invocations {
 		copiedInvocations[key] = value

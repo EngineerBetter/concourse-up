@@ -3,30 +3,28 @@ package concourse_test
 import (
 	"errors"
 	"fmt"
-	"github.com/EngineerBetter/concourse-up/bosh/boshfakes"
-	"github.com/EngineerBetter/concourse-up/certs/certsfakes"
-	"github.com/EngineerBetter/concourse-up/concourse/concoursefakes"
-	"github.com/EngineerBetter/concourse-up/config/configfakes"
-	"github.com/EngineerBetter/concourse-up/fly/flyfakes"
-	"github.com/EngineerBetter/concourse-up/iaas/iaasfakes"
-	"github.com/EngineerBetter/concourse-up/terraform/terraformfakes"
-	"github.com/xenolf/lego/lego"
-	"io"
-	"reflect"
-
 	"github.com/EngineerBetter/concourse-up/bosh"
+	"github.com/EngineerBetter/concourse-up/bosh/boshfakes"
 	"github.com/EngineerBetter/concourse-up/certs"
+	"github.com/EngineerBetter/concourse-up/certs/certsfakes"
 	"github.com/EngineerBetter/concourse-up/commands/deploy"
 	"github.com/EngineerBetter/concourse-up/concourse"
+	"github.com/EngineerBetter/concourse-up/concourse/concoursefakes"
 	"github.com/EngineerBetter/concourse-up/config"
+	"github.com/EngineerBetter/concourse-up/config/configfakes"
 	"github.com/EngineerBetter/concourse-up/director"
 	"github.com/EngineerBetter/concourse-up/fly"
+	"github.com/EngineerBetter/concourse-up/fly/flyfakes"
 	"github.com/EngineerBetter/concourse-up/iaas"
+	"github.com/EngineerBetter/concourse-up/iaas/iaasfakes"
 	"github.com/EngineerBetter/concourse-up/terraform"
+	"github.com/EngineerBetter/concourse-up/terraform/terraformfakes"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/onsi/gomega/gbytes"
 	. "github.com/tjarratt/gcounterfeiter"
+	"github.com/xenolf/lego/lego"
+	"io"
 )
 
 var _ = Describe("client", func() {
@@ -120,22 +118,8 @@ var _ = Describe("client", func() {
 		return configClient
 	}
 
-	var setupFakeTerraformCLI = func(terraformMetadata terraform.AWSOutputs) *terraformfakes.FakeCLIInterface {
+	var setupFakeTerraformCLI = func(terraformOutputs terraform.AWSOutputs) *terraformfakes.FakeCLIInterface {
 		terraformCLI := &terraformfakes.FakeCLIInterface{}
-		terraformCLI.OutputsForStub = func(name iaas.Name) (terraform.Outputs, error) {
-			fakeMetadata := &terraformfakes.FakeOutputs{}
-			fakeMetadata.GetStub = func(key string) (string, error) {
-				mm := reflect.ValueOf(&terraformMetadata)
-				m := mm.Elem()
-				mv := m.FieldByName(key)
-				if !mv.IsValid() {
-					return "", errors.New(key + " key not found")
-				}
-				return mv.FieldByName("Value").String(), nil
-			}
-
-			return fakeMetadata, nil
-		}
 		terraformCLI.ApplyStub = func(inputVars terraform.InputVars, dryrun bool) error {
 			actions = append(actions, "applying terraform")
 			return nil
@@ -144,9 +128,9 @@ var _ = Describe("client", func() {
 			actions = append(actions, "destroying terraform")
 			return nil
 		}
-		terraformCLI.BuildOutputStub = func(conf terraform.InputVars, outputs terraform.Outputs) error {
+		terraformCLI.BuildOutputStub = func(conf terraform.InputVars) (terraform.Outputs, error) {
 			actions = append(actions, "initializing terraform outputs")
-			return nil
+			return &terraformOutputs, nil
 		}
 		return terraformCLI
 	}
@@ -364,6 +348,7 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 				Expect(actions[3]).To(Equal("applying terraform"))
 				Expect(terraformCLI).To(HaveReceived("Apply").With(terraformInputVars, false))
 				Expect(actions[4]).To(Equal("initializing terraform outputs"))
+				Expect(terraformCLI).To(HaveReceived("BuildOutput").With(terraformInputVars))
 				Expect(actions[5]).To(Equal("updating config file"))
 				Expect(actions[6]).To(Equal("generating cert ca: concourse-up-happymeal, cn: [99.99.99.99 192.168.0.6]"))
 				Expect(actions[7]).To(Equal("generating cert ca: concourse-up-happymeal, cn: [77.77.77.77]"))

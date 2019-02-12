@@ -31,8 +31,7 @@ type Outputs interface {
 type CLIInterface interface {
 	Apply(InputVars, bool) error
 	Destroy(InputVars) error
-	BuildOutput(InputVars, Outputs) error
-	OutputsFor(iaas.Name) (Outputs, error)
+	BuildOutput(InputVars) (Outputs, error)
 }
 
 // CLI struct holds the abstraction of execCmd
@@ -40,6 +39,17 @@ type CLI struct {
 	execCmd func(string, ...string) *exec.Cmd
 	Path    string
 	iaas    iaas.Name
+}
+
+//Factory function to return iaas-specific outputs
+func outputsFor(name iaas.Name) (Outputs, error) {
+	switch name {
+	case iaas.AWS: // nolint
+		return &AWSOutputs{}, nil
+	case iaas.GCP: // nolint
+		return &GCPOutputs{}, nil
+	}
+	return &NullOutputs{}, errors.New("terraform: " + name.String() + " not a valid iaas provider")
 }
 
 // Option defines the arbitary element of Options for New
@@ -63,12 +73,13 @@ func DownloadTerraform() Option {
 }
 
 // New provides a new CLI
-func New(ops ...Option) (*CLI, error) {
+func New(iaas iaas.Name, ops ...Option) (*CLI, error) {
 	// @Note: we will have to switch between IAASs at this point
 	// for the time being we are using directly AWS
 	cli := &CLI{
 		execCmd: exec.Command,
 		Path:    "terraform",
+		iaas:    iaas,
 	}
 	for _, op := range ops {
 		if err := op(cli); err != nil {
@@ -91,18 +102,6 @@ func (n *NullOutputs) AssertValid() error { return nil }
 func (n *NullOutputs) Init(*bytes.Buffer) error { return nil }
 
 func (n *NullOutputs) Get(string) (string, error) { return "", nil }
-
-func (c *CLI) OutputsFor(name iaas.Name) (Outputs, error) {
-	switch name {
-	case iaas.AWS: // nolint
-		c.iaas = iaas.AWS // nolint
-		return &AWSOutputs{}, nil
-	case iaas.GCP: // nolint
-		c.iaas = iaas.GCP // nolint
-		return &GCPOutputs{}, nil
-	}
-	return &NullOutputs{}, errors.New("terraform: " + name.String() + " not a valid iaas provider")
-}
 
 func (c *CLI) init(config InputVars) (string, error) {
 	var (
@@ -177,10 +176,10 @@ func (c *CLI) Destroy(config InputVars) error {
 }
 
 // BuildOutput builds the terraform output
-func (c *CLI) BuildOutput(config InputVars, outputs Outputs) error {
+func (c *CLI) BuildOutput(config InputVars) (Outputs, error) {
 	terraformConfigPath, err := c.init(config)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	defer os.RemoveAll(terraformConfigPath)
@@ -191,10 +190,18 @@ func (c *CLI) BuildOutput(config InputVars, outputs Outputs) error {
 	cmd.Stderr = os.Stderr
 	cmd.Stdout = stdoutBuffer
 	if err := cmd.Run(); err != nil {
-		return err
+		return nil, err
 	}
 
-	return outputs.Init(stdoutBuffer)
+	outputs, err := outputsFor(c.iaas)
+	if err != nil {
+		return nil, fmt.Errorf("Error creating blank TF Outputs before population: [%v]", err)
+	}
+	err = outputs.Init(stdoutBuffer)
+	if err != nil {
+		return nil, fmt.Errorf("Error populating blank TF Outputs: [%v]", err)
+	}
+	return outputs, nil
 }
 
 func writeTempFile(data []byte) (string, error) {

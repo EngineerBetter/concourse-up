@@ -387,7 +387,7 @@ func validateRdsSubnetSize(cidr *net.IPNet) bool {
 }
 
 func buildClient(name, version string, deployArgs deploy.Args, provider iaas.Provider) (*concourse.Client, error) {
-	terraformClient, err := terraform.New(terraform.DownloadTerraform())
+	terraformClient, err := terraform.New(provider.IAAS(), terraform.DownloadTerraform())
 	if err != nil {
 		return nil, err
 	}

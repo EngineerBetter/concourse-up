@@ -79,7 +79,7 @@ func maintainAction(c *cli.Context, maintainArgs maintain.Args, provider iaas.Pr
 }
 
 func buildMaintainClient(name, version string, maintainArgs maintain.Args, provider iaas.Provider) (*concourse.Client, error) {
-	terraformClient, err := terraform.New(terraform.DownloadTerraform())
+	terraformClient, err := terraform.New(provider.IAAS(), terraform.DownloadTerraform())
 	if err != nil {
 		return nil, err
 	}
