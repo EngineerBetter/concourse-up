@@ -37,11 +37,12 @@ var _ = Describe("client", func() {
 	var stderr *gbytes.Buffer
 	var deleteBoshDirectorError error
 	var args *deploy.Args
-	var configInBucket config.Config
+	var configInBucket, configBeforeTerraform config.Config
 	var ipChecker func() (string, error)
 	var exampleDirectorCreds []byte
 	var tfInputVarsFactory *concoursefakes.FakeTFInputVarsFactory
 	var flyClient *flyfakes.FakeIClient
+	var terraformCLI *terraformfakes.FakeCLIInterface
 
 	var setupFakeAwsProvider = func() *iaasfakes.FakeProvider {
 		provider := &iaasfakes.FakeProvider{}
@@ -136,7 +137,6 @@ var _ = Describe("client", func() {
 			return fakeMetadata, nil
 		}
 		terraformCLI.ApplyStub = func(inputVars terraform.InputVars, dryrun bool) error {
-			Expect(dryrun).To(BeFalse())
 			actions = append(actions, "applying terraform")
 			return nil
 		}
@@ -176,7 +176,7 @@ var _ = Describe("client", func() {
 			DBSizeIsSet: false,
 		}
 
-		terraformMetadata := terraform.AWSOutputs{
+		terraformOutputs := terraform.AWSOutputs{
 			ATCPublicIP:              terraform.MetadataStringValue{Value: "77.77.77.77"},
 			ATCSecurityGroupID:       terraform.MetadataStringValue{Value: "sg-999"},
 			BlobstoreBucket:          terraform.MetadataStringValue{Value: "blobs.aws.com"},
@@ -242,9 +242,14 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 			PrivateCIDR:       "192.168.1.0/24",
 		}
 
+		//Mutations we expect to have been done after load, but before calling Terraform
+		configBeforeTerraform = configInBucket
+		configBeforeTerraform.AllowIPs = "\"0.0.0.0/0\""
+		configBeforeTerraform.SourceAccessIP = "192.0.2.0"
+
 		exampleDirectorCreds = []byte("atc_password: s3cret")
 
-		terraformCLI := setupFakeTerraformCLI(terraformMetadata)
+		terraformCLI = setupFakeTerraformCLI(terraformOutputs)
 
 		boshClientFactory := func(config config.Config, outputs terraform.Outputs, director director.IClient, stdout, stderr io.Writer, provider iaas.Provider) (bosh.IClient, error) {
 			client := &boshfakes.FakeIClient{}
@@ -325,12 +330,39 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 			It("does all the things in the right order", func() {
 				client := buildClient()
 				err := client.Deploy()
+
+				terraformInputVars := &terraform.AWSInputVars{
+					NetworkCIDR:            configBeforeTerraform.NetworkCIDR,
+					PublicCIDR:             configBeforeTerraform.PublicCIDR,
+					PrivateCIDR:            configBeforeTerraform.PrivateCIDR,
+					AllowIPs:               configBeforeTerraform.AllowIPs,
+					AvailabilityZone:       configBeforeTerraform.AvailabilityZone,
+					ConfigBucket:           configBeforeTerraform.ConfigBucket,
+					Deployment:             configBeforeTerraform.Deployment,
+					HostedZoneID:           configBeforeTerraform.HostedZoneID,
+					HostedZoneRecordPrefix: configBeforeTerraform.HostedZoneRecordPrefix,
+					Namespace:              configBeforeTerraform.Namespace,
+					Project:                configBeforeTerraform.Project,
+					PublicKey:              configBeforeTerraform.PublicKey,
+					RDSDefaultDatabaseName: configBeforeTerraform.RDSDefaultDatabaseName,
+					RDSInstanceClass:       configBeforeTerraform.RDSInstanceClass,
+					RDSPassword:            configBeforeTerraform.RDSPassword,
+					RDSUsername:            configBeforeTerraform.RDSUsername,
+					Region:                 configBeforeTerraform.Region,
+					SourceAccessIP:         configBeforeTerraform.SourceAccessIP,
+					TFStatePath:            configBeforeTerraform.TFStatePath,
+				}
+
+				tfInputVarsFactory.NewInputVarsReturns(terraformInputVars)
+
 				Expect(err).ToNot(HaveOccurred())
 
 				Expect(actions[0]).To(Equal("checking to see if config exists"))
 				Expect(actions[1]).To(Equal("loading config file"))
 				Expect(actions[2]).To(Equal("converting config.Config to TFInputVars"))
+				Expect(tfInputVarsFactory).To(HaveReceived("NewInputVars").With(configBeforeTerraform))
 				Expect(actions[3]).To(Equal("applying terraform"))
+				Expect(terraformCLI).To(HaveReceived("Apply").With(terraformInputVars, false))
 				Expect(actions[4]).To(Equal("initializing terraform outputs"))
 				Expect(actions[5]).To(Equal("updating config file"))
 				Expect(actions[6]).To(Equal("generating cert ca: concourse-up-happymeal, cn: [99.99.99.99 192.168.0.6]"))
@@ -534,11 +566,7 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 			client := buildClient()
 			err := client.Deploy()
 			Expect(err).ToNot(HaveOccurred())
-
-			expectedConfig := configInBucket
-			expectedConfig.AllowIPs = "\"0.0.0.0/0\""
-			expectedConfig.SourceAccessIP = "192.0.2.0"
-			Expect(tfInputVarsFactory).To(HaveReceived("NewInputVars").With(expectedConfig))
+			Expect(tfInputVarsFactory).To(HaveReceived("NewInputVars").With(configBeforeTerraform))
 		})
 
 		It("Loads terraform output", func() {
