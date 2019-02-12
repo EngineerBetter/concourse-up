@@ -22,13 +22,13 @@ func (client *Client) Destroy() error {
 	switch client.provider.IAAS() {
 
 	case iaas.AWS: // nolint
-		tfOutputs, err := client.tfCLI.BuildOutput(tfInputVars)
-		if err != nil {
-			return err
-		}
-		vpcID, err1 := tfOutputs.Get("VPCID")
+		tfOutputs, err1 := client.tfCLI.BuildOutput(tfInputVars)
 		if err1 != nil {
 			return err1
+		}
+		vpcID, err2 := tfOutputs.Get("VPCID")
+		if err2 != nil {
+			return err2
 		}
 		volumesToDelete, err1 = client.provider.DeleteVMsInVPC(vpcID)
 		if err1 != nil {

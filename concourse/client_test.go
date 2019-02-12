@@ -119,7 +119,7 @@ var _ = Describe("client", func() {
 	}
 
 	var setupFakeTerraformCLI = func(terraformOutputs terraform.AWSOutputs) *terraformfakes.FakeCLIInterface {
-		terraformCLI := &terraformfakes.FakeCLIInterface{}
+		terraformCLI = &terraformfakes.FakeCLIInterface{}
 		terraformCLI.ApplyStub = func(inputVars terraform.InputVars, dryrun bool) error {
 			actions = append(actions, "applying terraform")
 			return nil

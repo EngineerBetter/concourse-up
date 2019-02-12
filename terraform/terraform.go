@@ -189,7 +189,7 @@ func (c *CLI) BuildOutput(config InputVars) (Outputs, error) {
 	cmd.Dir = terraformConfigPath
 	cmd.Stderr = os.Stderr
 	cmd.Stdout = stdoutBuffer
-	if err := cmd.Run(); err != nil {
+	if err = cmd.Run(); err != nil {
 		return nil, err
 	}
 
