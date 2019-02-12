@@ -65,39 +65,41 @@ var _ = Describe("client", func() {
 		PublicCIDR               string
 		PrivateCIDR              string
 	}
-	var terraformMetadata TerraformMetadata
 
-	BeforeEach(func() {
-		certGenerator := func(c func(u *certs.User) (*lego.Client, error), caName string, provider iaas.Provider, ip ...string) (*certs.Certs, error) {
-			actions = append(actions, fmt.Sprintf("generating cert ca: %s, cn: %s", caName, ip))
-			return &certs.Certs{
-				CACert: []byte("----EXAMPLE CERT----"),
-			}, nil
-		}
-
-		awsClient := &iaasfakes.FakeProvider{}
-		awsClient.DBTypeReturns("db.t2.small")
-		awsClient.RegionReturns("eu-west-1")
-		awsClient.IAASReturns(iaas.AWS)
-		awsClient.CheckForWhitelistedIPStub = func(ip, securityGroup string) (bool, error) {
+	var setupFakeAwsProvider = func() *iaasfakes.FakeProvider {
+		provider := &iaasfakes.FakeProvider{}
+		provider.DBTypeReturns("db.t2.small")
+		provider.RegionReturns("eu-west-1")
+		provider.IAASReturns(iaas.AWS)
+		provider.CheckForWhitelistedIPStub = func(ip, securityGroup string) (bool, error) {
 			actions = append(actions, "checking security group for IP")
 			if ip == "1.2.3.4" {
 				return false, nil
 			}
 			return true, nil
 		}
-		awsClient.DeleteVMsInVPCStub = func(vpcID string) ([]string, error) {
+		provider.DeleteVMsInVPCStub = func(vpcID string) ([]string, error) {
 			actions = append(actions, fmt.Sprintf("deleting vms in %s", vpcID))
 			return nil, nil
 		}
-		awsClient.FindLongestMatchingHostedZoneStub = func(subdomain string) (string, string, error) {
+		provider.FindLongestMatchingHostedZoneStub = func(subdomain string) (string, string, error) {
 			if subdomain == "ci.google.com" {
 				return "google.com", "ABC123", nil
 			}
 
 			return "", "", errors.New("hosted zone not found")
 		}
+		return provider
+	}
 
+	var setupFakeOtherRegionProvider = func() *iaasfakes.FakeProvider {
+		otherRegionClient := &iaasfakes.FakeProvider{}
+		otherRegionClient.IAASReturns(iaas.AWS)
+		otherRegionClient.RegionReturns("eu-central-1")
+		return otherRegionClient
+	}
+
+	var setupFakeTfInputVarsFactory = func() *concoursefakes.FakeTFInputVarsFactory {
 		tfInputVarsFactory = &concoursefakes.FakeTFInputVarsFactory{}
 
 		provider, err := iaas.New(iaas.AWS, "eu-west-1")
@@ -108,10 +110,82 @@ var _ = Describe("client", func() {
 			actions = append(actions, "converting config.Config to TFInputVars")
 			return awsInputVarsFactory.NewInputVars(i)
 		}
+		return tfInputVarsFactory
+	}
 
-		otherRegionClient := &iaasfakes.FakeProvider{}
-		otherRegionClient.IAASReturns(iaas.AWS)
-		otherRegionClient.RegionReturns("eu-central-1")
+	var setupFakeConfigClient = func() *configfakes.FakeIClient {
+		configClient := &configfakes.FakeIClient{}
+		configClient.LoadStub = func() (config.Config, error) {
+			actions = append(actions, "loading config file")
+			return configInBucket, nil
+		}
+		configClient.DeleteAssetStub = func(filename string) error {
+			actions = append(actions, fmt.Sprintf("deleting config asset: %s", filename))
+			return nil
+		}
+		configClient.UpdateStub = func(config config.Config) error {
+			actions = append(actions, "updating config file")
+			return nil
+		}
+		configClient.StoreAssetStub = func(filename string, contents []byte) error {
+			actions = append(actions, fmt.Sprintf("storing config asset: %s", filename))
+			return nil
+		}
+		configClient.DeleteAllStub = func(config config.Config) error {
+			actions = append(actions, "deleting config")
+			return nil
+		}
+		configClient.ConfigExistsStub = func() (bool, error) {
+			actions = append(actions, "checking to see if config exists")
+			return true, nil
+		}
+		return configClient
+	}
+
+	var setupFakeTerraformCLI = func(terraformMetadata TerraformMetadata) *terraformfakes.FakeCLIInterface {
+		terraformCLI := &terraformfakes.FakeCLIInterface{}
+		terraformCLI.OutputsForStub = func(name iaas.Name) (terraform.Outputs, error) {
+			fakeMetadata := &terraformfakes.FakeOutputs{}
+			fakeMetadata.GetStub = func(key string) (string, error) {
+				mm := reflect.ValueOf(&terraformMetadata)
+				m := mm.Elem()
+				mv := m.FieldByName(key)
+				if !mv.IsValid() {
+					return "", errors.New(key + " key not found")
+				}
+				return mv.String(), nil
+			}
+
+			return fakeMetadata, nil
+		}
+		terraformCLI.ApplyStub = func(inputVars terraform.InputVars, dryrun bool) error {
+			Expect(dryrun).To(BeFalse())
+			actions = append(actions, "applying terraform")
+			return nil
+		}
+		terraformCLI.DestroyStub = func(conf terraform.InputVars) error {
+			actions = append(actions, "destroying terraform")
+			return nil
+		}
+		terraformCLI.BuildOutputStub = func(conf terraform.InputVars, outputs terraform.Outputs) error {
+			actions = append(actions, "initializing terraform outputs")
+			return nil
+		}
+		return terraformCLI
+	}
+
+	BeforeEach(func() {
+		certGenerator := func(c func(u *certs.User) (*lego.Client, error), caName string, provider iaas.Provider, ip ...string) (*certs.Certs, error) {
+			actions = append(actions, fmt.Sprintf("generating cert ca: %s, cn: %s", caName, ip))
+			return &certs.Certs{
+				CACert: []byte("----EXAMPLE CERT----"),
+			}, nil
+		}
+
+		awsClient := setupFakeAwsProvider()
+		otherRegionClient := setupFakeOtherRegionProvider()
+		tfInputVarsFactory = setupFakeTfInputVarsFactory()
+		configClient := setupFakeConfigClient()
 
 		flyClient = &flyfakes.FakeIClient{}
 		flyClient.SetDefaultPipelineStub = func(config config.Config, allowFlyVersionDiscrepancy bool) error {
@@ -125,7 +199,7 @@ var _ = Describe("client", func() {
 			DBSizeIsSet: false,
 		}
 
-		terraformMetadata = TerraformMetadata{
+		terraformMetadata := TerraformMetadata{
 			ATCPublicIP:              "77.77.77.77",
 			ATCSecurityGroupID:       "sg-999",
 			BlobstoreBucket:          "blobs.aws.com",
@@ -193,60 +267,7 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 
 		exampleDirectorCreds = []byte("atc_password: s3cret")
 
-		configClient := &configfakes.FakeIClient{}
-		configClient.LoadStub = func() (config.Config, error) {
-			actions = append(actions, "loading config file")
-			return configInBucket, nil
-		}
-		configClient.DeleteAssetStub = func(filename string) error {
-			actions = append(actions, fmt.Sprintf("deleting config asset: %s", filename))
-			return nil
-		}
-		configClient.UpdateStub = func(config config.Config) error {
-			actions = append(actions, "updating config file")
-			return nil
-		}
-		configClient.StoreAssetStub = func(filename string, contents []byte) error {
-			actions = append(actions, fmt.Sprintf("storing config asset: %s", filename))
-			return nil
-		}
-		configClient.DeleteAllStub = func(config config.Config) error {
-			actions = append(actions, "deleting config")
-			return nil
-		}
-		configClient.ConfigExistsStub = func() (bool, error) {
-			actions = append(actions, "checking to see if config exists")
-			return true, nil
-		}
-
-		terraformCLI := &terraformfakes.FakeCLIInterface{}
-		terraformCLI.OutputsForStub = func(name iaas.Name) (terraform.Outputs, error) {
-			fakeMetadata := &terraformfakes.FakeOutputs{}
-			fakeMetadata.GetStub = func(key string) (string, error) {
-				mm := reflect.ValueOf(&terraformMetadata)
-				m := mm.Elem()
-				mv := m.FieldByName(key)
-				if !mv.IsValid() {
-					return "", errors.New(key + " key not found")
-				}
-				return mv.String(), nil
-			}
-
-			return fakeMetadata, nil
-		}
-		terraformCLI.ApplyStub = func(inputVars terraform.InputVars, dryrun bool) error {
-			Expect(dryrun).To(BeFalse())
-			actions = append(actions, "applying terraform")
-			return nil
-		}
-		terraformCLI.DestroyStub = func(conf terraform.InputVars) error {
-			actions = append(actions, "destroying terraform")
-			return nil
-		}
-		terraformCLI.BuildOutputStub = func(conf terraform.InputVars, outputs terraform.Outputs) error {
-			actions = append(actions, "initializing terraform outputs")
-			return nil
-		}
+		terraformCLI := setupFakeTerraformCLI(terraformMetadata)
 
 		boshClientFactory := func(config config.Config, outputs terraform.Outputs, director director.IClient, stdout, stderr io.Writer, provider iaas.Provider) (bosh.IClient, error) {
 			client := &boshfakes.FakeIClient{}
