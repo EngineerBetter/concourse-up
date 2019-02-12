@@ -3,6 +3,7 @@
 set -eu
 
 version=dev
+go generate bosh/data.go
 go generate github.com/EngineerBetter/concourse-up/...
 GO111MODULE=on go build -mod=vendor -ldflags "
   -X github.com/EngineerBetter/concourse-up/fly.ConcourseUpVersion=$version
