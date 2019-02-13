@@ -33,8 +33,8 @@ then
     args+=(--domain cup.engineerbetter.com)
 
     args+=(--vpc-network-range 192.168.0.0/24)
-    args+=(--rds-subnet-range1 192.168.0.64/29)
-    args+=(--rds-subnet-range2 192.168.0.72/29)
+    args+=(--rds-subnet-range1 192.168.0.64/28)
+    args+=(--rds-subnet-range2 192.168.0.80/28)
 elif [ "$IAAS" = "GCP" ]
 then
     # shellcheck disable=SC2034
