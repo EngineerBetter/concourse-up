@@ -109,10 +109,22 @@ var _ = Describe("client", func() {
 		directorCredsFixture, err = ioutil.ReadFile("fixtures/director-creds.yml")
 		Expect(err).ToNot(HaveOccurred())
 
+		//At the time of writing, these are defaults from the CLI flags
 		args = &deploy.Args{
-			AllowIPs:    "0.0.0.0/0",
-			DBSize:      "small",
-			DBSizeIsSet: false,
+			AllowIPs:         "0.0.0.0/0",
+			AllowIPsIsSet:    false,
+			DBSize:           "small",
+			DBSizeIsSet:      false,
+			IAAS:             "AWS",
+			IAASIsSet:        false,
+			WorkerCount:      1,
+			WorkerCountIsSet: false,
+			WorkerSize:       "xlarge",
+			WorkerSizeIsSet:  false,
+			WorkerType:       "m4",
+			WorkerTypeIsSet:  false,
+			WebSize:          "small",
+			WebSizeIsSet:     false,
 		}
 
 		terraformOutputs = terraform.AWSOutputs{
