@@ -82,6 +82,7 @@ provider "google" {
     credentials = "{{ .GCPCredentialsJSON }}"
     project = "{{ .Project }}"
     region = "${var.region}"
+    version = "~> 1.20"
 }
 
 
