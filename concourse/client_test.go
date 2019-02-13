@@ -25,6 +25,7 @@ import (
 	. "github.com/tjarratt/gcounterfeiter"
 	"github.com/xenolf/lego/lego"
 	"io"
+	"io/ioutil"
 )
 
 var _ = Describe("client", func() {
@@ -37,11 +38,12 @@ var _ = Describe("client", func() {
 	var args *deploy.Args
 	var configInBucket, configAfterLoad config.Config
 	var ipChecker func() (string, error)
-	var exampleDirectorCreds []byte
+	var directorStateFixture, directorCredsFixture, exampleDirectorCreds []byte
 	var tfInputVarsFactory *concoursefakes.FakeTFInputVarsFactory
 	var flyClient *flyfakes.FakeIClient
 	var terraformCLI *terraformfakes.FakeCLIInterface
 	var configClient *configfakes.FakeIClient
+	var boshClient *boshfakes.FakeIClient
 
 	var setupFakeAwsProvider = func() *iaasfakes.FakeProvider {
 		provider := &iaasfakes.FakeProvider{}
@@ -91,7 +93,7 @@ var _ = Describe("client", func() {
 	}
 
 	var setupFakeConfigClient = func() *configfakes.FakeIClient {
-		configClient := &configfakes.FakeIClient{}
+		configClient = &configfakes.FakeIClient{}
 		configClient.LoadStub = func() (config.Config, error) {
 			actions = append(actions, "loading config file")
 			return configInBucket, nil
@@ -237,8 +239,8 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 		terraformCLI = setupFakeTerraformCLI(terraformOutputs)
 
 		boshClientFactory := func(config config.Config, outputs terraform.Outputs, director director.IClient, stdout, stderr io.Writer, provider iaas.Provider) (bosh.IClient, error) {
-			client := &boshfakes.FakeIClient{}
-			client.DeployStub = func(stateFileBytes, credsFileBytes []byte, detach bool) ([]byte, []byte, error) {
+			boshClient = &boshfakes.FakeIClient{}
+			boshClient.DeployStub = func(stateFileBytes, credsFileBytes []byte, detach bool) ([]byte, []byte, error) {
 				if detach {
 					actions = append(actions, "deploying director in self-update mode")
 				} else {
@@ -246,20 +248,20 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 				}
 				return nil, exampleDirectorCreds, nil
 			}
-			client.DeleteStub = func([]byte) ([]byte, error) {
+			boshClient.DeleteStub = func([]byte) ([]byte, error) {
 				actions = append(actions, "deleting director")
 				return nil, deleteBoshDirectorError
 			}
-			client.CleanupStub = func() error {
+			boshClient.CleanupStub = func() error {
 				actions = append(actions, "cleaning up bosh init")
 				return nil
 			}
-			client.InstancesStub = func() ([]bosh.Instance, error) {
+			boshClient.InstancesStub = func() ([]bosh.Instance, error) {
 				actions = append(actions, "listing bosh instances")
 				return nil, nil
 			}
 
-			return client, nil
+			return boshClient, nil
 		}
 
 		ipChecker = func() (string, error) {
@@ -312,6 +314,18 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 
 	Describe("Deploy", func() {
 		Context("when there is an existing config and no CLI args", func() {
+			BeforeEach(func() {
+				var err error
+				directorStateFixture, err = ioutil.ReadFile("fixtures/director-state.json")
+				Expect(err).ToNot(HaveOccurred())
+				directorCredsFixture, err = ioutil.ReadFile("fixtures/director-creds.yml")
+				Expect(err).ToNot(HaveOccurred())
+
+				configClient.HasAssetReturnsOnCall(0, true, nil)
+				configClient.LoadAssetReturnsOnCall(0, directorStateFixture, nil)
+				configClient.HasAssetReturnsOnCall(1, true, nil)
+				configClient.LoadAssetReturnsOnCall(1, directorCredsFixture, nil)
+			})
 			It("does all the things in the right order", func() {
 				client := buildClient()
 				err := client.Deploy()
@@ -344,17 +358,34 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 
 				Expect(actions[0]).To(Equal("checking to see if config exists"))
 				Expect(actions[1]).To(Equal("loading config file"))
+
 				Expect(actions[2]).To(Equal("converting config.Config to TFInputVars"))
 				Expect(tfInputVarsFactory).To(HaveReceived("NewInputVars").With(configAfterLoad))
+
 				Expect(actions[3]).To(Equal("applying terraform"))
 				Expect(terraformCLI).To(HaveReceived("Apply").With(terraformInputVars, false))
+
 				Expect(actions[4]).To(Equal("initializing terraform outputs"))
 				Expect(terraformCLI).To(HaveReceived("BuildOutput").With(terraformInputVars))
+
 				Expect(actions[5]).To(Equal("updating config file"))
 				Expect(configClient).To(HaveReceived("Update").With(configAfterLoad))
 				Expect(actions[6]).To(Equal("generating cert ca: concourse-up-happymeal, cn: [99.99.99.99 192.168.0.6]"))
 				Expect(actions[7]).To(Equal("generating cert ca: concourse-up-happymeal, cn: [77.77.77.77]"))
+
 				Expect(actions[8]).To(Equal("deploying director"))
+				Expect(configClient).To(HaveReceived("HasAsset").With("director-state.json"))
+				Expect(configClient.HasAssetArgsForCall(0)).To(Equal("director-state.json"))
+				Expect(configClient).To(HaveReceived("LoadAsset").With("director-state.json"))
+				Expect(configClient.LoadAssetArgsForCall(0)).To(Equal("director-state.json"))
+
+				Expect(configClient).To(HaveReceived("HasAsset").With("director-creds.yml"))
+				Expect(configClient.HasAssetArgsForCall(1)).To(Equal("director-creds.yml"))
+				Expect(configClient).To(HaveReceived("LoadAsset").With("director-creds.yml"))
+				Expect(configClient.LoadAssetArgsForCall(1)).To(Equal("director-creds.yml"))
+
+				Expect(boshClient).To(HaveReceived("Deploy").With(directorStateFixture, directorCredsFixture, false))
+
 				Expect(actions[9]).To(Equal("storing config asset: director-state.json"))
 				Expect(actions[10]).To(Equal("storing config asset: director-creds.yml"))
 				Expect(actions[11]).To(Equal("cleaning up bosh init"))
@@ -542,6 +573,13 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 	})
 
 	Describe("FetchInfo", func() {
+		BeforeEach(func() {
+			directorCredsFixture, err := ioutil.ReadFile("fixtures/director-creds.yml")
+			Expect(err).ToNot(HaveOccurred())
+
+			configClient.HasAssetReturnsOnCall(0, true, nil)
+			configClient.LoadAssetReturnsOnCall(0, directorCredsFixture, nil)
+		})
 		It("Loads the config file", func() {
 			client := buildClient()
 			_, err := client.FetchInfo()
