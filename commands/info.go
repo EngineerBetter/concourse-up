@@ -123,6 +123,9 @@ func buildInfoClient(name, version string, infoArgs info.Args, provider iaas.Pro
 		os.Stderr,
 		util.FindUserIP,
 		certs.NewAcmeClient,
+		util.GeneratePasswordWithLength,
+		util.EightRandomLetters,
+		util.GenerateSSHKeyPair,
 		version,
 	)
 

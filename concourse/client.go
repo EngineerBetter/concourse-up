@@ -19,20 +19,23 @@ import (
 
 // client is a concrete implementation of IClient interface
 type Client struct {
-	provider              iaas.Provider
-	tfInputVarsFactory    TFInputVarsFactory
-	tfCLI                 terraform.CLIInterface
+	acmeClientConstructor func(u *certs.User) (*lego.Client, error)
 	boshClientFactory     bosh.ClientFactory
-	flyClientFactory      func(iaas.Provider, fly.Credentials, io.Writer, io.Writer, []byte) (fly.IClient, error)
 	certGenerator         func(constructor func(u *certs.User) (*lego.Client, error), caName string, provider iaas.Provider, ip ...string) (*certs.Certs, error)
 	configClient          config.IClient
 	deployArgs            *deploy.Args
-	stdout                io.Writer
-	stderr                io.Writer
+	eightRandomLetters    func() string
+	flyClientFactory      func(iaas.Provider, fly.Credentials, io.Writer, io.Writer, []byte) (fly.IClient, error)
 	ipChecker             func() (string, error)
-	acmeClientConstructor func(u *certs.User) (*lego.Client, error)
-	versionFile           []byte
+	passwordGenerator     func(int) string
+	provider              iaas.Provider
+	sshGenerator          func() ([]byte, []byte, string, error)
+	stderr                io.Writer
+	stdout                io.Writer
+	tfCLI                 terraform.CLIInterface
+	tfInputVarsFactory    TFInputVarsFactory
 	version               string
+	versionFile           []byte
 }
 
 // IClient represents a concourse-up client
@@ -60,26 +63,32 @@ func NewClient(
 	stdout, stderr io.Writer,
 	ipChecker func() (string, error),
 	acmeClientConstructor func(u *certs.User) (*lego.Client, error),
+	passwordGenerator func(int) string,
+	eightRandomLetters func() string,
+	sshGenerator func() ([]byte, []byte, string, error),
 	version string) *Client {
 	v, _ := provider.Choose(iaas.Choice{
 		AWS: awsVersionFile,
 		GCP: gcpVersionFile,
 	}).([]byte)
 	return &Client{
-		provider:              provider,
-		tfInputVarsFactory:    tfInputVarsFactory,
-		tfCLI:                 tfCLI,
-		boshClientFactory:     boshClientFactory,
-		flyClientFactory:      flyClientFactory,
-		configClient:          configClient,
-		certGenerator:         certGenerator,
-		deployArgs:            deployArgs,
-		stdout:                stdout,
-		stderr:                stderr,
-		ipChecker:             ipChecker,
 		acmeClientConstructor: acmeClientConstructor,
-		versionFile:           v,
+		boshClientFactory:     boshClientFactory,
+		certGenerator:         certGenerator,
+		configClient:          configClient,
+		deployArgs:            deployArgs,
+		eightRandomLetters:    eightRandomLetters,
+		flyClientFactory:      flyClientFactory,
+		ipChecker:             ipChecker,
+		passwordGenerator:     passwordGenerator,
+		provider:              provider,
+		sshGenerator:          sshGenerator,
+		stderr:                stderr,
+		stdout:                stdout,
+		tfCLI:                 tfCLI,
+		tfInputVarsFactory:    tfInputVarsFactory,
 		version:               version,
+		versionFile:           v,
 	}
 }
 

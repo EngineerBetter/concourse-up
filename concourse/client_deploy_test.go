@@ -3,6 +3,9 @@ package concourse_test
 import (
 	"errors"
 	"fmt"
+	"io"
+	"io/ioutil"
+
 	"github.com/EngineerBetter/concourse-up/bosh"
 	"github.com/EngineerBetter/concourse-up/bosh/boshfakes"
 	"github.com/EngineerBetter/concourse-up/certs"
@@ -24,8 +27,6 @@ import (
 	"github.com/onsi/gomega/gbytes"
 	. "github.com/tjarratt/gcounterfeiter"
 	"github.com/xenolf/lego/lego"
-	"io"
-	"io/ioutil"
 )
 
 var _ = Describe("client", func() {
@@ -34,7 +35,7 @@ var _ = Describe("client", func() {
 	var stderr *gbytes.Buffer
 	var deleteBoshDirectorError error
 	var args *deploy.Args
-	var configInBucket, configAfterLoad, configAfterCreateEnv config.Config
+	var configInBucket config.Config
 	var terraformOutputs terraform.AWSOutputs
 
 	var directorStateFixture, directorCredsFixture []byte
@@ -89,13 +90,6 @@ var _ = Describe("client", func() {
 		return tfInputVarsFactory
 	}
 
-	var setupFakeConfigClient = func(startingConfig config.Config) *configfakes.FakeIClient {
-		configClient = &configfakes.FakeIClient{}
-		configClient.LoadReturns(startingConfig, nil)
-		configClient.ConfigExistsReturns(true, nil)
-		return configClient
-	}
-
 	var setupFakeTerraformCLI = func(terraformOutputs terraform.AWSOutputs) *terraformfakes.FakeCLIInterface {
 		terraformCLI = &terraformfakes.FakeCLIInterface{}
 		terraformCLI.BuildOutputReturns(&terraformOutputs, nil)
@@ -117,6 +111,9 @@ var _ = Describe("client", func() {
 			DBSizeIsSet:      false,
 			IAAS:             "AWS",
 			IAASIsSet:        false,
+			Preemptible:      true,
+			Spot:             true,
+			SpotIsSet:        false,
 			WorkerCount:      1,
 			WorkerCountIsSet: false,
 			WorkerSize:       "xlarge",
@@ -149,6 +146,8 @@ var _ = Describe("client", func() {
 
 		deleteBoshDirectorError = nil
 		certGenerationActions = []string{}
+
+		// Initial config in bucket from an existing deployment
 		configInBucket = config.Config{
 			PublicKey: "example-public-key",
 			PrivateKey: `-----BEGIN RSA PRIVATE KEY-----
@@ -190,20 +189,6 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 			ConcourseUsername: "admin",
 			RDSInstanceClass:  "db.t2.medium",
 		}
-
-		//Mutations we expect to have been done after load
-		configAfterLoad = configInBucket
-		configAfterLoad.AllowIPs = "\"0.0.0.0/0\""
-		configAfterLoad.SourceAccessIP = "192.0.2.0"
-
-		//Mutations we expect to have been done after Deploy
-		configAfterCreateEnv = configAfterLoad
-		configAfterCreateEnv.ConcourseCACert = "----EXAMPLE CERT----"
-		configAfterCreateEnv.DirectorCACert = "----EXAMPLE CERT----"
-		configAfterCreateEnv.DirectorPublicIP = "99.99.99.99"
-		configAfterCreateEnv.Domain = "77.77.77.77"
-		configAfterCreateEnv.Tags = []string{"concourse-up-version=some version"}
-		configAfterCreateEnv.Version = "some version"
 	})
 
 	JustBeforeEach(func() {
@@ -218,7 +203,7 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 		awsClient := setupFakeAwsProvider()
 		otherRegionClient := setupFakeOtherRegionProvider()
 		tfInputVarsFactory = setupFakeTfInputVarsFactory()
-		configClient = setupFakeConfigClient(configInBucket)
+		configClient = &configfakes.FakeIClient{}
 		terraformCLI = setupFakeTerraformCLI(terraformOutputs)
 
 		boshClientFactory := func(config config.Config, outputs terraform.Outputs, director director.IClient, stdout, stderr io.Writer, provider iaas.Provider) (bosh.IClient, error) {
@@ -251,6 +236,9 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 				stderr,
 				ipChecker,
 				certsfakes.NewFakeAcmeClient,
+				func(size int) string { return fmt.Sprintf("generatedPassword%d", size) },
+				func() string { return "8letters" },
+				func() ([]byte, []byte, string, error) { return []byte("private"), []byte("public"), "fingerprint", nil },
 				"some version",
 			)
 		}
@@ -271,6 +259,9 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 				stderr,
 				ipChecker,
 				certsfakes.NewFakeAcmeClient,
+				func(size int) string { return fmt.Sprintf("generatedPassword%d", size) },
+				func() string { return "8letters" },
+				func() ([]byte, []byte, string, error) { return []byte("private"), []byte("public"), "fingerprint", nil },
 				"some version",
 			)
 		}
@@ -278,9 +269,24 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 
 	Describe("Deploy", func() {
 		Context("when there is an existing config and no CLI args", func() {
-			var configAfterConcourseDeploy config.Config
+			var configAfterLoad, configAfterCreateEnv, configAfterConcourseDeploy config.Config
 
 			BeforeEach(func() {
+				//Mutations we expect to have been done after load
+				configAfterLoad = configInBucket
+				configAfterLoad.AllowIPs = "\"0.0.0.0/0\""
+				configAfterLoad.SourceAccessIP = "192.0.2.0"
+
+				//Mutations we expect to have been done after deploying the director
+				configAfterCreateEnv = configAfterLoad
+				configAfterCreateEnv.ConcourseCACert = "----EXAMPLE CERT----"
+				configAfterCreateEnv.DirectorCACert = "----EXAMPLE CERT----"
+				configAfterCreateEnv.DirectorPublicIP = "99.99.99.99"
+				configAfterCreateEnv.Domain = "77.77.77.77"
+				configAfterCreateEnv.Tags = []string{"concourse-up-version=some version"}
+				configAfterCreateEnv.Version = "some version"
+
+				// Mutations we expect to have been done after deploying Concourse
 				configAfterConcourseDeploy = configAfterCreateEnv
 				configAfterConcourseDeploy.CredhubAdminClientSecret = "hxfgb56zny2yys6m9wjx"
 				configAfterConcourseDeploy.CredhubCACert = `-----BEGIN CERTIFICATE-----
@@ -316,6 +322,8 @@ wEW5QkylaPEkbVDhJWeR1I8=
 			})
 
 			JustBeforeEach(func() {
+				configClient.LoadReturns(configInBucket, nil)
+				configClient.ConfigExistsReturns(true, nil)
 				configClient.HasAssetReturnsOnCall(0, true, nil)
 				configClient.LoadAssetReturnsOnCall(0, directorStateFixture, nil)
 				configClient.HasAssetReturnsOnCall(1, true, nil)
@@ -377,6 +385,185 @@ wEW5QkylaPEkbVDhJWeR1I8=
 				Expect(flyClient).To(HaveReceived("SetDefaultPipeline").With(configAfterCreateEnv, false))
 				Expect(configClient).To(HaveReceived("Update").With(configAfterConcourseDeploy))
 			})
+
+			It("Warns about access to local machine", func() {
+				client := buildClient()
+				err := client.Deploy()
+				Expect(err).ToNot(HaveOccurred())
+
+				Eventually(stderr).Should(gbytes.Say("WARNING: allowing access from local machine"))
+			})
+
+			It("Prints the bosh credentials", func() {
+				client := buildClient()
+				err := client.Deploy()
+				Expect(err).ToNot(HaveOccurred())
+				Eventually(stdout).Should(gbytes.Say("DEPLOY SUCCESSFUL"))
+				Eventually(stdout).Should(gbytes.Say("fly --target happymeal login --insecure --concourse-url https://77.77.77.77 --username admin --password s3cret"))
+			})
+
+			It("Notifies the user", func() {
+				client := buildClient()
+				err := client.Deploy()
+				Expect(err).ToNot(HaveOccurred())
+
+				Eventually(stdout).Should(gbytes.Say("USING PREVIOUS DEPLOYMENT CONFIG"))
+			})
+		})
+
+		Context("a new deployment with no CLI args", func() {
+			var defaultGeneratedConfig, configAfterLoad, configAfterCreateEnv, configAfterConcourseDeploy config.Config
+			BeforeEach(func() {
+				// Config generated by default for a new deployment
+				defaultGeneratedConfig = config.Config{
+					AllowIPs:                 "\"0.0.0.0/0\"",
+					AvailabilityZone:         "",
+					ConcoursePassword:        "",
+					ConcourseUsername:        "",
+					ConcourseWebSize:         "small",
+					ConcourseWorkerCount:     1,
+					ConcourseWorkerSize:      "xlarge",
+					ConfigBucket:             "concourse-up-initial-deployment-eu-west-1-config",
+					DirectorHMUserPassword:   "generatedPassword20",
+					DirectorMbusPassword:     "generatedPassword20",
+					DirectorNATSPassword:     "generatedPassword20",
+					Deployment:               "concourse-up-initial-deployment",
+					DirectorPassword:         "generatedPassword20",
+					DirectorRegistryPassword: "generatedPassword20",
+					DirectorUsername:         "admin",
+					EncryptionKey:            "generatedPassword32",
+					IAAS:                     "AWS",
+					NetworkCIDR:              "10.0.0.0/16",
+					PrivateCIDR:              "10.0.1.0/24",
+					PrivateKey:               "private",
+					Project:                  "initial-deployment",
+					PublicCIDR:               "10.0.0.0/24",
+					PublicKey:                "public",
+					RDSDefaultDatabaseName:   "bosh_8letters",
+					RDSInstanceClass:         "db.t2.small",
+					RDSPassword:              "generatedPassword20",
+					RDSUsername:              "admingeneratedPassword7",
+					Region:                   "eu-west-1",
+					SourceAccessIP:           "192.0.2.0",
+					Spot:                     true,
+					TFStatePath:              "terraform.tfstate",
+					WorkerType:               "m4",
+				}
+
+				//Mutations we expect to have been done after load
+				configAfterLoad = defaultGeneratedConfig
+				configAfterLoad.AllowIPs = "\"0.0.0.0/0\""
+				configAfterLoad.SourceAccessIP = "192.0.2.0"
+
+				//Mutations we expect to have been done after deploying the director
+				configAfterCreateEnv = configAfterLoad
+				configAfterCreateEnv.ConcourseCACert = "----EXAMPLE CERT----"
+				configAfterCreateEnv.DirectorCACert = "----EXAMPLE CERT----"
+				configAfterCreateEnv.DirectorPublicIP = "99.99.99.99"
+				configAfterCreateEnv.Domain = "77.77.77.77"
+				configAfterCreateEnv.Tags = []string{"concourse-up-version=some version"}
+				configAfterCreateEnv.Version = "some version"
+
+				// Mutations we expect to have been done after deploying Concourse
+				configAfterConcourseDeploy = configAfterCreateEnv
+				configAfterConcourseDeploy.ConcourseUsername = "admin"
+				configAfterConcourseDeploy.CredhubAdminClientSecret = "hxfgb56zny2yys6m9wjx"
+				configAfterConcourseDeploy.CredhubCACert = `-----BEGIN CERTIFICATE-----
+MIIEXTCCAsWgAwIBAgIQSmhcetyHDHLOYGaqMnJ0QTANBgkqhkiG9w0BAQsFADA4
+MQwwCgYDVQQGEwNVU0ExFjAUBgNVBAoTDUNsb3VkIEZvdW5kcnkxEDAOBgNVBAMM
+B2Jvc2hfY2EwHhcNMTkwMjEzMTAyNTM0WhcNMjAwMjEzMTAyNTM0WjA4MQwwCgYD
+VQQGEwNVU0ExFjAUBgNVBAoTDUNsb3VkIEZvdW5kcnkxEDAOBgNVBAMMB2Jvc2hf
+Y2EwggGiMA0GCSqGSIb3DQEBAQUAA4IBjwAwggGKAoIBgQC+0bA9T4awlJYSn6aq
+un6Hylu47b2UiZpFZpvPomKWPay86QaJ0vC9SK8keoYI4gWwsZSAMXp2mSCkXKRi
++rVc+sKnzv9VgPoVY5eYIYCtJvl7KCJQE02dGoxuGOaWlBiHuD6TzY6lI9fNxkAW
+eMGR3UylJ7ET0NvgAZWS1daov2GfiKkaYUCdbY8DtfhMyFhJ381VNHwoP6xlZbSf
+TInO/2TS8xpW2BcMNhFAu9MJVtC5pDHtJtkXHXep027CkrPjtFQWpzvIMvPAtZ68
+9t46nS9Ix+RmeN3v+sawNzbZscnsslhB+m4GrpL9M8g8sbweMw9yxf241z1qkiNJ
+to3HRqqyNyGsvI9n7OUrZ4D5oAfY7ze1TF+nxnkmJp14y21FEdG7t76N0J5dn6bJ
+/lroojig/PqabRsyHbmj6g8N832PEQvwsPptihEwgrRmY6fcBbMUaPCpNuVTJVa5
+g0KdBGDYDKTMlEn4xaj8P1wRbVjtXVMED2l4K4tS/UiDIb8CAwEAAaNjMGEwDgYD
+VR0PAQH/BAQDAgEGMA8GA1UdEwEB/wQFMAMBAf8wHQYDVR0OBBYEFHii4fiqAwJS
+nNhi6C+ibr/4OOTyMB8GA1UdIwQYMBaAFHii4fiqAwJSnNhi6C+ibr/4OOTyMA0G
+CSqGSIb3DQEBCwUAA4IBgQAGXDTlsQWIJHfvU3zy9te35adKOUeDwk1lSe4NYvgW
+FJC0w2K/1ZldmQ2leHmiXSukDJAYmROy9Y1qkUazTzjsdvHGhUF2N1p7fIweNj8e
+csR+T21MjPEwD99m5+xLvnMRMuqzH9TqVbFIM3lmCDajh8n9cp4KvGkQmB+X7DE1
+R6AXG4EN9xn91TFrqmFFNOrFtoAjtag05q/HoqMhFFVeg+JTpsPshFjlWIkzwqKx
+pn68KG2ztgS0KeDraGKwItTKengTCr/VkgorXnhKcI1C6C5iRXZp3wREu8RO+wRe
+KSGbsYIHaFxd3XwW4JnsW+hes/W5MZX01wkwOLrktf85FjssBZBavxBbyFag/LvS
+8oULOZRLYUkuElM+0Wzf8ayB574Fd97gzCVzWoD0Ei982jAdbEfk77PV1TvMNmEn
+3M6ktB7GkjuD9OL12iNzxmbQe7p1WkYYps9hK4r0pbyxZPZlPMmNNZo579rywDjF
+wEW5QkylaPEkbVDhJWeR1I8=
+-----END CERTIFICATE-----
+`
+				configAfterConcourseDeploy.CredhubPassword = "f4b12bc0166cad1bc02b050e4e79ac4c"
+				configAfterConcourseDeploy.CredhubURL = "https://77.77.77.77:8844/"
+				configAfterConcourseDeploy.CredhubUsername = "credhub-cli"
+			})
+
+			JustBeforeEach(func() {
+				configClient.NewConfigReturns(config.Config{
+					ConfigBucket: "concourse-up-initial-deployment-eu-west-1-config",
+					Deployment:   "concourse-up-initial-deployment",
+					Namespace:    "",
+					Project:      "initial-deployment",
+					Region:       "eu-west-1",
+					TFStatePath:  "terraform.tfstate",
+				})
+				configClient.HasAssetReturnsOnCall(0, false, nil)
+				configClient.HasAssetReturnsOnCall(1, false, nil)
+			})
+
+			It("does the right things in the right order", func() {
+				client := buildClient()
+				err := client.Deploy()
+				Expect(err).ToNot(HaveOccurred())
+
+				terraformInputVars := &terraform.AWSInputVars{
+					NetworkCIDR:            defaultGeneratedConfig.NetworkCIDR,
+					PublicCIDR:             defaultGeneratedConfig.PublicCIDR,
+					PrivateCIDR:            defaultGeneratedConfig.PrivateCIDR,
+					AllowIPs:               defaultGeneratedConfig.AllowIPs,
+					AvailabilityZone:       defaultGeneratedConfig.AvailabilityZone,
+					ConfigBucket:           defaultGeneratedConfig.ConfigBucket,
+					Deployment:             defaultGeneratedConfig.Deployment,
+					HostedZoneID:           defaultGeneratedConfig.HostedZoneID,
+					HostedZoneRecordPrefix: defaultGeneratedConfig.HostedZoneRecordPrefix,
+					Namespace:              defaultGeneratedConfig.Namespace,
+					Project:                defaultGeneratedConfig.Project,
+					PublicKey:              defaultGeneratedConfig.PublicKey,
+					RDSDefaultDatabaseName: defaultGeneratedConfig.RDSDefaultDatabaseName,
+					RDSInstanceClass:       defaultGeneratedConfig.RDSInstanceClass,
+					RDSPassword:            defaultGeneratedConfig.RDSPassword,
+					RDSUsername:            defaultGeneratedConfig.RDSUsername,
+					Region:                 defaultGeneratedConfig.Region,
+					SourceAccessIP:         defaultGeneratedConfig.SourceAccessIP,
+					TFStatePath:            defaultGeneratedConfig.TFStatePath,
+				}
+
+				tfInputVarsFactory.NewInputVarsReturns(terraformInputVars)
+
+				Expect(configClient).To(HaveReceived("ConfigExists"))
+				Expect(configClient).ToNot(HaveReceived("Load"))
+				Expect(tfInputVarsFactory).To(HaveReceived("NewInputVars").With(defaultGeneratedConfig))
+				Expect(terraformCLI).To(HaveReceived("Apply").With(terraformInputVars, false))
+				Expect(terraformCLI).To(HaveReceived("BuildOutput").With(terraformInputVars))
+				Expect(configClient).To(HaveReceived("Update").With(configAfterLoad))
+
+				Expect(certGenerationActions[0]).To(Equal("generating cert ca: concourse-up-initial-deployment, cn: [99.99.99.99 10.0.0.6]"))
+				Expect(certGenerationActions[1]).To(Equal("generating cert ca: concourse-up-initial-deployment, cn: [77.77.77.77]"))
+
+				Expect(configClient).To(HaveReceived("HasAsset").With("director-state.json"))
+				Expect(configClient.HasAssetArgsForCall(0)).To(Equal("director-state.json"))
+				Expect(configClient).To(HaveReceived("HasAsset").With("director-creds.yml"))
+				Expect(configClient.HasAssetArgsForCall(1)).To(Equal("director-creds.yml"))
+				Expect(boshClient).To(HaveReceived("Deploy").With([]byte{}, []byte{}, false))
+
+				Expect(configClient).To(HaveReceived("StoreAsset").With("director-state.json", directorStateFixture))
+				Expect(configClient).To(HaveReceived("StoreAsset").With("director-creds.yml", directorCredsFixture))
+				Expect(boshClient).To(HaveReceived("Cleanup"))
+				Expect(flyClient).To(HaveReceived("SetDefaultPipeline").With(configAfterCreateEnv, false))
+				Expect(configClient).To(HaveReceived("Update").With(configAfterConcourseDeploy))
+			})
 		})
 
 		It("Prints a warning about changing the sourceIP", func() {
@@ -392,9 +579,12 @@ wEW5QkylaPEkbVDhJWeR1I8=
 				configInBucket.Domain = "ci.google.com"
 			})
 
-			It("Prints a warning about adding a DNS record", func() {
-				configInBucket.Domain = "ci.google.com"
+			JustBeforeEach(func() {
+				configClient.LoadReturns(configInBucket, nil)
+				configClient.ConfigExistsReturns(true, nil)
+			})
 
+			It("Prints a warning about adding a DNS record", func() {
 				client := buildClient()
 				err := client.Deploy()
 				Expect(err).ToNot(HaveOccurred())
@@ -427,9 +617,15 @@ wEW5QkylaPEkbVDhJWeR1I8=
 		})
 
 		Context("When the user tries to change the region of an existing deployment", func() {
-			It("Returns a meaningful error message", func() {
+			BeforeEach(func() {
 				args.AWSRegion = "eu-central-1"
+			})
 
+			JustBeforeEach(func() {
+				configClient.LoadReturns(configInBucket, nil)
+				configClient.ConfigExistsReturns(true, nil)
+			})
+			It("Returns a meaningful error message", func() {
 				client := buildClientOtherRegion()
 				err := client.Deploy()
 				Expect(err).To(MatchError("found previous deployment in eu-west-1. Refusing to deploy to eu-central-1 as changing regions for existing deployments is not supported"))
@@ -437,10 +633,16 @@ wEW5QkylaPEkbVDhJWeR1I8=
 		})
 
 		Context("When a custom DB instance size is not provided", func() {
-			It("Does not override the existing DB size", func() {
+			BeforeEach(func() {
 				args.DBSize = "small"
 				args.DBSizeIsSet = false
+			})
 
+			JustBeforeEach(func() {
+				configClient.LoadReturns(configInBucket, nil)
+				configClient.ConfigExistsReturns(true, nil)
+			})
+			It("Does not override the existing DB size", func() {
 				provider, err := iaas.New(iaas.AWS, "eu-west-1")
 				Expect(err).ToNot(HaveOccurred())
 				awsInputVarsFactory, err := concourse.NewTFInputVarsFactory(provider)
@@ -474,32 +676,5 @@ wEW5QkylaPEkbVDhJWeR1I8=
 				Expect(boshClient).To(HaveReceived("Deploy").With([]byte{}, []byte{}, true))
 			})
 		})
-
-		It("Warns about access to local machine", func() {
-			client := buildClient()
-			err := client.Deploy()
-			Expect(err).ToNot(HaveOccurred())
-
-			Eventually(stderr).Should(gbytes.Say("WARNING: allowing access from local machine"))
-		})
-
-		It("Prints the bosh credentials", func() {
-			client := buildClient()
-			err := client.Deploy()
-			Expect(err).ToNot(HaveOccurred())
-			Eventually(stdout).Should(gbytes.Say("DEPLOY SUCCESSFUL"))
-			Eventually(stdout).Should(gbytes.Say("fly --target happymeal login --insecure --concourse-url https://77.77.77.77 --username admin --password s3cret"))
-		})
-
-		Context("When an existing config is loaded", func() {
-			It("Notifies the user", func() {
-				client := buildClient()
-				err := client.Deploy()
-				Expect(err).ToNot(HaveOccurred())
-
-				Eventually(stdout).Should(gbytes.Say("USING PREVIOUS DEPLOYMENT CONFIG"))
-			})
-		})
 	})
-
 })

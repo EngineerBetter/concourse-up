@@ -291,6 +291,9 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 				stderr,
 				ipChecker,
 				certsfakes.NewFakeAcmeClient,
+				func(size int) string { return fmt.Sprintf("generatedPassword%d", size) },
+				func() string { return "8letters" },
+				func() ([]byte, []byte, string, error) { return []byte("private"), []byte("public"), "fingerprint", nil },
 				"some version",
 			)
 		}

@@ -107,6 +107,9 @@ func buildDestroyClient(name, version string, destroyArgs destroy.Args, provider
 		os.Stderr,
 		util.FindUserIP,
 		certs.NewAcmeClient,
+		util.GeneratePasswordWithLength,
+		util.EightRandomLetters,
+		util.GenerateSSHKeyPair,
 		version,
 	)
 

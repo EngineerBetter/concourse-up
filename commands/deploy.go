@@ -410,6 +410,9 @@ func buildClient(name, version string, deployArgs deploy.Args, provider iaas.Pro
 		os.Stderr,
 		util.FindUserIP,
 		certs.NewAcmeClient,
+		util.GeneratePasswordWithLength,
+		util.EightRandomLetters,
+		util.GenerateSSHKeyPair,
 		version,
 	)
 

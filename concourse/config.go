@@ -6,7 +6,6 @@ import (
 	"github.com/EngineerBetter/concourse-up/commands/deploy"
 	"github.com/EngineerBetter/concourse-up/config"
 	"github.com/EngineerBetter/concourse-up/iaas"
-	"github.com/EngineerBetter/concourse-up/util"
 	"github.com/asaskevich/govalidator"
 	"net"
 	"strings"
@@ -25,7 +24,10 @@ func (client *Client) getInitialConfig() (config.Config, bool, error) {
 		if err != nil {
 			return config.Config{}, false, fmt.Errorf("error loading existing config [%v]", err)
 		}
-		writeConfigLoadedSuccessMessage(client.stdout)
+		err = writeConfigLoadedSuccessMessage(client.stdout)
+		if err != nil {
+			return config.Config{}, false, fmt.Errorf("error writing config loaded success message [%v]", err)
+		}
 
 		conf, isDomainUpdated, err = populateConfigWithDefaultsOrProvidedArguments(conf, false, client.deployArgs, client.provider)
 		if err != nil {
@@ -33,7 +35,7 @@ func (client *Client) getInitialConfig() (config.Config, bool, error) {
 		}
 
 	} else {
-		conf, err = newConfig(client.configClient, client.deployArgs, client.provider)
+		conf, err = newConfig(client.configClient, client.deployArgs, client.provider, client.passwordGenerator, client.eightRandomLetters, client.sshGenerator)
 		if err != nil {
 			return config.Config{}, false, fmt.Errorf("error generating new config: [%v]", err)
 		}
@@ -49,9 +51,9 @@ func (client *Client) getInitialConfig() (config.Config, bool, error) {
 	return conf, isDomainUpdated, nil
 }
 
-func newConfig(configClient config.IClient, deployArgs *deploy.Args, provider iaas.Provider) (config.Config, error) {
+func newConfig(configClient config.IClient, deployArgs *deploy.Args, provider iaas.Provider, passwordGenerator func(int) string, eightRandomLetters func() string, sshGenerator func() ([]byte, []byte, string, error)) (config.Config, error) {
 	conf := configClient.NewConfig()
-	conf, err := populateConfigWithDefaults(conf)
+	conf, err := populateConfigWithDefaults(conf, passwordGenerator, sshGenerator)
 	if err != nil {
 		return config.Config{}, fmt.Errorf("error generating default config: [%v]", err)
 	}
@@ -64,9 +66,9 @@ func newConfig(configClient config.IClient, deployArgs *deploy.Args, provider ia
 	// Stuff from concourse.Deploy()
 	switch provider.IAAS() {
 	case iaas.AWS: // nolint
-		conf.RDSDefaultDatabaseName = fmt.Sprintf("bosh_%s", util.EightRandomLetters())
+		conf.RDSDefaultDatabaseName = fmt.Sprintf("bosh_%s", eightRandomLetters())
 	case iaas.GCP: // nolint
-		conf.RDSDefaultDatabaseName = fmt.Sprintf("bosh-%s", util.EightRandomLetters())
+		conf.RDSDefaultDatabaseName = fmt.Sprintf("bosh-%s", eightRandomLetters())
 	}
 
 	// Why do we do this here?
@@ -78,33 +80,35 @@ func newConfig(configClient config.IClient, deployArgs *deploy.Args, provider ia
 }
 
 //RENAME ME
-func populateConfigWithDefaults(conf config.Config) (config.Config, error) {
-	privateKey, publicKey, _, err := util.GenerateSSHKeyPair()
+func populateConfigWithDefaults(conf config.Config, passwordGenerator func(int) string, sshGenerator func() ([]byte, []byte, string, error)) (config.Config, error) {
+	const defaultPasswordLength = 20
+
+	privateKey, publicKey, _, err := sshGenerator()
 	if err != nil {
 		return config.Config{}, fmt.Errorf("error generating SSH keypair for new config: [%v]", err)
 	}
 
 	conf.AvailabilityZone = ""
-	conf.ConcourseWorkerCount = 1
 	conf.ConcourseWebSize = "small"
+	conf.ConcourseWorkerCount = 1
 	conf.ConcourseWorkerSize = "xlarge"
-	conf.DirectorHMUserPassword = util.GeneratePassword()
-	conf.DirectorMbusPassword = util.GeneratePassword()
-	conf.DirectorNATSPassword = util.GeneratePassword()
-	conf.DirectorPassword = util.GeneratePassword()
-	conf.DirectorRegistryPassword = util.GeneratePassword()
+	conf.DirectorHMUserPassword = passwordGenerator(defaultPasswordLength)
+	conf.DirectorMbusPassword = passwordGenerator(defaultPasswordLength)
+	conf.DirectorNATSPassword = passwordGenerator(defaultPasswordLength)
+	conf.DirectorPassword = passwordGenerator(defaultPasswordLength)
+	conf.DirectorRegistryPassword = passwordGenerator(defaultPasswordLength)
 	conf.DirectorUsername = "admin"
-	conf.EncryptionKey = util.GeneratePasswordWithLength(32)
-	conf.PrivateKey = strings.TrimSpace(string(privateKey))
-	conf.PublicKey = strings.TrimSpace(string(publicKey))
-	conf.RDSPassword = util.GeneratePassword()
-	conf.RDSUsername = "admin" + util.GeneratePasswordWithLength(7)
-	conf.Spot = true
-	conf.PrivateCIDR = "10.0.1.0/24"
-	conf.PublicCIDR = "10.0.0.0/24"
+	conf.EncryptionKey = passwordGenerator(32)
 	conf.NetworkCIDR = "10.0.0.0/16"
+	conf.PrivateCIDR = "10.0.1.0/24"
+	conf.PrivateKey = strings.TrimSpace(string(privateKey))
+	conf.PublicCIDR = "10.0.0.0/24"
+	conf.PublicKey = strings.TrimSpace(string(publicKey))
 	conf.Rds1CIDR = "10.0.4.0/24"
 	conf.Rds2CIDR = "10.0.5.0/24"
+	conf.RDSPassword = passwordGenerator(defaultPasswordLength)
+	conf.RDSUsername = "admin" + passwordGenerator(7)
+	conf.Spot = true
 
 	return conf, nil
 }

@@ -102,6 +102,9 @@ func buildMaintainClient(name, version string, maintainArgs maintain.Args, provi
 		os.Stderr,
 		util.FindUserIP,
 		certs.NewAcmeClient,
+		util.GeneratePasswordWithLength,
+		util.EightRandomLetters,
+		util.GenerateSSHKeyPair,
 		version,
 	)
 
