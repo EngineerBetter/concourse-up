@@ -226,15 +226,34 @@ resource "google_compute_firewall" "atc-https" {
   }
 }
 
-resource "google_compute_firewall" "vms" {
-  name = "${var.deployment}-vms"
+resource "google_compute_firewall" "from-public" {
+  name = "${var.deployment}-public"
   description = "Concourse UP VMs firewall"
   network     = "${google_compute_network.default.self_link}"
   target_tags = ["web", "external", "internal", "worker"]
-  source_ranges = ["10.0.0.0/16"]
+  source_ranges = ["${var.public_cidr}"]
   allow {
     protocol = "tcp"
-    ports = ["6868","4222", "25250", "25555", "25777","2222", "5555", "7777", "7788", "7799", "22"]
+    ports = ["6868","4222", "25250", "25555", "25777", "5555", "2222", "7777", "7788", "7799", "22"]
+  }
+  allow {
+    protocol = "udp"
+    ports = ["53"]
+  }
+  allow {
+    protocol = "icmp"
+  }
+}
+
+resource "google_compute_firewall" "from-private" {
+  name = "${var.deployment}-private"
+  description = "Concourse UP VMs firewall"
+  network     = "${google_compute_network.default.self_link}"
+  target_tags = ["web", "external", "internal", "worker"]
+  source_ranges = ["${var.private_cidr}"]
+  allow {
+    protocol = "tcp"
+    ports = ["6868","4222", "25250", "25555", "25777", "5555", "2222", "7777", "7788", "7799", "22"]
   }
   allow {
     protocol = "udp"
@@ -363,11 +382,11 @@ output "public_subnetwork_name" {
 value = "${google_compute_subnetwork.public.name}"
 }
 
-output "private_subnetwor_internal_gw" {
+output "private_subnetwork_internal_gw" {
 value = "${google_compute_subnetwork.private.gateway_address}"
 }
 
-output "public_subnetwor_internal_gw" {
+output "public_subnetwork_internal_gw" {
 value = "${google_compute_subnetwork.public.gateway_address}"
 }
 

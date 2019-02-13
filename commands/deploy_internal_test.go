@@ -221,6 +221,8 @@ func Test_validateCidrRanges(t *testing.T) {
 		networkCidr string
 		publicCidr  string
 		privateCidr string
+		rds1Cidr    string
+		rds2Cidr    string
 	}
 	tests := []struct {
 		name          string
@@ -231,10 +233,10 @@ func Test_validateCidrRanges(t *testing.T) {
 		{
 			name: "does not err if no flags provided",
 			args: args{
-				provider:    awsProvider,
+				provider: awsProvider,
 			},
-			wantErr:       false,
-		},
+			wantErr: false,
+		}, //
 		{
 			name: "errs if public range is provided and private is not",
 			args: args{
@@ -266,6 +268,30 @@ func Test_validateCidrRanges(t *testing.T) {
 			desiredErrMsg: "error validating CIDR ranges - vpc-network-range must be provided when using AWS",
 		},
 		{
+			name: "errs if provider is AWS and rds1 range is not provided",
+			args: args{
+				provider:    awsProvider,
+				networkCidr: "10.0.0.0/16",
+				privateCidr: "10.0.0.0/24",
+				publicCidr:  "10.0.1.0/24",
+				rds2Cidr:    "10.0.4.0/24",
+			},
+			wantErr:       true,
+			desiredErrMsg: "error validating CIDR ranges - both rds1-subnet-range and rds2-subnet-range must be provided",
+		},
+		{
+			name: "errs if provider is AWS and rds2 range is not provided",
+			args: args{
+				provider:    awsProvider,
+				networkCidr: "10.0.0.0/16",
+				privateCidr: "10.0.0.0/24",
+				publicCidr:  "10.0.1.0/24",
+				rds1Cidr:    "10.0.2.0/24",
+			},
+			wantErr:       true,
+			desiredErrMsg: "error validating CIDR ranges - both rds1-subnet-range and rds2-subnet-range must be provided",
+		},
+		{
 			name: "errs if default range isn't a CIDR",
 			args: args{
 				provider:    awsProvider,
@@ -283,6 +309,8 @@ func Test_validateCidrRanges(t *testing.T) {
 				networkCidr: "10.0.0.0/16",
 				privateCidr: "10.0.0.0/24",
 				publicCidr:  "aPublicNetwork",
+				rds1Cidr:    "10.0.2.0/16",
+				rds2Cidr:    "10.0.3.0/16",
 			},
 			wantErr:       true,
 			desiredErrMsg: "error validating CIDR ranges - public-subnet-range is not a valid CIDR",
@@ -294,9 +322,37 @@ func Test_validateCidrRanges(t *testing.T) {
 				networkCidr: "10.0.0.0/16",
 				privateCidr: "aPrivateNetwork",
 				publicCidr:  "10.0.1.0/24",
+				rds1Cidr:    "10.0.2.0/16",
+				rds2Cidr:    "10.0.3.0/16",
 			},
 			wantErr:       true,
 			desiredErrMsg: "error validating CIDR ranges - private-subnet-range is not a valid CIDR",
+		},
+		{
+			name: "errs if rds1 range isn't a CIDR",
+			args: args{
+				provider:    awsProvider,
+				networkCidr: "10.0.0.0/16",
+				privateCidr: "10.0.0.0/24",
+				publicCidr:  "10.0.1.0/24",
+				rds1Cidr:    "aPrivateNetwork",
+				rds2Cidr:    "10.0.3.0/16",
+			},
+			wantErr:       true,
+			desiredErrMsg: "error validating CIDR ranges - rds1-subnet-range is not a valid CIDR",
+		},
+		{
+			name: "errs if rds2 range isn't a CIDR",
+			args: args{
+				provider:    awsProvider,
+				networkCidr: "10.0.0.0/16",
+				privateCidr: "10.0.0.0/24",
+				publicCidr:  "10.0.1.0/24",
+				rds1Cidr:    "10.0.2.0/16",
+				rds2Cidr:    "aPrivateNetwork",
+			},
+			wantErr:       true,
+			desiredErrMsg: "error validating CIDR ranges - rds2-subnet-range is not a valid CIDR",
 		},
 		{
 			name: "errs if provider is AWS and public range is not in default range",
@@ -305,6 +361,8 @@ func Test_validateCidrRanges(t *testing.T) {
 				networkCidr: "10.0.0.0/16",
 				privateCidr: "10.0.0.0/24",
 				publicCidr:  "172.0.0.0/24",
+				rds1Cidr:    "10.0.2.0/16",
+				rds2Cidr:    "10.0.3.0/16",
 			},
 			wantErr:       true,
 			desiredErrMsg: "error validating CIDR ranges - public-subnet-range must be within vpc-network-range",
@@ -316,9 +374,37 @@ func Test_validateCidrRanges(t *testing.T) {
 				networkCidr: "10.0.0.0/16",
 				privateCidr: "172.0.0.0/24",
 				publicCidr:  "10.0.1.0/24",
+				rds1Cidr:    "10.0.2.0/16",
+				rds2Cidr:    "10.0.3.0/16",
 			},
 			wantErr:       true,
 			desiredErrMsg: "error validating CIDR ranges - private-subnet-range must be within vpc-network-range",
+		},
+		{
+			name: "errs if provider is AWS and rds1 range is not in default range",
+			args: args{
+				provider:    awsProvider,
+				networkCidr: "10.0.0.0/16",
+				privateCidr: "10.0.0.0/24",
+				publicCidr:  "10.0.1.0/24",
+				rds1Cidr:    "192.168.2.0/16",
+				rds2Cidr:    "10.0.3.0/16",
+			},
+			wantErr:       true,
+			desiredErrMsg: "error validating CIDR ranges - rds1-subnet-range must be within vpc-network-range",
+		},
+		{
+			name: "errs if provider is AWS and rds2 range is not in default range",
+			args: args{
+				provider:    awsProvider,
+				networkCidr: "10.0.0.0/16",
+				privateCidr: "10.0.0.0/24",
+				publicCidr:  "10.0.1.0/24",
+				rds1Cidr:    "10.0.3.0/16",
+				rds2Cidr:    "192.168.2.0/16",
+			},
+			wantErr:       true,
+			desiredErrMsg: "error validating CIDR ranges - rds2-subnet-range must be within vpc-network-range",
 		},
 		{
 			name: "errs if public range overlaps with private range",
@@ -327,6 +413,8 @@ func Test_validateCidrRanges(t *testing.T) {
 				networkCidr: "10.0.0.0/16",
 				privateCidr: "10.0.0.0/24",
 				publicCidr:  "10.0.0.0/24",
+				rds1Cidr:    "10.0.3.0/16",
+				rds2Cidr:    "10.0.4.0/16",
 			},
 			wantErr:       true,
 			desiredErrMsg: "error validating CIDR ranges - public-subnet-range must not overlap private-network-range",
@@ -338,9 +426,11 @@ func Test_validateCidrRanges(t *testing.T) {
 				networkCidr: "10.0.0.0/28",
 				privateCidr: "10.0.0.0/32",
 				publicCidr:  "10.0.0.0/24",
+				rds1Cidr:    "10.0.3.0/16",
+				rds2Cidr:    "10.0.4.0/16",
 			},
 			wantErr:       true,
-			desiredErrMsg: "error validating CIDR ranges - vpc-network-range is not big enough, at least 16 usable IPs needed.",
+			desiredErrMsg: "error validating CIDR ranges - vpc-network-range is not big enough, at least /26 needed.",
 		},
 		{
 			name: "errs if private cidr range is not big enough (8 usable IPs)",
@@ -349,9 +439,11 @@ func Test_validateCidrRanges(t *testing.T) {
 				networkCidr: "10.0.0.0/16",
 				privateCidr: "10.0.0.0/32",
 				publicCidr:  "10.0.0.0/24",
+				rds1Cidr:    "10.0.3.0/16",
+				rds2Cidr:    "10.0.4.0/16",
 			},
 			wantErr:       true,
-			desiredErrMsg: "error validating CIDR ranges - private-subnet-range is not big enough, at least 8 usable IPs needed.",
+			desiredErrMsg: "error validating CIDR ranges - private-subnet-range is not big enough, at least /28 needed.",
 		},
 		{
 			name: "errs if public cidr range is not big enough  (8 usable IPs)",
@@ -360,16 +452,44 @@ func Test_validateCidrRanges(t *testing.T) {
 				networkCidr: "10.0.0.0/16",
 				privateCidr: "10.0.0.0/24",
 				publicCidr:  "10.0.0.0/32",
+				rds1Cidr:    "10.0.3.0/16",
+				rds2Cidr:    "10.0.4.0/16",
 			},
 			wantErr:       true,
-			desiredErrMsg: "error validating CIDR ranges - public-subnet-range is not big enough, at least 8 usable IPs needed.",
+			desiredErrMsg: "error validating CIDR ranges - public-subnet-range is not big enough, at least /28 needed.",
+		},
+		{
+			name: "errs if rds1 cidr range is not big enough  (8 usable IPs)",
+			args: args{
+				provider:    awsProvider,
+				networkCidr: "10.0.0.0/16",
+				privateCidr: "10.0.0.0/24",
+				publicCidr:  "10.0.0.0/24",
+				rds1Cidr:    "10.0.3.0/32",
+				rds2Cidr:    "10.0.4.0/16",
+			},
+			wantErr:       true,
+			desiredErrMsg: "error validating CIDR ranges - rds1-subnet-range is not big enough, at least /29 needed.",
+		},
+		{
+			name: "errs if rds2 cidr range is not big enough  (8 usable IPs)",
+			args: args{
+				provider:    awsProvider,
+				networkCidr: "10.0.0.0/16",
+				privateCidr: "10.0.0.0/24",
+				publicCidr:  "10.0.0.0/24",
+				rds1Cidr:    "10.0.3.0/24",
+				rds2Cidr:    "10.0.4.0/32",
+			},
+			wantErr:       true,
+			desiredErrMsg: "error validating CIDR ranges - rds2-subnet-range is not big enough, at least /29 needed.",
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			err := validateCidrRanges(tt.args.provider, tt.args.networkCidr, tt.args.publicCidr, tt.args.privateCidr)
+			err := validateCidrRanges(tt.args.provider, tt.args.networkCidr, tt.args.publicCidr, tt.args.privateCidr, tt.args.rds1Cidr, tt.args.rds2Cidr)
 
-			if (err == nil && tt.wantErr) || (err != nil && ! tt.wantErr){
+			if (err == nil && tt.wantErr) || (err != nil && ! tt.wantErr) {
 				t.Errorf("validateCidrRanges() error = %v, wantErr %v", err, tt.wantErr)
 			}
 

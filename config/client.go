@@ -220,6 +220,8 @@ func (client *Client) LoadOrCreate(deployArgs *deploy.Args) (Config, bool, bool,
 			config.NetworkCIDR = deployArgs.NetworkCIDR
 			config.PublicCIDR = deployArgs.PublicCIDR
 			config.PrivateCIDR = deployArgs.PrivateCIDR
+			config.Rds1CIDR = deployArgs.Rds1CIDR
+			config.Rds2CIDR = deployArgs.Rds2CIDR
 		}
 	}
 

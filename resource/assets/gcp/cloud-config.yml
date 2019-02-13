@@ -111,9 +111,9 @@ networks:
     az: z1
     static: {{ .PublicCIDRStatic }}
     reserved: {{ .PublicCIDRReserved }}
-  cloud_properties:
-    network_name: {{ .Network }}
-    subnetwork_name: {{ .PublicSubnetwork }}
+    cloud_properties:
+      network_name: {{ .Network }}
+      subnetwork_name: {{ .PublicSubnetwork }}
 - name: private
   type: manual
   subnets:
@@ -122,10 +122,10 @@ networks:
     dns: {{ .PrivateCIDRDNS }}
     az: z1
     reserved: {{ .PrivateCIDRReserved }}
-  cloud_properties:
-    network_name: {{ .Network }}
-    subnetwork_name: {{ .PrivateSubnetwork }}
-    tags: [no-ip]
+    cloud_properties:
+      network_name: {{ .Network }}
+      subnetwork_name: {{ .PrivateSubnetwork }}
+      tags: [no-ip]
 - name: vip
   type: vip
 

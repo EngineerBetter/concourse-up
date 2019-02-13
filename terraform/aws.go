@@ -29,6 +29,8 @@ type AWSInputVars struct {
 	RDSInstanceClass       string
 	RDSPassword            string
 	RDSUsername            string
+	Rds1CIDR               string
+	Rds2CIDR               string
 	Region                 string
 	SourceAccessIP         string
 	TFStatePath            string

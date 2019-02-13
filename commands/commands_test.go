@@ -40,6 +40,8 @@ var _ = Describe("commands", func() {
 				Expect(session.Out).To(Say("--vpc-network-range value\\s+\\(optional\\) VPC network CIDR to deploy into, only required if IAAS is AWS"))
 				Expect(session.Out).To(Say("--public-subnet-range value\\s+\\(optional\\) public network CIDR \\(if IAAS is AWS must be within --vpc-network-range\\)"))
 				Expect(session.Out).To(Say("--private-subnet-range value\\s+\\(optional\\) private network CIDR \\(if IAAS is AWS must be within --vpc-network-range\\)"))
+				Expect(session.Out).To(Say("--rds-subnet-range1 value\\s+\\(optional\\) first rds network CIDR \\(if IAAS is AWS must be within --vpc-network-range\\)"))
+				Expect(session.Out).To(Say("--rds-subnet-range2 value\\s+\\(optional\\) second rds network CIDR \\(if IAAS is AWS must be within --vpc-network-range\\)"))
 			})
 		})
 

@@ -74,6 +74,16 @@ variable "network_cidr" {
 	default = "{{ .NetworkCIDR }}"
 }
 
+variable "rds1_cidr" {
+  type = "string"
+  default = "{{ .Rds1CIDR }}"
+}
+
+variable "rds2_cidr" {
+  type = "string"
+  default = "{{ .Rds2CIDR }}"
+}
+
 {{if .HostedZoneID }}
 variable "hosted_zone_id" {
   type = "string"
@@ -542,7 +552,7 @@ resource "aws_route_table_association" "rds_b" {
 resource "aws_subnet" "rds_a" {
   vpc_id            = "${aws_vpc.default.id}"
   availability_zone = "${element(sort(data.aws_availability_zones.available.names),0)}"
-  cidr_block        = "10.0.4.0/24"
+  cidr_block        =  "${var.rds1_cidr}"
 
   tags {
     Name = "${var.deployment}-rds-a"
@@ -554,7 +564,7 @@ resource "aws_subnet" "rds_a" {
 resource "aws_subnet" "rds_b" {
   vpc_id            = "${aws_vpc.default.id}"
   availability_zone = "${element(sort(data.aws_availability_zones.available.names),1)}"
-  cidr_block        = "10.0.5.0/24"
+  cidr_block        = "${var.rds2_cidr}"
 
   tags {
     Name = "${var.deployment}-rds-b"

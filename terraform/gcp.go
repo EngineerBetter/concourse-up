@@ -46,8 +46,8 @@ type GCPOutputs struct {
 	Network                    MetadataStringValue `json:"network" valid:"required"`
 	PrivateSubnetworkName      MetadataStringValue `json:"private_subnetwork_name" valid:"required"`
 	PublicSubnetworkName       MetadataStringValue `json:"public_subnetwork_name" valid:"required"`
-	PrivateSubnetworInternalGw MetadataStringValue `json:"private_subnetwor_internal_gw" valid:"required"`
-	PublicSubnetworInternalGw  MetadataStringValue `json:"public_subnetwor_internal_gw" valid:"required"`
+	PrivateSubnetworkInternalGw MetadataStringValue `json:"private_subnetwork_internal_gw" valid:"required"`
+	PublicSubnetworkInternalGw  MetadataStringValue `json:"public_subnetwork_internal_gw" valid:"required"`
 	ATCPublicIP                MetadataStringValue `json:"atc_public_ip" valid:"required"`
 	DirectorAccountCreds       MetadataStringValue `json:"director_account_creds" valid:"required"`
 	DirectorPublicIP           MetadataStringValue `json:"director_public_ip" valid:"required"`

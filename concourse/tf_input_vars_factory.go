@@ -56,6 +56,8 @@ func (f *AWSInputVarsFactory) NewInputVars(c config.Config) terraform.InputVars 
 		RDSInstanceClass:       c.RDSInstanceClass,
 		RDSPassword:            c.RDSPassword,
 		RDSUsername:            c.RDSUsername,
+		Rds1CIDR:               c.Rds1CIDR,
+		Rds2CIDR:               c.Rds2CIDR,
 		Region:                 c.Region,
 		SourceAccessIP:         c.SourceAccessIP,
 		TFStatePath:            c.TFStatePath,

@@ -63,6 +63,8 @@ type Config struct {
 	PrivateCIDR               string   `json:"private_cidr"`
 	PublicCIDR                string   `json:"public_cidr"`
 	NetworkCIDR               string   `json:"network_cidr"`
+	Rds1CIDR                  string   `json:"rds1_cidr"`
+	Rds2CIDR                  string   `json:"rds2_cidr"`
 }
 
 func generateDefaultConfig(project, deployment, configBucket, region, namespace string) (Config, error) {
@@ -96,7 +98,10 @@ func generateDefaultConfig(project, deployment, configBucket, region, namespace 
 		Namespace:                namespace,
 		PrivateCIDR:              "10.0.1.0/24",
 		PublicCIDR:               "10.0.0.0/24",
-		NetworkCIDR:              "10.0.0.0/16"}
+		NetworkCIDR:              "10.0.0.0/16",
+		Rds1CIDR:                 "10.0.4.0/24",
+		Rds2CIDR:                 "10.0.5.0/24",
+	}
 
 	return conf, nil
 }

@@ -167,6 +167,18 @@ var deployFlags = []cli.Flag{
 		EnvVar:      "PRIVATE_SUBNET_RANGE",
 		Destination: &initialDeployArgs.PrivateCIDR,
 	},
+	cli.StringFlag{
+		Name:        "rds-subnet-range1",
+		Usage:       "(optional) first rds network CIDR (if IAAS is AWS must be within --vpc-network-range)",
+		EnvVar:      "RDS_SUBNET_RANGE1",
+		Destination: &initialDeployArgs.Rds1CIDR,
+	},
+	cli.StringFlag{
+		Name:        "rds-subnet-range2",
+		Usage:       "(optional) second rds network CIDR (if IAAS is AWS must be within --vpc-network-range)",
+		EnvVar:      "RDS_SUBNET_RANGE2",
+		Destination: &initialDeployArgs.Rds2CIDR,
+	},
 }
 
 func deployAction(c *cli.Context, deployArgs deploy.Args, provider iaas.Provider) error {
@@ -192,7 +204,7 @@ func deployAction(c *cli.Context, deployArgs deploy.Args, provider iaas.Provider
 		return err
 	}
 
-	err = validateCidrRanges(provider, deployArgs.NetworkCIDR, deployArgs.PublicCIDR, deployArgs.PrivateCIDR)
+	err = validateCidrRanges(provider, deployArgs.NetworkCIDR, deployArgs.PublicCIDR, deployArgs.PrivateCIDR, deployArgs.Rds1CIDR, deployArgs.Rds2CIDR)
 	if err != nil {
 		return err
 	}
@@ -221,9 +233,9 @@ func validateDeployArgs(c *cli.Context, deployArgs deploy.Args) (deploy.Args, er
 func setZoneAndRegion(deployArgs deploy.Args) (deploy.Args, error) {
 	if !deployArgs.AWSRegionIsSet {
 		switch strings.ToUpper(deployArgs.IAAS) {
-		case awsConst: //nolint
+		case awsConst:                         //nolint
 			deployArgs.AWSRegion = "eu-west-1" //nolint
-		case gcpConst: //nolint
+		case gcpConst:                            //nolint
 			deployArgs.AWSRegion = "europe-west1" //nolint
 		}
 	}
@@ -271,16 +283,16 @@ func validateNameLength(name string, provider iaas.Provider) error {
 	return nil
 }
 
-func validateCidrRanges(provider iaas.Provider, networkCidr, publicCidr, privateCidr string) error {
-	var parsedNetworkCidr, parsedPublicCidr, parsedPrivateCidr *net.IPNet
+func validateCidrRanges(provider iaas.Provider, networkCidr, publicCidr, privateCidr, rds1Cidr, rds2Cidr string) error {
+	var parsedNetworkCidr, parsedPublicCidr, parsedPrivateCidr, parsedRds1Cidr, parsedRds2Cidr *net.IPNet
 	var err error
 
-	if networkCidr == "" && publicCidr == "" && privateCidr == "" {
+	if networkCidr == "" && publicCidr == "" && privateCidr == ""  && rds1Cidr == "" && rds2Cidr == "" {
 		return nil
 	}
 
 	if provider.IAAS() == iaas.AWS {
-		if (privateCidr != "" || publicCidr != "") && networkCidr == "" {
+		if (privateCidr != "" || publicCidr != "" || rds1Cidr != "" || rds2Cidr != "") && networkCidr == "" {
 			return errors.New("error validating CIDR ranges - vpc-network-range must be provided when using AWS")
 		}
 		_, parsedNetworkCidr, err = net.ParseCIDR(networkCidr)
@@ -288,8 +300,26 @@ func validateCidrRanges(provider iaas.Provider, networkCidr, publicCidr, private
 			return errors.New("error validating CIDR ranges - vpc-network-range is not a valid CIDR")
 		}
 		if !validateNetworkSize(parsedNetworkCidr) {
-			return errors.New("error validating CIDR ranges - vpc-network-range is not big enough, at least 16 usable IPs needed.")
+			return errors.New("error validating CIDR ranges - vpc-network-range is not big enough, at least /26 needed.")
 		}
+		if rds1Cidr == "" || rds2Cidr == "" {
+			return errors.New("error validating CIDR ranges - both rds1-subnet-range and rds2-subnet-range must be provided")
+		}
+		_, parsedRds1Cidr, err = net.ParseCIDR(rds1Cidr)
+		if err != nil {
+			return errors.New("error validating CIDR ranges - rds1-subnet-range is not a valid CIDR")
+		}
+		if !validateRdsSubnetSize(parsedRds1Cidr) {
+			return errors.New("error validating CIDR ranges - rds1-subnet-range is not big enough, at least /29 needed.")
+		}
+		_, parsedRds2Cidr, err = net.ParseCIDR(rds2Cidr)
+		if err != nil {
+			return errors.New("error validating CIDR ranges - rds2-subnet-range is not a valid CIDR")
+		}
+		if !validateRdsSubnetSize(parsedRds2Cidr) {
+			return errors.New("error validating CIDR ranges - rds2-subnet-range is not big enough, at least /29 needed.")
+		}
+
 	}
 	if privateCidr != "" || publicCidr != "" {
 		if privateCidr == "" || publicCidr == "" {
@@ -301,14 +331,14 @@ func validateCidrRanges(provider iaas.Provider, networkCidr, publicCidr, private
 		return errors.New("error validating CIDR ranges - public-subnet-range is not a valid CIDR")
 	}
 	if !validateSubnetSize(parsedPublicCidr) {
-		return errors.New("error validating CIDR ranges - public-subnet-range is not big enough, at least 8 usable IPs needed.")
+		return errors.New("error validating CIDR ranges - public-subnet-range is not big enough, at least /28 needed.")
 	}
 	_, parsedPrivateCidr, err = net.ParseCIDR(privateCidr)
 	if err != nil {
 		return errors.New("error validating CIDR ranges - private-subnet-range is not a valid CIDR")
 	}
 	if !validateSubnetSize(parsedPrivateCidr) {
-		return errors.New("error validating CIDR ranges - private-subnet-range is not big enough, at least 8 usable IPs needed.")
+		return errors.New("error validating CIDR ranges - private-subnet-range is not big enough, at least /28 needed.")
 	}
 
 	if provider.IAAS() == iaas.AWS {
@@ -318,6 +348,14 @@ func validateCidrRanges(provider iaas.Provider, networkCidr, publicCidr, private
 
 		if !parsedNetworkCidr.Contains(parsedPrivateCidr.IP) {
 			return errors.New("error validating CIDR ranges - private-subnet-range must be within vpc-network-range")
+		}
+
+		if !parsedNetworkCidr.Contains(parsedRds1Cidr.IP) {
+			return errors.New("error validating CIDR ranges - rds1-subnet-range must be within vpc-network-range")
+		}
+
+		if !parsedNetworkCidr.Contains(parsedRds2Cidr.IP) {
+			return errors.New("error validating CIDR ranges - rds2-subnet-range must be within vpc-network-range")
 		}
 
 		if parsedPublicCidr.Contains(parsedPrivateCidr.IP) || parsedPrivateCidr.Contains(parsedPublicCidr.IP) {
@@ -330,7 +368,7 @@ func validateCidrRanges(provider iaas.Provider, networkCidr, publicCidr, private
 
 func cidrSize(cidr *net.IPNet) float64 {
 	prefix, suffix := cidr.Mask.Size()
-	return math.Pow(2, float64(suffix - prefix))
+	return math.Pow(2, float64(suffix-prefix))
 }
 
 func validateNetworkSize(cidr *net.IPNet) bool {
@@ -341,6 +379,11 @@ func validateNetworkSize(cidr *net.IPNet) bool {
 func validateSubnetSize(cidr *net.IPNet) bool {
 	size := cidrSize(cidr)
 	return size > 8
+}
+
+func validateRdsSubnetSize(cidr *net.IPNet) bool {
+	size := cidrSize(cidr)
+	return size > 4
 }
 
 func buildClient(name, version string, deployArgs deploy.Args, provider iaas.Provider) (*concourse.Client, error) {

@@ -57,6 +57,10 @@ type Args struct {
 	PublicCIDRIsSet  bool
 	PrivateCIDR      string
 	PrivateCIDRIsSet bool
+	Rds1CIDR         string
+	Rds1CIDRIsSet    bool
+	Rds2CIDR         string
+	Rds2CIDRIsSet    bool
 }
 
 // MarkSetFlags is marking the IsSet DeployArgs
@@ -106,6 +110,10 @@ func (a *Args) MarkSetFlags(c FlagSetChecker) error {
 				a.PublicCIDRIsSet = true
 			case "private-subnet-range":
 				a.PrivateCIDRIsSet = true
+			case "rds-subnet-range1":
+				a.Rds1CIDRIsSet = true
+			case "rds-subnet-range2":
+				a.Rds2CIDRIsSet = true
 			default:
 				return fmt.Errorf("flag %q is not supported by deployment flags", f)
 			}

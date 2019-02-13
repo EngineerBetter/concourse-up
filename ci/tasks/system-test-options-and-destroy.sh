@@ -30,7 +30,9 @@ then
     region=us-east-1
     args+=(--domain cup.engineerbetter.com)
 
-    args+=(--vpc-network-range 192.168.0.0/16)
+    args+=(--vpc-network-range 192.168.0.0/24)
+    args+=(--rds-subnet-range1 192.168.0.64/29)
+    args+=(--rds-subnet-range2 192.168.0.72/29)
 elif [ "$IAAS" = "GCP" ]
 then
     # shellcheck disable=SC2034
@@ -38,8 +40,8 @@ then
     args+=(--domain cup.gcp.engineerbetter.com)
 fi
 
-args+=(--public-subnet-range 192.168.0.0/24)
-args+=(--private-subnet-range 192.168.1.0/24)
+args+=(--public-subnet-range 192.168.0.0/27)
+args+=(--private-subnet-range 192.168.0.32/27)
 
 trapCustomCleanup
 
@@ -49,7 +51,7 @@ args+=(--region "$region")
 ./cup deploy "${args[@]}" --iaas "$IAAS" "$deployment"
 assertTagsSet
 assertGitHubAuthConfigured
-assertNetworkCidrsCorrect 192.168.0.0/24 192.168.1.0/24 192.168.0.0/16
+assertNetworkCidrsCorrect 192.168.0.0/27 192.168.0.32/27 192.168.0.0/24
 
 assertPipelinesCanReadFromCredhub
 sleep 60
