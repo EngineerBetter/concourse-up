@@ -29,16 +29,19 @@ import (
 )
 
 var _ = Describe("client", func() {
-	var buildClient func() concourse.IClient
-	var buildClientOtherRegion func() concourse.IClient
-	var actions []string
+	var certGenerationActions []string
 	var stdout *gbytes.Buffer
 	var stderr *gbytes.Buffer
 	var deleteBoshDirectorError error
 	var args *deploy.Args
 	var configInBucket, configAfterLoad, configAfterCreateEnv config.Config
-	var ipChecker func() (string, error)
+	var terraformOutputs terraform.AWSOutputs
+
 	var directorStateFixture, directorCredsFixture []byte
+
+	var buildClient func() concourse.IClient
+	var buildClientOtherRegion func() concourse.IClient
+	var ipChecker func() (string, error)
 	var tfInputVarsFactory *concoursefakes.FakeTFInputVarsFactory
 	var flyClient *flyfakes.FakeIClient
 	var terraformCLI *terraformfakes.FakeCLIInterface
@@ -51,15 +54,10 @@ var _ = Describe("client", func() {
 		provider.RegionReturns("eu-west-1")
 		provider.IAASReturns(iaas.AWS)
 		provider.CheckForWhitelistedIPStub = func(ip, securityGroup string) (bool, error) {
-			actions = append(actions, "checking security group for IP")
 			if ip == "1.2.3.4" {
 				return false, nil
 			}
 			return true, nil
-		}
-		provider.DeleteVMsInVPCStub = func(vpcID string) ([]string, error) {
-			actions = append(actions, fmt.Sprintf("deleting vms in %s", vpcID))
-			return nil, nil
 		}
 		provider.FindLongestMatchingHostedZoneStub = func(subdomain string) (string, string, error) {
 			if subdomain == "ci.google.com" {
@@ -86,55 +84,21 @@ var _ = Describe("client", func() {
 		awsInputVarsFactory, err := concourse.NewTFInputVarsFactory(provider)
 		Expect(err).ToNot(HaveOccurred())
 		tfInputVarsFactory.NewInputVarsStub = func(i config.Config) terraform.InputVars {
-			actions = append(actions, "converting config.Config to TFInputVars")
 			return awsInputVarsFactory.NewInputVars(i)
 		}
 		return tfInputVarsFactory
 	}
 
-	var setupFakeConfigClient = func() *configfakes.FakeIClient {
+	var setupFakeConfigClient = func(startingConfig config.Config) *configfakes.FakeIClient {
 		configClient = &configfakes.FakeIClient{}
-		configClient.LoadStub = func() (config.Config, error) {
-			actions = append(actions, "loading config file")
-			return configInBucket, nil
-		}
-		configClient.DeleteAssetStub = func(filename string) error {
-			actions = append(actions, fmt.Sprintf("deleting config asset: %s", filename))
-			return nil
-		}
-		configClient.UpdateStub = func(config config.Config) error {
-			actions = append(actions, "updating config file")
-			return nil
-		}
-		configClient.StoreAssetStub = func(filename string, contents []byte) error {
-			actions = append(actions, fmt.Sprintf("storing config asset: %s", filename))
-			return nil
-		}
-		configClient.DeleteAllStub = func(config config.Config) error {
-			actions = append(actions, "deleting config")
-			return nil
-		}
-		configClient.ConfigExistsStub = func() (bool, error) {
-			actions = append(actions, "checking to see if config exists")
-			return true, nil
-		}
+		configClient.LoadReturns(startingConfig, nil)
+		configClient.ConfigExistsReturns(true, nil)
 		return configClient
 	}
 
 	var setupFakeTerraformCLI = func(terraformOutputs terraform.AWSOutputs) *terraformfakes.FakeCLIInterface {
 		terraformCLI = &terraformfakes.FakeCLIInterface{}
-		terraformCLI.ApplyStub = func(inputVars terraform.InputVars, dryrun bool) error {
-			actions = append(actions, "applying terraform")
-			return nil
-		}
-		terraformCLI.DestroyStub = func(conf terraform.InputVars) error {
-			actions = append(actions, "destroying terraform")
-			return nil
-		}
-		terraformCLI.BuildOutputStub = func(conf terraform.InputVars) (terraform.Outputs, error) {
-			actions = append(actions, "initializing terraform outputs")
-			return &terraformOutputs, nil
-		}
+		terraformCLI.BuildOutputReturns(&terraformOutputs, nil)
 		return terraformCLI
 	}
 
@@ -145,31 +109,13 @@ var _ = Describe("client", func() {
 		directorCredsFixture, err = ioutil.ReadFile("fixtures/director-creds.yml")
 		Expect(err).ToNot(HaveOccurred())
 
-		certGenerator := func(c func(u *certs.User) (*lego.Client, error), caName string, provider iaas.Provider, ip ...string) (*certs.Certs, error) {
-			actions = append(actions, fmt.Sprintf("generating cert ca: %s, cn: %s", caName, ip))
-			return &certs.Certs{
-				CACert: []byte("----EXAMPLE CERT----"),
-			}, nil
-		}
-
-		awsClient := setupFakeAwsProvider()
-		otherRegionClient := setupFakeOtherRegionProvider()
-		tfInputVarsFactory = setupFakeTfInputVarsFactory()
-		configClient = setupFakeConfigClient()
-
-		flyClient = &flyfakes.FakeIClient{}
-		flyClient.SetDefaultPipelineStub = func(config config.Config, allowFlyVersionDiscrepancy bool) error {
-			actions = append(actions, "setting default pipeline")
-			return nil
-		}
-
 		args = &deploy.Args{
 			AllowIPs:    "0.0.0.0/0",
 			DBSize:      "small",
 			DBSizeIsSet: false,
 		}
 
-		terraformOutputs := terraform.AWSOutputs{
+		terraformOutputs = terraform.AWSOutputs{
 			ATCPublicIP:              terraform.MetadataStringValue{Value: "77.77.77.77"},
 			ATCSecurityGroupID:       terraform.MetadataStringValue{Value: "sg-999"},
 			BlobstoreBucket:          terraform.MetadataStringValue{Value: "blobs.aws.com"},
@@ -190,7 +136,7 @@ var _ = Describe("client", func() {
 		}
 
 		deleteBoshDirectorError = nil
-		actions = []string{}
+		certGenerationActions = []string{}
 		configInBucket = config.Config{
 			PublicKey: "example-public-key",
 			PrivateKey: `-----BEGIN RSA PRIVATE KEY-----
@@ -246,32 +192,27 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 		configAfterCreateEnv.Domain = "77.77.77.77"
 		configAfterCreateEnv.Tags = []string{"concourse-up-version=some version"}
 		configAfterCreateEnv.Version = "some version"
+	})
 
+	JustBeforeEach(func() {
+		certGenerator := func(c func(u *certs.User) (*lego.Client, error), caName string, provider iaas.Provider, ip ...string) (*certs.Certs, error) {
+			certGenerationActions = append(certGenerationActions, fmt.Sprintf("generating cert ca: %s, cn: %s", caName, ip))
+			return &certs.Certs{
+				CACert: []byte("----EXAMPLE CERT----"),
+			}, nil
+		}
+
+		flyClient = &flyfakes.FakeIClient{}
+		awsClient := setupFakeAwsProvider()
+		otherRegionClient := setupFakeOtherRegionProvider()
+		tfInputVarsFactory = setupFakeTfInputVarsFactory()
+		configClient = setupFakeConfigClient(configInBucket)
 		terraformCLI = setupFakeTerraformCLI(terraformOutputs)
 
 		boshClientFactory := func(config config.Config, outputs terraform.Outputs, director director.IClient, stdout, stderr io.Writer, provider iaas.Provider) (bosh.IClient, error) {
 			boshClient = &boshfakes.FakeIClient{}
-			boshClient.DeployStub = func(stateFileBytes, credsFileBytes []byte, detach bool) ([]byte, []byte, error) {
-				if detach {
-					actions = append(actions, "deploying director in self-update mode")
-				} else {
-					actions = append(actions, "deploying director")
-				}
-				return directorStateFixture, directorCredsFixture, nil
-			}
-			boshClient.DeleteStub = func([]byte) ([]byte, error) {
-				actions = append(actions, "deleting director")
-				return nil, deleteBoshDirectorError
-			}
-			boshClient.CleanupStub = func() error {
-				actions = append(actions, "cleaning up bosh init")
-				return nil
-			}
-			boshClient.InstancesStub = func() ([]bosh.Instance, error) {
-				actions = append(actions, "listing bosh instances")
-				return nil, nil
-			}
-
+			boshClient.DeployReturns(directorStateFixture, directorCredsFixture, nil)
+			boshClient.DeleteReturns(nil, deleteBoshDirectorError)
 			return boshClient, nil
 		}
 
@@ -328,11 +269,6 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 			var configAfterConcourseDeploy config.Config
 
 			BeforeEach(func() {
-				configClient.HasAssetReturnsOnCall(0, true, nil)
-				configClient.LoadAssetReturnsOnCall(0, directorStateFixture, nil)
-				configClient.HasAssetReturnsOnCall(1, true, nil)
-				configClient.LoadAssetReturnsOnCall(1, directorCredsFixture, nil)
-
 				configAfterConcourseDeploy = configAfterCreateEnv
 				configAfterConcourseDeploy.CredhubAdminClientSecret = "hxfgb56zny2yys6m9wjx"
 				configAfterConcourseDeploy.CredhubCACert = `-----BEGIN CERTIFICATE-----
@@ -367,6 +303,13 @@ wEW5QkylaPEkbVDhJWeR1I8=
 				configAfterConcourseDeploy.CredhubUsername = "credhub-cli"
 			})
 
+			JustBeforeEach(func() {
+				configClient.HasAssetReturnsOnCall(0, true, nil)
+				configClient.LoadAssetReturnsOnCall(0, directorStateFixture, nil)
+				configClient.HasAssetReturnsOnCall(1, true, nil)
+				configClient.LoadAssetReturnsOnCall(1, directorCredsFixture, nil)
+			})
+
 			It("does all the things in the right order", func() {
 				client := buildClient()
 				err := client.Deploy()
@@ -396,27 +339,16 @@ wEW5QkylaPEkbVDhJWeR1I8=
 
 				tfInputVarsFactory.NewInputVarsReturns(terraformInputVars)
 
-				Expect(actions[0]).To(Equal("checking to see if config exists"))
 				Expect(configClient).To(HaveReceived("ConfigExists"))
-				Expect(actions[1]).To(Equal("loading config file"))
 				Expect(configClient).To(HaveReceived("Load"))
-
-				Expect(actions[2]).To(Equal("converting config.Config to TFInputVars"))
 				Expect(tfInputVarsFactory).To(HaveReceived("NewInputVars").With(configAfterLoad))
-
-				Expect(actions[3]).To(Equal("applying terraform"))
 				Expect(terraformCLI).To(HaveReceived("Apply").With(terraformInputVars, false))
-
-				Expect(actions[4]).To(Equal("initializing terraform outputs"))
 				Expect(terraformCLI).To(HaveReceived("BuildOutput").With(terraformInputVars))
-
-				Expect(actions[5]).To(Equal("updating config file"))
 				Expect(configClient).To(HaveReceived("Update").With(configAfterLoad))
 
-				Expect(actions[6]).To(Equal("generating cert ca: concourse-up-happymeal, cn: [99.99.99.99 10.0.0.6]"))
-				Expect(actions[7]).To(Equal("generating cert ca: concourse-up-happymeal, cn: [77.77.77.77]"))
+				Expect(certGenerationActions[0]).To(Equal("generating cert ca: concourse-up-happymeal, cn: [99.99.99.99 10.0.0.6]"))
+				Expect(certGenerationActions[1]).To(Equal("generating cert ca: concourse-up-happymeal, cn: [77.77.77.77]"))
 
-				Expect(actions[8]).To(Equal("deploying director"))
 				Expect(configClient).To(HaveReceived("HasAsset").With("director-state.json"))
 				Expect(configClient.HasAssetArgsForCall(0)).To(Equal("director-state.json"))
 				Expect(configClient).To(HaveReceived("LoadAsset").With("director-state.json"))
@@ -427,21 +359,11 @@ wEW5QkylaPEkbVDhJWeR1I8=
 				Expect(configClient.LoadAssetArgsForCall(1)).To(Equal("director-creds.yml"))
 				Expect(boshClient).To(HaveReceived("Deploy").With(directorStateFixture, directorCredsFixture, false))
 
-				Expect(actions[9]).To(Equal("storing config asset: director-state.json"))
 				Expect(configClient).To(HaveReceived("StoreAsset").With("director-state.json", directorStateFixture))
-
-				Expect(actions[10]).To(Equal("storing config asset: director-creds.yml"))
 				Expect(configClient).To(HaveReceived("StoreAsset").With("director-creds.yml", directorCredsFixture))
-
-				Expect(actions[11]).To(Equal("cleaning up bosh init"))
 				Expect(boshClient).To(HaveReceived("Cleanup"))
-
-				Expect(actions[12]).To(Equal("setting default pipeline"))
 				Expect(flyClient).To(HaveReceived("SetDefaultPipeline").With(configAfterCreateEnv, false))
-
-				Expect(actions[13]).To(Equal("updating config file"))
 				Expect(configClient).To(HaveReceived("Update").With(configAfterConcourseDeploy))
-				Expect(len(actions)).To(Equal(14))
 			})
 		})
 
@@ -453,7 +375,11 @@ wEW5QkylaPEkbVDhJWeR1I8=
 			Expect(stderr).To(gbytes.Say("WARNING: allowing access from local machine"))
 		})
 
-		Context("When a custom domain is required", func() {
+		Context("When a custom domain was previously configured", func() {
+			BeforeEach(func() {
+				configInBucket.Domain = "ci.google.com"
+			})
+
 			It("Prints a warning about adding a DNS record", func() {
 				configInBucket.Domain = "ci.google.com"
 
@@ -462,6 +388,29 @@ wEW5QkylaPEkbVDhJWeR1I8=
 				Expect(err).ToNot(HaveOccurred())
 
 				Expect(stderr).To(gbytes.Say("WARNING: adding record ci.google.com to DNS zone google.com with name ABC123"))
+			})
+
+			It("Generates certificates for that domain and not the public IP", func() {
+				client := buildClient()
+				err := client.Deploy()
+				Expect(err).ToNot(HaveOccurred())
+
+				Expect(certGenerationActions).To(ContainElement("generating cert ca: concourse-up-happymeal, cn: [ci.google.com]"))
+			})
+
+			Context("and a custom cert is provided", func() {
+				BeforeEach(func() {
+					args.TLSCert = "--- CERTIFICATE ---"
+					args.TLSKey = "--- KEY ---"
+				})
+
+				It("Prints the correct domain and not suggest using --insecure", func() {
+					client := buildClient()
+					err := client.Deploy()
+					Expect(err).ToNot(HaveOccurred())
+					Eventually(stdout).Should(gbytes.Say("DEPLOY SUCCESSFUL"))
+					Eventually(stdout).Should(gbytes.Say("fly --target happymeal login --concourse-url https://ci.google.com --username admin --password s3cret"))
+				})
 			})
 		})
 
@@ -483,6 +432,8 @@ wEW5QkylaPEkbVDhJWeR1I8=
 				provider, err := iaas.New(iaas.AWS, "eu-west-1")
 				Expect(err).ToNot(HaveOccurred())
 				awsInputVarsFactory, err := concourse.NewTFInputVarsFactory(provider)
+				Expect(err).ToNot(HaveOccurred())
+
 				var passedDBSize string
 				tfInputVarsFactory.NewInputVarsStub = func(config config.Config) terraform.InputVars {
 					passedDBSize = config.RDSInstanceClass
@@ -497,18 +448,6 @@ wEW5QkylaPEkbVDhJWeR1I8=
 			})
 		})
 
-		Context("When a custom domain is required", func() {
-			It("Generates certificates for that domain and not the public IP", func() {
-				configInBucket.Domain = "ci.google.com"
-
-				client := buildClient()
-				err := client.Deploy()
-				Expect(err).ToNot(HaveOccurred())
-
-				Expect(actions).To(ContainElement("generating cert ca: concourse-up-happymeal, cn: [ci.google.com]"))
-			})
-		})
-
 		Context("When running in self-update mode and the concourse is already deployed", func() {
 			It("Sets the default pipeline, before deploying the bosh director", func() {
 				flyClient.CanConnectStub = func() (bool, error) {
@@ -520,7 +459,7 @@ wEW5QkylaPEkbVDhJWeR1I8=
 				err := client.Deploy()
 				Expect(err).ToNot(HaveOccurred())
 
-				Expect(actions).To(ContainElement("deploying director in self-update mode"))
+				Expect(boshClient).To(HaveReceived("Deploy").With([]byte{}, []byte{}, true))
 			})
 		})
 
@@ -538,20 +477,6 @@ wEW5QkylaPEkbVDhJWeR1I8=
 			Expect(err).ToNot(HaveOccurred())
 			Eventually(stdout).Should(gbytes.Say("DEPLOY SUCCESSFUL"))
 			Eventually(stdout).Should(gbytes.Say("fly --target happymeal login --insecure --concourse-url https://77.77.77.77 --username admin --password s3cret"))
-		})
-
-		Context("When a custom cert is provided", func() {
-			It("Prints the correct domain and not suggest using --insecure", func() {
-				configInBucket.Domain = "ci.google.com"
-				args.TLSCert = "--- CERTIFICATE ---"
-				args.TLSKey = "--- KEY ---"
-
-				client := buildClient()
-				err := client.Deploy()
-				Expect(err).ToNot(HaveOccurred())
-				Eventually(stdout).Should(gbytes.Say("DEPLOY SUCCESSFUL"))
-				Eventually(stdout).Should(gbytes.Say("fly --target happymeal login --concourse-url https://ci.google.com --username admin --password s3cret"))
-			})
 		})
 
 		Context("When an existing config is loaded", func() {
