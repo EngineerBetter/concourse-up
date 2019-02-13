@@ -376,16 +376,18 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 				Expect(configClient.HasAssetArgsForCall(0)).To(Equal("director-state.json"))
 				Expect(configClient).To(HaveReceived("LoadAsset").With("director-state.json"))
 				Expect(configClient.LoadAssetArgsForCall(0)).To(Equal("director-state.json"))
-
 				Expect(configClient).To(HaveReceived("HasAsset").With("director-creds.yml"))
 				Expect(configClient.HasAssetArgsForCall(1)).To(Equal("director-creds.yml"))
 				Expect(configClient).To(HaveReceived("LoadAsset").With("director-creds.yml"))
 				Expect(configClient.LoadAssetArgsForCall(1)).To(Equal("director-creds.yml"))
-
 				Expect(boshClient).To(HaveReceived("Deploy").With(directorStateFixture, directorCredsFixture, false))
 
 				Expect(actions[9]).To(Equal("storing config asset: director-state.json"))
+				Expect(configClient).To(HaveReceived("StoreAsset").With("director-state.json", directorStateFixture))
+
 				Expect(actions[10]).To(Equal("storing config asset: director-creds.yml"))
+				Expect(configClient).To(HaveReceived("StoreAsset").With("director-creds.yml", directorCredsFixture))
+
 				Expect(actions[11]).To(Equal("cleaning up bosh init"))
 				Expect(actions[12]).To(Equal("setting default pipeline"))
 				Expect(actions[13]).To(Equal("updating config file"))
