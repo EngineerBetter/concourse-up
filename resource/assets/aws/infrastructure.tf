@@ -87,7 +87,8 @@ variable "hosted_zone_record_prefix" {
 {{end}}
 
 provider "aws" {
-	region = "{{ .Region }}"
+  region = "{{ .Region }}"
+  version = "~> 1.58"
 }
 
 resource "aws_key_pair" "default" {
