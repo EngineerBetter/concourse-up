@@ -480,11 +480,20 @@ wEW5QkylaPEkbVDhJWeR1I8=
 				args.DBSize = "small"
 				args.DBSizeIsSet = false
 
+				provider, err := iaas.New(iaas.AWS, "eu-west-1")
+				Expect(err).ToNot(HaveOccurred())
+				awsInputVarsFactory, err := concourse.NewTFInputVarsFactory(provider)
+				var passedDBSize string
+				tfInputVarsFactory.NewInputVarsStub = func(config config.Config) terraform.InputVars {
+					passedDBSize = config.RDSInstanceClass
+					return awsInputVarsFactory.NewInputVars(config)
+				}
+
 				client := buildClient()
-				err := client.Deploy()
+				err = client.Deploy()
 				Expect(err).ToNot(HaveOccurred())
 
-				Expect(actions).To(ContainElement("applying terraform"))
+				Expect(passedDBSize).To(Equal(configInBucket.RDSInstanceClass))
 			})
 		})
 
