@@ -38,7 +38,7 @@ var _ = Describe("client", func() {
 	var args *deploy.Args
 	var configInBucket, configAfterLoad config.Config
 	var ipChecker func() (string, error)
-	var directorStateFixture, directorCredsFixture, exampleDirectorCreds []byte
+	var directorStateFixture, directorCredsFixture []byte
 	var tfInputVarsFactory *concoursefakes.FakeTFInputVarsFactory
 	var flyClient *flyfakes.FakeIClient
 	var terraformCLI *terraformfakes.FakeCLIInterface
@@ -139,6 +139,12 @@ var _ = Describe("client", func() {
 	}
 
 	BeforeEach(func() {
+		var err error
+		directorStateFixture, err = ioutil.ReadFile("fixtures/director-state.json")
+		Expect(err).ToNot(HaveOccurred())
+		directorCredsFixture, err = ioutil.ReadFile("fixtures/director-creds.yml")
+		Expect(err).ToNot(HaveOccurred())
+
 		certGenerator := func(c func(u *certs.User) (*lego.Client, error), caName string, provider iaas.Provider, ip ...string) (*certs.Certs, error) {
 			actions = append(actions, fmt.Sprintf("generating cert ca: %s, cn: %s", caName, ip))
 			return &certs.Certs{
@@ -234,8 +240,6 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 		configAfterLoad.AllowIPs = "\"0.0.0.0/0\""
 		configAfterLoad.SourceAccessIP = "192.0.2.0"
 
-		exampleDirectorCreds = []byte("atc_password: s3cret")
-
 		terraformCLI = setupFakeTerraformCLI(terraformOutputs)
 
 		boshClientFactory := func(config config.Config, outputs terraform.Outputs, director director.IClient, stdout, stderr io.Writer, provider iaas.Provider) (bosh.IClient, error) {
@@ -246,7 +250,7 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 				} else {
 					actions = append(actions, "deploying director")
 				}
-				return nil, exampleDirectorCreds, nil
+				return directorStateFixture, directorCredsFixture, nil
 			}
 			boshClient.DeleteStub = func([]byte) ([]byte, error) {
 				actions = append(actions, "deleting director")
@@ -315,12 +319,6 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 	Describe("Deploy", func() {
 		Context("when there is an existing config and no CLI args", func() {
 			BeforeEach(func() {
-				var err error
-				directorStateFixture, err = ioutil.ReadFile("fixtures/director-state.json")
-				Expect(err).ToNot(HaveOccurred())
-				directorCredsFixture, err = ioutil.ReadFile("fixtures/director-creds.yml")
-				Expect(err).ToNot(HaveOccurred())
-
 				configClient.HasAssetReturnsOnCall(0, true, nil)
 				configClient.LoadAssetReturnsOnCall(0, directorStateFixture, nil)
 				configClient.HasAssetReturnsOnCall(1, true, nil)
@@ -574,9 +572,6 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 
 	Describe("FetchInfo", func() {
 		BeforeEach(func() {
-			directorCredsFixture, err := ioutil.ReadFile("fixtures/director-creds.yml")
-			Expect(err).ToNot(HaveOccurred())
-
 			configClient.HasAssetReturnsOnCall(0, true, nil)
 			configClient.LoadAssetReturnsOnCall(0, directorCredsFixture, nil)
 		})
