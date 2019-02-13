@@ -327,6 +327,7 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 			It("does all the things in the right order", func() {
 				client := buildClient()
 				err := client.Deploy()
+				Expect(err).ToNot(HaveOccurred())
 
 				terraformInputVars := &terraform.AWSInputVars{
 					NetworkCIDR:            configAfterLoad.NetworkCIDR,
@@ -351,8 +352,6 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 				}
 
 				tfInputVarsFactory.NewInputVarsReturns(terraformInputVars)
-
-				Expect(err).ToNot(HaveOccurred())
 
 				Expect(actions[0]).To(Equal("checking to see if config exists"))
 				Expect(actions[1]).To(Equal("loading config file"))
