@@ -399,7 +399,9 @@ wEW5QkylaPEkbVDhJWeR1I8=
 				tfInputVarsFactory.NewInputVarsReturns(terraformInputVars)
 
 				Expect(actions[0]).To(Equal("checking to see if config exists"))
+				Expect(configClient).To(HaveReceived("ConfigExists"))
 				Expect(actions[1]).To(Equal("loading config file"))
+				Expect(configClient).To(HaveReceived("Load"))
 
 				Expect(actions[2]).To(Equal("converting config.Config to TFInputVars"))
 				Expect(tfInputVarsFactory).To(HaveReceived("NewInputVars").With(configAfterLoad))
