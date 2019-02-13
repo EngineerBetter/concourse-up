@@ -36,7 +36,7 @@ var _ = Describe("client", func() {
 	var stderr *gbytes.Buffer
 	var deleteBoshDirectorError error
 	var args *deploy.Args
-	var configInBucket, configAfterLoad config.Config
+	var configInBucket, configAfterLoad, configAfterDeploy config.Config
 	var ipChecker func() (string, error)
 	var directorStateFixture, directorCredsFixture []byte
 	var tfInputVarsFactory *concoursefakes.FakeTFInputVarsFactory
@@ -240,6 +240,15 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 		configAfterLoad.AllowIPs = "\"0.0.0.0/0\""
 		configAfterLoad.SourceAccessIP = "192.0.2.0"
 
+		//Mutations we expect to have been done after Deploy
+		configAfterDeploy = configAfterLoad
+		configAfterDeploy.ConcourseCACert = "----EXAMPLE CERT----"
+		configAfterDeploy.DirectorCACert = "----EXAMPLE CERT----"
+		configAfterDeploy.DirectorPublicIP = "99.99.99.99"
+		configAfterDeploy.Domain = "77.77.77.77"
+		configAfterDeploy.Tags = []string{"concourse-up-version=some version"}
+		configAfterDeploy.Version = "some version"
+
 		terraformCLI = setupFakeTerraformCLI(terraformOutputs)
 
 		boshClientFactory := func(config config.Config, outputs terraform.Outputs, director director.IClient, stdout, stderr io.Writer, provider iaas.Provider) (bosh.IClient, error) {
@@ -388,7 +397,10 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 				Expect(configClient).To(HaveReceived("StoreAsset").With("director-creds.yml", directorCredsFixture))
 
 				Expect(actions[11]).To(Equal("cleaning up bosh init"))
+
 				Expect(actions[12]).To(Equal("setting default pipeline"))
+				Expect(flyClient).To(HaveReceived("SetDefaultPipeline").With(configAfterDeploy, false))
+
 				Expect(actions[13]).To(Equal("updating config file"))
 				Expect(len(actions)).To(Equal(14))
 			})
