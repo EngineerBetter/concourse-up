@@ -162,12 +162,8 @@ func populateConfigWithDefaultsOrProvidedArguments(conf config.Config, newConfig
 	}
 
 	if newConfigCreated {
-		if deployArgs.NetworkCIDRIsSet && deployArgs.PublicCIDRIsSet && deployArgs.PrivateCIDRIsSet {
-			conf.NetworkCIDR = deployArgs.NetworkCIDR
-			conf.PublicCIDR = deployArgs.PublicCIDR
-			conf.PrivateCIDR = deployArgs.PrivateCIDR
-			conf.RDS1CIDR = deployArgs.RDS1CIDR
-			conf.RDS2CIDR = deployArgs.RDS2CIDR
+		if hasCIDRFlagsSet(deployArgs, provider) {
+			conf = populateConfigWithDeployArgsCIDRs(conf, deployArgs, provider)
 		}
 	} else {
 		// Existing config, these values are mandatory but did not exist in older versions
@@ -191,6 +187,17 @@ func populateConfigWithDefaultsOrProvidedArguments(conf config.Config, newConfig
 	return conf, isDomainUpdated, nil
 }
 
+func hasCIDRFlagsSet(deployArgs *deploy.Args, provider iaas.Provider) bool {
+	switch provider.IAAS() {
+	case iaas.AWS:
+		return deployArgs.NetworkCIDRIsSet && deployArgs.PublicCIDRIsSet && deployArgs.PrivateCIDRIsSet
+	case iaas.GCP:
+		return deployArgs.PublicCIDRIsSet && deployArgs.PrivateCIDRIsSet
+	default:
+		return false
+	}
+}
+
 func isMissingCIDRs(conf config.Config, provider iaas.Provider) bool {
 	switch provider.IAAS() {
 	case iaas.AWS:
@@ -200,6 +207,21 @@ func isMissingCIDRs(conf config.Config, provider iaas.Provider) bool {
 	default:
 		return false
 	}
+}
+
+func populateConfigWithDeployArgsCIDRs(conf config.Config, deployArgs *deploy.Args, provider iaas.Provider) config.Config {
+	switch provider.IAAS() {
+	case iaas.AWS:
+		conf.NetworkCIDR = deployArgs.NetworkCIDR
+		conf.PublicCIDR = deployArgs.PublicCIDR
+		conf.PrivateCIDR = deployArgs.PrivateCIDR
+		conf.RDS1CIDR = deployArgs.RDS1CIDR
+		conf.RDS2CIDR = deployArgs.RDS2CIDR
+	case iaas.GCP:
+		conf.PublicCIDR = deployArgs.PublicCIDR
+		conf.PrivateCIDR = deployArgs.PrivateCIDR
+	}
+	return conf
 }
 
 func populateConfigWithDefaultCIDRs(conf config.Config, provider iaas.Provider) config.Config {
