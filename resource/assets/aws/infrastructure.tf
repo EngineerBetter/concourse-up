@@ -76,12 +76,12 @@ variable "network_cidr" {
 
 variable "rds1_cidr" {
   type = "string"
-  default = "{{ .Rds1CIDR }}"
+  default = "{{ .RDS1CIDR }}"
 }
 
 variable "rds2_cidr" {
   type = "string"
-  default = "{{ .Rds2CIDR }}"
+  default = "{{ .RDS2CIDR }}"
 }
 
 {{if .HostedZoneID }}

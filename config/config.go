@@ -57,6 +57,6 @@ type Config struct {
 	PrivateCIDR               string   `json:"private_cidr"`
 	PublicCIDR                string   `json:"public_cidr"`
 	NetworkCIDR               string   `json:"network_cidr"`
-	Rds1CIDR                  string   `json:"rds1_cidr"`
-	Rds2CIDR                  string   `json:"rds2_cidr"`
+	RDS1CIDR                  string   `json:"rds1_cidr"`
+	RDS2CIDR                  string   `json:"rds2_cidr"`
 }

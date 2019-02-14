@@ -104,8 +104,8 @@ func populateConfigWithDefaults(conf config.Config, passwordGenerator func(int) 
 	conf.PrivateKey = strings.TrimSpace(string(privateKey))
 	conf.PublicCIDR = "10.0.0.0/24"
 	conf.PublicKey = strings.TrimSpace(string(publicKey))
-	conf.Rds1CIDR = "10.0.4.0/24"
-	conf.Rds2CIDR = "10.0.5.0/24"
+	conf.RDS1CIDR = "10.0.4.0/24"
+	conf.RDS2CIDR = "10.0.5.0/24"
 	conf.RDSPassword = passwordGenerator(defaultPasswordLength)
 	conf.RDSUsername = "admin" + passwordGenerator(7)
 	conf.Spot = true
@@ -170,8 +170,8 @@ func populateConfigWithDefaultsOrProvidedArguments(conf config.Config, newConfig
 			conf.NetworkCIDR = deployArgs.NetworkCIDR
 			conf.PublicCIDR = deployArgs.PublicCIDR
 			conf.PrivateCIDR = deployArgs.PrivateCIDR
-			conf.Rds1CIDR = deployArgs.Rds1CIDR
-			conf.Rds2CIDR = deployArgs.Rds2CIDR
+			conf.RDS1CIDR = deployArgs.RDS1CIDR
+			conf.RDS2CIDR = deployArgs.RDS2CIDR
 		}
 	}
 
