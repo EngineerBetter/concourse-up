@@ -3,8 +3,7 @@
 set -eu
 
 version=dev
-go generate bosh/data.go
-go generate github.com/EngineerBetter/concourse-up/...
+grep -lr --include=*.go --exclude-dir=vendor "go:generate go-bindata" . | xargs -I {} go generate {}
 GO111MODULE=on go build -mod=vendor -ldflags "
   -X github.com/EngineerBetter/concourse-up/fly.ConcourseUpVersion=$version
   -X main.ConcourseUpVersion=$version

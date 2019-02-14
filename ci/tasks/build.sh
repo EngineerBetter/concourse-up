@@ -19,9 +19,8 @@ mv concourse-up-ops/* "$GOPATH/src/github.com/EngineerBetter/concourse-up-ops"
 cd "$GOPATH/src/github.com/EngineerBetter/concourse-up" || exit 1
 
 GOOS=linux go get -u github.com/mattn/go-bindata/...
-GOOS=linux go get -u github.com/maxbrunsfeld/counterfeiter
-go generate bosh/data.go
-go generate github.com/EngineerBetter/concourse-up/...
+
+grep -lr --include=*.go --exclude-dir=vendor "go:generate go-bindata" . | xargs -I {} go generate {}
 go build -ldflags "
   -X main.ConcourseUpVersion=$version
   -X github.com/EngineerBetter/concourse-up/fly.ConcourseUpVersion=$version

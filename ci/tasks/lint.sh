@@ -10,9 +10,7 @@ mv concourse-up-ops/* "$GOPATH/src/github.com/EngineerBetter/concourse-up-ops"
 cd "$GOPATH/src/github.com/EngineerBetter/concourse-up" || exit 1
 
 go get -u github.com/mattn/go-bindata/...
-go get -u github.com/maxbrunsfeld/counterfeiter
-go generate bosh/data.go
-go generate github.com/EngineerBetter/concourse-up/...
+grep -lr --include=*.go --exclude-dir=vendor "go:generate go-bindata" . | xargs -I {} go generate {}
 gometalinter \
 --disable-all \
 --enable=goconst \
