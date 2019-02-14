@@ -8,8 +8,8 @@ import (
 
 // Args are arguments passed to the info command
 type Args struct {
-	AWSRegion          string
-	AWSRegionIsSet     bool
+	Region             string
+	RegionIsSet        bool
 	RenewNatsCert      bool
 	RenewNatsCertIsSet bool
 	Namespace          string
@@ -25,7 +25,7 @@ func (a *Args) MarkSetFlags(c FlagSetChecker) error {
 		if c.IsSet(f) {
 			switch f {
 			case "region":
-				a.AWSRegionIsSet = true
+				a.RegionIsSet = true
 			case "namespace":
 				a.NamespaceIsSet = true
 			case "renew-nats-cert":

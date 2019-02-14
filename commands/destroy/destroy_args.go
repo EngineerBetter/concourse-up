@@ -8,8 +8,8 @@ import (
 
 // Args are arguments passed to the destroy command
 type Args struct {
-	AWSRegion      string
-	AWSRegionIsSet bool
+	Region         string
+	RegionIsSet    bool
 	IAAS           string
 	Namespace      string
 	NamespaceIsSet bool
@@ -22,7 +22,7 @@ func (a *Args) MarkSetFlags(c FlagSetChecker) error {
 		if c.IsSet(f) {
 			switch f {
 			case "region":
-				a.AWSRegionIsSet = true
+				a.RegionIsSet = true
 			case "namespace":
 				a.NamespaceIsSet = true
 			case "iaas":

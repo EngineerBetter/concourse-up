@@ -104,9 +104,9 @@ func Test_setZoneAndRegion(t *testing.T) {
 		{
 			name: "region should not change if user provided it",
 			args: deploy.Args{
-				IAAS:           "AWS",
-				AWSRegion:      "us-east-1",
-				AWSRegionIsSet: true,
+				IAAS:        "AWS",
+				Region:      "us-east-1",
+				RegionIsSet: true,
 			},
 			expectedRegion: "us-east-1",
 		},
@@ -119,8 +119,8 @@ func Test_setZoneAndRegion(t *testing.T) {
 				t.Errorf("setZoneAndRegion() error = %v, wantErr %v", err, tt.wantErr)
 			}
 
-			if actual.AWSRegion != tt.expectedRegion {
-				t.Errorf("setZoneAndRegion() region = %v, expected %v", actual.AWSRegion, tt.expectedRegion)
+			if actual.Region != tt.expectedRegion {
+				t.Errorf("setZoneAndRegion() region = %v, expected %v", actual.Region, tt.expectedRegion)
 			}
 		})
 	}
@@ -489,7 +489,7 @@ func Test_validateCidrRanges(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			err := validateCidrRanges(tt.args.provider, tt.args.networkCidr, tt.args.publicCidr, tt.args.privateCidr, tt.args.rds1Cidr, tt.args.rds2Cidr)
 
-			if (err == nil && tt.wantErr) || (err != nil && ! tt.wantErr) {
+			if (err == nil && tt.wantErr) || (err != nil && !tt.wantErr) {
 				t.Errorf("validateCidrRanges() error = %v, wantErr %v", err, tt.wantErr)
 			}
 

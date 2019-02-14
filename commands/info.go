@@ -24,7 +24,7 @@ var infoFlags = []cli.Flag{
 		Name:        "region",
 		Usage:       "(optional) AWS region",
 		EnvVar:      "AWS_REGION",
-		Destination: &initialInfoArgs.AWSRegion,
+		Destination: &initialInfoArgs.Region,
 	},
 	cli.BoolFlag{
 		Name:        "json",
@@ -143,7 +143,7 @@ var infoCmd = cli.Command{
 		if err != nil {
 			return err
 		}
-		provider, err := iaas.New(iaasName, initialInfoArgs.AWSRegion)
+		provider, err := iaas.New(iaasName, initialInfoArgs.Region)
 		if err != nil {
 			return fmt.Errorf("Error creating IAAS provider on info: [%v]", err)
 		}

@@ -25,7 +25,7 @@ var maintainFlags = []cli.Flag{
 		Name:        "region",
 		Usage:       "(optional) AWS region",
 		EnvVar:      "AWS_REGION",
-		Destination: &initialMaintainArgs.AWSRegion,
+		Destination: &initialMaintainArgs.Region,
 	},
 	cli.BoolFlag{
 		Name:        "renew-nats-cert",
@@ -122,7 +122,7 @@ var maintainCmd = cli.Command{
 		if err != nil {
 			return err
 		}
-		provider, err := iaas.New(iaasName, initialMaintainArgs.AWSRegion)
+		provider, err := iaas.New(iaasName, initialMaintainArgs.Region)
 		if err != nil {
 			return fmt.Errorf("Error creating IAAS provider on maintain: [%v]", err)
 		}

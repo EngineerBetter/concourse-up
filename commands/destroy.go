@@ -28,7 +28,7 @@ var destroyFlags = []cli.Flag{
 		Name:        "region",
 		Usage:       "(optional) AWS region",
 		EnvVar:      "AWS_REGION",
-		Destination: &initialDestroyArgs.AWSRegion,
+		Destination: &initialDestroyArgs.Region,
 	},
 	cli.StringFlag{
 		Name:        "iaas",
@@ -127,7 +127,7 @@ var destroyCmd = cli.Command{
 		if err != nil {
 			return err
 		}
-		provider, err := iaas.New(iaasName, initialDestroyArgs.AWSRegion)
+		provider, err := iaas.New(iaasName, initialDestroyArgs.Region)
 		if err != nil {
 			return fmt.Errorf("Error creating IAAS provider on destroy: [%v]", err)
 		}

@@ -11,7 +11,7 @@ import (
 func TestDeployArgs_Validate(t *testing.T) {
 	defaultFields := Args{
 		AllowIPs:               "0.0.0.0",
-		AWSRegion:              "eu-west-1",
+		Region:                 "eu-west-1",
 		DBSize:                 "small",
 		DBSizeIsSet:            false,
 		Domain:                 "",

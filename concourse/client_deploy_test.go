@@ -758,7 +758,7 @@ wEW5QkylaPEkbVDhJWeR1I8=
 
 		Context("When the user tries to change the region of an existing deployment", func() {
 			BeforeEach(func() {
-				args.AWSRegion = "eu-central-1"
+				args.Region = "eu-central-1"
 			})
 
 			JustBeforeEach(func() {

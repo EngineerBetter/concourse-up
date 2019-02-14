@@ -32,7 +32,7 @@ var deployFlags = []cli.Flag{
 		Name:        "region",
 		Usage:       "(optional) AWS region",
 		EnvVar:      "AWS_REGION",
-		Destination: &initialDeployArgs.AWSRegion,
+		Destination: &initialDeployArgs.Region,
 	},
 	cli.StringFlag{
 		Name:        "domain",
@@ -231,25 +231,25 @@ func validateDeployArgs(c *cli.Context, deployArgs deploy.Args) (deploy.Args, er
 }
 
 func setZoneAndRegion(deployArgs deploy.Args) (deploy.Args, error) {
-	if !deployArgs.AWSRegionIsSet {
+	if !deployArgs.RegionIsSet {
 		switch strings.ToUpper(deployArgs.IAAS) {
-		case awsConst:                         //nolint
-			deployArgs.AWSRegion = "eu-west-1" //nolint
-		case gcpConst:                            //nolint
-			deployArgs.AWSRegion = "europe-west1" //nolint
+		case awsConst: //nolint
+			deployArgs.Region = "eu-west-1" //nolint
+		case gcpConst: //nolint
+			deployArgs.Region = "europe-west1" //nolint
 		}
 	}
 
-	if deployArgs.ZoneIsSet && deployArgs.AWSRegionIsSet {
-		if err := zoneBelongsToRegion(deployArgs.Zone, deployArgs.AWSRegion); err != nil {
+	if deployArgs.ZoneIsSet && deployArgs.RegionIsSet {
+		if err := zoneBelongsToRegion(deployArgs.Zone, deployArgs.Region); err != nil {
 			return deployArgs, err
 		}
 	}
 
-	if deployArgs.ZoneIsSet && !deployArgs.AWSRegionIsSet {
+	if deployArgs.ZoneIsSet && !deployArgs.RegionIsSet {
 		region, message := regionFromZone(deployArgs.Zone)
 		if region != "" {
-			deployArgs.AWSRegion = region
+			deployArgs.Region = region
 			fmt.Print(message)
 		}
 	}
@@ -287,7 +287,7 @@ func validateCidrRanges(provider iaas.Provider, networkCidr, publicCidr, private
 	var parsedNetworkCidr, parsedPublicCidr, parsedPrivateCidr, parsedRds1Cidr, parsedRds2Cidr *net.IPNet
 	var err error
 
-	if networkCidr == "" && publicCidr == "" && privateCidr == ""  && rds1Cidr == "" && rds2Cidr == "" {
+	if networkCidr == "" && publicCidr == "" && privateCidr == "" && rds1Cidr == "" && rds2Cidr == "" {
 		return nil
 	}
 
@@ -430,7 +430,7 @@ var deployCmd = cli.Command{
 		if err != nil {
 			return err
 		}
-		provider, err := iaas.New(iaasName, initialDeployArgs.AWSRegion)
+		provider, err := iaas.New(iaasName, initialDeployArgs.Region)
 		if err != nil {
 			return fmt.Errorf("Error creating IAAS provider on deploy: [%v]", err)
 		}

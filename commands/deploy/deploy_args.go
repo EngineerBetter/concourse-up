@@ -12,8 +12,8 @@ import (
 type Args struct {
 	IAAS             string
 	IAASIsSet        bool
-	AWSRegion        string
-	AWSRegionIsSet   bool
+	Region           string
+	RegionIsSet      bool
 	Domain           string
 	DomainIsSet      bool
 	TLSCert          string
@@ -69,7 +69,7 @@ func (a *Args) MarkSetFlags(c FlagSetChecker) error {
 		if c.IsSet(f) {
 			switch f {
 			case "region":
-				a.AWSRegionIsSet = true
+				a.RegionIsSet = true
 			case "domain":
 				a.DomainIsSet = true
 			case "tls-cert":
