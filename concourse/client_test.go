@@ -3,10 +3,11 @@ package concourse_test
 import (
 	"errors"
 	"fmt"
-	"github.com/EngineerBetter/concourse-up/terraform/terraformfakes"
-	"github.com/xenolf/lego/lego"
 	"io"
 	"reflect"
+
+	"github.com/EngineerBetter/concourse-up/terraform/terraformfakes"
+	"github.com/xenolf/lego/lego"
 
 	"github.com/EngineerBetter/concourse-up/bosh"
 	"github.com/EngineerBetter/concourse-up/certs"
@@ -53,9 +54,9 @@ var _ = Describe("client", func() {
 		PublicSubnetID           string
 		VMsSecurityGroupID       string
 		VPCID                    string
-		NetworkCIDR      string
-		PublicCIDR       string
-		PrivateCIDR      string
+		NetworkCIDR              string
+		PublicCIDR               string
+		PrivateCIDR              string
 	}
 	var terraformMetadata TerraformMetadata
 
@@ -191,6 +192,8 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 			ConcoursePassword: "s3cret",
 			ConcourseUsername: "admin",
 			RDSInstanceClass:  "db.t2.medium",
+			PublicCIDR:        "192.168.0.0/24",
+			PrivateCIDR:       "192.168.1.0/24",
 		}
 
 		exampleDirectorCreds = []byte("atc_password: s3cret")
@@ -377,7 +380,7 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 			err := client.Deploy()
 			Expect(err).ToNot(HaveOccurred())
 
-			Expect(actions).To(ContainElement("generating cert ca: concourse-up-happymeal, cn: [99.99.99.99 10.0.0.6]"))
+			Expect(actions).To(ContainElement("generating cert ca: concourse-up-happymeal, cn: [99.99.99.99 192.168.0.6]"))
 		})
 
 		It("Generates certificates for concourse", func() {

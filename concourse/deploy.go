@@ -4,10 +4,13 @@ import (
 	"crypto/x509"
 	"encoding/pem"
 	"fmt"
-	"github.com/EngineerBetter/concourse-up/iaas"
 	"io"
+	"net"
 	"text/template"
 	"time"
+
+	"github.com/EngineerBetter/concourse-up/iaas"
+	"github.com/apparentlymart/go-cidr/cidr"
 
 	"strings"
 
@@ -343,7 +346,7 @@ func (client *Client) checkPreDeployConfigRequirements(c func(u *certs.User) (*l
 		DirectorKey:    cfg.DirectorKey,
 	}
 
-	dc, err := client.ensureDirectorCerts(c, dc, cfg.Deployment, tfOutputs)
+	dc, err := client.ensureDirectorCerts(c, dc, cfg.Deployment, tfOutputs, cfg.PublicCIDR)
 	if err != nil {
 		return cr, err
 	}
@@ -372,11 +375,21 @@ func (client *Client) checkPreDeployConfigRequirements(c func(u *certs.User) (*l
 	return cr, nil
 }
 
-func (client *Client) ensureDirectorCerts(c func(u *certs.User) (*lego.Client, error), dc DirectorCerts, deployment string, tfOutputs terraform.Outputs) (DirectorCerts, error) {
+func (client *Client) ensureDirectorCerts(c func(u *certs.User) (*lego.Client, error), dc DirectorCerts, deployment string, tfOutputs terraform.Outputs, publicCIDR string) (DirectorCerts, error) {
 	// If we already have director certificates, don't regenerate as changing them will
 	// force a bosh director re-deploy even if there are no other changes
 	certs := dc
 	if certs.DirectorCACert != "" {
+		return certs, nil
+	}
+
+	// @Note: Duplicate code retrieving director internal IP needs to find a home
+	_, pubCIDR, err1 := net.ParseCIDR(publicCIDR)
+	if err1 != nil {
+		return certs, nil
+	}
+	directorInternalIP, err1 := cidr.Host(pubCIDR, 6)
+	if err1 != nil {
 		return certs, nil
 	}
 
@@ -385,12 +398,12 @@ func (client *Client) ensureDirectorCerts(c func(u *certs.User) (*lego.Client, e
 		return certs, err
 	}
 	_, err = client.stdout.Write(
-		[]byte(fmt.Sprintf("\nGENERATING BOSH DIRECTOR CERTIFICATE (%s, 10.0.0.6)\n", ip)))
+		[]byte(fmt.Sprintf("\nGENERATING BOSH DIRECTOR CERTIFICATE (%s, %s)\n", ip, directorInternalIP.String())))
 	if err != nil {
 		return certs, err
 	}
 
-	directorCerts, err := client.certGenerator(c, deployment, client.provider, ip, "10.0.0.6")
+	directorCerts, err := client.certGenerator(c, deployment, client.provider, ip, directorInternalIP.String())
 	if err != nil {
 		return certs, err
 	}
