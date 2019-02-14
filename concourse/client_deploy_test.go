@@ -116,14 +116,14 @@ var _ = Describe("client", func() {
 			Preemptible:      true,
 			Spot:             true,
 			SpotIsSet:        false,
+			WebSize:          "small",
+			WebSizeIsSet:     false,
 			WorkerCount:      1,
 			WorkerCountIsSet: false,
 			WorkerSize:       "xlarge",
 			WorkerSizeIsSet:  false,
 			WorkerType:       "m4",
 			WorkerTypeIsSet:  false,
-			WebSize:          "small",
-			WebSizeIsSet:     false,
 		}
 
 		terraformOutputs = terraform.AWSOutputs{
@@ -151,7 +151,11 @@ var _ = Describe("client", func() {
 
 		// Initial config in bucket from an existing deployment
 		configInBucket = config.Config{
-			PublicKey: "example-public-key",
+			ConcoursePassword: "s3cret",
+			ConcourseUsername: "admin",
+			Deployment:        "concourse-up-happymeal",
+			DirectorPassword:  "secret123",
+			DirectorUsername:  "admin",
 			PrivateKey: `-----BEGIN RSA PRIVATE KEY-----
 MIIEpAIBAAKCAQEA2spClkDkFfy2c91Z7N3AImPf0v3o5OoqXUS6nE2NbV2bP/o7
 Oa3KnpzeQ5DBmW3EW7tuvA4bAHxPuk25T9tM8jiItg0TNtMlxzFYVxFq8jMmokEi
@@ -179,17 +183,13 @@ ZSFal6ECgYBDXbrmvF+G5HoASez0WpgrHxf3oZh+gP40rzwc94m9rVP28i8xTvT9
 5SrvtzwjMsmQPUM/ttaBnNj1PvmOTTmRhXVw5ztAN9hhuIwVm8+mECFObq95NIgm
 sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 -----END RSA PRIVATE KEY-----`,
-			Region:            "eu-west-1",
-			Deployment:        "concourse-up-happymeal",
-			Project:           "happymeal",
-			TFStatePath:       "example-path",
-			DirectorUsername:  "admin",
-			DirectorPassword:  "secret123",
-			RDSUsername:       "admin",
-			RDSPassword:       "s3cret",
-			ConcoursePassword: "s3cret",
-			ConcourseUsername: "admin",
-			RDSInstanceClass:  "db.t2.medium",
+			Project:          "happymeal",
+			PublicKey:        "example-public-key",
+			RDSInstanceClass: "db.t2.medium",
+			RDSPassword:      "s3cret",
+			RDSUsername:      "admin",
+			Region:           "eu-west-1",
+			TFStatePath:      "example-path",
 			//These come from fixtures/director-creds.yml
 			CredhubUsername:          "credhub-cli",
 			CredhubPassword:          "f4b12bc0166cad1bc02b050e4e79ac4c",
@@ -276,14 +276,37 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 
 	Describe("Deploy", func() {
 		Context("when there is an existing config", func() {
-			Context("and no CLI args were provided", func() {
-				var configAfterLoad, configAfterCreateEnv, configAfterConcourseDeploy config.Config
+			var configAfterLoad, configAfterCreateEnv, configAfterConcourseDeploy config.Config
+			var terraformInputVars *terraform.AWSInputVars
 
+			Context("and no CLI args were provided", func() {
 				BeforeEach(func() {
 					//Mutations we expect to have been done after load
 					configAfterLoad = configInBucket
 					configAfterLoad.AllowIPs = "\"0.0.0.0/0\""
 					configAfterLoad.SourceAccessIP = "192.0.2.0"
+
+					terraformInputVars = &terraform.AWSInputVars{
+						NetworkCIDR:            configAfterLoad.NetworkCIDR,
+						PublicCIDR:             configAfterLoad.PublicCIDR,
+						PrivateCIDR:            configAfterLoad.PrivateCIDR,
+						AllowIPs:               configAfterLoad.AllowIPs,
+						AvailabilityZone:       configAfterLoad.AvailabilityZone,
+						ConfigBucket:           configAfterLoad.ConfigBucket,
+						Deployment:             configAfterLoad.Deployment,
+						HostedZoneID:           configAfterLoad.HostedZoneID,
+						HostedZoneRecordPrefix: configAfterLoad.HostedZoneRecordPrefix,
+						Namespace:              configAfterLoad.Namespace,
+						Project:                configAfterLoad.Project,
+						PublicKey:              configAfterLoad.PublicKey,
+						RDSDefaultDatabaseName: configAfterLoad.RDSDefaultDatabaseName,
+						RDSInstanceClass:       configAfterLoad.RDSInstanceClass,
+						RDSPassword:            configAfterLoad.RDSPassword,
+						RDSUsername:            configAfterLoad.RDSUsername,
+						Region:                 configAfterLoad.Region,
+						SourceAccessIP:         configAfterLoad.SourceAccessIP,
+						TFStatePath:            configAfterLoad.TFStatePath,
+					}
 
 					//Mutations we expect to have been done after deploying the director
 					configAfterCreateEnv = configAfterLoad
@@ -343,28 +366,6 @@ wEW5QkylaPEkbVDhJWeR1I8=
 					err := client.Deploy()
 					Expect(err).ToNot(HaveOccurred())
 
-					terraformInputVars := &terraform.AWSInputVars{
-						NetworkCIDR:            configAfterLoad.NetworkCIDR,
-						PublicCIDR:             configAfterLoad.PublicCIDR,
-						PrivateCIDR:            configAfterLoad.PrivateCIDR,
-						AllowIPs:               configAfterLoad.AllowIPs,
-						AvailabilityZone:       configAfterLoad.AvailabilityZone,
-						ConfigBucket:           configAfterLoad.ConfigBucket,
-						Deployment:             configAfterLoad.Deployment,
-						HostedZoneID:           configAfterLoad.HostedZoneID,
-						HostedZoneRecordPrefix: configAfterLoad.HostedZoneRecordPrefix,
-						Namespace:              configAfterLoad.Namespace,
-						Project:                configAfterLoad.Project,
-						PublicKey:              configAfterLoad.PublicKey,
-						RDSDefaultDatabaseName: configAfterLoad.RDSDefaultDatabaseName,
-						RDSInstanceClass:       configAfterLoad.RDSInstanceClass,
-						RDSPassword:            configAfterLoad.RDSPassword,
-						RDSUsername:            configAfterLoad.RDSUsername,
-						Region:                 configAfterLoad.Region,
-						SourceAccessIP:         configAfterLoad.SourceAccessIP,
-						TFStatePath:            configAfterLoad.TFStatePath,
-					}
-
 					tfInputVarsFactory.NewInputVarsReturns(terraformInputVars)
 
 					Expect(configClient).To(HaveReceived("ConfigExists"))
@@ -420,10 +421,8 @@ wEW5QkylaPEkbVDhJWeR1I8=
 			})
 
 			Context("and all the CLI args were provided", func() {
-				var configAfterLoad, configAfterCreateEnv, configAfterConcourseDeploy config.Config
-				var terraformInputVars *terraform.AWSInputVars
-
 				BeforeEach(func() {
+					// Set all changeable arguments (IE, not IAAS, Region, Namespace, AZ, et al)
 					args.AllowIPs = "88.98.225.40"
 					args.AllowIPsIsSet = true
 					args.DBSize = "4xlarge"
@@ -495,9 +494,9 @@ wEW5QkylaPEkbVDhJWeR1I8=
 					}
 
 					configAfterCreateEnv = configAfterLoad
-					configAfterCreateEnv.ConcourseUserProvidedCert = true
 					configAfterCreateEnv.ConcourseCert = args.TLSCert
 					configAfterCreateEnv.ConcourseKey = args.TLSKey
+					configAfterCreateEnv.ConcourseUserProvidedCert = true
 					configAfterCreateEnv.DirectorCACert = "----EXAMPLE CERT----"
 					configAfterCreateEnv.DirectorPublicIP = "99.99.99.99"
 					configAfterCreateEnv.Tags = append([]string{"concourse-up-version=some version"}, args.Tags...)
