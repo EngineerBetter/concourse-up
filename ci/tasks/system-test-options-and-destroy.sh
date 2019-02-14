@@ -16,6 +16,8 @@ source concourse-up/ci/tasks/lib/tags.sh
 source concourse-up/ci/tasks/lib/letsencrypt.sh
 # shellcheck disable=SC1091
 source concourse-up/ci/tasks/lib/assert-iaas.sh
+# shellcheck disable=SC1091
+source concourse-up/ci/tasks/lib/check-cidr-ranges.sh
 
 # shellcheck disable=SC1091
 [ "$IAAS" = "AWS" ] && { source concourse-up/ci/tasks/lib/destroy.sh; }
