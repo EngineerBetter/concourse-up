@@ -99,16 +99,12 @@ func populateConfigWithDefaults(conf config.Config, passwordGenerator func(int) 
 	conf.DirectorRegistryPassword = passwordGenerator(defaultPasswordLength)
 	conf.DirectorUsername = "admin"
 	conf.EncryptionKey = passwordGenerator(32)
-	conf.NetworkCIDR = "10.0.0.0/16"
-	conf.PrivateCIDR = "10.0.1.0/24"
 	conf.PrivateKey = strings.TrimSpace(string(privateKey))
-	conf.PublicCIDR = "10.0.0.0/24"
 	conf.PublicKey = strings.TrimSpace(string(publicKey))
-	conf.RDS1CIDR = "10.0.4.0/24"
-	conf.RDS2CIDR = "10.0.5.0/24"
 	conf.RDSPassword = passwordGenerator(defaultPasswordLength)
 	conf.RDSUsername = "admin" + passwordGenerator(7)
 	conf.Spot = true
+	conf = populateConfigWithDefaultCIDRs(conf)
 
 	return conf, nil
 }
@@ -173,6 +169,11 @@ func populateConfigWithDefaultsOrProvidedArguments(conf config.Config, newConfig
 			conf.RDS1CIDR = deployArgs.RDS1CIDR
 			conf.RDS2CIDR = deployArgs.RDS2CIDR
 		}
+	} else {
+		// Existing config, these values are mandatory but did not exist in older versions
+		if conf.NetworkCIDR == "" && conf.PrivateCIDR == "" && conf.PublicCIDR == "" && conf.RDS1CIDR == "" && conf.RDS2CIDR == "" {
+			conf = populateConfigWithDefaultCIDRs(conf)
+		}
 	}
 
 	var isDomainUpdated bool
@@ -188,6 +189,15 @@ func populateConfigWithDefaultsOrProvidedArguments(conf config.Config, newConfig
 	}
 
 	return conf, isDomainUpdated, nil
+}
+
+func populateConfigWithDefaultCIDRs(conf config.Config) config.Config {
+	conf.NetworkCIDR = "10.0.0.0/16"
+	conf.PrivateCIDR = "10.0.1.0/24"
+	conf.PublicCIDR = "10.0.0.0/24"
+	conf.RDS1CIDR = "10.0.4.0/24"
+	conf.RDS2CIDR = "10.0.5.0/24"
+	return conf
 }
 
 func updateAllowedIPs(c config.Config, ingressAddresses cidrBlocks) (config.Config, error) {

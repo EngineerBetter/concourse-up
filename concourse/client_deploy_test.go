@@ -285,11 +285,13 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 					configAfterLoad = configInBucket
 					configAfterLoad.AllowIPs = "\"0.0.0.0/0\""
 					configAfterLoad.SourceAccessIP = "192.0.2.0"
+					configAfterLoad.NetworkCIDR = "10.0.0.0/16"
+					configAfterLoad.PublicCIDR = "10.0.0.0/24"
+					configAfterLoad.PrivateCIDR = "10.0.1.0/24"
+					configAfterLoad.RDS1CIDR = "10.0.4.0/24"
+					configAfterLoad.RDS2CIDR = "10.0.5.0/24"
 
 					terraformInputVars = &terraform.AWSInputVars{
-						NetworkCIDR:            configAfterLoad.NetworkCIDR,
-						PublicCIDR:             configAfterLoad.PublicCIDR,
-						PrivateCIDR:            configAfterLoad.PrivateCIDR,
 						AllowIPs:               configAfterLoad.AllowIPs,
 						AvailabilityZone:       configAfterLoad.AvailabilityZone,
 						ConfigBucket:           configAfterLoad.ConfigBucket,
@@ -297,8 +299,13 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 						HostedZoneID:           configAfterLoad.HostedZoneID,
 						HostedZoneRecordPrefix: configAfterLoad.HostedZoneRecordPrefix,
 						Namespace:              configAfterLoad.Namespace,
+						NetworkCIDR:            configAfterLoad.NetworkCIDR,
+						PrivateCIDR:            configAfterLoad.PrivateCIDR,
 						Project:                configAfterLoad.Project,
+						PublicCIDR:             configAfterLoad.PublicCIDR,
 						PublicKey:              configAfterLoad.PublicKey,
+						RDS1CIDR:               configAfterLoad.RDS1CIDR,
+						RDS2CIDR:               configAfterLoad.RDS2CIDR,
 						RDSDefaultDatabaseName: configAfterLoad.RDSDefaultDatabaseName,
 						RDSInstanceClass:       configAfterLoad.RDSInstanceClass,
 						RDSPassword:            configAfterLoad.RDSPassword,
@@ -463,6 +470,11 @@ wEW5QkylaPEkbVDhJWeR1I8=
 					configAfterLoad.GithubClientSecret = args.GithubAuthClientSecret
 					configAfterLoad.HostedZoneID = "ABC123"
 					configAfterLoad.HostedZoneRecordPrefix = "ci"
+					configAfterLoad.NetworkCIDR = "10.0.0.0/16"
+					configAfterLoad.PrivateCIDR = "10.0.1.0/24"
+					configAfterLoad.PublicCIDR = "10.0.0.0/24"
+					configAfterLoad.RDS1CIDR = "10.0.4.0/24"
+					configAfterLoad.RDS2CIDR = "10.0.5.0/24"
 					configAfterLoad.RDSInstanceClass = "db.t2.4xlarge"
 					configAfterLoad.SourceAccessIP = "192.0.2.0"
 					configAfterLoad.Spot = false
