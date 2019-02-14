@@ -79,7 +79,6 @@ func newConfig(configClient config.IClient, deployArgs *deploy.Args, provider ia
 	return conf, nil
 }
 
-//RENAME ME
 func populateConfigWithDefaults(conf config.Config, passwordGenerator func(int) string, sshGenerator func() ([]byte, []byte, string, error)) (config.Config, error) {
 	const defaultPasswordLength = 20
 
