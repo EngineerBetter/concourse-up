@@ -5,12 +5,13 @@ import (
 	"crypto/rand"
 	"errors"
 	"fmt"
-	"github.com/EngineerBetter/concourse-up/iaas"
-	"github.com/EngineerBetter/concourse-up/resource"
 	"io/ioutil"
 	"os"
 	"os/exec"
 	"path"
+
+	"github.com/EngineerBetter/concourse-up/iaas"
+	"github.com/EngineerBetter/concourse-up/resource"
 )
 
 // InputVars exposes ConfigureDirectorManifestCPI

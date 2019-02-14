@@ -3,6 +3,9 @@ package concourse_test
 import (
 	"errors"
 	"fmt"
+	"io"
+	"io/ioutil"
+
 	"github.com/EngineerBetter/concourse-up/bosh"
 	"github.com/EngineerBetter/concourse-up/bosh/boshfakes"
 	"github.com/EngineerBetter/concourse-up/certs"
@@ -24,8 +27,6 @@ import (
 	"github.com/onsi/gomega/gbytes"
 	. "github.com/tjarratt/gcounterfeiter"
 	"github.com/xenolf/lego/lego"
-	"io"
-	"io/ioutil"
 )
 
 var _ = Describe("client", func() {
@@ -230,6 +231,11 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 		configAfterLoad = configInBucket
 		configAfterLoad.AllowIPs = "\"0.0.0.0/0\""
 		configAfterLoad.SourceAccessIP = "192.0.2.0"
+		configAfterLoad.NetworkCIDR = "10.0.0.0/16"
+		configAfterLoad.PublicCIDR = "10.0.0.0/24"
+		configAfterLoad.PrivateCIDR = "10.0.1.0/24"
+		configAfterLoad.RDS1CIDR = "10.0.4.0/24"
+		configAfterLoad.RDS2CIDR = "10.0.5.0/24"
 
 		//Mutations we expect to have been done after Deploy
 		configAfterCreateEnv = configAfterLoad

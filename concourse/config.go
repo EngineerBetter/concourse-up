@@ -3,12 +3,13 @@ package concourse
 import (
 	"bytes"
 	"fmt"
+	"net"
+	"strings"
+
 	"github.com/EngineerBetter/concourse-up/commands/deploy"
 	"github.com/EngineerBetter/concourse-up/config"
 	"github.com/EngineerBetter/concourse-up/iaas"
 	"github.com/asaskevich/govalidator"
-	"net"
-	"strings"
 )
 
 func (client *Client) getInitialConfig() (config.Config, bool, error) {
@@ -53,7 +54,7 @@ func (client *Client) getInitialConfig() (config.Config, bool, error) {
 
 func newConfig(configClient config.IClient, deployArgs *deploy.Args, provider iaas.Provider, passwordGenerator func(int) string, eightRandomLetters func() string, sshGenerator func() ([]byte, []byte, string, error)) (config.Config, error) {
 	conf := configClient.NewConfig()
-	conf, err := populateConfigWithDefaults(conf, passwordGenerator, sshGenerator)
+	conf, err := populateConfigWithDefaults(conf, provider, passwordGenerator, sshGenerator)
 	if err != nil {
 		return config.Config{}, fmt.Errorf("error generating default config: [%v]", err)
 	}
@@ -79,7 +80,7 @@ func newConfig(configClient config.IClient, deployArgs *deploy.Args, provider ia
 	return conf, nil
 }
 
-func populateConfigWithDefaults(conf config.Config, passwordGenerator func(int) string, sshGenerator func() ([]byte, []byte, string, error)) (config.Config, error) {
+func populateConfigWithDefaults(conf config.Config, provider iaas.Provider, passwordGenerator func(int) string, sshGenerator func() ([]byte, []byte, string, error)) (config.Config, error) {
 	const defaultPasswordLength = 20
 
 	privateKey, publicKey, _, err := sshGenerator()
@@ -103,7 +104,7 @@ func populateConfigWithDefaults(conf config.Config, passwordGenerator func(int) 
 	conf.RDSPassword = passwordGenerator(defaultPasswordLength)
 	conf.RDSUsername = "admin" + passwordGenerator(7)
 	conf.Spot = true
-	conf = populateConfigWithDefaultCIDRs(conf)
+	conf = populateConfigWithDefaultCIDRs(conf, provider)
 
 	return conf, nil
 }
@@ -170,8 +171,8 @@ func populateConfigWithDefaultsOrProvidedArguments(conf config.Config, newConfig
 		}
 	} else {
 		// Existing config, these values are mandatory but did not exist in older versions
-		if conf.NetworkCIDR == "" && conf.PrivateCIDR == "" && conf.PublicCIDR == "" && conf.RDS1CIDR == "" && conf.RDS2CIDR == "" {
-			conf = populateConfigWithDefaultCIDRs(conf)
+		if isMissingCIDRs(conf, provider) {
+			conf = populateConfigWithDefaultCIDRs(conf, provider)
 		}
 	}
 
@@ -190,12 +191,29 @@ func populateConfigWithDefaultsOrProvidedArguments(conf config.Config, newConfig
 	return conf, isDomainUpdated, nil
 }
 
-func populateConfigWithDefaultCIDRs(conf config.Config) config.Config {
-	conf.NetworkCIDR = "10.0.0.0/16"
-	conf.PrivateCIDR = "10.0.1.0/24"
-	conf.PublicCIDR = "10.0.0.0/24"
-	conf.RDS1CIDR = "10.0.4.0/24"
-	conf.RDS2CIDR = "10.0.5.0/24"
+func isMissingCIDRs(conf config.Config, provider iaas.Provider) bool {
+	switch provider.IAAS() {
+	case iaas.AWS:
+		return conf.NetworkCIDR == "" || conf.PrivateCIDR == "" || conf.PublicCIDR == "" || conf.RDS1CIDR == "" || conf.RDS2CIDR == ""
+	case iaas.GCP:
+		return conf.PrivateCIDR == "" || conf.PublicCIDR == ""
+	default:
+		return false
+	}
+}
+
+func populateConfigWithDefaultCIDRs(conf config.Config, provider iaas.Provider) config.Config {
+	switch provider.IAAS() {
+	case iaas.AWS:
+		conf.NetworkCIDR = "10.0.0.0/16"
+		conf.PrivateCIDR = "10.0.1.0/24"
+		conf.PublicCIDR = "10.0.0.0/24"
+		conf.RDS1CIDR = "10.0.4.0/24"
+		conf.RDS2CIDR = "10.0.5.0/24"
+	case iaas.GCP:
+		conf.PrivateCIDR = "10.0.1.0/24"
+		conf.PublicCIDR = "10.0.0.0/24"
+	}
 	return conf
 }
 
