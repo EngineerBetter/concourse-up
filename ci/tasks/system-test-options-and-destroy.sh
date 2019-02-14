@@ -55,7 +55,14 @@ args+=(--region "$region")
 ./cup deploy "${args[@]}" --iaas "$IAAS" "$deployment"
 assertTagsSet
 assertGitHubAuthConfigured
-assertNetworkCidrsCorrect 192.168.0.0/27 192.168.0.32/27 192.168.0.0/24 "$region"
+
+if [ "$IAAS" = "AWS" ]
+then
+    assertNetworkCidrsCorrect 192.168.0.0/27 192.168.0.32/27 192.168.0.0/24 192.168.0.64/28 192.168.0.80/28
+elif [ "$IAAS" = "GCP" ]
+then
+    assertNetworkCidrsCorrect 192.168.0.0/27 192.168.0.32/27
+fi
 
 assertPipelinesCanReadFromCredhub
 sleep 60
