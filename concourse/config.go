@@ -170,8 +170,8 @@ func populateConfigWithDefaultsOrProvidedArguments(conf config.Config, newConfig
 			conf.NetworkCIDR = deployArgs.NetworkCIDR
 			conf.PublicCIDR = deployArgs.PublicCIDR
 			conf.PrivateCIDR = deployArgs.PrivateCIDR
-			config.Rds1CIDR = deployArgs.Rds1CIDR
-			config.Rds2CIDR = deployArgs.Rds2CIDR
+			conf.Rds1CIDR = deployArgs.Rds1CIDR
+			conf.Rds2CIDR = deployArgs.Rds2CIDR
 		}
 	}
 
