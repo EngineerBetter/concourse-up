@@ -1,11 +1,12 @@
 package bosh
 
 import (
+	"net"
+
 	"github.com/EngineerBetter/concourse-up/bosh/internal/aws"
 	"github.com/EngineerBetter/concourse-up/bosh/internal/boshenv"
 	"github.com/EngineerBetter/concourse-up/db"
 	"github.com/apparentlymart/go-cidr/cidr"
-	"net"
 )
 
 // Deploy implements deploy for AWS client
@@ -234,7 +235,6 @@ func (client *AWSClient) updateCloudConfig(bosh *boshenv.BOSHCLI) error {
 		return err
 	}
 	publicCIDRGateway := pubGateway.String()
-
 
 	publicCIDRDNS, err := formatIPRange(publicCIDR, "", []int{2})
 	if err != nil {

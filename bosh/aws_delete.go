@@ -1,9 +1,12 @@
 package bosh
 
 import (
+	"net"
+
 	"github.com/EngineerBetter/concourse-up/bosh/internal/aws"
 	"github.com/EngineerBetter/concourse-up/bosh/internal/boshenv"
 	"github.com/EngineerBetter/concourse-up/db"
+	"github.com/apparentlymart/go-cidr/cidr"
 )
 
 // Delete deletes a bosh director
@@ -86,10 +89,24 @@ func (client *AWSClient) Delete(stateFileBytes []byte) ([]byte, error) {
 		return store["state.json"], err
 	}
 
+	publicCIDR := client.config.PublicCIDR
+	_, pubCIDR, err1 := net.ParseCIDR(publicCIDR)
+	if err1 != nil {
+		return store["state.json"], err
+	}
+	internalGateway, err1 := cidr.Host(pubCIDR, 1)
+	if err1 != nil {
+		return store["state.json"], err
+	}
+	directorInternalIP, err1 := cidr.Host(pubCIDR, 6)
+	if err1 != nil {
+		return store["state.json"], err
+	}
+
 	err = bosh.DeleteEnv(store, aws.Environment{
-		InternalCIDR:    "10.0.0.0/24",
-		InternalGateway: "10.0.0.1",
-		InternalIP:      "10.0.0.6",
+		InternalCIDR:    client.config.PublicCIDR,
+		InternalGateway: internalGateway.String(),
+		InternalIP:      directorInternalIP.String(),
 		AccessKeyID:     boshUserAccessKeyID,
 		SecretAccessKey: boshSecretAccessKey,
 		Region:          client.config.Region,
