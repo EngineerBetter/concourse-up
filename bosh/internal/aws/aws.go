@@ -22,6 +22,7 @@ type Environment struct {
 	ATCSecurityGroup      string
 	AZ                    string
 	BlobstoreBucket       string
+	CustomOperations      string
 	DBCACert              string
 	DBHost                string
 	DBName                string
@@ -34,8 +35,17 @@ type Environment struct {
 	InternalCIDR          string
 	InternalGateway       string
 	InternalIP            string
+	PrivateCIDR           string
+	PrivateCIDRDNS        string
+	PrivateCIDRGateway    string
+	PrivateCIDRReserved   string
 	PrivateKey            string
 	PrivateSubnetID       string
+	PublicCIDR            string
+	PublicCIDRDNS         string
+	PublicCIDRGateway     string
+	PublicCIDRReserved    string
+	PublicCIDRStatic      string
 	PublicSubnetID        string
 	Region                string
 	S3AWSAccessKeyID      string
@@ -44,16 +54,6 @@ type Environment struct {
 	Spot                  bool
 	VMSecurityGroup       string
 	WorkerType            string
-	CustomOperations      string
-	PublicCIDR            string
-	PublicCIDRGateway     string
-	PublicCIDRDNS         string
-	PublicCIDRStatic      string
-	PublicCIDRReserved    string
-	PrivateCIDR           string
-	PrivateCIDRGateway    string
-	PrivateCIDRDNS        string
-	PrivateCIDRReserved   string
 }
 
 var allOperations = resource.AWSCPIOps + resource.ExternalIPOps + resource.AWSDirectorCustomOps
@@ -95,21 +95,21 @@ func (e Environment) ConfigureDirectorManifestCPI(manifest string) (string, erro
 }
 
 type awsCloudConfigParams struct {
-	ATCSecurityGroupID string
-	AvailabilityZone   string
-	PrivateSubnetID    string
-	PublicSubnetID     string
-	Spot               bool
-	VMsSecurityGroupID string
-	WorkerType         string
-	PublicCIDR string
-	PublicCIDRStatic string
-	PublicCIDRReserved string
-	PublicCIDRGateway string
-	PublicCIDRDNS string
-	PrivateCIDR string
-	PrivateCIDRGateway string
-	PrivateCIDRDNS string
+	ATCSecurityGroupID  string
+	AvailabilityZone    string
+	PrivateSubnetID     string
+	PublicSubnetID      string
+	Spot                bool
+	VMsSecurityGroupID  string
+	WorkerType          string
+	PublicCIDR          string
+	PublicCIDRStatic    string
+	PublicCIDRReserved  string
+	PublicCIDRGateway   string
+	PublicCIDRDNS       string
+	PrivateCIDR         string
+	PrivateCIDRGateway  string
+	PrivateCIDRDNS      string
 	PrivateCIDRReserved string
 }
 
@@ -122,23 +122,22 @@ func (e Environment) IAASCheck() string {
 func (e Environment) ConfigureDirectorCloudConfig(cloudConfig string) (string, error) {
 
 	templateParams := awsCloudConfigParams{
-		AvailabilityZone:   e.AZ,
-		VMsSecurityGroupID: e.VMSecurityGroup,
-		ATCSecurityGroupID: e.ATCSecurityGroup,
-		PublicSubnetID:     e.PublicSubnetID,
-		PrivateSubnetID:    e.PrivateSubnetID,
-		Spot:               e.Spot,
-		WorkerType:         e.WorkerType,
-		PublicCIDR: e.PublicCIDR,
-		PublicCIDRGateway: e.PublicCIDRGateway,
-		PublicCIDRDNS: e.PublicCIDRDNS,
-		PublicCIDRReserved: e.PublicCIDRReserved,
-		PublicCIDRStatic: e.PublicCIDRStatic,
-		PrivateCIDR: e.PrivateCIDR,
-		PrivateCIDRGateway: e.PrivateCIDRGateway,
-		PrivateCIDRDNS: e.PrivateCIDRDNS,
+		AvailabilityZone:    e.AZ,
+		VMsSecurityGroupID:  e.VMSecurityGroup,
+		ATCSecurityGroupID:  e.ATCSecurityGroup,
+		PublicSubnetID:      e.PublicSubnetID,
+		PrivateSubnetID:     e.PrivateSubnetID,
+		Spot:                e.Spot,
+		WorkerType:          e.WorkerType,
+		PublicCIDR:          e.PublicCIDR,
+		PublicCIDRGateway:   e.PublicCIDRGateway,
+		PublicCIDRDNS:       e.PublicCIDRDNS,
+		PublicCIDRReserved:  e.PublicCIDRReserved,
+		PublicCIDRStatic:    e.PublicCIDRStatic,
+		PrivateCIDR:         e.PrivateCIDR,
+		PrivateCIDRGateway:  e.PrivateCIDRGateway,
+		PrivateCIDRDNS:      e.PrivateCIDRDNS,
 		PrivateCIDRReserved: e.PrivateCIDRReserved,
-
 	}
 
 	cc, err := util.RenderTemplate("cloud-config", cloudConfig, templateParams)

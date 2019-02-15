@@ -18,30 +18,30 @@ import (
 
 // Environment holds all the parameters GCP IAAS needs
 type Environment struct {
+	CustomOperations    string
+	DirectorName        string
+	ExternalIP          string
+	GcpCredentialsJSON  string
 	InternalCIDR        string
 	InternalGW          string
 	InternalIP          string
-	DirectorName        string
-	Zone                string
 	Network             string
-	PublicSubnetwork    string
-	PrivateSubnetwork   string
-	Tags                string
-	ProjectID           string
-	GcpCredentialsJSON  string
-	ExternalIP          string
-	Spot                bool
-	PublicKey           string
-	CustomOperations    string
-	PublicCIDR          string
-	PublicCIDRGateway   string
-	PublicCIDRDNS       string
-	PublicCIDRStatic    string
-	PublicCIDRReserved  string
 	PrivateCIDR         string
-	PrivateCIDRGateway  string
 	PrivateCIDRDNS      string
+	PrivateCIDRGateway  string
 	PrivateCIDRReserved string
+	PrivateSubnetwork   string
+	ProjectID           string
+	PublicCIDR          string
+	PublicCIDRDNS       string
+	PublicCIDRGateway   string
+	PublicCIDRReserved  string
+	PublicCIDRStatic    string
+	PublicKey           string
+	PublicSubnetwork    string
+	Spot                bool
+	Tags                string
+	Zone                string
 }
 
 var allOperations = resource.GCPCPIOps + resource.GCPExternalIPOps + resource.GCPDirectorCustomOps + resource.GCPJumpboxUserOps

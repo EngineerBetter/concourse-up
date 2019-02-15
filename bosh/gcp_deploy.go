@@ -88,7 +88,6 @@ func (client *GCPClient) createEnv(bosh boshenv.IBOSHCLI, state, creds []byte, c
 	if err1 != nil {
 		return state, creds, err1
 	}
-	// credentialsPath := "~/Downloads/concourse-up-6f707de4d7bd.json"
 	credentialsPath, err1 := client.provider.Attr("credentials_path")
 	if err1 != nil {
 		return state, creds, err1
