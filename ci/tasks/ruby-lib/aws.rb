@@ -33,6 +33,7 @@ class AWS
 
     vpc_id = vpc_id(orphan.project, orphan.region)
     if vpc_id_valid?(vpc_id)
+      delete_nat_gateways(orphan.project)
       delete_db_instance(vpc_id, orphan.region)
       delete_vpc(vpc_id, orphan.region)
     else
@@ -70,6 +71,13 @@ class AWS
       `aws --region #{region} rds delete-db-instance --db-instance-identifier "#{rds_instance}" --skip-final-snapshot true`
       `aws --region #{region} rds wait db-instance-deleted --db-instance-identifier "#{rds_instance}"`
     end
+  end
+
+  def delete_nat_gateways(project)
+    results_json = `aws ec2 describe-nat-gateways --filter 'Name=tag:concourse-up-project,Values=#{project}'`
+    results = JSON.parse(results_json)
+    ids = results.fetch('NatGateways').map { |gateway| gateway.fetch('NatGatewayId') }
+    ids.each { |id| `aws ec2 delete-nat-gateway --nat-gateway-id #{id}` }
   end
 end
 
