@@ -10,8 +10,8 @@ import (
 
 	"github.com/EngineerBetter/concourse-up/terraform"
 
+	"github.com/EngineerBetter/concourse-up/bosh/internal/director"
 	"github.com/EngineerBetter/concourse-up/config"
-	"github.com/EngineerBetter/concourse-up/director"
 )
 
 // StateFilename is default name for bosh-init state file
@@ -40,10 +40,26 @@ type Instance struct {
 }
 
 // ClientFactory creates a new IClient
-type ClientFactory func(config config.Config, outputs terraform.Outputs, director director.IClient, stdout, stderr io.Writer, provider iaas.Provider) (IClient, error)
+type ClientFactory func(config config.Config, outputs terraform.Outputs, stdout, stderr io.Writer, provider iaas.Provider, versionFile []byte) (IClient, error)
 
 //New returns an IAAS specific implementation of BOSH client
-func New(config config.Config, outputs terraform.Outputs, director director.IClient, stdout, stderr io.Writer, provider iaas.Provider) (IClient, error) {
+func New(config config.Config, outputs terraform.Outputs, stdout, stderr io.Writer, provider iaas.Provider, versionFile []byte) (IClient, error) {
+
+	directorPublicIP, err := outputs.Get("DirectorPublicIP")
+	if err != nil {
+		return nil, err
+	}
+
+	director, err := director.New(director.Credentials{
+		Username: config.DirectorUsername,
+		Password: config.DirectorPassword,
+		Host:     directorPublicIP,
+		CACert:   config.DirectorCACert,
+	}, versionFile)
+	if err != nil {
+		return nil, err
+	}
+
 	switch provider.IAAS() {
 	case iaas.AWS:
 		return NewAWSClient(config, outputs, director, stdout, stderr, provider)

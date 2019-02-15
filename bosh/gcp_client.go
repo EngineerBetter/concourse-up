@@ -3,8 +3,8 @@ package bosh
 import (
 	"io"
 
+	"github.com/EngineerBetter/concourse-up/bosh/internal/director"
 	"github.com/EngineerBetter/concourse-up/config"
-	"github.com/EngineerBetter/concourse-up/director"
 	"github.com/EngineerBetter/concourse-up/iaas"
 	"github.com/EngineerBetter/concourse-up/terraform"
 )

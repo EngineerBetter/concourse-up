@@ -15,7 +15,6 @@ import (
 	"github.com/EngineerBetter/concourse-up/concourse/concoursefakes"
 	"github.com/EngineerBetter/concourse-up/config"
 	"github.com/EngineerBetter/concourse-up/config/configfakes"
-	"github.com/EngineerBetter/concourse-up/director"
 	"github.com/EngineerBetter/concourse-up/fly"
 	"github.com/EngineerBetter/concourse-up/fly/flyfakes"
 	"github.com/EngineerBetter/concourse-up/iaas"
@@ -213,7 +212,7 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 		configClient = &configfakes.FakeIClient{}
 		terraformCLI = setupFakeTerraformCLI(terraformOutputs)
 
-		boshClientFactory := func(config config.Config, outputs terraform.Outputs, director director.IClient, stdout, stderr io.Writer, provider iaas.Provider) (bosh.IClient, error) {
+		boshClientFactory := func(config config.Config, outputs terraform.Outputs, stdout, stderr io.Writer, provider iaas.Provider, versionFile []byte) (bosh.IClient, error) {
 			boshClient = &boshfakes.FakeIClient{}
 			boshClient.DeployReturns(directorStateFixture, directorCredsFixture, nil)
 			boshClient.DeleteReturns(nil, deleteBoshDirectorError)

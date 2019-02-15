@@ -9,7 +9,6 @@ import (
 	"github.com/EngineerBetter/concourse-up/certs"
 	"github.com/EngineerBetter/concourse-up/commands/deploy"
 	"github.com/EngineerBetter/concourse-up/config"
-	"github.com/EngineerBetter/concourse-up/director"
 	"github.com/EngineerBetter/concourse-up/fly"
 	"github.com/EngineerBetter/concourse-up/iaas"
 	"github.com/EngineerBetter/concourse-up/terraform"
@@ -93,31 +92,13 @@ func NewClient(
 }
 
 func (client *Client) buildBoshClient(config config.Config, tfOutputs terraform.Outputs) (bosh.IClient, error) {
-	directorPublicIP, err := tfOutputs.Get("DirectorPublicIP")
-	if err != nil {
-		return nil, err
-	}
-	v, _ := client.provider.Choose(iaas.Choice{
-		AWS: awsVersionFile,
-		GCP: gcpVersionFile,
-	}).([]byte)
-
-	director, err := director.New(director.Credentials{
-		Username: config.DirectorUsername,
-		Password: config.DirectorPassword,
-		Host:     directorPublicIP,
-		CACert:   config.DirectorCACert,
-	}, v)
-	if err != nil {
-		return nil, err
-	}
 
 	return client.boshClientFactory(
 		config,
 		tfOutputs,
-		director,
 		client.stdout,
 		client.stderr,
 		client.provider,
+		client.versionFile,
 	)
 }
