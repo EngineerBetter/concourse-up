@@ -11,20 +11,20 @@ import (
 
 // Deploy implements deploy for AWS client
 func (client *AWSClient) Deploy(state, creds []byte, detach bool) (newState, newCreds []byte, err error) {
-	bosh, err := boshenv.New(boshenv.DownloadBOSH())
+	boshCLI, err := boshenv.New(boshenv.DownloadBOSH())
 	if err != nil {
 		return state, creds, err
 	}
 
-	state, creds, err = client.createEnv(bosh, state, creds, "")
+	state, creds, err = client.createEnv(boshCLI, state, creds, "")
 	if err != nil {
 		return state, creds, err
 	}
 
-	if err = client.updateCloudConfig(bosh); err != nil {
+	if err = client.updateCloudConfig(boshCLI); err != nil {
 		return state, creds, err
 	}
-	if err = client.uploadConcourseStemcell(bosh); err != nil {
+	if err = client.uploadConcourseStemcell(boshCLI); err != nil {
 		return state, creds, err
 	}
 	if err = client.createDefaultDatabases(); err != nil {
@@ -41,7 +41,7 @@ func (client *AWSClient) Deploy(state, creds []byte, detach bool) (newState, new
 
 // Locks implements locks for AWS client
 func (client *AWSClient) Locks() ([]byte, error) {
-	bosh, err := boshenv.New(boshenv.DownloadBOSH())
+	boshCLI, err := boshenv.New(boshenv.DownloadBOSH())
 	if err != nil {
 		return []byte{}, err
 	}
@@ -50,7 +50,7 @@ func (client *AWSClient) Locks() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	return bosh.Locks(aws.Environment{
+	return boshCLI.Locks(aws.Environment{
 		ExternalIP: directorPublicIP,
 	}, directorPublicIP, client.config.DirectorPassword, client.config.DirectorCACert)
 
@@ -58,16 +58,16 @@ func (client *AWSClient) Locks() ([]byte, error) {
 
 // CreateEnv exposes bosh create-env functionality
 func (client *AWSClient) CreateEnv(state, creds []byte, customOps string) (newState, newCreds []byte, err error) {
-	bosh, err := boshenv.New(boshenv.DownloadBOSH())
+	boshCLI, err := boshenv.New(boshenv.DownloadBOSH())
 	if err != nil {
 		return state, creds, err
 	}
-	return client.createEnv(bosh, state, creds, customOps)
+	return client.createEnv(boshCLI, state, creds, customOps)
 }
 
 // Recreate exposes BOSH recreate
 func (client *AWSClient) Recreate() error {
-	bosh, err := boshenv.New(boshenv.DownloadBOSH())
+	boshCLI, err := boshenv.New(boshenv.DownloadBOSH())
 	if err != nil {
 		return err
 	}
@@ -76,7 +76,7 @@ func (client *AWSClient) Recreate() error {
 	if err != nil {
 		return err
 	}
-	return bosh.Recreate(aws.Environment{
+	return boshCLI.Recreate(aws.Environment{
 		ExternalIP: directorPublicIP,
 	}, directorPublicIP, client.config.DirectorPassword, client.config.DirectorCACert)
 }

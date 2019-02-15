@@ -10,20 +10,20 @@ import (
 // Deploy deploys a new Bosh director or converges an existing deployment
 // Returns new contents of bosh state file
 func (client *GCPClient) Deploy(state, creds []byte, detach bool) (newState, newCreds []byte, err error) {
-	bosh, err := boshenv.New(boshenv.DownloadBOSH())
+	boshCLI, err := boshenv.New(boshenv.DownloadBOSH())
 	if err != nil {
 		return state, creds, err
 	}
 
-	state, creds, err = client.createEnv(bosh, state, creds, "")
+	state, creds, err = client.createEnv(boshCLI, state, creds, "")
 	if err != nil {
 		return state, creds, err
 	}
 
-	if err = client.updateCloudConfig(bosh); err != nil {
+	if err = client.updateCloudConfig(boshCLI); err != nil {
 		return state, creds, err
 	}
-	if err = client.uploadConcourseStemcell(bosh); err != nil {
+	if err = client.uploadConcourseStemcell(boshCLI); err != nil {
 		return state, creds, err
 	}
 	if err = client.createDefaultDatabases(); err != nil {
@@ -40,16 +40,16 @@ func (client *GCPClient) Deploy(state, creds []byte, detach bool) (newState, new
 
 // CreateEnv exposes bosh create-env functionality
 func (client *GCPClient) CreateEnv(state, creds []byte, customOps string) (newState, newCreds []byte, err error) {
-	bosh, err := boshenv.New(boshenv.DownloadBOSH())
+	boshCLI, err := boshenv.New(boshenv.DownloadBOSH())
 	if err != nil {
 		return state, creds, err
 	}
-	return client.createEnv(bosh, state, creds, customOps)
+	return client.createEnv(boshCLI, state, creds, customOps)
 }
 
 // Recreate exposes BOSH recreate
 func (client *GCPClient) Recreate() error {
-	bosh, err := boshenv.New(boshenv.DownloadBOSH())
+	boshCLI, err := boshenv.New(boshenv.DownloadBOSH())
 	if err != nil {
 		return err
 	}
@@ -57,7 +57,7 @@ func (client *GCPClient) Recreate() error {
 	if err != nil {
 		return err
 	}
-	return bosh.Recreate(gcp.Environment{
+	return boshCLI.Recreate(gcp.Environment{
 		ExternalIP: directorPublicIP,
 	}, directorPublicIP, client.config.DirectorPassword, client.config.DirectorCACert)
 }
@@ -139,7 +139,7 @@ func (client *GCPClient) createEnv(bosh *boshenv.BOSHCLI, state, creds []byte, c
 
 // Locks implements locks for GCP client
 func (client *GCPClient) Locks() ([]byte, error) {
-	bosh, err := boshenv.New(boshenv.DownloadBOSH())
+	boshCLI, err := boshenv.New(boshenv.DownloadBOSH())
 	if err != nil {
 		return []byte{}, err
 	}
@@ -147,7 +147,7 @@ func (client *GCPClient) Locks() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	return bosh.Locks(gcp.Environment{
+	return boshCLI.Locks(gcp.Environment{
 		ExternalIP: directorPublicIP,
 	}, directorPublicIP, client.config.DirectorPassword, client.config.DirectorCACert)
 
