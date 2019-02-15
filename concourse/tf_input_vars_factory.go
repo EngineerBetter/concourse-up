@@ -2,6 +2,7 @@ package concourse
 
 import (
 	"fmt"
+
 	"github.com/EngineerBetter/concourse-up/config"
 	"github.com/EngineerBetter/concourse-up/iaas"
 	"github.com/EngineerBetter/concourse-up/terraform"

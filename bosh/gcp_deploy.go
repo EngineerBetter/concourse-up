@@ -1,10 +1,11 @@
 package bosh
 
 import (
+	"net"
+
 	"github.com/EngineerBetter/concourse-up/bosh/internal/boshenv"
 	"github.com/EngineerBetter/concourse-up/bosh/internal/gcp"
 	"github.com/apparentlymart/go-cidr/cidr"
-	"net"
 )
 
 // Deploy deploys a new Bosh director or converges an existing deployment
@@ -40,29 +41,21 @@ func (client *GCPClient) Deploy(state, creds []byte, detach bool) (newState, new
 
 // CreateEnv exposes bosh create-env functionality
 func (client *GCPClient) CreateEnv(state, creds []byte, customOps string) (newState, newCreds []byte, err error) {
-	boshCLI, err := boshenv.New(boshenv.DownloadBOSH())
-	if err != nil {
-		return state, creds, err
-	}
-	return client.createEnv(boshCLI, state, creds, customOps)
+	return client.createEnv(client.boshCLI, state, creds, customOps)
 }
 
 // Recreate exposes BOSH recreate
 func (client *GCPClient) Recreate() error {
-	boshCLI, err := boshenv.New(boshenv.DownloadBOSH())
-	if err != nil {
-		return err
-	}
 	directorPublicIP, err := client.outputs.Get("DirectorPublicIP")
 	if err != nil {
 		return err
 	}
-	return boshCLI.Recreate(gcp.Environment{
+	return client.boshCLI.Recreate(gcp.Environment{
 		ExternalIP: directorPublicIP,
 	}, directorPublicIP, client.config.DirectorPassword, client.config.DirectorCACert)
 }
 
-func (client *GCPClient) createEnv(bosh *boshenv.BOSHCLI, state, creds []byte, customOps string) (newState, newCreds []byte, err error) {
+func (client *GCPClient) createEnv(bosh boshenv.IBOSHCLI, state, creds []byte, customOps string) (newState, newCreds []byte, err error) {
 	tags, err := splitTags(client.config.Tags)
 	if err != nil {
 		return state, creds, err
@@ -139,21 +132,17 @@ func (client *GCPClient) createEnv(bosh *boshenv.BOSHCLI, state, creds []byte, c
 
 // Locks implements locks for GCP client
 func (client *GCPClient) Locks() ([]byte, error) {
-	boshCLI, err := boshenv.New(boshenv.DownloadBOSH())
-	if err != nil {
-		return []byte{}, err
-	}
 	directorPublicIP, err := client.outputs.Get("DirectorPublicIP")
 	if err != nil {
 		return nil, err
 	}
-	return boshCLI.Locks(gcp.Environment{
+	return client.boshCLI.Locks(gcp.Environment{
 		ExternalIP: directorPublicIP,
 	}, directorPublicIP, client.config.DirectorPassword, client.config.DirectorCACert)
 
 }
 
-func (client *GCPClient) updateCloudConfig(bosh *boshenv.BOSHCLI) error {
+func (client *GCPClient) updateCloudConfig(bosh boshenv.IBOSHCLI) error {
 
 	privateSubnetwork, err := client.outputs.Get("PrivateSubnetworkName")
 	if err != nil {
@@ -234,7 +223,7 @@ func (client *GCPClient) updateCloudConfig(bosh *boshenv.BOSHCLI) error {
 		Network:             network,
 	}, directorPublicIP, client.config.DirectorPassword, client.config.DirectorCACert)
 }
-func (client *GCPClient) uploadConcourseStemcell(bosh *boshenv.BOSHCLI) error {
+func (client *GCPClient) uploadConcourseStemcell(bosh boshenv.IBOSHCLI) error {
 	directorPublicIP, err := client.outputs.Get("DirectorPublicIP")
 	if err != nil {
 		return err

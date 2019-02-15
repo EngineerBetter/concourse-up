@@ -11,20 +11,15 @@ import (
 
 // Deploy implements deploy for AWS client
 func (client *AWSClient) Deploy(state, creds []byte, detach bool) (newState, newCreds []byte, err error) {
-	boshCLI, err := boshenv.New(boshenv.DownloadBOSH())
+	state, creds, err = client.createEnv(client.boshCLI, state, creds, "")
 	if err != nil {
 		return state, creds, err
 	}
 
-	state, creds, err = client.createEnv(boshCLI, state, creds, "")
-	if err != nil {
+	if err = client.updateCloudConfig(client.boshCLI); err != nil {
 		return state, creds, err
 	}
-
-	if err = client.updateCloudConfig(boshCLI); err != nil {
-		return state, creds, err
-	}
-	if err = client.uploadConcourseStemcell(boshCLI); err != nil {
+	if err = client.uploadConcourseStemcell(client.boshCLI); err != nil {
 		return state, creds, err
 	}
 	if err = client.createDefaultDatabases(); err != nil {
@@ -41,16 +36,11 @@ func (client *AWSClient) Deploy(state, creds []byte, detach bool) (newState, new
 
 // Locks implements locks for AWS client
 func (client *AWSClient) Locks() ([]byte, error) {
-	boshCLI, err := boshenv.New(boshenv.DownloadBOSH())
-	if err != nil {
-		return []byte{}, err
-	}
-
 	directorPublicIP, err := client.outputs.Get("DirectorPublicIP")
 	if err != nil {
 		return nil, err
 	}
-	return boshCLI.Locks(aws.Environment{
+	return client.boshCLI.Locks(aws.Environment{
 		ExternalIP: directorPublicIP,
 	}, directorPublicIP, client.config.DirectorPassword, client.config.DirectorCACert)
 
@@ -58,30 +48,21 @@ func (client *AWSClient) Locks() ([]byte, error) {
 
 // CreateEnv exposes bosh create-env functionality
 func (client *AWSClient) CreateEnv(state, creds []byte, customOps string) (newState, newCreds []byte, err error) {
-	boshCLI, err := boshenv.New(boshenv.DownloadBOSH())
-	if err != nil {
-		return state, creds, err
-	}
-	return client.createEnv(boshCLI, state, creds, customOps)
+	return client.createEnv(client.boshCLI, state, creds, customOps)
 }
 
 // Recreate exposes BOSH recreate
 func (client *AWSClient) Recreate() error {
-	boshCLI, err := boshenv.New(boshenv.DownloadBOSH())
-	if err != nil {
-		return err
-	}
-
 	directorPublicIP, err := client.outputs.Get("DirectorPublicIP")
 	if err != nil {
 		return err
 	}
-	return boshCLI.Recreate(aws.Environment{
+	return client.boshCLI.Recreate(aws.Environment{
 		ExternalIP: directorPublicIP,
 	}, directorPublicIP, client.config.DirectorPassword, client.config.DirectorCACert)
 }
 
-func (client *AWSClient) createEnv(bosh *boshenv.BOSHCLI, state, creds []byte, customOps string) (newState, newCreds []byte, err error) {
+func (client *AWSClient) createEnv(bosh boshenv.IBOSHCLI, state, creds []byte, customOps string) (newState, newCreds []byte, err error) {
 	tags, err := splitTags(client.config.Tags)
 	if err != nil {
 		return state, creds, err
@@ -203,7 +184,7 @@ func (client *AWSClient) createEnv(bosh *boshenv.BOSHCLI, state, creds []byte, c
 	return store["state.json"], store["vars.yaml"], err
 }
 
-func (client *AWSClient) updateCloudConfig(bosh *boshenv.BOSHCLI) error {
+func (client *AWSClient) updateCloudConfig(bosh boshenv.IBOSHCLI) error {
 	publicSubnetID, err := client.outputs.Get("PublicSubnetID")
 	if err != nil {
 		return err
@@ -289,7 +270,7 @@ func (client *AWSClient) updateCloudConfig(bosh *boshenv.BOSHCLI) error {
 		PrivateCIDRReserved: privateCIDRReserved,
 	}, directorPublicIP, client.config.DirectorPassword, client.config.DirectorCACert)
 }
-func (client *AWSClient) uploadConcourseStemcell(bosh *boshenv.BOSHCLI) error {
+func (client *AWSClient) uploadConcourseStemcell(bosh boshenv.IBOSHCLI) error {
 	directorPublicIP, err := client.outputs.Get("DirectorPublicIP")
 	if err != nil {
 		return err

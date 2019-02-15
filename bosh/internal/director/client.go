@@ -11,6 +11,7 @@ import (
 	"github.com/EngineerBetter/concourse-up/util"
 )
 
+//go:generate counterfeiter . IClient
 // IClient represents a bosh director client
 type IClient interface {
 	RunCommand(stdout, stderr io.Writer, args ...string) error

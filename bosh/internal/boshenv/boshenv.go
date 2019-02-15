@@ -16,6 +16,16 @@ const awsConst = "AWS"
 
 const gcpConst = "GCP"
 
+//go:generate counterfeiter . IBOSHCLI
+type IBOSHCLI interface {
+	UpdateCloudConfig(config IAASEnvironment, ip, password, ca string) error
+	Locks(config IAASEnvironment, ip, password, ca string) ([]byte, error)
+	UploadConcourseStemcell(config IAASEnvironment, ip, password, ca string) error
+	Recreate(config IAASEnvironment, ip, password, ca string) error
+	DeleteEnv(store Store, config IAASEnvironment, password, cert, key, ca string, tags map[string]string) error
+	CreateEnv(store Store, config IAASEnvironment, password, cert, key, ca string, tags map[string]string) error
+}
+
 // BOSHCLI struct holds the abstraction of execCmd
 type BOSHCLI struct {
 	execCmd  func(string, ...string) *exec.Cmd
@@ -43,7 +53,7 @@ func DownloadBOSH() Option {
 }
 
 // New provides a new BOSHCLI
-func New(ops ...Option) (*BOSHCLI, error) {
+func New(ops ...Option) (IBOSHCLI, error) {
 	c := &BOSHCLI{
 		execCmd:  exec.Command,
 		boshPath: "bosh",

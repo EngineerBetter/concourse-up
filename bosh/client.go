@@ -10,6 +10,7 @@ import (
 
 	"github.com/EngineerBetter/concourse-up/terraform"
 
+	"github.com/EngineerBetter/concourse-up/bosh/internal/boshenv"
 	"github.com/EngineerBetter/concourse-up/bosh/internal/director"
 	"github.com/EngineerBetter/concourse-up/config"
 )
@@ -60,11 +61,16 @@ func New(config config.Config, outputs terraform.Outputs, stdout, stderr io.Writ
 		return nil, err
 	}
 
+	boshCLI, err := boshenv.New(boshenv.DownloadBOSH())
+	if err != nil {
+		return nil, fmt.Errorf("failed to create boshCLI: [%v]", err)
+	}
+
 	switch provider.IAAS() {
 	case iaas.AWS:
-		return NewAWSClient(config, outputs, director, stdout, stderr, provider)
+		return NewAWSClient(config, outputs, director, stdout, stderr, provider, boshCLI)
 	case iaas.GCP:
-		return NewGCPClient(config, outputs, director, stdout, stderr, provider)
+		return NewGCPClient(config, outputs, director, stdout, stderr, provider, boshCLI)
 	}
 	return nil, fmt.Errorf("IAAS not supported: %s", provider.IAAS())
 }
