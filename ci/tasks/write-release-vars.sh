@@ -108,11 +108,7 @@ Deploys:
 - BOSH CLI $bin_bosh_cli_version_gcp
 - Terraform $bin_terraform_version_gcp
 
-cat <<EOF > release-vars/slackmsg
-<!channel> Concourse Up $(cat version/version) published to Github
-```
-$(diff --suppress-common-lines release-vars/body <(curl -Ss https://api.github.com/repos/EngineerBetter/concourse-up/releases/latest | jq -r .body) || true)
-```
+>Note to build locally you will need to clone [concourse-up-ops](https://github.com/EngineerBetter/concourse-up-ops/tree/$ops_version) (version $ops_version) to the same level as concourse-up to get the required manifests and ops files.
 EOF
 
 pushd concourse-up

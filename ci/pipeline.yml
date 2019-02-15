@@ -592,10 +592,6 @@ jobs:
     resource: version
     params:
       file: version/version
-  - put: slack-alert
-    params:
-      channel: "#integrations"
-      text_file: release-vars/slackmsg
 
 - name: patch
   serial: true
@@ -635,10 +631,6 @@ jobs:
     resource: version
     params:
       file: version/version
-  - put: slack-alert
-    params:
-      channel: "#integrations"
-      text_file: release-vars/slackmsg
 
 - name: minor
   serial: true
@@ -678,10 +670,6 @@ jobs:
     resource: version
     params:
       file: version/version
-  - put: slack-alert
-    params:
-      channel: "#integrations"
-      text_file: release-vars/slackmsg
 
 - name: major
   serial: true
@@ -721,10 +709,6 @@ jobs:
     resource: version
     params:
       file: version/version
-  - put: slack-alert
-    params:
-      channel: "#integrations"
-      text_file: release-vars/slackmsg
 
 - name: cleanup-aws
   serial: true
