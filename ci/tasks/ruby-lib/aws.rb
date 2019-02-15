@@ -31,11 +31,7 @@ class AWS
 
   def cleanup(orphan)
     bucket = orphan.bucket
-    puts "\n#{bucket.name} is missing key files"
-    puts 'Attempting to delete VPC'
-    puts '==================================================================='
-    puts "MANUAL CLEANUP MAY BE REQUIRED FOR #{bucket.name}"
-    puts '==================================================================='
+    puts "\n#{bucket.name} is missing key files, attempting item-by-item delete"
 
     vpc_id = vpc_id(orphan.project, orphan.region)
     if vpc_id_valid?(vpc_id)
@@ -48,11 +44,11 @@ class AWS
 
       threads.each { |thread| thread.join }
 
-      delete_internet_gateways(orphan.project, orphan.region)
       delete_elastic_ips(orphan.project, orphan.region)
       delete_subnets(orphan.project, orphan.region)
       delete_security_groups(orphan.project, orphan.region)
       delete_route_tables(orphan.project, orphan.region)
+      delete_internet_gateways(orphan.project, orphan.region)
       delete_key_pairs(orphan.project, orphan.region)
       delete_network_acls(orphan.project, orphan.region, vpc_id)
       delete_vpc(vpc_id, orphan.region)
@@ -99,22 +95,22 @@ class AWS
   end
 
   def delete_bosh(project, region)
-  results_json = run("aws --region #{region} ec2 describe-instances --filter 'Name=tag:concourse-up-project,Values=#{project}' 'Name=tag:deployment,Values=bosh'")
-  results = JSON.parse(results_json)
-  ids = results.fetch('Reservations')
-               .flat_map { |reservation| reservation.fetch('Instances') }
-               .flat_map { |instance| instance.fetch('InstanceId') }
-  ids.each { |id| run("aws --region #{region} ec2 terminate-instances --instance-id #{id}") }
+    results_json = run("aws --region #{region} ec2 describe-instances --filter 'Name=tag:concourse-up-project,Values=#{project}' 'Name=tag:deployment,Values=bosh'")
+    results = JSON.parse(results_json)
+    ids = results.fetch('Reservations')
+                .flat_map { |reservation| reservation.fetch('Instances') }
+                .flat_map { |instance| instance.fetch('InstanceId') }
+    ids.each { |id| run("aws --region #{region} ec2 terminate-instances --instance-id #{id}") }
   end
 
-def delete_instances(project, region)
-  results_json = run("aws --region #{region} ec2 describe-instances --filter 'Name=tag:concourse-up-project,Values=#{project}'")
-  results = JSON.parse(results_json)
-  ids = results.fetch('Reservations')
-               .flat_map { |reservation| reservation.fetch('Instances') }
-               .flat_map { |instance| instance.fetch('InstanceId') }
-  ids.each { |id| run("aws --region #{region} ec2 terminate-instances --instance-id #{id}") }
-end
+  def delete_instances(project, region)
+    results_json = run("aws --region #{region} ec2 describe-instances --filter 'Name=tag:concourse-up-project,Values=#{project}'")
+    results = JSON.parse(results_json)
+    ids = results.fetch('Reservations')
+                .flat_map { |reservation| reservation.fetch('Instances') }
+                .flat_map { |instance| instance.fetch('InstanceId') }
+    ids.each { |id| run("aws --region #{region} ec2 terminate-instances --instance-id #{id}") }
+  end
 
   def delete_nat_gateways(project, region)
     delete_things('nat-gateway', 'NatGateways', 'NatGatewayId', 'nat-gateway-id', project, region)
