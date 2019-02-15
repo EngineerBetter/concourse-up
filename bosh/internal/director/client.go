@@ -61,7 +61,7 @@ func New(creds Credentials, versionFile []byte) (*client, error) {
 	}, nil
 }
 
-// SaveFileToWorkingDir saves thegiven file to the temporary director working directory
+// SaveFileToWorkingDir saves the given file to the temporary director working directory
 func (client *client) SaveFileToWorkingDir(filename string, contents []byte) (string, error) {
 	return client.tempDir.Save(filename, contents)
 }

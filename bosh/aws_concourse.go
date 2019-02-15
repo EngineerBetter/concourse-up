@@ -8,47 +8,13 @@ import (
 	"github.com/EngineerBetter/concourse-up/db"
 )
 
-func (client *AWSClient) deployConcourse(creds []byte, detach bool) (newCreds []byte, err error) {
+func (client *AWSClient) deployConcourse(creds []byte, detach bool) ([]byte, error) {
 
-	concourseManifestPath, err := client.director.SaveFileToWorkingDir(concourseManifestFilename, concourseManifestContents)
+	err := saveFilesToWorkingDir(client.director, client.provider, creds)
 	if err != nil {
-		return
+		return nil, fmt.Errorf("failed saving files to working directory in deployConcourse: [%v]", err)
 	}
 
-	concourseVersionsPath, err := client.director.SaveFileToWorkingDir(concourseVersionsFilename, awsConcourseVersions)
-	if err != nil {
-		return
-	}
-
-	concourseSHAsPath, err := client.director.SaveFileToWorkingDir(concourseSHAsFilename, awsConcourseSHAs)
-	if err != nil {
-		return
-	}
-
-	concourseCompatibilityPath, err := client.director.SaveFileToWorkingDir(concourseCompatibilityFilename, awsConcourseCompatibility)
-	if err != nil {
-		return
-	}
-
-	concourseGrafanaPath, err := client.director.SaveFileToWorkingDir(concourseGrafanaFilename, awsConcourseGrafana)
-	if err != nil {
-		return
-	}
-
-	concourseGitHubAuthPath, err := client.director.SaveFileToWorkingDir(concourseGitHubAuthFilename, awsConcourseGitHubAuth)
-	if err != nil {
-		return
-	}
-
-	credsPath, err := client.director.SaveFileToWorkingDir(credsFilename, creds)
-	if err != nil {
-		return
-	}
-
-	extraTagsPath, err := client.director.SaveFileToWorkingDir(extraTagsFilename, extraTags)
-	if err != nil {
-		return nil, err
-	}
 	boshDBAddress, err := client.outputs.Get("BoshDBAddress")
 	if err != nil {
 		return nil, err
@@ -86,17 +52,17 @@ func (client *AWSClient) deployConcourse(creds []byte, detach bool) (newCreds []
 		"--deployment",
 		concourseDeploymentName,
 		"deploy",
-		concourseManifestPath,
+		client.director.PathInWorkingDir(concourseManifestFilename),
 		"--vars-store",
-		credsPath,
+		client.director.PathInWorkingDir(credsFilename),
 		"--ops-file",
-		concourseVersionsPath,
+		client.director.PathInWorkingDir(concourseVersionsFilename),
 		"--ops-file",
-		concourseSHAsPath,
+		client.director.PathInWorkingDir(concourseSHAsFilename),
 		"--ops-file",
-		concourseCompatibilityPath,
+		client.director.PathInWorkingDir(concourseCompatibilityFilename),
 		"--vars-file",
-		concourseGrafanaPath,
+		client.director.PathInWorkingDir(concourseGrafanaFilename),
 	}
 
 	if client.config.ConcoursePassword != "" {
@@ -106,7 +72,7 @@ func (client *AWSClient) deployConcourse(creds []byte, detach bool) (newCreds []
 	if client.config.GithubAuthIsSet {
 		vmap["github_client_id"] = client.config.GithubClientID
 		vmap["github_client_secret"] = client.config.GithubClientSecret
-		flagFiles = append(flagFiles, "--ops-file", concourseGitHubAuthPath)
+		flagFiles = append(flagFiles, "--ops-file", client.director.PathInWorkingDir(concourseGitHubAuthFilename))
 	}
 
 	t, err1 := client.buildTagsYaml(vmap["project"], "concourse")
@@ -114,7 +80,7 @@ func (client *AWSClient) deployConcourse(creds []byte, detach bool) (newCreds []
 		return nil, err
 	}
 	vmap["tags"] = t
-	flagFiles = append(flagFiles, "--ops-file", extraTagsPath)
+	flagFiles = append(flagFiles, "--ops-file", client.director.PathInWorkingDir(extraTagsFilename))
 
 	vs := vars(vmap)
 
@@ -124,11 +90,11 @@ func (client *AWSClient) deployConcourse(creds []byte, detach bool) (newCreds []
 		detach,
 		append(flagFiles, vs...)...,
 	)
-	newCreds, err1 = ioutil.ReadFile(credsPath)
-	if err == nil {
-		err = err1
+	if err != nil {
+		return nil, fmt.Errorf("failed to run bosh deploy with commands %+v: [%v]", flagFiles, err)
 	}
-	return
+
+	return ioutil.ReadFile(client.director.PathInWorkingDir(credsFilename))
 }
 
 func (client *AWSClient) buildTagsYaml(project interface{}, component string) (string, error) {

@@ -12,9 +12,9 @@ const extraTagsFilename = "extra_tags.yml"
 const uaaCertFilename = "uaa-cert.yml"
 
 //go:generate go-bindata -pkg $GOPACKAGE -ignore \.git assets/... ../../concourse-up-ops/... ../resource/assets/...
-var awsConcourseGrafana = MustAsset("assets/grafana_dashboard.yml")
-var awsConcourseCompatibility = MustAsset("assets/ops/cup_compatibility.yml")
-var awsConcourseGitHubAuth = MustAsset("assets/ops/github-auth.yml")
+var concourseGrafana = MustAsset("assets/grafana_dashboard.yml")
+var concourseCompatibility = MustAsset("assets/ops/cup_compatibility.yml")
+var concourseGitHubAuth = MustAsset("assets/ops/github-auth.yml")
 var extraTags = MustAsset("assets/ops/extra_tags.yml")
 var concourseManifestContents = MustAsset("../../concourse-up-ops/manifest.yml")
 var awsConcourseVersions = MustAsset("../../concourse-up-ops/ops/versions-aws.json")

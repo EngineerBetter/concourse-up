@@ -118,3 +118,33 @@ func instances(director director.IClient, stderr io.Writer) ([]Instance, error) 
 
 	return instances, nil
 }
+
+func saveFilesToWorkingDir(director director.IClient, provider iaas.Provider, creds []byte) error {
+	concourseVersionsContents, _ := provider.Choose(iaas.Choice{
+		AWS: awsConcourseVersions,
+		GCP: gcpConcourseVersions,
+	}).([]byte)
+	concourseSHAsContents, _ := provider.Choose(iaas.Choice{
+		AWS: awsConcourseSHAs,
+		GCP: gcpConcourseSHAs,
+	}).([]byte)
+
+	filesToSave := map[string][]byte{
+		concourseVersionsFilename:      concourseVersionsContents,
+		concourseSHAsFilename:          concourseSHAsContents,
+		concourseManifestFilename:      concourseManifestContents,
+		concourseCompatibilityFilename: concourseCompatibility,
+		concourseGrafanaFilename:       concourseGrafana,
+		concourseGitHubAuthFilename:    concourseGitHubAuth,
+		credsFilename:                  creds,
+		extraTagsFilename:              extraTags,
+	}
+
+	for filename, contents := range filesToSave {
+		_, err := director.SaveFileToWorkingDir(filename, contents)
+		if err != nil {
+			return fmt.Errorf("failed to save %s to working directory: [%v]", filename, err)
+		}
+	}
+	return nil
+}

@@ -6,49 +6,14 @@ import (
 	"strings"
 )
 
-func (client *GCPClient) deployConcourse(creds []byte, detach bool) (newCreds []byte, err error) {
+func (client *GCPClient) deployConcourse(creds []byte, detach bool) ([]byte, error) {
 
-	concourseManifestPath, err := client.director.SaveFileToWorkingDir(concourseManifestFilename, concourseManifestContents)
+	err := saveFilesToWorkingDir(client.director, client.provider, creds)
 	if err != nil {
-		return []byte{}, err
-	}
-
-	concourseVersionsPath, err := client.director.SaveFileToWorkingDir(concourseVersionsFilename, gcpConcourseVersions)
-	if err != nil {
-		return []byte{}, err
-	}
-
-	concourseSHAsPath, err := client.director.SaveFileToWorkingDir(concourseSHAsFilename, gcpConcourseSHAs)
-	if err != nil {
-		return []byte{}, err
-	}
-
-	concourseCompatibilityPath, err := client.director.SaveFileToWorkingDir(concourseCompatibilityFilename, awsConcourseCompatibility)
-	if err != nil {
-		return []byte{}, err
-	}
-
-	concourseGrafanaPath, err := client.director.SaveFileToWorkingDir(concourseGrafanaFilename, awsConcourseGrafana)
-	if err != nil {
-		return []byte{}, err
-	}
-
-	concourseGitHubAuthPath, err := client.director.SaveFileToWorkingDir(concourseGitHubAuthFilename, awsConcourseGitHubAuth)
-	if err != nil {
-		return []byte{}, err
+		return nil, fmt.Errorf("failed saving files to working directory in deployConcourse: [%v]", err)
 	}
 
 	uaaCertPath, err := client.director.SaveFileToWorkingDir(uaaCertFilename, uaaCert)
-	if err != nil {
-		return []byte{}, err
-	}
-
-	credsPath, err := client.director.SaveFileToWorkingDir(credsFilename, creds)
-	if err != nil {
-		return []byte{}, err
-	}
-
-	extraTagsPath, err := client.director.SaveFileToWorkingDir(extraTagsFilename, extraTags)
 	if err != nil {
 		return []byte{}, err
 	}
@@ -97,19 +62,19 @@ func (client *GCPClient) deployConcourse(creds []byte, detach bool) (newCreds []
 		"--deployment",
 		concourseDeploymentName,
 		"deploy",
-		concourseManifestPath,
+		client.director.PathInWorkingDir(concourseManifestFilename),
 		"--vars-store",
-		credsPath,
+		client.director.PathInWorkingDir(credsFilename),
 		"--ops-file",
-		concourseVersionsPath,
+		client.director.PathInWorkingDir(concourseVersionsFilename),
 		"--ops-file",
-		concourseSHAsPath,
+		client.director.PathInWorkingDir(concourseSHAsFilename),
 		"--ops-file",
-		concourseCompatibilityPath,
+		client.director.PathInWorkingDir(concourseCompatibilityFilename),
 		"--ops-file",
 		uaaCertPath,
 		"--vars-file",
-		concourseGrafanaPath,
+		client.director.PathInWorkingDir(concourseGrafanaFilename),
 	}
 
 	if client.config.ConcoursePassword != "" {
@@ -119,15 +84,15 @@ func (client *GCPClient) deployConcourse(creds []byte, detach bool) (newCreds []
 	if client.config.GithubAuthIsSet {
 		vmap["github_client_id"] = client.config.GithubClientID
 		vmap["github_client_secret"] = client.config.GithubClientSecret
-		flagFiles = append(flagFiles, "--ops-file", concourseGitHubAuthPath)
+		flagFiles = append(flagFiles, "--ops-file", client.director.PathInWorkingDir(concourseGitHubAuthFilename))
 	}
 
 	t, err1 := client.buildTagsYaml(vmap["project"], "concourse")
 	if err1 != nil {
-		return []byte{}, err
+		return nil, err
 	}
 	vmap["tags"] = t
-	flagFiles = append(flagFiles, "--ops-file", extraTagsPath)
+	flagFiles = append(flagFiles, "--ops-file", client.director.PathInWorkingDir(extraTagsFilename))
 
 	vs := vars(vmap)
 
@@ -137,11 +102,11 @@ func (client *GCPClient) deployConcourse(creds []byte, detach bool) (newCreds []
 		detach,
 		append(flagFiles, vs...)...,
 	)
-	newCreds, err1 = ioutil.ReadFile(credsPath)
-	if err == nil {
-		err = err1
+	if err != nil {
+		return nil, fmt.Errorf("failed to run bosh deploy with commands %+v: [%v]", flagFiles, err)
 	}
-	return
+
+	return ioutil.ReadFile(client.director.PathInWorkingDir(credsFilename))
 }
 
 func (client *GCPClient) buildTagsYaml(project interface{}, component string) (string, error) {
