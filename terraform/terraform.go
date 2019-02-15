@@ -30,7 +30,7 @@ type Outputs interface {
 //go:generate counterfeiter . CLIInterface
 //CLIInterface is the abstraction of execCmd
 type CLIInterface interface {
-	Apply(InputVars, bool) error
+	Apply(InputVars) error
 	Destroy(InputVars) error
 	BuildOutput(InputVars) (Outputs, error)
 }
@@ -138,7 +138,7 @@ func (c *CLI) init(config InputVars) (string, error) {
 }
 
 // Apply runs terraform apply for a given config
-func (c *CLI) Apply(config InputVars, dryrun bool) error {
+func (c *CLI) Apply(config InputVars) error {
 	terraformConfigPath, err := c.init(config)
 	if err != nil {
 		return err
@@ -146,12 +146,7 @@ func (c *CLI) Apply(config InputVars, dryrun bool) error {
 
 	defer os.RemoveAll(terraformConfigPath)
 
-	action := "apply"
-	if dryrun {
-		action = "plan"
-	}
-
-	cmd := c.execCmd(c.Path, action, "-input=false", "-auto-approve")
+	cmd := c.execCmd(c.Path, "apply", "-input=false", "-auto-approve")
 	cmd.Dir = terraformConfigPath
 
 	cmd.Stderr = os.Stderr

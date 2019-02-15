@@ -8,11 +8,10 @@ import (
 )
 
 type FakeCLIInterface struct {
-	ApplyStub        func(terraform.InputVars, bool) error
+	ApplyStub        func(terraform.InputVars) error
 	applyMutex       sync.RWMutex
 	applyArgsForCall []struct {
 		arg1 terraform.InputVars
-		arg2 bool
 	}
 	applyReturns struct {
 		result1 error
@@ -48,17 +47,16 @@ type FakeCLIInterface struct {
 	invocationsMutex sync.RWMutex
 }
 
-func (fake *FakeCLIInterface) Apply(arg1 terraform.InputVars, arg2 bool) error {
+func (fake *FakeCLIInterface) Apply(arg1 terraform.InputVars) error {
 	fake.applyMutex.Lock()
 	ret, specificReturn := fake.applyReturnsOnCall[len(fake.applyArgsForCall)]
 	fake.applyArgsForCall = append(fake.applyArgsForCall, struct {
 		arg1 terraform.InputVars
-		arg2 bool
-	}{arg1, arg2})
-	fake.recordInvocation("Apply", []interface{}{arg1, arg2})
+	}{arg1})
+	fake.recordInvocation("Apply", []interface{}{arg1})
 	fake.applyMutex.Unlock()
 	if fake.ApplyStub != nil {
-		return fake.ApplyStub(arg1, arg2)
+		return fake.ApplyStub(arg1)
 	}
 	if specificReturn {
 		return ret.result1
@@ -73,17 +71,17 @@ func (fake *FakeCLIInterface) ApplyCallCount() int {
 	return len(fake.applyArgsForCall)
 }
 
-func (fake *FakeCLIInterface) ApplyCalls(stub func(terraform.InputVars, bool) error) {
+func (fake *FakeCLIInterface) ApplyCalls(stub func(terraform.InputVars) error) {
 	fake.applyMutex.Lock()
 	defer fake.applyMutex.Unlock()
 	fake.ApplyStub = stub
 }
 
-func (fake *FakeCLIInterface) ApplyArgsForCall(i int) (terraform.InputVars, bool) {
+func (fake *FakeCLIInterface) ApplyArgsForCall(i int) terraform.InputVars {
 	fake.applyMutex.RLock()
 	defer fake.applyMutex.RUnlock()
 	argsForCall := fake.applyArgsForCall[i]
-	return argsForCall.arg1, argsForCall.arg2
+	return argsForCall.arg1
 }
 
 func (fake *FakeCLIInterface) ApplyReturns(result1 error) {

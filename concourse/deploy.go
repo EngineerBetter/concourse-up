@@ -66,7 +66,7 @@ func (client *Client) Deploy() error {
 
 	tfInputVars := client.tfInputVarsFactory.NewInputVars(conf)
 
-	err = client.tfCLI.Apply(tfInputVars, false)
+	err = client.tfCLI.Apply(tfInputVars)
 	if err != nil {
 		return err
 	}

@@ -50,7 +50,7 @@ func TestCLI_Apply(t *testing.T) {
 		require.Equal(t, args[2], "-auto-approve")
 
 	})
-	err = mockCLIent.Apply(config, false)
+	err = mockCLIent.Apply(config)
 	require.NoError(t, err)
 }
 
@@ -69,9 +69,9 @@ func TestCLI_ApplyPlan(t *testing.T) {
 	})
 	e.ExpectFunc(func(t testing.TB, command string, args ...string) {
 		require.Equal(t, "terraform", command)
-		require.Equal(t, args[0], "plan")
+		require.Equal(t, args[0], "apply")
 	})
-	err = mockCLIent.Apply(config, true)
+	err = mockCLIent.Apply(config)
 	require.NoError(t, err)
 }
 

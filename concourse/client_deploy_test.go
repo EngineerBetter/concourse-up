@@ -377,7 +377,7 @@ wEW5QkylaPEkbVDhJWeR1I8=
 					Expect(configClient).To(HaveReceived("ConfigExists"))
 					Expect(configClient).To(HaveReceived("Load"))
 					Expect(tfInputVarsFactory).To(HaveReceived("NewInputVars").With(configAfterLoad))
-					Expect(terraformCLI).To(HaveReceived("Apply").With(terraformInputVars, false))
+					Expect(terraformCLI).To(HaveReceived("Apply").With(terraformInputVars))
 					Expect(terraformCLI).To(HaveReceived("BuildOutput").With(terraformInputVars))
 					Expect(configClient).To(HaveReceived("Update").With(configAfterLoad))
 
@@ -535,7 +535,7 @@ wEW5QkylaPEkbVDhJWeR1I8=
 					Expect(configClient).To(HaveReceived("Load"))
 					Expect(tfInputVarsFactory).To(HaveReceived("NewInputVars").With(configAfterLoad))
 
-					Expect(terraformCLI).To(HaveReceived("Apply").With(terraformInputVars, false))
+					Expect(terraformCLI).To(HaveReceived("Apply").With(terraformInputVars))
 					Expect(terraformCLI).To(HaveReceived("BuildOutput").With(terraformInputVars))
 					Expect(configClient).To(HaveReceived("Update").With(configAfterLoad))
 
@@ -697,7 +697,7 @@ wEW5QkylaPEkbVDhJWeR1I8=
 				Expect(configClient).ToNot(HaveReceived("Load"))
 				Expect(tfInputVarsFactory).To(HaveReceived("NewInputVars").With(defaultGeneratedConfig))
 				Expect(configClient).To(HaveReceived("Update").With(defaultGeneratedConfig))
-				Expect(terraformCLI).To(HaveReceived("Apply").With(terraformInputVars, false))
+				Expect(terraformCLI).To(HaveReceived("Apply").With(terraformInputVars))
 				Expect(terraformCLI).To(HaveReceived("BuildOutput").With(terraformInputVars))
 				Expect(configClient).To(HaveReceived("Update").With(configAfterLoad))
 
