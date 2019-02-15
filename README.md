@@ -230,11 +230,11 @@ All flags are optional. Configuration settings provided via flags will persist i
 - `--zone`            Specify an availability zone [$ZONE] (cannot be changed after the initial deployment)
 
 If any of the following 5 flags is set, all the required ones from this group need to be set
-- `--vpc-network-range value`      Customise the VPC network CIDR to deploy into (required for AWS) [$VPC_NETWORK_RANGE]
-- `--public-subnet-range value`    Customise public network CIDR (if IAAS is AWS must be within --vpc-network-range) (required) [$PUBLIC_SUBNET_RANGE]
-- `--private-subnet-range value`   Customise private network CIDR (if IAAS is AWS must be within --vpc-network-range) (required) [$PRIVATE_SUBNET_RANGE]
-- `--rds-subnet-range1 value`      Customise first rds network CIDR (must be within --vpc-network-range) (required for AWS) [$RDS_SUBNET_RANGE1]
-- `--rds-subnet-range2 value`      Customise second rds network CIDR (must be within --vpc-network-range) (required for AWS) [$RDS_SUBNET_RANGE2]
+- `--vpc-network-range=value`      Customise the VPC network CIDR to deploy into (required for AWS) [$VPC_NETWORK_RANGE]
+- `--public-subnet-range=value`    Customise public network CIDR (if IAAS is AWS must be within --vpc-network-range) (required) [$PUBLIC_SUBNET_RANGE]
+- `--private-subnet-range=value`   Customise private network CIDR (if IAAS is AWS must be within --vpc-network-range) (required) [$PRIVATE_SUBNET_RANGE]
+- `--rds-subnet-range1=value`      Customise first rds network CIDR (must be within --vpc-network-range) (required for AWS) [$RDS_SUBNET_RANGE1]
+- `--rds-subnet-range2=value`      Customise second rds network CIDR (must be within --vpc-network-range) (required for AWS) [$RDS_SUBNET_RANGE2]
 
     > All the ranges above should be in the CIDR format of IPv4/Mask. The sizes can vary as long as `vpc-network-range` is big enough to contain all others (in case IAAS is AWS). The smallest CIDR for `public` and `private` subnets is a /28. The smallest CIDR for `rds1` and `rds2` subnets is a /29
 
