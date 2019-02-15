@@ -1,3 +1,5 @@
+require 'json'
+
 class AWS
   private
   attr_reader :system_tests_name_prefix
@@ -11,7 +13,11 @@ class AWS
   end
 
   def bucket_names
-    `aws s3 ls | grep -E '#{system_tests_name_prefix}' | awk '{print $3}'`.split("\n")
+    response_json = `aws s3api list-buckets`
+    response = JSON.parse(response_json)
+    response.fetch('Buckets')
+            .map { |bucket| bucket.fetch('Name') }
+            .select { |bucket_name| bucket_name.start_with?(system_tests_name_prefix) }
   end
 
   def new_orphan(bucket_name)
