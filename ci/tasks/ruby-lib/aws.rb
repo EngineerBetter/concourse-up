@@ -160,19 +160,14 @@ class AWS
   end
 
   def delete_internet_gateways(project, region)
-    do_action_to_things('detach', 'internet-gateway', 'InternetGateways', 'InternetGatewayId', 'internet-gateway-id', project, region)
     delete_things('internet-gateway', 'InternetGateways', 'InternetGatewayId', 'internet-gateway-id', project, region)
   end
 
   def delete_things(type, key, id_key, id_flag, project, region)
-    do_action_to_things('delete', type, key, id_key, id_flag, project, region)
-  end
-
-  def do_action_to_things(action, type, key, id_key, id_flag, project, region)
     results_json = run("aws --region #{region} ec2 describe-#{type}s --filter 'Name=tag:concourse-up-project,Values=#{project}'")
     results = JSON.parse(results_json)
     ids = results.fetch(key).map { |address| address.fetch(id_key) }
-    ids.each { |id| run("aws --region #{region} ec2 #{action}-#{type} --#{id_flag} #{id}") }
+    ids.each { |id| run("aws --region #{region} ec2 delete-#{type} --#{id_flag} #{id}") }
   end
 
   def run(command)
