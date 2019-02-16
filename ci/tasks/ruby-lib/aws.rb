@@ -212,6 +212,7 @@ class AWSBucket
   end
 
   def delete
+    `aws s3 rm s3://#{name} --recursive`
     `aws s3 rb s3://#{name} --force`
   end
 end
