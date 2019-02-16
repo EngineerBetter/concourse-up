@@ -3,6 +3,7 @@ package bosh
 import (
 	"fmt"
 	"io/ioutil"
+	"os"
 	"strings"
 )
 
@@ -59,9 +60,6 @@ func (client *GCPClient) deployConcourse(creds []byte, detach bool) ([]byte, err
 	}
 
 	flagFiles := []string{
-		"--deployment",
-		concourseDeploymentName,
-		"deploy",
 		client.director.PathInWorkingDir(concourseManifestFilename),
 		"--vars-store",
 		client.director.PathInWorkingDir(credsFilename),
@@ -96,12 +94,19 @@ func (client *GCPClient) deployConcourse(creds []byte, detach bool) ([]byte, err
 
 	vs := vars(vmap)
 
-	err = client.director.RunAuthenticatedCommand(
-		client.stdout,
-		client.stderr,
+	directorPublicIP, err := client.outputs.Get("DirectorPublicIP")
+	if err != nil {
+		return nil, fmt.Errorf("failed to retrieve director IP: [%v]", err)
+	}
+
+	err = client.boshCLI.RunAuthenticatedCommand(
+		"deploy",
+		directorPublicIP,
+		client.config.DirectorPassword,
+		client.config.DirectorCACert,
 		detach,
-		append(flagFiles, vs...)...,
-	)
+		os.Stdout,
+		append(flagFiles, vs...)...)
 	if err != nil {
 		return nil, fmt.Errorf("failed to run bosh deploy with commands %+v: [%v]", flagFiles, err)
 	}

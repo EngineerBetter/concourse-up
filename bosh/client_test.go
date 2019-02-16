@@ -98,8 +98,8 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 			})
 			Context("When instances are found", func() {
 				JustBeforeEach(func() {
-					directorClient.RunAuthenticatedCommandStub = func(out, err io.Writer, detach bool, args ...string) error {
-						out.Write([]byte("{\"Tables\":[{\"Rows\": [{\"instance\": \"foo\",\"ips\": \"1.2.3.4\", \"process_state\": \"bar\"}]}]}"))
+					boshCLI.RunAuthenticatedCommandStub = func(action, ip, password, ca string, detach bool, stdout io.Writer, flags ...string) error {
+						stdout.Write([]byte("{\"Tables\":[{\"Rows\": [{\"instance\": \"foo\",\"ips\": \"1.2.3.4\", \"process_state\": \"bar\"}]}]}"))
 						return nil
 					}
 				})

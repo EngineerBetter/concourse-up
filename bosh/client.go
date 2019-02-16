@@ -75,16 +75,16 @@ func New(config config.Config, outputs terraform.Outputs, stdout, stderr io.Writ
 	return nil, fmt.Errorf("IAAS not supported: %s", provider.IAAS())
 }
 
-func instances(director director.IClient, stderr io.Writer) ([]Instance, error) {
+func instances(boshCLI boshenv.IBOSHCLI, ip, password, ca string) ([]Instance, error) {
 	output := new(bytes.Buffer)
 
-	if err := director.RunAuthenticatedCommand(
-		output,
-		stderr,
-		false,
-		"--deployment",
-		concourseDeploymentName,
+	if err := boshCLI.RunAuthenticatedCommand(
 		"instances",
+		ip,
+		password,
+		ca,
+		false,
+		output,
 		"--json",
 	); err != nil {
 		return nil, fmt.Errorf("Error [%s] running `bosh instances`. stdout: [%s]", err, output.String())

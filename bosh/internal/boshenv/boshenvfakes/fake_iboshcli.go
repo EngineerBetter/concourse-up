@@ -2,6 +2,7 @@
 package boshenvfakes
 
 import (
+	"io"
 	"sync"
 
 	"github.com/EngineerBetter/concourse-up/bosh/internal/boshenv"
@@ -70,6 +71,23 @@ type FakeIBOSHCLI struct {
 		result1 error
 	}
 	recreateReturnsOnCall map[int]struct {
+		result1 error
+	}
+	RunAuthenticatedCommandStub        func(string, string, string, string, bool, io.Writer, ...string) error
+	runAuthenticatedCommandMutex       sync.RWMutex
+	runAuthenticatedCommandArgsForCall []struct {
+		arg1 string
+		arg2 string
+		arg3 string
+		arg4 string
+		arg5 bool
+		arg6 io.Writer
+		arg7 []string
+	}
+	runAuthenticatedCommandReturns struct {
+		result1 error
+	}
+	runAuthenticatedCommandReturnsOnCall map[int]struct {
 		result1 error
 	}
 	UpdateCloudConfigStub        func(boshenv.IAASEnvironment, string, string, string) error
@@ -365,6 +383,72 @@ func (fake *FakeIBOSHCLI) RecreateReturnsOnCall(i int, result1 error) {
 	}{result1}
 }
 
+func (fake *FakeIBOSHCLI) RunAuthenticatedCommand(arg1 string, arg2 string, arg3 string, arg4 string, arg5 bool, arg6 io.Writer, arg7 ...string) error {
+	fake.runAuthenticatedCommandMutex.Lock()
+	ret, specificReturn := fake.runAuthenticatedCommandReturnsOnCall[len(fake.runAuthenticatedCommandArgsForCall)]
+	fake.runAuthenticatedCommandArgsForCall = append(fake.runAuthenticatedCommandArgsForCall, struct {
+		arg1 string
+		arg2 string
+		arg3 string
+		arg4 string
+		arg5 bool
+		arg6 io.Writer
+		arg7 []string
+	}{arg1, arg2, arg3, arg4, arg5, arg6, arg7})
+	fake.recordInvocation("RunAuthenticatedCommand", []interface{}{arg1, arg2, arg3, arg4, arg5, arg6, arg7})
+	fake.runAuthenticatedCommandMutex.Unlock()
+	if fake.RunAuthenticatedCommandStub != nil {
+		return fake.RunAuthenticatedCommandStub(arg1, arg2, arg3, arg4, arg5, arg6, arg7...)
+	}
+	if specificReturn {
+		return ret.result1
+	}
+	fakeReturns := fake.runAuthenticatedCommandReturns
+	return fakeReturns.result1
+}
+
+func (fake *FakeIBOSHCLI) RunAuthenticatedCommandCallCount() int {
+	fake.runAuthenticatedCommandMutex.RLock()
+	defer fake.runAuthenticatedCommandMutex.RUnlock()
+	return len(fake.runAuthenticatedCommandArgsForCall)
+}
+
+func (fake *FakeIBOSHCLI) RunAuthenticatedCommandCalls(stub func(string, string, string, string, bool, io.Writer, ...string) error) {
+	fake.runAuthenticatedCommandMutex.Lock()
+	defer fake.runAuthenticatedCommandMutex.Unlock()
+	fake.RunAuthenticatedCommandStub = stub
+}
+
+func (fake *FakeIBOSHCLI) RunAuthenticatedCommandArgsForCall(i int) (string, string, string, string, bool, io.Writer, []string) {
+	fake.runAuthenticatedCommandMutex.RLock()
+	defer fake.runAuthenticatedCommandMutex.RUnlock()
+	argsForCall := fake.runAuthenticatedCommandArgsForCall[i]
+	return argsForCall.arg1, argsForCall.arg2, argsForCall.arg3, argsForCall.arg4, argsForCall.arg5, argsForCall.arg6, argsForCall.arg7
+}
+
+func (fake *FakeIBOSHCLI) RunAuthenticatedCommandReturns(result1 error) {
+	fake.runAuthenticatedCommandMutex.Lock()
+	defer fake.runAuthenticatedCommandMutex.Unlock()
+	fake.RunAuthenticatedCommandStub = nil
+	fake.runAuthenticatedCommandReturns = struct {
+		result1 error
+	}{result1}
+}
+
+func (fake *FakeIBOSHCLI) RunAuthenticatedCommandReturnsOnCall(i int, result1 error) {
+	fake.runAuthenticatedCommandMutex.Lock()
+	defer fake.runAuthenticatedCommandMutex.Unlock()
+	fake.RunAuthenticatedCommandStub = nil
+	if fake.runAuthenticatedCommandReturnsOnCall == nil {
+		fake.runAuthenticatedCommandReturnsOnCall = make(map[int]struct {
+			result1 error
+		})
+	}
+	fake.runAuthenticatedCommandReturnsOnCall[i] = struct {
+		result1 error
+	}{result1}
+}
+
 func (fake *FakeIBOSHCLI) UpdateCloudConfig(arg1 boshenv.IAASEnvironment, arg2 string, arg3 string, arg4 string) error {
 	fake.updateCloudConfigMutex.Lock()
 	ret, specificReturn := fake.updateCloudConfigReturnsOnCall[len(fake.updateCloudConfigArgsForCall)]
@@ -502,6 +586,8 @@ func (fake *FakeIBOSHCLI) Invocations() map[string][][]interface{} {
 	defer fake.locksMutex.RUnlock()
 	fake.recreateMutex.RLock()
 	defer fake.recreateMutex.RUnlock()
+	fake.runAuthenticatedCommandMutex.RLock()
+	defer fake.runAuthenticatedCommandMutex.RUnlock()
 	fake.updateCloudConfigMutex.RLock()
 	defer fake.updateCloudConfigMutex.RUnlock()
 	fake.uploadConcourseStemcellMutex.RLock()

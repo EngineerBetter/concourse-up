@@ -2,7 +2,6 @@
 package directorfakes
 
 import (
-	"io"
 	"sync"
 
 	"github.com/EngineerBetter/concourse-up/bosh/internal/director"
@@ -29,33 +28,6 @@ type FakeIClient struct {
 	}
 	pathInWorkingDirReturnsOnCall map[int]struct {
 		result1 string
-	}
-	RunAuthenticatedCommandStub        func(io.Writer, io.Writer, bool, ...string) error
-	runAuthenticatedCommandMutex       sync.RWMutex
-	runAuthenticatedCommandArgsForCall []struct {
-		arg1 io.Writer
-		arg2 io.Writer
-		arg3 bool
-		arg4 []string
-	}
-	runAuthenticatedCommandReturns struct {
-		result1 error
-	}
-	runAuthenticatedCommandReturnsOnCall map[int]struct {
-		result1 error
-	}
-	RunCommandStub        func(io.Writer, io.Writer, ...string) error
-	runCommandMutex       sync.RWMutex
-	runCommandArgsForCall []struct {
-		arg1 io.Writer
-		arg2 io.Writer
-		arg3 []string
-	}
-	runCommandReturns struct {
-		result1 error
-	}
-	runCommandReturnsOnCall map[int]struct {
-		result1 error
 	}
 	SaveFileToWorkingDirStub        func(string, []byte) (string, error)
 	saveFileToWorkingDirMutex       sync.RWMutex
@@ -187,131 +159,6 @@ func (fake *FakeIClient) PathInWorkingDirReturnsOnCall(i int, result1 string) {
 	}{result1}
 }
 
-func (fake *FakeIClient) RunAuthenticatedCommand(arg1 io.Writer, arg2 io.Writer, arg3 bool, arg4 ...string) error {
-	fake.runAuthenticatedCommandMutex.Lock()
-	ret, specificReturn := fake.runAuthenticatedCommandReturnsOnCall[len(fake.runAuthenticatedCommandArgsForCall)]
-	fake.runAuthenticatedCommandArgsForCall = append(fake.runAuthenticatedCommandArgsForCall, struct {
-		arg1 io.Writer
-		arg2 io.Writer
-		arg3 bool
-		arg4 []string
-	}{arg1, arg2, arg3, arg4})
-	fake.recordInvocation("RunAuthenticatedCommand", []interface{}{arg1, arg2, arg3, arg4})
-	fake.runAuthenticatedCommandMutex.Unlock()
-	if fake.RunAuthenticatedCommandStub != nil {
-		return fake.RunAuthenticatedCommandStub(arg1, arg2, arg3, arg4...)
-	}
-	if specificReturn {
-		return ret.result1
-	}
-	fakeReturns := fake.runAuthenticatedCommandReturns
-	return fakeReturns.result1
-}
-
-func (fake *FakeIClient) RunAuthenticatedCommandCallCount() int {
-	fake.runAuthenticatedCommandMutex.RLock()
-	defer fake.runAuthenticatedCommandMutex.RUnlock()
-	return len(fake.runAuthenticatedCommandArgsForCall)
-}
-
-func (fake *FakeIClient) RunAuthenticatedCommandCalls(stub func(io.Writer, io.Writer, bool, ...string) error) {
-	fake.runAuthenticatedCommandMutex.Lock()
-	defer fake.runAuthenticatedCommandMutex.Unlock()
-	fake.RunAuthenticatedCommandStub = stub
-}
-
-func (fake *FakeIClient) RunAuthenticatedCommandArgsForCall(i int) (io.Writer, io.Writer, bool, []string) {
-	fake.runAuthenticatedCommandMutex.RLock()
-	defer fake.runAuthenticatedCommandMutex.RUnlock()
-	argsForCall := fake.runAuthenticatedCommandArgsForCall[i]
-	return argsForCall.arg1, argsForCall.arg2, argsForCall.arg3, argsForCall.arg4
-}
-
-func (fake *FakeIClient) RunAuthenticatedCommandReturns(result1 error) {
-	fake.runAuthenticatedCommandMutex.Lock()
-	defer fake.runAuthenticatedCommandMutex.Unlock()
-	fake.RunAuthenticatedCommandStub = nil
-	fake.runAuthenticatedCommandReturns = struct {
-		result1 error
-	}{result1}
-}
-
-func (fake *FakeIClient) RunAuthenticatedCommandReturnsOnCall(i int, result1 error) {
-	fake.runAuthenticatedCommandMutex.Lock()
-	defer fake.runAuthenticatedCommandMutex.Unlock()
-	fake.RunAuthenticatedCommandStub = nil
-	if fake.runAuthenticatedCommandReturnsOnCall == nil {
-		fake.runAuthenticatedCommandReturnsOnCall = make(map[int]struct {
-			result1 error
-		})
-	}
-	fake.runAuthenticatedCommandReturnsOnCall[i] = struct {
-		result1 error
-	}{result1}
-}
-
-func (fake *FakeIClient) RunCommand(arg1 io.Writer, arg2 io.Writer, arg3 ...string) error {
-	fake.runCommandMutex.Lock()
-	ret, specificReturn := fake.runCommandReturnsOnCall[len(fake.runCommandArgsForCall)]
-	fake.runCommandArgsForCall = append(fake.runCommandArgsForCall, struct {
-		arg1 io.Writer
-		arg2 io.Writer
-		arg3 []string
-	}{arg1, arg2, arg3})
-	fake.recordInvocation("RunCommand", []interface{}{arg1, arg2, arg3})
-	fake.runCommandMutex.Unlock()
-	if fake.RunCommandStub != nil {
-		return fake.RunCommandStub(arg1, arg2, arg3...)
-	}
-	if specificReturn {
-		return ret.result1
-	}
-	fakeReturns := fake.runCommandReturns
-	return fakeReturns.result1
-}
-
-func (fake *FakeIClient) RunCommandCallCount() int {
-	fake.runCommandMutex.RLock()
-	defer fake.runCommandMutex.RUnlock()
-	return len(fake.runCommandArgsForCall)
-}
-
-func (fake *FakeIClient) RunCommandCalls(stub func(io.Writer, io.Writer, ...string) error) {
-	fake.runCommandMutex.Lock()
-	defer fake.runCommandMutex.Unlock()
-	fake.RunCommandStub = stub
-}
-
-func (fake *FakeIClient) RunCommandArgsForCall(i int) (io.Writer, io.Writer, []string) {
-	fake.runCommandMutex.RLock()
-	defer fake.runCommandMutex.RUnlock()
-	argsForCall := fake.runCommandArgsForCall[i]
-	return argsForCall.arg1, argsForCall.arg2, argsForCall.arg3
-}
-
-func (fake *FakeIClient) RunCommandReturns(result1 error) {
-	fake.runCommandMutex.Lock()
-	defer fake.runCommandMutex.Unlock()
-	fake.RunCommandStub = nil
-	fake.runCommandReturns = struct {
-		result1 error
-	}{result1}
-}
-
-func (fake *FakeIClient) RunCommandReturnsOnCall(i int, result1 error) {
-	fake.runCommandMutex.Lock()
-	defer fake.runCommandMutex.Unlock()
-	fake.RunCommandStub = nil
-	if fake.runCommandReturnsOnCall == nil {
-		fake.runCommandReturnsOnCall = make(map[int]struct {
-			result1 error
-		})
-	}
-	fake.runCommandReturnsOnCall[i] = struct {
-		result1 error
-	}{result1}
-}
-
 func (fake *FakeIClient) SaveFileToWorkingDir(arg1 string, arg2 []byte) (string, error) {
 	var arg2Copy []byte
 	if arg2 != nil {
@@ -388,10 +235,6 @@ func (fake *FakeIClient) Invocations() map[string][][]interface{} {
 	defer fake.cleanupMutex.RUnlock()
 	fake.pathInWorkingDirMutex.RLock()
 	defer fake.pathInWorkingDirMutex.RUnlock()
-	fake.runAuthenticatedCommandMutex.RLock()
-	defer fake.runAuthenticatedCommandMutex.RUnlock()
-	fake.runCommandMutex.RLock()
-	defer fake.runCommandMutex.RUnlock()
 	fake.saveFileToWorkingDirMutex.RLock()
 	defer fake.saveFileToWorkingDirMutex.RUnlock()
 	copiedInvocations := map[string][][]interface{}{}

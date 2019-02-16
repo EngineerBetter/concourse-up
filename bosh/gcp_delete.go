@@ -1,22 +1,28 @@
 package bosh
 
 import (
+	"fmt"
 	"net"
+	"os"
 
-	"github.com/EngineerBetter/concourse-up/bosh/internal/boshenv"
 	"github.com/EngineerBetter/concourse-up/bosh/internal/gcp"
 	"github.com/apparentlymart/go-cidr/cidr"
 )
 
 // Delete deletes a bosh director
 func (client *GCPClient) Delete(stateFileBytes []byte) ([]byte, error) {
-	if err := client.director.RunAuthenticatedCommand(
-		client.stdout,
-		client.stderr,
-		false,
-		"--deployment",
-		concourseDeploymentName,
+	directorPublicIP, err := client.outputs.Get("DirectorPublicIP")
+	if err != nil {
+		return nil, fmt.Errorf("failed to retrieve director IP: [%v]", err)
+	}
+
+	if err = client.boshCLI.RunAuthenticatedCommand(
 		"delete-deployment",
+		directorPublicIP,
+		client.config.DirectorPassword,
+		client.config.DirectorCACert,
+		false,
+		os.Stdout,
 		"--force",
 	); err != nil {
 		return nil, err
@@ -26,16 +32,6 @@ func (client *GCPClient) Delete(stateFileBytes []byte) ([]byte, error) {
 	store := temporaryStore{
 		"state.json": stateFileBytes,
 	}
-	bosh, err := boshenv.New()
-	if err != nil {
-		return store["state.json"], err
-	}
-
-	directorPublicIP, err := client.outputs.Get("DirectorPublicIP")
-	if err != nil {
-		return store["state.json"], err
-	}
-
 	publicCIDR := client.config.PublicCIDR
 	_, pubCIDR, err := net.ParseCIDR(publicCIDR)
 	if err != nil {
@@ -70,7 +66,7 @@ func (client *GCPClient) Delete(stateFileBytes []byte) ([]byte, error) {
 		return store["state.json"], err
 	}
 
-	err = bosh.DeleteEnv(store, gcp.Environment{
+	err = client.boshCLI.DeleteEnv(store, gcp.Environment{
 		DirectorName:       "bosh",
 		ExternalIP:         directorPublicIP,
 		GcpCredentialsJSON: credentialsPath,

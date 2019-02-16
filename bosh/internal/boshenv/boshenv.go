@@ -1,12 +1,15 @@
 package boshenv
 
 import (
+	"bufio"
 	"bytes"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 
 	"github.com/EngineerBetter/concourse-up/resource"
 	"github.com/EngineerBetter/concourse-up/util/yaml"
@@ -18,12 +21,13 @@ const gcpConst = "GCP"
 
 //go:generate counterfeiter . IBOSHCLI
 type IBOSHCLI interface {
-	UpdateCloudConfig(config IAASEnvironment, ip, password, ca string) error
-	Locks(config IAASEnvironment, ip, password, ca string) ([]byte, error)
-	UploadConcourseStemcell(config IAASEnvironment, ip, password, ca string) error
-	Recreate(config IAASEnvironment, ip, password, ca string) error
-	DeleteEnv(store Store, config IAASEnvironment, password, cert, key, ca string, tags map[string]string) error
 	CreateEnv(store Store, config IAASEnvironment, password, cert, key, ca string, tags map[string]string) error
+	DeleteEnv(store Store, config IAASEnvironment, password, cert, key, ca string, tags map[string]string) error
+	RunAuthenticatedCommand(action, ip, password, ca string, detach bool, stdout io.Writer, flags ...string) error
+	Locks(config IAASEnvironment, ip, password, ca string) ([]byte, error)
+	Recreate(config IAASEnvironment, ip, password, ca string) error
+	UpdateCloudConfig(config IAASEnvironment, ip, password, ca string) error
+	UploadConcourseStemcell(config IAASEnvironment, ip, password, ca string) error
 }
 
 // BOSHCLI struct holds the abstraction of execCmd
@@ -226,16 +230,65 @@ func (c *BOSHCLI) Recreate(config IAASEnvironment, ip, password, ca string) erro
 	return cmd.Run()
 }
 
-// DeleteEnv deletes a bosh env
 func (c *BOSHCLI) DeleteEnv(store Store, config IAASEnvironment, password, cert, key, ca string, tags map[string]string) error {
 	return c.xEnv("delete-env", store, config, password, cert, key, ca, tags)
 }
 
-// CreateEnv creates a bosh env
 func (c *BOSHCLI) CreateEnv(store Store, config IAASEnvironment, password, cert, key, ca string, tags map[string]string) error {
 
 	return c.xEnv("create-env", store, config, password, cert, key, ca, tags)
+}
 
+func (c *BOSHCLI) RunAuthenticatedCommand(action, ip, password, ca string, detach bool, stdout io.Writer, flags ...string) error {
+	caPath, err := writeTempFile([]byte(ca))
+	if err != nil {
+		return err
+	}
+	defer os.Remove(caPath)
+	ip = fmt.Sprintf("https://%s", ip)
+
+	authFlags := []string{"--non-interactive", "--environment", ip, "--ca-cert", caPath, "--client", "admin", "--client-secret", password, "--deployment", "concourse", action}
+	flags = append(authFlags, flags...)
+	if detach {
+		return c.detachedBoshCommand(stdout, flags...)
+	}
+	return c.boshCommand(stdout, flags...)
+}
+
+func (c *BOSHCLI) boshCommand(stdout io.Writer, flags ...string) error {
+	cmd := c.execCmd(c.boshPath, flags...)
+	cmd.Stderr = os.Stderr
+	cmd.Stdout = stdout
+	return cmd.Run()
+}
+
+func (c *BOSHCLI) detachedBoshCommand(stdout io.Writer, flags ...string) error {
+	cmd := c.execCmd(c.boshPath, flags...)
+	cmd.Stderr = os.Stderr
+
+	cmdReader, err := cmd.StdoutPipe()
+	if err != nil {
+		return err
+	}
+
+	scanner := bufio.NewScanner(cmdReader)
+
+	if err := cmd.Start(); err != nil {
+		return err
+	}
+
+	for scanner.Scan() {
+		text := scanner.Text()
+		if _, err := stdout.Write([]byte(fmt.Sprintf("%s\n", text))); err != nil {
+			return err
+		}
+		if strings.Contains(text, "Preparing deployment") {
+			stdout.Write([]byte("Task started, detaching output\n"))
+			return nil
+		}
+	}
+
+	return fmt.Errorf("Didn't detect successful task start in BOSH comand: bosh-cli %s", strings.Join(flags, " "))
 }
 
 func writeToDisk(store Store, key string) (filename string, upload func() error, err error) {
