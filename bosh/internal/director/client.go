@@ -1,13 +1,6 @@
 package director
 
 import (
-	"encoding/json"
-	"fmt"
-	"io"
-	"net/http"
-	"os"
-	"runtime"
-
 	"github.com/EngineerBetter/concourse-up/util"
 )
 
@@ -72,59 +65,4 @@ func (client *client) PathInWorkingDir(filename string) string {
 // Cleanup removes tempfiles
 func (client *client) Cleanup() error {
 	return client.tempDir.Cleanup()
-}
-
-func (client *client) ensureBinaryDownloaded() error {
-	if client.hasDownloadedBinary {
-		return nil
-	}
-
-	fileHandler, err := os.Create(client.tempDir.Path("bosh-cli"))
-	if err != nil {
-		return err
-	}
-	defer fileHandler.Close()
-
-	url, err := getBoshCLIURL(client.versionFile)
-	if err != nil {
-		return err
-	}
-
-	resp, err := http.Get(url)
-	if err != nil {
-		return err
-	}
-	defer resp.Body.Close()
-
-	if _, err := io.Copy(fileHandler, resp.Body); err != nil {
-		return err
-	}
-
-	if err := fileHandler.Sync(); err != nil {
-		return err
-	}
-
-	if err := os.Chmod(fileHandler.Name(), 0700); err != nil {
-		return err
-	}
-
-	client.hasDownloadedBinary = true
-
-	return nil
-}
-
-func getBoshCLIURL(versionFile []byte) (string, error) {
-	var x map[string]map[string]string
-	err := json.Unmarshal(versionFile, &x)
-	if err != nil {
-		return "", err
-	}
-	switch runtime.GOOS {
-	case "darwin":
-		return x["bosh-cli"]["mac"], nil
-	case "linux":
-		return x["bosh-cli"]["linux"], nil
-	default:
-		return "", fmt.Errorf("unknown os: `%s`", runtime.GOOS)
-	}
 }
