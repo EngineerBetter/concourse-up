@@ -71,7 +71,10 @@ class AWS
   def vpc_id(project, region)
     results_json = run("aws --region #{region} ec2 describe-vpcs --filters 'Name=tag:concourse-up-project,Values=#{project}'")
     results = JSON.parse(results_json)
-    results.fetch('Vpcs').first.fetch('VpcId')
+    return '' unless results.fetch('Vpcs', []).any?
+    results.fetch('Vpcs')
+           .first
+           .fetch('VpcId')
   end
 
   def vpc_id_valid?(id)
