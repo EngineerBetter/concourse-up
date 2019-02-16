@@ -3,7 +3,7 @@ package bosh
 import (
 	"net"
 
-	"github.com/EngineerBetter/concourse-up/bosh/internal/boshenv"
+	"github.com/EngineerBetter/concourse-up/bosh/internal/boshcli"
 	"github.com/EngineerBetter/concourse-up/bosh/internal/gcp"
 	"github.com/apparentlymart/go-cidr/cidr"
 )
@@ -11,7 +11,7 @@ import (
 // Deploy deploys a new Bosh director or converges an existing deployment
 // Returns new contents of bosh state file
 func (client *GCPClient) Deploy(state, creds []byte, detach bool) (newState, newCreds []byte, err error) {
-	boshCLI, err := boshenv.New(boshenv.DownloadBOSH())
+	boshCLI, err := boshcli.New(boshcli.DownloadBOSH())
 	if err != nil {
 		return state, creds, err
 	}
@@ -55,7 +55,7 @@ func (client *GCPClient) Recreate() error {
 	}, directorPublicIP, client.config.DirectorPassword, client.config.DirectorCACert)
 }
 
-func (client *GCPClient) createEnv(bosh boshenv.IBOSHCLI, state, creds []byte, customOps string) (newState, newCreds []byte, err error) {
+func (client *GCPClient) createEnv(bosh boshcli.ICLI, state, creds []byte, customOps string) (newState, newCreds []byte, err error) {
 	tags, err := splitTags(client.config.Tags)
 	if err != nil {
 		return state, creds, err
@@ -141,7 +141,7 @@ func (client *GCPClient) Locks() ([]byte, error) {
 
 }
 
-func (client *GCPClient) updateCloudConfig(bosh boshenv.IBOSHCLI) error {
+func (client *GCPClient) updateCloudConfig(bosh boshcli.ICLI) error {
 
 	privateSubnetwork, err := client.outputs.Get("PrivateSubnetworkName")
 	if err != nil {
@@ -222,7 +222,7 @@ func (client *GCPClient) updateCloudConfig(bosh boshenv.IBOSHCLI) error {
 		Network:             network,
 	}, directorPublicIP, client.config.DirectorPassword, client.config.DirectorCACert)
 }
-func (client *GCPClient) uploadConcourseStemcell(bosh boshenv.IBOSHCLI) error {
+func (client *GCPClient) uploadConcourseStemcell(bosh boshcli.ICLI) error {
 	directorPublicIP, err := client.outputs.Get("DirectorPublicIP")
 	if err != nil {
 		return err

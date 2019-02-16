@@ -1,4 +1,4 @@
-package boshenv
+package boshcli
 
 import (
 	"bufio"
@@ -19,8 +19,8 @@ const awsConst = "AWS"
 
 const gcpConst = "GCP"
 
-//go:generate counterfeiter . IBOSHCLI
-type IBOSHCLI interface {
+//go:generate counterfeiter . ICLI
+type ICLI interface {
 	CreateEnv(store Store, config IAASEnvironment, password, cert, key, ca string, tags map[string]string) error
 	DeleteEnv(store Store, config IAASEnvironment, password, cert, key, ca string, tags map[string]string) error
 	RunAuthenticatedCommand(action, ip, password, ca string, detach bool, stdout io.Writer, flags ...string) error
@@ -30,18 +30,18 @@ type IBOSHCLI interface {
 	UploadConcourseStemcell(config IAASEnvironment, ip, password, ca string) error
 }
 
-// BOSHCLI struct holds the abstraction of execCmd
-type BOSHCLI struct {
+// CLI struct holds the abstraction of execCmd
+type CLI struct {
 	execCmd  func(string, ...string) *exec.Cmd
 	boshPath string
 }
 
 // Option defines the arbitary element of Options for New
-type Option func(*BOSHCLI) error
+type Option func(*CLI) error
 
 // BOSHPath returns the path of the bosh-cli as an Option
 func BOSHPath(path string) Option {
-	return func(c *BOSHCLI) error {
+	return func(c *CLI) error {
 		c.boshPath = path
 		return nil
 	}
@@ -49,16 +49,16 @@ func BOSHPath(path string) Option {
 
 // DownloadBOSH returns the dowloaded boshcli path Option
 func DownloadBOSH() Option {
-	return func(c *BOSHCLI) error {
+	return func(c *CLI) error {
 		path, err := resource.BOSHCLIPath()
 		c.boshPath = path
 		return err
 	}
 }
 
-// New provides a new BOSHCLI
-func New(ops ...Option) (IBOSHCLI, error) {
-	c := &BOSHCLI{
+// New provides a new CLI
+func New(ops ...Option) (ICLI, error) {
+	c := &CLI{
 		execCmd:  exec.Command,
 		boshPath: "bosh",
 	}
@@ -85,7 +85,7 @@ type Store interface {
 	Get(string) ([]byte, error)
 }
 
-func (c *BOSHCLI) xEnv(action string, store Store, config IAASEnvironment, password, cert, key, ca string, tags map[string]string) error {
+func (c *CLI) xEnv(action string, store Store, config IAASEnvironment, password, cert, key, ca string, tags map[string]string) error {
 	const stateFilename = "state.json"
 	const varsFilename = "vars.yaml"
 
@@ -138,7 +138,7 @@ func (c *BOSHCLI) xEnv(action string, store Store, config IAASEnvironment, passw
 }
 
 // UpdateCloudConfig generates cloud config from template and use it to update bosh cloud config
-func (c *BOSHCLI) UpdateCloudConfig(config IAASEnvironment, ip, password, ca string) error {
+func (c *CLI) UpdateCloudConfig(config IAASEnvironment, ip, password, ca string) error {
 	var cloudConfig string
 	var err error
 	iaas := config.IAASCheck()
@@ -170,7 +170,7 @@ func (c *BOSHCLI) UpdateCloudConfig(config IAASEnvironment, ip, password, ca str
 }
 
 // Locks runs bosh locks
-func (c *BOSHCLI) Locks(config IAASEnvironment, ip, password, ca string) ([]byte, error) {
+func (c *CLI) Locks(config IAASEnvironment, ip, password, ca string) ([]byte, error) {
 	var out bytes.Buffer
 	caPath, err := writeTempFile([]byte(ca))
 	if err != nil {
@@ -187,7 +187,7 @@ func (c *BOSHCLI) Locks(config IAASEnvironment, ip, password, ca string) ([]byte
 }
 
 // UploadConcourseStemcell uploads a stemcell for the chosen IAAS
-func (c *BOSHCLI) UploadConcourseStemcell(config IAASEnvironment, ip, password, ca string) error {
+func (c *CLI) UploadConcourseStemcell(config IAASEnvironment, ip, password, ca string) error {
 	var (
 		stemcell string
 		err      error
@@ -217,7 +217,7 @@ func (c *BOSHCLI) UploadConcourseStemcell(config IAASEnvironment, ip, password, 
 }
 
 // Recreate runs BOSH recreate
-func (c *BOSHCLI) Recreate(config IAASEnvironment, ip, password, ca string) error {
+func (c *CLI) Recreate(config IAASEnvironment, ip, password, ca string) error {
 	caPath, err := writeTempFile([]byte(ca))
 	if err != nil {
 		return err
@@ -230,16 +230,16 @@ func (c *BOSHCLI) Recreate(config IAASEnvironment, ip, password, ca string) erro
 	return cmd.Run()
 }
 
-func (c *BOSHCLI) DeleteEnv(store Store, config IAASEnvironment, password, cert, key, ca string, tags map[string]string) error {
+func (c *CLI) DeleteEnv(store Store, config IAASEnvironment, password, cert, key, ca string, tags map[string]string) error {
 	return c.xEnv("delete-env", store, config, password, cert, key, ca, tags)
 }
 
-func (c *BOSHCLI) CreateEnv(store Store, config IAASEnvironment, password, cert, key, ca string, tags map[string]string) error {
+func (c *CLI) CreateEnv(store Store, config IAASEnvironment, password, cert, key, ca string, tags map[string]string) error {
 
 	return c.xEnv("create-env", store, config, password, cert, key, ca, tags)
 }
 
-func (c *BOSHCLI) RunAuthenticatedCommand(action, ip, password, ca string, detach bool, stdout io.Writer, flags ...string) error {
+func (c *CLI) RunAuthenticatedCommand(action, ip, password, ca string, detach bool, stdout io.Writer, flags ...string) error {
 	caPath, err := writeTempFile([]byte(ca))
 	if err != nil {
 		return err
@@ -255,14 +255,14 @@ func (c *BOSHCLI) RunAuthenticatedCommand(action, ip, password, ca string, detac
 	return c.boshCommand(stdout, flags...)
 }
 
-func (c *BOSHCLI) boshCommand(stdout io.Writer, flags ...string) error {
+func (c *CLI) boshCommand(stdout io.Writer, flags ...string) error {
 	cmd := c.execCmd(c.boshPath, flags...)
 	cmd.Stderr = os.Stderr
 	cmd.Stdout = stdout
 	return cmd.Run()
 }
 
-func (c *BOSHCLI) detachedBoshCommand(stdout io.Writer, flags ...string) error {
+func (c *CLI) detachedBoshCommand(stdout io.Writer, flags ...string) error {
 	cmd := c.execCmd(c.boshPath, flags...)
 	cmd.Stderr = os.Stderr
 

@@ -5,7 +5,7 @@ import (
 	"io"
 	"net"
 
-	"github.com/EngineerBetter/concourse-up/bosh/internal/boshenv"
+	"github.com/EngineerBetter/concourse-up/bosh/internal/boshcli"
 	"github.com/EngineerBetter/concourse-up/bosh/internal/director"
 	"github.com/EngineerBetter/concourse-up/config"
 	"github.com/EngineerBetter/concourse-up/iaas"
@@ -23,11 +23,11 @@ type AWSClient struct {
 	stdout   io.Writer
 	stderr   io.Writer
 	provider iaas.Provider
-	boshCLI  boshenv.IBOSHCLI
+	boshCLI  boshcli.ICLI
 }
 
 //NewAWSClient returns a AWS specific implementation of IClient
-func NewAWSClient(config config.Config, outputs terraform.Outputs, director director.IClient, stdout, stderr io.Writer, provider iaas.Provider, boshCLI boshenv.IBOSHCLI) (IClient, error) {
+func NewAWSClient(config config.Config, outputs terraform.Outputs, director director.IClient, stdout, stderr io.Writer, provider iaas.Provider, boshCLI boshcli.ICLI) (IClient, error) {
 	directorPublicIP, err := outputs.Get("DirectorPublicIP")
 	if err != nil {
 		return nil, fmt.Errorf("failed to get DirectorPublicIP from terraform outputs: [%v]", err)

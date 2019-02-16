@@ -10,7 +10,7 @@ import (
 
 	"github.com/EngineerBetter/concourse-up/terraform"
 
-	"github.com/EngineerBetter/concourse-up/bosh/internal/boshenv"
+	"github.com/EngineerBetter/concourse-up/bosh/internal/boshcli"
 	"github.com/EngineerBetter/concourse-up/bosh/internal/director"
 	"github.com/EngineerBetter/concourse-up/config"
 )
@@ -61,7 +61,7 @@ func New(config config.Config, outputs terraform.Outputs, stdout, stderr io.Writ
 		return nil, err
 	}
 
-	boshCLI, err := boshenv.New(boshenv.DownloadBOSH())
+	boshCLI, err := boshcli.New(boshcli.DownloadBOSH())
 	if err != nil {
 		return nil, fmt.Errorf("failed to create boshCLI: [%v]", err)
 	}
@@ -75,7 +75,7 @@ func New(config config.Config, outputs terraform.Outputs, stdout, stderr io.Writ
 	return nil, fmt.Errorf("IAAS not supported: %s", provider.IAAS())
 }
 
-func instances(boshCLI boshenv.IBOSHCLI, ip, password, ca string) ([]Instance, error) {
+func instances(boshCLI boshcli.ICLI, ip, password, ca string) ([]Instance, error) {
 	output := new(bytes.Buffer)
 
 	if err := boshCLI.RunAuthenticatedCommand(

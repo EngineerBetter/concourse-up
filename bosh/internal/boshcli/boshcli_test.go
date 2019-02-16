@@ -1,4 +1,4 @@
-package boshenv_test
+package boshcli_test
 
 import (
 	"fmt"
@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/EngineerBetter/concourse-up/bosh/internal/boshenv"
+	"github.com/EngineerBetter/concourse-up/bosh/internal/boshcli"
 	"github.com/EngineerBetter/concourse-up/internal/fakeexec"
 	"github.com/stretchr/testify/require"
 )
@@ -51,10 +51,10 @@ func (c mockIAASConfig) ConfigureConcourseStemcell(v string) (string, error) {
 	return c.f(v), nil
 }
 
-func TestBOSHCLI_CreateEnv(t *testing.T) {
+func TestCLI_CreateEnv(t *testing.T) {
 	e := fakeexec.New(t)
 	defer e.Finish()
-	c, err := boshenv.New(boshenv.FakeExec(e.Cmd()))
+	c, err := boshcli.New(boshcli.FakeExec(e.Cmd()))
 	require.NoError(t, err)
 	store := make(mockStore)
 	config := mockIAASConfig{
@@ -85,10 +85,10 @@ func expectPathNotToExistButBeWriteable(t testing.TB, path string) {
 	f.Close()
 }
 
-func TestBOSHCLI_UpdateCloudConfig(t *testing.T) {
+func TestCLI_UpdateCloudConfig(t *testing.T) {
 	e := fakeexec.New(t)
 	defer e.Finish()
-	c, err := boshenv.New(boshenv.FakeExec(e.Cmd()))
+	c, err := boshcli.New(boshcli.FakeExec(e.Cmd()))
 	require.NoError(t, err)
 	config := mockIAASConfig{
 		f: func(s string) string {
@@ -109,10 +109,10 @@ func TestBOSHCLI_UpdateCloudConfig(t *testing.T) {
 	require.NoError(t, err)
 }
 
-func TestBOSHCLI_UploadConcourseStemcell(t *testing.T) {
+func TestCLI_UploadConcourseStemcell(t *testing.T) {
 	e := fakeexec.New(t)
 	defer e.Finish()
-	c, err := boshenv.New(boshenv.FakeExec(e.Cmd()))
+	c, err := boshcli.New(boshcli.FakeExec(e.Cmd()))
 	require.NoError(t, err)
 	config := mockIAASConfig{
 		f: func(s string) string {

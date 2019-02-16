@@ -4,7 +4,7 @@ import (
 	"net"
 
 	"github.com/EngineerBetter/concourse-up/bosh/internal/aws"
-	"github.com/EngineerBetter/concourse-up/bosh/internal/boshenv"
+	"github.com/EngineerBetter/concourse-up/bosh/internal/boshcli"
 	"github.com/EngineerBetter/concourse-up/db"
 	"github.com/apparentlymart/go-cidr/cidr"
 )
@@ -62,7 +62,7 @@ func (client *AWSClient) Recreate() error {
 	}, directorPublicIP, client.config.DirectorPassword, client.config.DirectorCACert)
 }
 
-func (client *AWSClient) createEnv(bosh boshenv.IBOSHCLI, state, creds []byte, customOps string) (newState, newCreds []byte, err error) {
+func (client *AWSClient) createEnv(bosh boshcli.ICLI, state, creds []byte, customOps string) (newState, newCreds []byte, err error) {
 	tags, err := splitTags(client.config.Tags)
 	if err != nil {
 		return state, creds, err
@@ -184,7 +184,7 @@ func (client *AWSClient) createEnv(bosh boshenv.IBOSHCLI, state, creds []byte, c
 	return store["state.json"], store["vars.yaml"], err
 }
 
-func (client *AWSClient) updateCloudConfig(bosh boshenv.IBOSHCLI) error {
+func (client *AWSClient) updateCloudConfig(bosh boshcli.ICLI) error {
 	publicSubnetID, err := client.outputs.Get("PublicSubnetID")
 	if err != nil {
 		return err
@@ -270,7 +270,7 @@ func (client *AWSClient) updateCloudConfig(bosh boshenv.IBOSHCLI) error {
 		PrivateCIDRReserved: privateCIDRReserved,
 	}, directorPublicIP, client.config.DirectorPassword, client.config.DirectorCACert)
 }
-func (client *AWSClient) uploadConcourseStemcell(bosh boshenv.IBOSHCLI) error {
+func (client *AWSClient) uploadConcourseStemcell(bosh boshcli.ICLI) error {
 	directorPublicIP, err := client.outputs.Get("DirectorPublicIP")
 	if err != nil {
 		return err
