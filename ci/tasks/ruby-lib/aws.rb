@@ -48,7 +48,7 @@ class AWS
       delete_subnets(orphan.project, orphan.region)
       delete_security_groups(orphan.project, orphan.region)
       delete_route_tables(orphan.project, orphan.region)
-      delete_internet_gateways(orphan.project, orphan.region)
+      delete_internet_gateways(orphan.project, orphan.region, vpc_id)
       delete_key_pairs(orphan.project, orphan.region)
       delete_network_acls(orphan.project, orphan.region, vpc_id)
       delete_vpc(vpc_id, orphan.region)
@@ -159,8 +159,12 @@ class AWS
     delete_things('route-table', 'RouteTables', 'RouteTableId', 'route-table-id', project, region)
   end
 
-  def delete_internet_gateways(project, region)
-    delete_things('internet-gateway', 'InternetGateways', 'InternetGatewayId', 'internet-gateway-id', project, region)
+  def delete_internet_gateways(project, region, vpc_id)
+    results_json = run("aws --region #{region} ec2 describe-internet-gateways --filter 'Name=tag:concourse-up-project,Values=#{project}'")
+    results = JSON.parse(results_json)
+    ids = results.fetch('InternetGateways').map { |address| address.fetch('InternetGatewayId') }
+    ids.each { |id| run("aws --region #{region} ec2 detach-internet-gateway --vpc-id #{vpc_id} --internet-gateway-id #{id}") }
+    ids.each { |id| run("aws --region #{region} ec2 delete-internet-gateway --internet-gateway-id #{id}") }
   end
 
   def delete_things(type, key, id_key, id_flag, project, region)
