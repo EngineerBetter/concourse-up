@@ -279,19 +279,3 @@ func (client *AWSClient) uploadConcourseStemcell(bosh boshcli.ICLI) error {
 		ExternalIP: directorPublicIP,
 	}, directorPublicIP, client.config.DirectorPassword, client.config.DirectorCACert)
 }
-
-func (client *AWSClient) saveStateFile(bytes []byte) (string, error) {
-	if bytes == nil {
-		return client.director.PathInWorkingDir(StateFilename), nil
-	}
-
-	return client.director.SaveFileToWorkingDir(StateFilename, bytes)
-}
-
-func (client *AWSClient) saveCredsFile(bytes []byte) (string, error) {
-	if bytes == nil {
-		return client.director.PathInWorkingDir(CredsFilename), nil
-	}
-
-	return client.director.SaveFileToWorkingDir(CredsFilename, bytes)
-}
