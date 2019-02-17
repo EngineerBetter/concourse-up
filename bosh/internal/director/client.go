@@ -5,50 +5,27 @@ import (
 )
 
 //go:generate counterfeiter . IClient
-// IClient represents a bosh director client
+// IClient represents client for interacting with a working directory
 type IClient interface {
 	SaveFileToWorkingDir(path string, contents []byte) (string, error)
 	PathInWorkingDir(filename string) string
 	Cleanup() error
 }
 
-// Credentials represent credentials for connecting to bosh director
-type Credentials struct {
-	Username string
-	Password string
-	Host     string
-	CACert   string
-}
-
-// client represents a low-level wrapper for bosh director
+// client represents a low-level wrapper for a working directory
 type client struct {
-	tempDir             *util.TempDir
-	creds               Credentials
-	caCertPath          string
-	hasDownloadedBinary bool
-	versionFile         []byte
+	tempDir *util.TempDir
 }
-
-const caCertFilename = "ca-cert.pem"
 
 // New returns a new client
-func New(creds Credentials, versionFile []byte) (*client, error) {
+func New() (*client, error) {
 	tempDir, err := util.NewTempDir()
 	if err != nil {
 		return nil, err
 	}
 
-	caCertPath, err := tempDir.Save(caCertFilename, []byte(creds.CACert))
-	if err != nil {
-		return nil, err
-	}
-
 	return &client{
-		tempDir:             tempDir,
-		creds:               creds,
-		caCertPath:          caCertPath,
-		hasDownloadedBinary: false,
-		versionFile:         versionFile,
+		tempDir: tempDir,
 	}, nil
 }
 

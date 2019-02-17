@@ -45,18 +45,7 @@ type ClientFactory func(config config.Config, outputs terraform.Outputs, stdout,
 
 //New returns an IAAS specific implementation of BOSH client
 func New(config config.Config, outputs terraform.Outputs, stdout, stderr io.Writer, provider iaas.Provider, versionFile []byte) (IClient, error) {
-
-	directorPublicIP, err := outputs.Get("DirectorPublicIP")
-	if err != nil {
-		return nil, err
-	}
-
-	director, err := director.New(director.Credentials{
-		Username: config.DirectorUsername,
-		Password: config.DirectorPassword,
-		Host:     directorPublicIP,
-		CACert:   config.DirectorCACert,
-	}, versionFile)
+	director, err := director.New()
 	if err != nil {
 		return nil, err
 	}
