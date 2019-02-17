@@ -1,4 +1,4 @@
-package director
+package workingdir
 
 import (
 	"github.com/EngineerBetter/concourse-up/util"

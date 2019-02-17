@@ -9,12 +9,12 @@ import (
 
 func (client *GCPClient) deployConcourse(creds []byte, detach bool) ([]byte, error) {
 
-	err := saveFilesToWorkingDir(client.director, client.provider, creds)
+	err := saveFilesToWorkingDir(client.workingdir, client.provider, creds)
 	if err != nil {
 		return nil, fmt.Errorf("failed saving files to working directory in deployConcourse: [%v]", err)
 	}
 
-	uaaCertPath, err := client.director.SaveFileToWorkingDir(uaaCertFilename, uaaCert)
+	uaaCertPath, err := client.workingdir.SaveFileToWorkingDir(uaaCertFilename, uaaCert)
 	if err != nil {
 		return []byte{}, err
 	}
@@ -60,19 +60,19 @@ func (client *GCPClient) deployConcourse(creds []byte, detach bool) ([]byte, err
 	}
 
 	flagFiles := []string{
-		client.director.PathInWorkingDir(concourseManifestFilename),
+		client.workingdir.PathInWorkingDir(concourseManifestFilename),
 		"--vars-store",
-		client.director.PathInWorkingDir(credsFilename),
+		client.workingdir.PathInWorkingDir(credsFilename),
 		"--ops-file",
-		client.director.PathInWorkingDir(concourseVersionsFilename),
+		client.workingdir.PathInWorkingDir(concourseVersionsFilename),
 		"--ops-file",
-		client.director.PathInWorkingDir(concourseSHAsFilename),
+		client.workingdir.PathInWorkingDir(concourseSHAsFilename),
 		"--ops-file",
-		client.director.PathInWorkingDir(concourseCompatibilityFilename),
+		client.workingdir.PathInWorkingDir(concourseCompatibilityFilename),
 		"--ops-file",
 		uaaCertPath,
 		"--vars-file",
-		client.director.PathInWorkingDir(concourseGrafanaFilename),
+		client.workingdir.PathInWorkingDir(concourseGrafanaFilename),
 	}
 
 	if client.config.ConcoursePassword != "" {
@@ -82,7 +82,7 @@ func (client *GCPClient) deployConcourse(creds []byte, detach bool) ([]byte, err
 	if client.config.GithubAuthIsSet {
 		vmap["github_client_id"] = client.config.GithubClientID
 		vmap["github_client_secret"] = client.config.GithubClientSecret
-		flagFiles = append(flagFiles, "--ops-file", client.director.PathInWorkingDir(concourseGitHubAuthFilename))
+		flagFiles = append(flagFiles, "--ops-file", client.workingdir.PathInWorkingDir(concourseGitHubAuthFilename))
 	}
 
 	t, err1 := client.buildTagsYaml(vmap["project"], "concourse")
@@ -90,7 +90,7 @@ func (client *GCPClient) deployConcourse(creds []byte, detach bool) ([]byte, err
 		return nil, err
 	}
 	vmap["tags"] = t
-	flagFiles = append(flagFiles, "--ops-file", client.director.PathInWorkingDir(extraTagsFilename))
+	flagFiles = append(flagFiles, "--ops-file", client.workingdir.PathInWorkingDir(extraTagsFilename))
 
 	vs := vars(vmap)
 
@@ -111,7 +111,7 @@ func (client *GCPClient) deployConcourse(creds []byte, detach bool) ([]byte, err
 		return nil, fmt.Errorf("failed to run bosh deploy with commands %+v: [%v]", flagFiles, err)
 	}
 
-	return ioutil.ReadFile(client.director.PathInWorkingDir(credsFilename))
+	return ioutil.ReadFile(client.workingdir.PathInWorkingDir(credsFilename))
 }
 
 func (client *GCPClient) buildTagsYaml(project interface{}, component string) (string, error) {

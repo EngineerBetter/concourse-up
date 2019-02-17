@@ -6,7 +6,7 @@ import (
 	"net"
 
 	"github.com/EngineerBetter/concourse-up/bosh/internal/boshcli"
-	"github.com/EngineerBetter/concourse-up/bosh/internal/director"
+	"github.com/EngineerBetter/concourse-up/bosh/internal/workingdir"
 	"github.com/EngineerBetter/concourse-up/config"
 	"github.com/EngineerBetter/concourse-up/iaas"
 	"github.com/EngineerBetter/concourse-up/terraform"
@@ -16,18 +16,18 @@ import (
 
 //AWSClient is an AWS specific implementation of IClient
 type AWSClient struct {
-	config   config.Config
-	outputs  terraform.Outputs
-	director director.IClient
-	db       Opener
-	stdout   io.Writer
-	stderr   io.Writer
-	provider iaas.Provider
-	boshCLI  boshcli.ICLI
+	config     config.Config
+	outputs    terraform.Outputs
+	workingdir workingdir.IClient
+	db         Opener
+	stdout     io.Writer
+	stderr     io.Writer
+	provider   iaas.Provider
+	boshCLI    boshcli.ICLI
 }
 
 //NewAWSClient returns a AWS specific implementation of IClient
-func NewAWSClient(config config.Config, outputs terraform.Outputs, director director.IClient, stdout, stderr io.Writer, provider iaas.Provider, boshCLI boshcli.ICLI) (IClient, error) {
+func NewAWSClient(config config.Config, outputs terraform.Outputs, workingdir workingdir.IClient, stdout, stderr io.Writer, provider iaas.Provider, boshCLI boshcli.ICLI) (IClient, error) {
 	directorPublicIP, err := outputs.Get("DirectorPublicIP")
 	if err != nil {
 		return nil, fmt.Errorf("failed to get DirectorPublicIP from terraform outputs: [%v]", err)
@@ -67,18 +67,18 @@ func NewAWSClient(config config.Config, outputs terraform.Outputs, director dire
 	}
 
 	return &AWSClient{
-		config:   config,
-		outputs:  outputs,
-		director: director,
-		db:       db,
-		stdout:   stdout,
-		stderr:   stderr,
-		provider: provider,
-		boshCLI:  boshCLI,
+		config:     config,
+		outputs:    outputs,
+		workingdir: workingdir,
+		db:         db,
+		stdout:     stdout,
+		stderr:     stderr,
+		provider:   provider,
+		boshCLI:    boshCLI,
 	}, nil
 }
 
 //Cleanup is AWS specific implementation of Cleanup
 func (client *AWSClient) Cleanup() error {
-	return client.director.Cleanup()
+	return client.workingdir.Cleanup()
 }

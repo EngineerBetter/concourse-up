@@ -6,7 +6,7 @@ import (
 
 	"github.com/EngineerBetter/concourse-up/bosh"
 	"github.com/EngineerBetter/concourse-up/bosh/internal/boshcli/boshclifakes"
-	"github.com/EngineerBetter/concourse-up/bosh/internal/director/directorfakes"
+	"github.com/EngineerBetter/concourse-up/bosh/internal/workingdir/workingdirfakes"
 	"github.com/EngineerBetter/concourse-up/config"
 	"github.com/EngineerBetter/concourse-up/iaas"
 	"github.com/EngineerBetter/concourse-up/iaas/iaasfakes"
@@ -19,7 +19,7 @@ import (
 var _ = Describe("Client", func() {
 	var buildClient func() bosh.IClient
 	var boshCLI *boshclifakes.FakeICLI
-	var directorClient *directorfakes.FakeIClient
+	var directorClient *workingdirfakes.FakeIClient
 	var stdout, stderr *gbytes.Buffer
 	var configInput config.Config
 
@@ -83,7 +83,7 @@ sWbB3FCIsym1FXB+eRnVF3Y15RwBWWKA5RfwUNpEXFxtv24tQ8jrdA==
 		Context("When on AWS", func() {
 			JustBeforeEach(func() {
 				boshCLI = &boshclifakes.FakeICLI{}
-				directorClient = &directorfakes.FakeIClient{}
+				directorClient = &workingdirfakes.FakeIClient{}
 				outputs := &terraformfakes.FakeOutputs{}
 				provider := setupFakeAwsProvider()
 

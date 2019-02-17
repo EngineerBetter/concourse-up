@@ -11,7 +11,7 @@ import (
 	"github.com/EngineerBetter/concourse-up/terraform"
 
 	"github.com/EngineerBetter/concourse-up/bosh/internal/boshcli"
-	"github.com/EngineerBetter/concourse-up/bosh/internal/director"
+	"github.com/EngineerBetter/concourse-up/bosh/internal/workingdir"
 	"github.com/EngineerBetter/concourse-up/config"
 )
 
@@ -45,7 +45,7 @@ type ClientFactory func(config config.Config, outputs terraform.Outputs, stdout,
 
 //New returns an IAAS specific implementation of BOSH client
 func New(config config.Config, outputs terraform.Outputs, stdout, stderr io.Writer, provider iaas.Provider, versionFile []byte) (IClient, error) {
-	director, err := director.New()
+	workingdir, err := workingdir.New()
 	if err != nil {
 		return nil, err
 	}
@@ -57,9 +57,9 @@ func New(config config.Config, outputs terraform.Outputs, stdout, stderr io.Writ
 
 	switch provider.IAAS() {
 	case iaas.AWS:
-		return NewAWSClient(config, outputs, director, stdout, stderr, provider, boshCLI)
+		return NewAWSClient(config, outputs, workingdir, stdout, stderr, provider, boshCLI)
 	case iaas.GCP:
-		return NewGCPClient(config, outputs, director, stdout, stderr, provider, boshCLI)
+		return NewGCPClient(config, outputs, workingdir, stdout, stderr, provider, boshCLI)
 	}
 	return nil, fmt.Errorf("IAAS not supported: %s", provider.IAAS())
 }
@@ -108,7 +108,7 @@ func instances(boshCLI boshcli.ICLI, ip, password, ca string) ([]Instance, error
 	return instances, nil
 }
 
-func saveFilesToWorkingDir(director director.IClient, provider iaas.Provider, creds []byte) error {
+func saveFilesToWorkingDir(workingdir workingdir.IClient, provider iaas.Provider, creds []byte) error {
 	concourseVersionsContents, _ := provider.Choose(iaas.Choice{
 		AWS: awsConcourseVersions,
 		GCP: gcpConcourseVersions,
@@ -130,7 +130,7 @@ func saveFilesToWorkingDir(director director.IClient, provider iaas.Provider, cr
 	}
 
 	for filename, contents := range filesToSave {
-		_, err := director.SaveFileToWorkingDir(filename, contents)
+		_, err := workingdir.SaveFileToWorkingDir(filename, contents)
 		if err != nil {
 			return fmt.Errorf("failed to save %s to working directory: [%v]", filename, err)
 		}
