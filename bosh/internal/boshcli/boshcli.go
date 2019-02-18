@@ -239,6 +239,9 @@ func (c *CLI) CreateEnv(store Store, config IAASEnvironment, password, cert, key
 	return c.xEnv("create-env", store, config, password, cert, key, ca, tags)
 }
 
+// RunAuthenticatedCommand runs the bosh command `action` with flags `flags`
+// specifying `detach` will cause the task to detach once a deployment starts
+// `detach` is currently only implemented with the action `deploy`
 func (c *CLI) RunAuthenticatedCommand(action, ip, password, ca string, detach bool, stdout io.Writer, flags ...string) error {
 	caPath, err := writeTempFile([]byte(ca))
 	if err != nil {
@@ -249,7 +252,7 @@ func (c *CLI) RunAuthenticatedCommand(action, ip, password, ca string, detach bo
 
 	authFlags := []string{"--non-interactive", "--environment", ip, "--ca-cert", caPath, "--client", "admin", "--client-secret", password, "--deployment", "concourse", action}
 	flags = append(authFlags, flags...)
-	if detach {
+	if detach && action == "deploy" {
 		return c.detachedBoshCommand(stdout, flags...)
 	}
 	return c.boshCommand(stdout, flags...)
