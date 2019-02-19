@@ -98,7 +98,7 @@ Deploys:
 - Concourse [$deployment_concourse_release_version_gcp]($deployment_concourse_release_url_gcp)
 - Garden RunC [$deployment_garden_release_version_gcp]($deployment_garden_release_url_gcp)
 - BOSH [$director_bosh_release_version_gcp]($director_bosh_release_url_gcp)
-- BOSH AWS CPI [$director_bosh_cpi_release_version_gcp]($director_bosh_cpi_release_url_gcp)
+- BOSH GCP CPI [$director_bosh_cpi_release_version_gcp]($director_bosh_cpi_release_url_gcp)
 - BPM [$director_bpm_release_version_gcp]($director_bpm_release_url_gcp)
 - Credhub [$deployment_credhub_release_version_gcp]($deployment_credhub_release_url_gcp)
 - Grafana [$deployment_grafana_release_version_gcp]($deployment_grafana_release_url_gcp)
