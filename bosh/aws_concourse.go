@@ -13,20 +13,20 @@ func (client *AWSClient) deployConcourse(creds []byte, detach bool) ([]byte, err
 
 	err := saveFilesToWorkingDir(client.workingdir, client.provider, creds)
 	if err != nil {
-		return nil, fmt.Errorf("failed saving files to working directory in deployConcourse: [%v]", err)
+		return creds, fmt.Errorf("failed saving files to working directory in deployConcourse: [%v]", err)
 	}
 
 	boshDBAddress, err := client.outputs.Get("BoshDBAddress")
 	if err != nil {
-		return nil, err
+		return creds, err
 	}
 	boshDBPort, err := client.outputs.Get("BoshDBPort")
 	if err != nil {
-		return nil, err
+		return creds, err
 	}
 	atcPublicIP, err := client.outputs.Get("ATCPublicIP")
 	if err != nil {
-		return nil, err
+		return creds, err
 	}
 
 	vmap := map[string]interface{}{
@@ -75,7 +75,7 @@ func (client *AWSClient) deployConcourse(creds []byte, detach bool) ([]byte, err
 
 	t, err1 := client.buildTagsYaml(vmap["project"], "concourse")
 	if err1 != nil {
-		return nil, err
+		return creds, err
 	}
 	vmap["tags"] = t
 	flagFiles = append(flagFiles, "--ops-file", client.workingdir.PathInWorkingDir(extraTagsFilename))
@@ -84,7 +84,7 @@ func (client *AWSClient) deployConcourse(creds []byte, detach bool) ([]byte, err
 
 	directorPublicIP, err := client.outputs.Get("DirectorPublicIP")
 	if err != nil {
-		return nil, fmt.Errorf("failed to retrieve director IP: [%v]", err)
+		return creds, fmt.Errorf("failed to retrieve director IP: [%v]", err)
 	}
 
 	err = client.boshCLI.RunAuthenticatedCommand(
@@ -96,7 +96,7 @@ func (client *AWSClient) deployConcourse(creds []byte, detach bool) ([]byte, err
 		os.Stdout,
 		append(flagFiles, vs...)...)
 	if err != nil {
-		return nil, fmt.Errorf("failed to run bosh deploy with commands %+v: [%v]", flagFiles, err)
+		return creds, fmt.Errorf("failed to run bosh deploy with commands %+v: [%v]", flagFiles, err)
 	}
 
 	return ioutil.ReadFile(client.workingdir.PathInWorkingDir(credsFilename))
