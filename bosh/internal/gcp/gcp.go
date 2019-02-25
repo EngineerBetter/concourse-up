@@ -27,13 +27,11 @@ type Environment struct {
 	InternalIP          string
 	Network             string
 	PrivateCIDR         string
-	PrivateCIDRDNS      string
 	PrivateCIDRGateway  string
 	PrivateCIDRReserved string
 	PrivateSubnetwork   string
 	ProjectID           string
 	PublicCIDR          string
-	PublicCIDRDNS       string
 	PublicCIDRGateway   string
 	PublicCIDRReserved  string
 	PublicCIDRStatic    string
@@ -78,12 +76,10 @@ type gcpCloudConfigParams struct {
 	Network             string
 	PublicCIDR          string
 	PublicCIDRGateway   string
-	PublicCIDRDNS       string
 	PublicCIDRStatic    string
 	PublicCIDRReserved  string
 	PrivateCIDR         string
 	PrivateCIDRGateway  string
-	PrivateCIDRDNS      string
 	PrivateCIDRReserved string
 }
 
@@ -103,12 +99,10 @@ func (e Environment) ConfigureDirectorCloudConfig(cloudConfig string) (string, e
 		Network:             e.Network,
 		PublicCIDR:          e.PublicCIDR,
 		PublicCIDRGateway:   e.PublicCIDRGateway,
-		PublicCIDRDNS:       e.PublicCIDRDNS,
 		PublicCIDRStatic:    e.PublicCIDRStatic,
 		PublicCIDRReserved:  e.PublicCIDRReserved,
 		PrivateCIDR:         e.PrivateCIDR,
 		PrivateCIDRGateway:  e.PrivateCIDRGateway,
-		PrivateCIDRDNS:      e.PrivateCIDRDNS,
 		PrivateCIDRReserved: e.PrivateCIDRReserved,
 	}
 

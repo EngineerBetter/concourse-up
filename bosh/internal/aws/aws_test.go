@@ -161,21 +161,18 @@ func TestStore_Set(t *testing.T) {
 
 func TestEnvironment_ConfigureDirectorCloudConfig(t *testing.T) {
 	type fields struct {
-		AZ               string
-		PublicSubnetID   string
-		PrivateSubnetID  string
-		ATCSecurityGroup string
-		VMSecurityGroup  string
-		Spot             bool
-		WorkerType       string
-		PublicCIDR string
-		PublicCIDRStatic string
-		PublicCIDRDNS string
-		PublicCIDRReserved string
-		PrivateCIDR string
-		PrivateCIDRDNS string
+		AZ                  string
+		PublicSubnetID      string
+		PrivateSubnetID     string
+		ATCSecurityGroup    string
+		VMSecurityGroup     string
+		Spot                bool
+		WorkerType          string
+		PublicCIDR          string
+		PublicCIDRStatic    string
+		PublicCIDRReserved  string
+		PrivateCIDR         string
 		PrivateCIDRReserved string
-
 	}
 	defaultValidate := func(a, b string) (bool, string) {
 		return strings.Contains(a, b), fmt.Sprintf("Environment.ConfigureDirectorCloudConfig()\nexpected '%v'\nreceived '%v'", a, b)
@@ -270,21 +267,18 @@ func TestEnvironment_ConfigureDirectorCloudConfig(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			e := Environment{
-				AZ:               tt.fields.AZ,
-				PublicSubnetID:   tt.fields.PublicSubnetID,
-				PrivateSubnetID:  tt.fields.PrivateSubnetID,
-				ATCSecurityGroup: tt.fields.ATCSecurityGroup,
-				VMSecurityGroup:  tt.fields.VMSecurityGroup,
-				Spot:             tt.fields.Spot,
-				WorkerType:       tt.fields.WorkerType,
-				PublicCIDR: tt.fields.PublicCIDR,
-				PublicCIDRStatic: tt.fields.PublicCIDRStatic,
-				PublicCIDRDNS: tt.fields.PublicCIDRDNS,
-				PublicCIDRReserved: tt.fields.PublicCIDRReserved,
-				PrivateCIDR: tt.fields.PrivateCIDR,
-				PrivateCIDRDNS: tt.fields.PrivateCIDRDNS,
+				AZ:                  tt.fields.AZ,
+				PublicSubnetID:      tt.fields.PublicSubnetID,
+				PrivateSubnetID:     tt.fields.PrivateSubnetID,
+				ATCSecurityGroup:    tt.fields.ATCSecurityGroup,
+				VMSecurityGroup:     tt.fields.VMSecurityGroup,
+				Spot:                tt.fields.Spot,
+				WorkerType:          tt.fields.WorkerType,
+				PublicCIDR:          tt.fields.PublicCIDR,
+				PublicCIDRStatic:    tt.fields.PublicCIDRStatic,
+				PublicCIDRReserved:  tt.fields.PublicCIDRReserved,
+				PrivateCIDR:         tt.fields.PrivateCIDR,
 				PrivateCIDRReserved: tt.fields.PrivateCIDRReserved,
-
 			}
 			got, err := e.ConfigureDirectorCloudConfig(tt.cloudConfig)
 			if (err != nil) != tt.wantErr {

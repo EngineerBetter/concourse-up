@@ -36,13 +36,11 @@ type Environment struct {
 	InternalGateway       string
 	InternalIP            string
 	PrivateCIDR           string
-	PrivateCIDRDNS        string
 	PrivateCIDRGateway    string
 	PrivateCIDRReserved   string
 	PrivateKey            string
 	PrivateSubnetID       string
 	PublicCIDR            string
-	PublicCIDRDNS         string
 	PublicCIDRGateway     string
 	PublicCIDRReserved    string
 	PublicCIDRStatic      string
@@ -106,10 +104,8 @@ type awsCloudConfigParams struct {
 	PublicCIDRStatic    string
 	PublicCIDRReserved  string
 	PublicCIDRGateway   string
-	PublicCIDRDNS       string
 	PrivateCIDR         string
 	PrivateCIDRGateway  string
-	PrivateCIDRDNS      string
 	PrivateCIDRReserved string
 }
 
@@ -131,12 +127,10 @@ func (e Environment) ConfigureDirectorCloudConfig(cloudConfig string) (string, e
 		WorkerType:          e.WorkerType,
 		PublicCIDR:          e.PublicCIDR,
 		PublicCIDRGateway:   e.PublicCIDRGateway,
-		PublicCIDRDNS:       e.PublicCIDRDNS,
 		PublicCIDRReserved:  e.PublicCIDRReserved,
 		PublicCIDRStatic:    e.PublicCIDRStatic,
 		PrivateCIDR:         e.PrivateCIDR,
 		PrivateCIDRGateway:  e.PrivateCIDRGateway,
-		PrivateCIDRDNS:      e.PrivateCIDRDNS,
 		PrivateCIDRReserved: e.PrivateCIDRReserved,
 	}
 
