@@ -107,7 +107,6 @@ networks:
   subnets:
   - range: {{ .PublicCIDR }}
     gateway: {{ .PublicCIDRGateway }}
-    dns: {{ .PublicCIDRDNS }}
     az: z1
     static: {{ .PublicCIDRStatic }}
     reserved: {{ .PublicCIDRReserved }}
@@ -119,7 +118,6 @@ networks:
   subnets:
   - range: {{ .PrivateCIDR }}
     gateway: {{ .PrivateCIDRGateway }}
-    dns: {{ .PrivateCIDRDNS }}
     az: z1
     reserved: {{ .PrivateCIDRReserved }}
     cloud_properties:

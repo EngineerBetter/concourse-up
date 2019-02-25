@@ -88,7 +88,7 @@ vm_types:
     spot_bid_price: 0.26 # on-demand price: 0.214
     spot_ondemand_fallback: true # {{ end }} {{ else }}
     instance_type: m4.xlarge {{ if .Spot }}
-    spot_bid_price: 0.27 # on-demand price: 0.222 
+    spot_bid_price: 0.27 # on-demand price: 0.222
     spot_ondemand_fallback: true # {{ end }} {{ end }}
     ephemeral_disk:
       size: 200_000
@@ -202,7 +202,6 @@ networks:
   subnets:
   - range: {{ .PublicCIDR }}
     gateway: {{ .PublicCIDRGateway }}
-    dns: {{ .PublicCIDRDNS }}
     az: z1
     static: {{ .PublicCIDRStatic }}
     reserved: {{ .PublicCIDRReserved }}
@@ -213,7 +212,6 @@ networks:
   subnets:
   - range: {{ .PrivateCIDR }}
     gateway: {{ .PrivateCIDRGateway }}
-    dns: {{ .PrivateCIDRDNS }}
     az: z1
     reserved: {{ .PrivateCIDRReserved }}
     cloud_properties:
@@ -234,4 +232,4 @@ compilation:
   reuse_compilation_vms: true
   az: z1
   vm_type: compilation
-  network: private 
+  network: private
