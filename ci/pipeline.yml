@@ -57,7 +57,7 @@ resources:
 - name: this-pipeline
   type: pipeline
   source:
-    target: https://10.0.0.8
+    target: https://ci.engineerbetter.com
     insecure: "true"
     teams:
     - name: main
