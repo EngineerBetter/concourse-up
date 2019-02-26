@@ -17,6 +17,7 @@ groups:
   - smoke-test-gcp
   - system-test-gcp
   - system-test-update-gcp
+  - release-notification
   - auto
   - major
   - minor
@@ -531,12 +532,11 @@ jobs:
         channel: "#integrations"
         text: |
           <!channel> Concourse Up *((branch))* branch *system-test-options-and-destroy-gcp* failure!
-
-- name: auto
+- name: release-notification
   serial: true
   plan:
   - aggregate:
-    - get: pcf-ops
+    - get: version
       passed: &system-tests
       - system-test
       - system-test-update
@@ -547,6 +547,52 @@ jobs:
       - system-test-options-and-destroy-gcp
       - system-test-letsencrypt-gcp
       - system-test-update-gcp
+    - get: pcf-ops
+      passed: *system-tests
+    - get: concourse-up
+      passed: *system-tests
+    - get: concourse-up-ops
+      passed: *system-tests
+  - task: write-release-notification
+    config:
+      platform: linux
+      image_resource:
+        type: docker-image
+        source:
+          repository: engineerbetter/pcf-ops
+      inputs:
+      - name: concourse-up
+      - name: concourse-up-ops
+      outputs:
+      - name: slack-message
+      run:
+        path: bash
+        args:
+        - -c
+        - |
+          CUP_REF="$(cat concourse-up/.git/ref)"
+          OPS_REF="$(cat concourse-up-ops/.git/ref)"
+          CUP_MESSAGE="$(cat concourse-up/.git/commit_message)"
+          OPS_MESSAGE="$(cat concourse-up-ops/.git/commit_message)"
+          cat << EOF > slack-message/text
+          Concourse-up is ready for a new release.
+          Latest commit in concourse-up repository:
+          commit $CUP_REF
+          $CUP_MESSAGE
+          Latest commit in concourse-up-ops repository:
+          commit $OPS_REF
+          $OPS_MESSAGE
+          EOF
+  - put: slack-alert
+    params:
+      channel: "#integrations"
+      text_file: slack-message/text
+- name: auto
+  serial: true
+  plan:
+  - aggregate:
+    - get: pcf-ops
+      passed: *system-tests
     - get: concourse-up
       passed: *system-tests
     - get: concourse-up-ops
