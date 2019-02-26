@@ -194,12 +194,12 @@ func deployAction(c *cli.Context, deployArgs deploy.Args, provider iaas.Provider
 		return err
 	}
 
-	deployArgs, err = setZoneAndRegion(deployArgs)
+	deployArgs, err = setZoneAndRegion(provider.Region(), deployArgs)
 	if err != nil {
 		return err
 	}
 
-	err = validateNameLength(name, provider)
+	err = validateNameLength(name, provider.IAAS())
 	if err != nil {
 		return err
 	}
@@ -230,14 +230,9 @@ func validateDeployArgs(c *cli.Context, deployArgs deploy.Args) (deploy.Args, er
 	return deployArgs, nil
 }
 
-func setZoneAndRegion(deployArgs deploy.Args) (deploy.Args, error) {
+func setZoneAndRegion(providerRegion string, deployArgs deploy.Args) (deploy.Args, error) {
 	if !deployArgs.RegionIsSet {
-		switch strings.ToUpper(deployArgs.IAAS) {
-		case awsConst: //nolint
-			deployArgs.Region = "eu-west-1" //nolint
-		case gcpConst: //nolint
-			deployArgs.Region = "europe-west1" //nolint
-		}
+		deployArgs.Region = providerRegion
 	}
 
 	if deployArgs.ZoneIsSet && deployArgs.RegionIsSet {
@@ -273,8 +268,8 @@ func zoneBelongsToRegion(zone, region string) error {
 	return nil
 }
 
-func validateNameLength(name string, provider iaas.Provider) error {
-	if provider.IAAS() == iaas.GCP {
+func validateNameLength(name string, providerName iaas.Name) error {
+	if providerName == iaas.GCP {
 		if len(name) > maxAllowedNameLength {
 			return fmt.Errorf("deployment name %s is too long. %d character limit", name, maxAllowedNameLength)
 		}

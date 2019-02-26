@@ -3,6 +3,8 @@ package commands
 import (
 	"errors"
 	"fmt"
+	"os"
+
 	"github.com/EngineerBetter/concourse-up/bosh"
 	"github.com/EngineerBetter/concourse-up/certs"
 	"github.com/EngineerBetter/concourse-up/commands/destroy"
@@ -12,13 +14,9 @@ import (
 	"github.com/EngineerBetter/concourse-up/iaas"
 	"github.com/EngineerBetter/concourse-up/terraform"
 	"github.com/EngineerBetter/concourse-up/util"
-	"os"
 
 	"gopkg.in/urfave/cli.v1"
 )
-
-const awsConst = "AWS"
-const gcpConst = "GCP"
 
 //var destroyArgs config.DestroyArgs
 var initialDestroyArgs destroy.Args

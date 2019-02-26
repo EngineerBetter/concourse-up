@@ -2,9 +2,10 @@ package commands
 
 import (
 	"fmt"
+	"testing"
+
 	"github.com/EngineerBetter/concourse-up/iaas"
 	"github.com/EngineerBetter/concourse-up/testsupport"
-	"testing"
 
 	"github.com/EngineerBetter/concourse-up/commands/deploy"
 )
@@ -84,6 +85,7 @@ func Test_setZoneAndRegion(t *testing.T) {
 	tests := []struct {
 		name           string
 		args           deploy.Args
+		providerRegion string
 		wantErr        bool
 		expectedRegion string
 	}{
@@ -92,6 +94,7 @@ func Test_setZoneAndRegion(t *testing.T) {
 			args: deploy.Args{
 				IAAS: "AWS",
 			},
+			providerRegion: "eu-west-1",
 			expectedRegion: "eu-west-1",
 		},
 		{
@@ -99,21 +102,23 @@ func Test_setZoneAndRegion(t *testing.T) {
 			args: deploy.Args{
 				IAAS: "GCP",
 			},
+			providerRegion: "europe-west1",
 			expectedRegion: "europe-west1",
 		},
 		{
-			name: "region should not change if user provided it",
+			name: "region should change if user provided it",
 			args: deploy.Args{
 				IAAS:        "AWS",
 				Region:      "us-east-1",
 				RegionIsSet: true,
 			},
+			providerRegion: "eu-west-1",
 			expectedRegion: "us-east-1",
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			actual, err := setZoneAndRegion(tt.args)
+			actual, err := setZoneAndRegion(tt.providerRegion, tt.args)
 
 			if err == nil && tt.wantErr {
 				t.Errorf("setZoneAndRegion() error = %v, wantErr %v", err, tt.wantErr)
@@ -127,20 +132,9 @@ func Test_setZoneAndRegion(t *testing.T) {
 }
 
 func Test_validateNameLength(t *testing.T) {
-	testsupport.SetupFakeCredsForGCPProvider(t)
-	gcpProvider, err := iaas.New(iaas.GCP, "europe-west1")
-	if err != nil {
-		t.Fatalf("Error initialisting iaas.Provider: [%v]", err)
-	}
-
-	awsProvider, err := iaas.New(iaas.AWS, "eu-west-1")
-	if err != nil {
-		t.Fatalf("Error initialisting iaas.Provider: [%v]", err)
-	}
-
 	type args struct {
-		name     string
-		provider iaas.Provider
+		name         string
+		providerName iaas.Name
 	}
 	tests := []struct {
 		name    string
@@ -150,55 +144,55 @@ func Test_validateNameLength(t *testing.T) {
 		{
 			name: "It is GCP with a valid name length",
 			args: args{
-				name:     "a-name",
-				provider: gcpProvider,
+				name:         "a-name",
+				providerName: iaas.GCP,
 			},
 			wantErr: false,
 		},
 		{
 			name: "It is GCP with a invalid name length",
 			args: args{
-				name:     "a-name-that-is-long-enough-make-this-fail",
-				provider: gcpProvider,
+				name:         "a-name-that-is-long-enough-make-this-fail",
+				providerName: iaas.GCP,
 			},
 			wantErr: true,
 		},
 		{
-			name: "It is gcP with an invalid name length",
+			name: "It is GCP with an invalid name length",
 			args: args{
-				name:     "a-name",
-				provider: gcpProvider,
+				name:         "a-name",
+				providerName: iaas.GCP,
 			},
 			wantErr: false,
 		},
 		{
-			name: "It is gcP with an invalid name length",
+			name: "It is GCP with an invalid name length",
 			args: args{
-				name:     "a-name-that-is-long-enough-make-this-fail-on-gcp",
-				provider: gcpProvider,
+				name:         "a-name-that-is-long-enough-make-this-fail-on-gcp",
+				providerName: iaas.GCP,
 			},
 			wantErr: true,
 		},
 		{
 			name: "It is AWS with a valid name length",
 			args: args{
-				name:     "a-name",
-				provider: awsProvider,
+				name:         "a-name",
+				providerName: iaas.AWS,
 			},
 			wantErr: false,
 		},
 		{
 			name: "It is AWS with an invalid name length",
 			args: args{
-				name:     "a-name-that-is-long-enough-make-this-fail-on-gcp",
-				provider: awsProvider,
+				name:         "a-name-that-is-long-enough-make-this-fail-on-gcp",
+				providerName: iaas.AWS,
 			},
 			wantErr: false,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := validateNameLength(tt.args.name, tt.args.provider); (err != nil) != tt.wantErr {
+			if err := validateNameLength(tt.args.name, tt.args.providerName); (err != nil) != tt.wantErr {
 				t.Errorf("validateNameLength() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
