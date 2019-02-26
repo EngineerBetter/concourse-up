@@ -11,13 +11,10 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/EngineerBetter/concourse-up/iaas"
 	"github.com/EngineerBetter/concourse-up/resource"
 	"github.com/EngineerBetter/concourse-up/util/yaml"
 )
-
-const awsConst = "AWS"
-
-const gcpConst = "GCP"
 
 //go:generate counterfeiter . ICLI
 type ICLI interface {
@@ -72,10 +69,10 @@ func New(ops ...Option) (ICLI, error) {
 
 // IAASEnvironment exposes ConfigureDirectorManifestCPI
 type IAASEnvironment interface {
-	ConfigureDirectorManifestCPI(string) (string, error)
-	ConfigureDirectorCloudConfig(string) (string, error)
-	ConfigureConcourseStemcell(string) (string, error)
-	IAASCheck() string
+	ConfigureDirectorManifestCPI() (string, error)
+	ConfigureDirectorCloudConfig() (string, error)
+	ConfigureConcourseStemcell() (string, error)
+	IAASCheck() iaas.Name
 }
 
 // Store exposes its methods
@@ -89,7 +86,7 @@ func (c *CLI) xEnv(action string, store Store, config IAASEnvironment, password,
 	const stateFilename = "state.json"
 	const varsFilename = "vars.yaml"
 
-	manifest, err := config.ConfigureDirectorManifestCPI(resource.DirectorManifest)
+	manifest, err := config.ConfigureDirectorManifestCPI()
 	if err != nil {
 		return err
 	}
@@ -141,14 +138,8 @@ func (c *CLI) xEnv(action string, store Store, config IAASEnvironment, password,
 func (c *CLI) UpdateCloudConfig(config IAASEnvironment, ip, password, ca string) error {
 	var cloudConfig string
 	var err error
-	iaas := config.IAASCheck()
-	switch iaas {
-	case awsConst:
-		cloudConfig, err = config.ConfigureDirectorCloudConfig(resource.AWSDirectorCloudConfig)
 
-	case gcpConst:
-		cloudConfig, err = config.ConfigureDirectorCloudConfig(resource.GCPDirectorCloudConfig)
-	}
+	cloudConfig, err = config.ConfigureDirectorCloudConfig()
 	if err != nil {
 		return err
 	}
@@ -192,14 +183,8 @@ func (c *CLI) UploadConcourseStemcell(config IAASEnvironment, ip, password, ca s
 		stemcell string
 		err      error
 	)
-	iaas := config.IAASCheck()
-	switch iaas {
-	case awsConst:
-		stemcell, err = config.ConfigureConcourseStemcell(resource.AWSReleaseVersions)
 
-	case gcpConst:
-		stemcell, err = config.ConfigureConcourseStemcell(resource.GCPReleaseVersions)
-	}
+	stemcell, err = config.ConfigureConcourseStemcell()
 	if err != nil {
 		return err
 	}

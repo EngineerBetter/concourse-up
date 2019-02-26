@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/EngineerBetter/concourse-up/bosh/internal/boshcli"
+	"github.com/EngineerBetter/concourse-up/iaas"
 	"github.com/EngineerBetter/concourse-up/internal/fakeexec"
 	"github.com/stretchr/testify/require"
 )
@@ -33,22 +34,21 @@ func (s mockStore) Get(key string) ([]byte, error) {
 }
 
 type mockIAASConfig struct {
-	f func(string) string
 }
 
-func (c mockIAASConfig) IAASCheck() string {
-	return "AWS"
+func (c mockIAASConfig) IAASCheck() iaas.Name {
+	return iaas.AWS
 }
-func (c mockIAASConfig) ConfigureDirectorManifestCPI(m string) (string, error) {
-	return c.f(m), nil
-}
-
-func (c mockIAASConfig) ConfigureDirectorCloudConfig(m string) (string, error) {
-	return c.f(m), nil
+func (c mockIAASConfig) ConfigureDirectorManifestCPI() (string, error) {
+	return "a CPI", nil
 }
 
-func (c mockIAASConfig) ConfigureConcourseStemcell(v string) (string, error) {
-	return c.f(v), nil
+func (c mockIAASConfig) ConfigureDirectorCloudConfig() (string, error) {
+	return "a Cloud Config", nil
+}
+
+func (c mockIAASConfig) ConfigureConcourseStemcell() (string, error) {
+	return "a Stemcell", nil
 }
 
 func TestCLI_CreateEnv(t *testing.T) {
@@ -57,11 +57,7 @@ func TestCLI_CreateEnv(t *testing.T) {
 	c, err := boshcli.New(boshcli.FakeExec(e.Cmd()))
 	require.NoError(t, err)
 	store := make(mockStore)
-	config := mockIAASConfig{
-		f: func(s string) string {
-			return s
-		},
-	}
+	config := mockIAASConfig{}
 	e.ExpectFunc(func(t testing.TB, command string, args ...string) {
 		require.Equal(t, "bosh", command)
 		require.Equal(t, "create-env", args[0])
@@ -90,11 +86,7 @@ func TestCLI_UpdateCloudConfig(t *testing.T) {
 	defer e.Finish()
 	c, err := boshcli.New(boshcli.FakeExec(e.Cmd()))
 	require.NoError(t, err)
-	config := mockIAASConfig{
-		f: func(s string) string {
-			return s
-		},
-	}
+	config := mockIAASConfig{}
 	e.ExpectFunc(func(t testing.TB, command string, args ...string) {
 		require.Equal(t, "bosh", command)
 
@@ -114,11 +106,7 @@ func TestCLI_UploadConcourseStemcell(t *testing.T) {
 	defer e.Finish()
 	c, err := boshcli.New(boshcli.FakeExec(e.Cmd()))
 	require.NoError(t, err)
-	config := mockIAASConfig{
-		f: func(s string) string {
-			return s
-		},
-	}
+	config := mockIAASConfig{}
 	e.ExpectFunc(func(t testing.TB, command string, args ...string) {
 		require.Equal(t, "bosh", command)
 

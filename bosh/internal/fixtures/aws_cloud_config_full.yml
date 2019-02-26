@@ -1,0 +1,200 @@
+---
+azs:
+- name: z1
+  cloud_properties:
+    availability_zone: az
+
+vm_types:
+- name: concourse-web-small
+  cloud_properties:
+    instance_type: t2.small
+    ephemeral_disk:
+      size: 20_000
+      type: gp2
+      encrypted: true
+    security_groups:
+    - vm_security_group
+
+- name: concourse-web-medium
+  cloud_properties:
+    instance_type: t2.medium
+    ephemeral_disk:
+      size: 20_000
+      type: gp2
+      encrypted: true
+    security_groups:
+    - vm_security_group
+
+- name: concourse-web-large
+  cloud_properties:
+    instance_type: t2.large
+    ephemeral_disk:
+      size: 20_000
+      type: gp2
+      encrypted: true
+    security_groups:
+    - vm_security_group
+
+- name: concourse-web-xlarge
+  cloud_properties:
+    instance_type: t2.xlarge
+    ephemeral_disk:
+      size: 20_000
+      type: gp2
+      encrypted: true
+    security_groups:
+    - vm_security_group
+
+- name: concourse-web-2xlarge
+  cloud_properties:
+    instance_type: t2.2xlarge
+    ephemeral_disk:
+      size: 20_000
+      type: gp2
+      encrypted: true
+    security_groups:
+    - vm_security_group
+
+- name: concourse-medium
+  cloud_properties:
+    instance_type: t2.medium 
+    ephemeral_disk:
+      size: 200_000
+      type: gp2
+      encrypted: true
+    security_groups:
+    - vm_security_group
+
+- name: concourse-large
+  cloud_properties: 
+    instance_type: m4.large  
+    ephemeral_disk:
+      size: 200_000
+      type: gp2
+      encrypted: true
+    security_groups:
+    - vm_security_group
+
+- name: concourse-xlarge
+  cloud_properties: 
+    instance_type: m4.xlarge  
+    ephemeral_disk:
+      size: 200_000
+      type: gp2
+      encrypted: true
+    security_groups:
+    - vm_security_group
+
+- name: concourse-2xlarge
+  cloud_properties: 
+    instance_type: m4.2xlarge  
+    ephemeral_disk:
+      size: 200_000
+      type: gp2
+      encrypted: true
+    security_groups:
+    - vm_security_group
+
+- name: concourse-4xlarge
+  cloud_properties: 
+    instance_type: m4.4xlarge  
+    ephemeral_disk:
+      size: 200_000
+      type: gp2
+      encrypted: true
+    security_groups:
+    - vm_security_group
+
+- name: concourse-10xlarge
+  cloud_properties:
+    instance_type: m4.10xlarge 
+    ephemeral_disk:
+      size: 200_000
+      type: gp2
+      encrypted: true
+    security_groups:
+    - vm_security_group
+
+- name: concourse-12xlarge
+  cloud_properties:
+    instance_type: m5.12xlarge 
+    ephemeral_disk:
+      size: 200_000
+      type: gp2
+      encrypted: true
+    security_groups:
+    - vm_security_group
+
+- name: concourse-16xlarge
+  cloud_properties:
+    instance_type: m4.16xlarge 
+    ephemeral_disk:
+      size: 200_000
+      type: gp2
+      encrypted: true
+    security_groups:
+    - vm_security_group
+
+- name: concourse-24xlarge
+  cloud_properties:
+    instance_type: m5.24xlarge 
+    ephemeral_disk:
+      size: 200_000
+      type: gp2
+      encrypted: true
+    security_groups:
+    - vm_security_group
+
+- name: compilation
+  cloud_properties: 
+    instance_type: m4.large  
+
+disk_types:
+- name: default
+  disk_size: 50_000
+  cloud_properties:
+    type: gp2
+    encrypted: true
+- name: large
+  disk_size: 200_000
+  cloud_properties:
+    type: gp2
+    encrypted: true
+
+networks:
+- name: public
+  type: manual
+  subnets:
+  - range: public_cidr
+    gateway: public_cidr_gateway
+    az: z1
+    static: public_cidr_static
+    reserved: public_cidr_reserved
+    cloud_properties:
+      subnet: public_subnet_id
+- name: private
+  type: manual
+  subnets:
+  - range: private_cidr
+    gateway: private_cidr_gateway
+    az: z1
+    reserved: private_cidr_reserved
+    cloud_properties:
+      subnet: private_subnet_id
+- name: vip
+  type: vip
+
+
+vm_extensions:
+- name: atc
+  cloud_properties:
+    security_groups:
+    - vm_security_group
+    - atc_security_group
+
+compilation:
+  workers: 5
+  reuse_compilation_vms: true
+  az: z1
+  vm_type: compilation
+  network: private

@@ -160,56 +160,96 @@ func TestStore_Set(t *testing.T) {
 }
 
 func TestEnvironment_ConfigureDirectorCloudConfig(t *testing.T) {
-	type fields struct {
-		Zone              string
-		PublicSubnetwork  string
-		PrivateSubnetwork string
-		Spot              bool
+
+	fullTemplateParams := Environment{
+		Zone:                "zone",
+		PublicSubnetwork:    "public_subnetwork",
+		PrivateSubnetwork:   "private_subnetwork",
+		Spot:                false,
+		Network:             "network",
+		PublicCIDR:          "public_cidr",
+		PublicCIDRGateway:   "public_cidr_gateway",
+		PublicCIDRStatic:    "public_cidr_static",
+		PublicCIDRReserved:  "public_cidr_reserved",
+		PrivateCIDR:         "private_cidr",
+		PrivateCIDRGateway:  "private_cidr_gateway",
+		PrivateCIDRReserved: "private_cidr_reserved",
 	}
+
+	getFixture := func(f string) string {
+		contents, _ := ioutil.ReadFile(f)
+		return string(contents)
+	}
+
 	tests := []struct {
-		name        string
-		fields      fields
-		cloudConfig string
-		want        string
-		wantErr     bool
+		name     string
+		fields   Environment
+		want     string
+		wantErr  bool
+		init     func(Environment) Environment
+		validate func(string, string) (bool, string)
 	}{
 		{
-			name: "Success- template rendered",
-			fields: fields{
-				Zone:              "europe-west1-b",
-				PublicSubnetwork:  "12345",
-				PrivateSubnetwork: "67890",
-				Spot:              true,
+			name:    "Success- template rendered",
+			fields:  fullTemplateParams,
+			want:    getFixture("../fixtures/gcp_cloud_config_full.yml"),
+			wantErr: false,
+			init: func(e Environment) Environment {
+				return e
 			},
-			cloudConfig: "zone: {{ .Zone }}\n public_subnet_id: {{ .PublicSubnetwork }}\n private_subnet_id: {{ .PrivateSubnetwork }}\n preemptible: {{ .Spot }}",
-			want:        "zone: europe-west1-b\n public_subnet_id: 12345\n private_subnet_id: 67890\n preemptible: true",
-			wantErr:     false,
+			validate: func(a, b string) (bool, string) {
+				return a == b, fmt.Sprintf("basic rendering expected to work")
+			},
 		},
 		{
-			name:        "Failure- template not rendered",
-			cloudConfig: "non_existant_key: {{ .NonExistantKey }}",
-			want:        "",
-			wantErr:     true,
+			name:    "Success- spot instance rendered",
+			fields:  fullTemplateParams,
+			want:    getFixture("../fixtures/gcp_cloud_config_spot.yml"),
+			wantErr: false,
+			init: func(e Environment) Environment {
+				n := e
+				n.Spot = true
+				return n
+			},
+			validate: func(a, b string) (bool, string) {
+				return a == b, fmt.Sprintf("templating failed while rendering without spots")
+			},
+		},
+
+		{
+			name:    "Success- running with no spot",
+			fields:  fullTemplateParams,
+			want:    getFixture("../fixtures/gcp_cloud_config_no_spot.yml"),
+			wantErr: false,
+			init: func(e Environment) Environment {
+				n := e
+				n.Spot = false
+				return n
+			},
+			validate: func(a, b string) (bool, string) {
+				return a == b, fmt.Sprintf("templating failed while rendering without spots")
+			},
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			e := Environment{
-				Zone:              tt.fields.Zone,
-				PublicSubnetwork:  tt.fields.PublicSubnetwork,
-				PrivateSubnetwork: tt.fields.PrivateSubnetwork,
-				Spot:              tt.fields.Spot,
-			}
-			got, err := e.ConfigureDirectorCloudConfig(tt.cloudConfig)
+			e := tt.init(tt.fields)
+			got, err := e.ConfigureDirectorCloudConfig()
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Environment.ConfigureDirectorCloudConfig()\nerror expected:  %v\nreceived error:  %v", tt.wantErr, err)
 				return
 			}
-			if got != tt.want {
-				t.Errorf("Environment.ConfigureDirectorCloudConfig()\nexpected %v\nreceived %v", tt.want, got)
+			passed, message := tt.validate(got, tt.want)
+			if !passed {
+				t.Errorf(message)
 			}
 		})
 	}
+}
+
+func getStemcellFixture(fixture string) string {
+	stemcellBytes, _ := ioutil.ReadFile(fmt.Sprintf("../fixtures/%s.json", fixture))
+	return string(stemcellBytes)
 }
 
 func TestEnvironment_ConfigureConcourseStemcell(t *testing.T) {
@@ -218,47 +258,28 @@ func TestEnvironment_ConfigureConcourseStemcell(t *testing.T) {
 	}
 	tests := []struct {
 		name    string
-		args    args
 		want    string
 		wantErr bool
+		fixture string
 	}{
 		{
-			name: "parse versions and provide a valid stemcell url",
-			args: args{
-				versions: `[{
-					"type": "replace",
-					"path": "/stemcells/alias=xenial/version",
-					"value": "97.19"
-				  }]`,
-			},
-			want:    fmt.Sprintf("https://s3.amazonaws.com/bosh-gce-light-stemcells/light-bosh-stemcell-%s-google-kvm-ubuntu-xenial-go_agent.tgz", "97.19"),
+			name:    "parse versions and provide a valid stemcell url",
+			want:    fmt.Sprintf("https://s3.amazonaws.com/bosh-gce-light-stemcells/light-bosh-stemcell-5-google-kvm-ubuntu-xenial-go_agent.tgz"),
 			wantErr: false,
+			fixture: "stemcell_version",
 		},
 		{
-			name: "parse versions and fail if stemcell is not xenial",
-			args: args{
-				versions: `[{
-					"type": "replace",
-					"path": "/stemcells/alias=zenial/version",
-					"value": "97.19"
-				  }]`,
-			},
+			name:    "parse versions and indicate no stemcell was found",
 			want:    "",
 			wantErr: true,
-		},
-		{
-			name: "fail if no xenial stemcell exists",
-			args: args{
-				versions: `[]`,
-			},
-			want:    "",
-			wantErr: true,
+			fixture: "invalid_stemcell_version",
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			e := Environment{}
-			got, err := e.ConfigureConcourseStemcell(tt.args.versions)
+			resource.GCPReleaseVersions = getStemcellFixture(tt.fixture)
+			got, err := e.ConfigureConcourseStemcell()
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Environment.ConfigureConcourseStemcell() error = %v, wantErr %v", err, tt.wantErr)
 				return

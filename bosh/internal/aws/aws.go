@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io/ioutil"
 
+	"github.com/EngineerBetter/concourse-up/iaas"
 	"github.com/EngineerBetter/concourse-up/resource"
 	"github.com/EngineerBetter/concourse-up/util"
 	"github.com/EngineerBetter/concourse-up/util/yaml"
@@ -58,11 +59,11 @@ var allOperations = resource.AWSCPIOps + resource.ExternalIPOps + resource.AWSDi
 
 // ConfigureDirectorManifestCPI interpolates all the Environment parameters and
 // required release versions into ready to use Director manifest
-func (e Environment) ConfigureDirectorManifestCPI(manifest string) (string, error) {
+func (e Environment) ConfigureDirectorManifestCPI() (string, error) {
 	cpiResource := resource.Get(resource.AWSCPI)
 	stemcellResource := resource.Get(resource.AWSStemcell)
 
-	return yaml.Interpolate(manifest, allOperations+e.CustomOperations, map[string]interface{}{
+	return yaml.Interpolate(resource.DirectorManifest, allOperations+e.CustomOperations, map[string]interface{}{
 		"cpi_url":                  cpiResource.URL,
 		"cpi_version":              cpiResource.Version,
 		"cpi_sha1":                 cpiResource.SHA1,
@@ -110,13 +111,12 @@ type awsCloudConfigParams struct {
 }
 
 // IAASCheck returns the IAAS provider
-func (e Environment) IAASCheck() string {
-	return "AWS"
+func (e Environment) IAASCheck() iaas.Name {
+	return iaas.AWS
 }
 
 // ConfigureDirectorCloudConfig inserts values from the environment into the config template passed as argument
-func (e Environment) ConfigureDirectorCloudConfig(cloudConfig string) (string, error) {
-
+func (e Environment) ConfigureDirectorCloudConfig() (string, error) {
 	templateParams := awsCloudConfigParams{
 		AvailabilityZone:    e.AZ,
 		VMsSecurityGroupID:  e.VMSecurityGroup,
@@ -134,7 +134,7 @@ func (e Environment) ConfigureDirectorCloudConfig(cloudConfig string) (string, e
 		PrivateCIDRReserved: e.PrivateCIDRReserved,
 	}
 
-	cc, err := util.RenderTemplate("cloud-config", cloudConfig, templateParams)
+	cc, err := util.RenderTemplate("cloud-config", resource.AWSDirectorCloudConfig, templateParams)
 	if cc == nil {
 		return "", err
 	}
@@ -142,12 +142,12 @@ func (e Environment) ConfigureDirectorCloudConfig(cloudConfig string) (string, e
 }
 
 // ConfigureConcourseStemcell returns the stemcell location string for an AWS specific stemcell for the required concourse version
-func (e Environment) ConfigureConcourseStemcell(versions string) (string, error) {
+func (e Environment) ConfigureConcourseStemcell() (string, error) {
 	var ops []struct {
 		Path  string
 		Value json.RawMessage
 	}
-	err := json.Unmarshal([]byte(versions), &ops)
+	err := json.Unmarshal([]byte(resource.AWSReleaseVersions), &ops)
 	if err != nil {
 		return "", err
 	}

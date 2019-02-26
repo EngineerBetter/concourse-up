@@ -1,0 +1,7 @@
+[
+    {
+        "type": "replace",
+        "path": "/stemcells/alias=xenial/version",
+        "value": "5"
+    }
+]
