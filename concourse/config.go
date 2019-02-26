@@ -21,6 +21,9 @@ func (client *Client) getInitialConfig() (config.Config, bool, error) {
 	var isDomainUpdated bool
 	var conf config.Config
 	if priorConfigExists {
+		if client.deployArgs.NetworkCIDRIsSet || client.deployArgs.PrivateCIDRIsSet || client.deployArgs.PublicCIDRIsSet {
+			return config.Config{}, false, fmt.Errorf("custom CIDRs cannot be applied after intial deploy")
+		}
 		conf, err = client.configClient.Load()
 		if err != nil {
 			return config.Config{}, false, fmt.Errorf("error loading existing config [%v]", err)

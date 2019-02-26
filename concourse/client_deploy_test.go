@@ -426,6 +426,35 @@ wEW5QkylaPEkbVDhJWeR1I8=
 				})
 			})
 
+			Context("and custom CIDR ranges were provided", func() {
+				BeforeEach(func() {
+					args.NetworkCIDR = "10.0.0.0/16"
+					args.NetworkCIDRIsSet = true
+					args.PrivateCIDR = "10.0.0.0/24"
+					args.PrivateCIDRIsSet = true
+					args.PublicCIDR = "10.0.1.0/24"
+					args.PublicCIDRIsSet = true
+					args.RDS1CIDR = "10.0.2.0/24"
+					args.RDS2CIDR = "10.0.3.0/24"
+				})
+
+				JustBeforeEach(func() {
+					configClient.LoadReturns(configInBucket, nil)
+					configClient.ConfigExistsReturns(true, nil)
+					configClient.HasAssetReturnsOnCall(0, true, nil)
+					configClient.LoadAssetReturnsOnCall(0, directorStateFixture, nil)
+					configClient.HasAssetReturnsOnCall(1, true, nil)
+					configClient.LoadAssetReturnsOnCall(1, directorCredsFixture, nil)
+				})
+
+				It("fails with a warning about not being able to specify CIDRs after first deploy", func() {
+					client := buildClient()
+					err := client.Deploy()
+					Expect(err).To(HaveOccurred())
+					Expect(err.Error()).To(ContainSubstring("custom CIDRs cannot be applied after intial deploy"))
+				})
+			})
+
 			Context("and all the CLI args were provided", func() {
 				BeforeEach(func() {
 					// Set all changeable arguments (IE, not IAAS, Region, Namespace, AZ, et al)
