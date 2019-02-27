@@ -532,6 +532,7 @@ jobs:
         channel: "#integrations"
         text: |
           <!channel> Concourse Up *((branch))* branch *system-test-options-and-destroy-gcp* failure!
+
 - name: release-notification
   serial: true
   plan:
@@ -575,18 +576,19 @@ jobs:
           CUP_MESSAGE="$(cat concourse-up/.git/commit_message)"
           OPS_MESSAGE="$(cat concourse-up-ops/.git/commit_message)"
           cat << EOF > slack-message/text
-          Concourse-up is ready for a new release.
-          Latest commit in concourse-up repository:
-          commit $CUP_REF
-          $CUP_MESSAGE
-          Latest commit in concourse-up-ops repository:
-          commit $OPS_REF
-          $OPS_MESSAGE
+          Concourse-up is ready for a new release, all system tests passed.
+
+          Latest commit in *concourse-up* repository: \`$CUP_REF\`
+          \`\`\`$CUP_MESSAGE\`\`\`
+
+          Latest commit in *concourse-up-ops* repository: \`$OPS_REF\`
+          \`\`\`$OPS_MESSAGE\`\`\`
           EOF
   - put: slack-alert
     params:
       channel: "#integrations"
       text_file: slack-message/text
+
 - name: auto
   serial: true
   plan:
