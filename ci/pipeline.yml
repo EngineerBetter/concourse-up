@@ -538,6 +538,7 @@ jobs:
   plan:
   - aggregate:
     - get: version
+      trigger: true
       passed: &system-tests
       - system-test
       - system-test-update
@@ -551,8 +552,10 @@ jobs:
     - get: pcf-ops
       passed: *system-tests
     - get: concourse-up
+      trigger: true
       passed: *system-tests
     - get: concourse-up-ops
+      trigger: true
       passed: *system-tests
   - task: write-release-notification
     config:
@@ -594,14 +597,14 @@ jobs:
   plan:
   - aggregate:
     - get: pcf-ops
-      passed: *system-tests
+      passed: [release-notification]
     - get: concourse-up
-      passed: *system-tests
+      passed: [release-notification]
     - get: concourse-up-ops
       trigger: true
-      passed: *system-tests
+      passed: [release-notification]
     - get: version
-      passed: *system-tests
+      passed: [release-notification]
       params:
         bump: patch
     - get: build-metadata
@@ -648,13 +651,13 @@ jobs:
     - get: version
       params:
         bump: patch
-      passed: *system-tests
+      passed: [release-notification]
     - get: pcf-ops
-      passed: *system-tests
+      passed: [release-notification]
     - get: concourse-up
-      passed: *system-tests
+      passed: [release-notification]
     - get: concourse-up-ops
-      passed: *system-tests
+      passed: [release-notification]
     - get: build-metadata
   - aggregate: *build_binaries
   - task: get-ops-version
@@ -687,13 +690,13 @@ jobs:
     - get: version
       params:
         bump: minor
-      passed: *system-tests
+      passed: [release-notification]
     - get: pcf-ops
-      passed: *system-tests
+      passed: [release-notification]
     - get: concourse-up
-      passed: *system-tests
+      passed: [release-notification]
     - get: concourse-up-ops
-      passed: *system-tests
+      passed: [release-notification]
     - get: build-metadata
   - aggregate: *build_binaries
   - task: get-ops-version
@@ -724,15 +727,15 @@ jobs:
   plan:
   - aggregate:
     - get: version
-      passed: *system-tests
+      passed: [release-notification]
       params:
         bump: major
     - get: pcf-ops
-      passed: *system-tests
+      passed: [release-notification]
     - get: concourse-up
-      passed: *system-tests
+      passed: [release-notification]
     - get: concourse-up-ops
-      passed: *system-tests
+      passed: [release-notification]
     - get: build-metadata
   - aggregate: *build_binaries
   - task: get-ops-version
