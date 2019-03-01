@@ -21,7 +21,7 @@ custom_domain="$deployment-auto-2.concourse-up.engineerbetter.com"
 
 if [ "$IAAS" = "GCP" ]
 then
-  custom_domain="$deployment-auto-2.gcp.engineerbetter.com"
+  custom_domain="$deployment-auto-2.gcp2.engineerbetter.com"
 fi
 
 ./cup deploy "$deployment" \

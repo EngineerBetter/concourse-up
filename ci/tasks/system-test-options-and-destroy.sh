@@ -41,7 +41,7 @@ elif [ "$IAAS" = "GCP" ]
 then
     # shellcheck disable=SC2034
     region=europe-west2
-    args+=(--domain cup.gcp.engineerbetter.com)
+    args+=(--domain cup.gcp2.engineerbetter.com)
 fi
 
 args+=(--public-subnet-range 192.168.0.0/27)
