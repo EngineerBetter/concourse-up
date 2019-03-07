@@ -253,7 +253,7 @@ resource "google_compute_firewall" "from-private" {
   source_ranges = ["${var.private_cidr}"]
   allow {
     protocol = "tcp"
-    ports = ["6868","4222", "25250", "25555", "25777", "5555", "2222", "7777", "7788", "7799", "22"]
+    ports = ["6868","4222", "25250", "25555", "25777", "5555", "2222", "7777", "7788", "7799", "22", "3307"]
   }
   allow {
     protocol = "udp"
@@ -335,6 +335,8 @@ resource "google_sql_database_instance" "director" {
   database_version = "POSTGRES_9_6"
   region       = "${var.region}"
 
+  depends_on = ["google_compute_instance.nat-instance"]
+
   settings {
     tier = "${var.db_tier}"
     user_labels {
@@ -346,10 +348,14 @@ resource "google_sql_database_instance" "director" {
         name = "atc_conf"
         value = "${google_compute_address.atc_ip.address}/32"}
 
-    authorized_networks = {
-      name = "bosh"
-      value = "${google_compute_address.director.address}/32"
-    }
+      authorized_networks = {
+        name = "bosh"
+        value = "${google_compute_address.director.address}/32"
+      }
+      authorized_networks = {
+        name = "nat"
+        value = "${google_compute_instance.nat-instance.network_interface.0.access_config.0.nat_ip}/32"
+      }
     }
   }
 }
