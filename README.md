@@ -1,6 +1,6 @@
 **Warning**
 
-**Concourse-Up is being replaced with [Control Tower](https://guthub.com/EngineerBetter/control-tower). First-time users should deploy using `control-tower` and raise issues under that project. This repo will be deprecated in due course.**
+**Concourse-Up is being replaced with [Control Tower](https://github.com/EngineerBetter/control-tower). First-time users should deploy using `control-tower` and raise issues under that project. This repo will be deprecated in due course.**
 
 # Concourse-Up
 
