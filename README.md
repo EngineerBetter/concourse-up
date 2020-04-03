@@ -1,8 +1,10 @@
-**Warning**
+# Deprecated - use [Control Tower](https://github.com/EngineerBetter/control-tower) instead
 
-**Concourse-Up is being replaced with [Control Tower](https://github.com/EngineerBetter/control-tower). First-time users should deploy using `control-tower` and raise issues under that project. This repo will be deprecated in due course.**
+**Concourse-Up has been replaced with [Control Tower](https://github.com/EngineerBetter/control-tower). First-time users should deploy using `control-tower` and raise issues under that project.**
 
-# Concourse-Up
+---
+
+# Concourse-Up (Deprecated)
 
 [![asciicast](https://asciinema.org/a/xVKD0dQuXdEmOcExt4A9WfbEN.svg)](https://asciinema.org/a/xVKD0dQuXdEmOcExt4A9WfbEN)
 
